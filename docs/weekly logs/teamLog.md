@@ -38,6 +38,7 @@ Github username mapping:
 We've been actively working on several tasks from the project board. Here's a summary of the progress:
 
 ### Tasks Completed
+
 | Task Description | Assigned To | Milestone # |
 | --- | --- | --- |
 | Team Meeting - discussing strengths and weaknesses | DhruvBihani, EthereousNatsuDragneel, ishita-guptaa, jae186, nickedchen | 1 |
@@ -52,7 +53,6 @@ We've been actively working on several tasks from the project board. Here's a su
 | Complete Weekly Log | DhruvBihani, EthereousNatsuDragneel, ishita-guptaa, jae186, nickedchen | 4 |
 | Add individual logs to repo | DhruvBihani, EthereousNatsuDragneel, ishita-guptaa, jae186, nickedchen | 4 |
 
-### Tasks Completed
 
 ### Burnup Chart (Velocity)
 
