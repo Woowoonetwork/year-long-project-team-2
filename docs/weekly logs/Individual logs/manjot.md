@@ -2,25 +2,21 @@
 
 ## Tasks Worked On During the week
 
-![Peer Evaluation](images/manjot.jpg)
+![Peer Evaluation](./images/ManjotWeek4.jpg)
 
 ## Recap of goals
-Work on planning the project
-
-Work on assigning and prioritizing tasks
-
-Attend weekly meetings
-
-Write project plan and documentation
+- Planning the project and its scope.
+- Help assign and prioritize tasks to be completed.
+- Setup project repository.
+- Complete the project plan document.
+- Complete the weekly logs.
 
 ## Tasks completed
-Participated in project planning
-
-Helped prioritize tasks and assign them to team members
-
-Assigned people to, reviewed, and merged PRs from team members
-
-Completed the project plan
+- Participated in project planning with the team.
+- Helped complete the project plan documentation - Overview, Individual Strengths and Weaknesses, Envisioned Usage, Major Milestones, Technology Stack, and Teamwork Distribution.
+- Assisted in assigning and prioritizing the tasks.
+- Reviewed other team members' PRs and assigned team members to PRs.
+- Contributed to the team log.
 
 ## Tasks in progress
 None
