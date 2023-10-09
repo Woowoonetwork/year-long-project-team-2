@@ -20,3 +20,37 @@ Completed individual log
 ## Tasks in progress
 All the above tasks were successfully completed. 
 ## Additional Information
+
+N/A.
+
+---
+---
+
+## Week 5: Monday 2nd Oct 2023 - Sunday 8th Oct 2023
+
+### Tasks Worked On During the week
+![Peer Evaluation](./images/Dhruv_week5.png)
+
+### Recap of goals
+
+- Discussed the potential names for the app 
+- Collaborate with team to plan the overview structure of the app.
+- Helped assign and prioritize tasks to be completed.
+- Helped build a prototype (low fidelity)
+- Completed the weekly logs.
+- Completed individual logs
+
+### Tasks completed (from Project Board)
+- Decide app structure
+- Decide app UI
+- Design the login and signup page on Figma
+- Assisted in assigning and prioritizing the tasks.
+- Complete team log.
+
+### Tasks in progress (from Project Board)
+
+All the above mentioned tasks are completed
+
+### Additional Information
+
+N/A.
