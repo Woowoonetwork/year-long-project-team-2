@@ -54,3 +54,31 @@ All the above mentioned tasks are completed
 ### Additional Information
 
 N/A.
+---
+---
+## Weeks 6 and 7: Monday 9th Oct 2023 - Sunday 22nd Oct 2023
+
+### Tasks Worked On During the week
+![Peer Evaluation](./images/dhruvWeekyLog6.png)
+### Recap of goals
+- Discussed the app names with my team 
+- Prioritise the tasks 
+- Helped the team to further design the app structure 
+- Designed the profile page on figma 
+- Discussed the entities and relationship among themm for the database
+- Created the ER diagram
+- Completed weekly log
+
+### Tasks completed (from Project Board)
+- Design the "add post" page on Figma
+- Design the order completed page on Figma
+- Create an ER diagram for database structure
+- Complete team log for Weeks 6 and 7#8
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
