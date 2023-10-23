@@ -1,3 +1,4 @@
+
 # Individual Log: Monday 25th Sept 2023 - Sunday 1st Oct 2023
 
 ## Tasks Worked On During the week
@@ -28,8 +29,8 @@ None
 ## Additional Information
 None
 
+# Individual Log: Monday 2nd Oct 2023 - Sunday 8th Oct 2023
 
-# Individual Log: Monday 25th Sept 2023 - Sunday 1st Oct 2023
 
 ## Tasks Worked On During the week
 
@@ -53,3 +54,35 @@ Tasks in progress
 * No tasks currently
 
 Additional Information
+
+
+# Individual Log: Monday 9th Oct 2023 - Sunday 22nd Oct 2023
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati3.png)
+￼
+Recap of goals
+* Discussed app name further
+* Helped workout app structure
+* Assigned and prioritized tasks
+* Designed the profile page on figma
+* Designed the ratings page on figma
+* Completed the weekly logs
+  
+Tasks completed (from Project Board)
+  
+* Decide app structure
+* Decide app UI
+* Complete team log
+* Complete individual log
+* Design the Profile page on Figma
+* Design the ratings page on Figma
+* Design the order completed page on Figma
+  
+Tasks in progress (from Project Board)
+No task currently in progress as all have been completed.
+
+Additional Information
+N/A.
+
+
