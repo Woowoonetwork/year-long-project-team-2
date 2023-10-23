@@ -53,7 +53,7 @@ We've been actively working on several tasks from the project board. Here's a su
 
 We've been steadily progressing over the week. Here is our auto-generated chart from GitHub.
 
-![BurnupChartW5](burnupWeek5.png)
+![BurnupChartW5](./Burnup%20Charts/burnupWeek5.png)
 
 ## Test Report
 
