@@ -23,3 +23,37 @@ None
 
 ## Additional Information
 None
+
+## Weeks 6 and 7: Monday 9th Oct 2023 - Sunday 22nd Oct 2023
+
+### Tasks Worked On During the week
+
+![Peer Evaluation](./images/manjot_week6.png)
+
+### Recap of goals
+
+- Collaborated with team to discuss the app name.
+- Helped plan the app structure further.
+- Helped assign and prioritize tasks to be completed.
+- Designed several pages of the app on Figma.
+- Worked on the database UML diagram
+- Setting up Firebase
+- Setting up realtime database on firebase
+- Enabling authentication on firebase server
+
+### Tasks completed (from Project Board)
+
+- Design the "add post" page on Figma	
+- Design the settings page on Figma and create detailed flows	
+- Design the chat page on Figma	
+- Design the public profile page on Figma	
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
