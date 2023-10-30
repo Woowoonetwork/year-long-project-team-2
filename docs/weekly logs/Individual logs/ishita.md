@@ -100,3 +100,40 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
+
+## Week 8: Monday 23rd Oct 2023 - Sunday 29th Oct 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaWeek8.png)
+
+### Recap of goals
+
+- Decided on the app name.
+- Helped assign and prioritize tasks to be completed.
+- Collaborated with team to discuss the presentation goals.
+- Rehearsed the live-demo for the presentation.
+- Designed the donor workflow on Figma.
+- Added interactions to several pages on Figma to create a prototype.
+- Began learning and installed Flutter SDK onto my device.
+- Managed and updated the project board.
+- Completed the weekly logs.
+
+### Tasks completed (from Project Board)
+
+- Create a donor workflow on Figma.
+- Add interactions to the designs on Figma.
+- Learn Flutter
+- Install Flutter SDK onto devices.
+- Finish presentation and practice it.
+- Complete team log for Week 8.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
