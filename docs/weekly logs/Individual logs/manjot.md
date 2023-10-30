@@ -57,3 +57,41 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
+
+## Week 8: Monday 23rd Oct 2023 - Sunday 29th Oct 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ManjotWeek8.png)
+
+### Recap of goals
+
+- Decided on the app name.
+- Helped assign and prioritize tasks to be completed.
+- Collaborated with team to discuss the presentation goals.
+- Rehearsed the live-demo for the presentation.
+- Completed the weekly logs.
+- Setup firebase authentication with email/password
+- Setup email verification on firebase
+- Setup multiple screens in flutter
+- Flutter tests, automated generated reports for the same
+- Debugging firebase
+
+### Tasks completed (from Project Board)
+
+- Completed the weekly logs.
+- Setup firebase authentication with email/password
+- Setup email verification on firebase
+- Setup multiple screens in flutter
+- Flutter tests, automated generated reports for the same
+- Debugging firebase
+- Finish presentation and practice it.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
