@@ -115,6 +115,12 @@ Tasks completed (from Project Board)
 * Create a donee workflow on Figma	
 
 Tasks in progress (from Project Board)
+
 No task currently in progress as all have been completed.
+
+
+Additional Information 
+
+N/A.
 
 
