@@ -101,6 +101,9 @@ No task currently in progress as all have been completed.
 
 N/A.
 
+---
+---
+
 ## Week 8: Monday 23rd Oct 2023 - Sunday 29th Oct 2023
 
 ### Tasks Worked On During the Week
