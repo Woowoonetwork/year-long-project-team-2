@@ -85,4 +85,42 @@ No task currently in progress as all have been completed.
 Additional Information
 N/A.
 
+# Individual Log: Monday 23rd Oct 2023 - Sunday 29th Oct 2023
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati4.png)
+￼
+Recap of goals
+
+Managed and updated the project board.
+
+* Decided on the app name.
+* Helped plan the app structure further.
+* Helped assign and prioritize tasks to be completed.
+* Designed several pages of the app on Figma.
+* Collaborated with team to discuss the presentation goals.
+* Began learning and installed Flutter SDK onto my device.
+* Added interactions to several pages on Figma to create a prototype.
+* Helped design the donee workflow on Figma.
+* Completed the weekly logs.
+
+Tasks completed (from Project Board)
+
+* Complete Week 8 Individual Log
+* Complete Week 8 Team Log
+* Finish presentation and practice it	
+* Install Flutter SDK onto devices	
+* Started learning Flutter	
+* Add framework choices to the presentation	
+* Create a donee workflow on Figma	
+
+Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+
+Additional Information 
+
+N/A.
+
 

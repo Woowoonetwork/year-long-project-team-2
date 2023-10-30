@@ -82,3 +82,37 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
+
+---
+---
+## Week 8: Monday 23rd Oct 2023 - Sunday 29th Oct 2023
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/Week8_dhruv.png)
+### Recap of goals
+
+- Helped the team to Decide on the app name.
+- Helped assign and prioritize tasks to be completed.
+- Discuss the presentation goals
+- Rehearsed the live-demo for the presentation.
+- Made the ER diagram better and fixed issues reccomended by the TA
+- Began learning and installed Flutter SDK onto my device.
+- Wrote down team logs 
+
+### Tasks completed (from Project Board)
+
+- Modify ER diagram based on feedback from TA
+- Add project specifics to the presentation
+- Learn Flutter
+- Install Flutter SDK onto devices.
+- Finish presentation and practice it.
+- Complete team log for Week 8.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
