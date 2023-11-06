@@ -63,11 +63,11 @@ We do not have any tasks currently in progress as all tasks have been completed.
 
 We've been steadily progressing over the week. Here is our auto-generated chart from GitHub for the week.
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/2f8ceb39-af08-45bd-aa32-7940e9a18760/3821d9f1-9e1c-41ff-b565-0599e9959210/Untitled.png)
+![Untitled](Burnup Charts/burnupWeek9.png)
 
 ## Test Report
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/2f8ceb39-af08-45bd-aa32-7940e9a18760/45b1d0e8-5032-44b2-87e3-f1f9554d99b0/Untitled.png)
+![Untitled](testWeek9.png)
 
 ## Additional Context
 
