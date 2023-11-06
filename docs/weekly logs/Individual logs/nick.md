@@ -132,3 +132,38 @@ N/A
 ## Additional Information
 
 N/A
+
+## Week 9: Monday 30th Oct 2023 - Sunday 5th Nov 2023
+
+![Peer Evaluation](./images/nickWeek9.png)
+
+## Recap of goals
+
+- Presented the first demo for the app in the presentation
+- Import resources from Figma to our Flutter project.
+- Managed Flutter Packages and dependencies for the app project.
+- Created and contributed in making splash, login, and registration pages for the app.
+- Created the welcome screen for the app.
+- Ensure the navigation between pages flows as expected.
+- Contributed integrating the Firebase Authentication and Firestore into the existing UI structure.
+
+## Tasks completed
+
+- Help assign tasks to team members.
+- Created the welcome screen for the app.
+- Created the splash screen for the app.
+- Created Google Maps API key and integrated into the existing package.
+- Reviewed and merged PRs from team members.
+- Contributed in integrating Firebase Authentication and Firestore into the existing UI structure.
+- Attended weekly meetings and completed individual log.
+- Presented the demo for the app.
+
+
+## Tasks in progress (from Project Board)
+
+N/A
+
+## Additional Information
+
+N/A
+
