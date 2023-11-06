@@ -95,3 +95,24 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
+
+## Week 9: Monday 30th Oct 2023 - Sunday 5th Nov 2023
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/manjotWeek9.jpg)
+### Recap of goals
+- Helped the team to make presentation 
+- Worked on the project specific part of the presentation 
+- Prepared for and gave the presentation
+- Watched and assessed other team's presentation
+- Discussed and prioritise tasks 
+- Worked on the test for signup mock 
+
+### Tasks completed (from Project Board)
+-work on signup and login
+-Made the authentication wrapper and rerouting based on authentication
+- Complete team log for W9
+- Complete individual log for W9
+
+### Tasks in progress (from Project Board)
+None
