@@ -116,3 +116,28 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
+
+---
+---
+## Week 9: Monday 30th Oct 2023 - Sunday 5th Nov 2023
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/Week9_dhruv.png)
+### Recap of goals
+- Helped the team to make presentation 
+- Worked on the project specific part of the presentation 
+- Also added ER diagram to the presentation
+- Prepared for presenting 
+- Could not give the presentation (due to illness)
+- Watched and assessed other team's presentation
+- Discussed and prioritise task 
+- Worked on the test for initiating the libraries of firebase 
+- Worked on the test for signup mock 
+
+### Tasks completed (from Project Board)
+- Test to verify if firebase libraries are getting initialized
+- Complete team log for W9
+- Complete individual log for W9
+
+### Tasks in progress (from Project Board)
+- Test for the signup mock.
