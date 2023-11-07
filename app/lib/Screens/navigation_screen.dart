@@ -4,16 +4,16 @@
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
-import 'package:FoodHood/Screens/browse_screen.dart';
-import 'package:FoodHood/Screens/new_post_screen.dart';
-import 'package:FoodHood/Screens/saved_screen.dart';
-import 'package:FoodHood/Screens/account_screen.dart';
+// import 'package:FoodHood/Screens/browse_screen.dart';
+// import 'package:FoodHood/Screens/new_post_screen.dart';
+// import 'package:FoodHood/Screens/saved_screen.dart';
+// import 'package:FoodHood/Screens/account_screen.dart';
 
 // TODO: Implement NavigationScreen
 class NavigationScreen extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
-
+  
   // TODO: Add more parameters if necessary
   const NavigationScreen({
     Key? key,
@@ -46,14 +46,14 @@ class NavigationScreen extends StatelessWidget {
             switch (index) {
               case 0:
                 return HomeScreen();
-              case 1:
-                return BrowseScreen();
-              case 2:
-                return NewPostScreen();
-              case 3:
-                return SavedScreen();  
-              case 4:
-                return AccountScreen();
+              // case 1:
+              //   return BrowseScreen();
+              // case 2:
+              //   return NewPostScreen();
+              // case 3:
+              //   return SavedScreen();  
+              // case 4:
+              //   return AccountScreen();
               // Add more cases for each screen
               default:
                 return HomeScreen();

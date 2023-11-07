@@ -3,10 +3,15 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../components.dart';
+import '../auth_service.dart';
+
 
 class RegistrationScreen extends StatefulWidget {
+  final AuthService auth; // AuthService object
+
+  RegistrationScreen({Key? key, required this.auth}) : super(key: key);
+
   @override
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
@@ -28,6 +33,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void register() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        await widget.auth.signUp(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
+        // User registration successful
+        print('User registered');
+      } catch (e) {
+        // Handle registration errors
+        print('Registration failed: $e');
+      }
+    }
   }
 
   @override
@@ -178,21 +199,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       String text, Color backgroundColor, Color textColor) {
     return CupertinoButton(
       onPressed: () async {
-        if (_formKey.currentState?.validate() ?? false) {
-          try {
-            UserCredential userCredential =
-                await FirebaseAuth.instance.createUserWithEmailAndPassword(
-              email: _emailController.text,
-              password: _passwordController.text,
-            );
-
-            // User registration successful
-            print('User registered: ${userCredential.user?.uid}');
-          } catch (e) {
-            // Handle registration errors
-            print('Registration failed: $e');
-          }
-        }
+        register();
       },
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14),
@@ -221,7 +228,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   Widget _buildGoogleSignInButton() {
     return Container(
-      width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
         border: Border.all(
@@ -239,17 +245,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.network(
-              'http://pngimg.com/uploads/google/google_PNG19635.png',
-              width: 20,
-              height: 20,
-            ),
+            Image.asset('assets/images/google.png', // Google logo image
+                width: 20,
+                height: 20),
             const SizedBox(width: 2),
-            const Text('Sign in with Google',
-                style: TextStyle(
-                    color: Color(0xFF757575),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600)),
+            const Text(
+              'Sign in with Google',
+              style: TextStyle(
+                color: Color(0xFF757575),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
       ),

@@ -43,12 +43,14 @@ dependencies:
   flutter_map: ^6.0.1
   geolocator: ^10.1.0
   fake_cloud_firestore: ^2.4.3
+  firebase_auth_mocks: ^0.13.0
 
 dev_dependencies:
 
   flutter_test:
     sdk: flutter
 
+  mockito: ^5.0.0
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -58,6 +60,7 @@ dev_dependencies:
   flutter_native_splash: ^2.3.5
   flutter_launcher_icons: "^0.13.1"
   flutter_feather_icons: ^2.0.0
+  firebase_analytics_platform_interface: ^3.7.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -66,6 +69,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/smilelyface.png
+    - assets/images/google.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
