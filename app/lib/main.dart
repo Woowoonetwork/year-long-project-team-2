@@ -25,7 +25,8 @@ class FoodHoodApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       home: AuthWrapper(), // Use AuthWrapper as the root widget
-      debugShowCheckedModeBanner: false, // Hide the debug banner in Preview mode
+      debugShowCheckedModeBanner:
+          false, // Hide the debug banner in Preview mode
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/':
@@ -34,7 +35,8 @@ class FoodHoodApp extends StatelessWidget {
             );
           case '/signup':
             return CupertinoPageRoute(
-              builder: (context) => RegistrationScreen(auth: AuthService(FirebaseAuth.instance)), // Signup route
+              builder: (context) => RegistrationScreen(
+                  auth: AuthService(FirebaseAuth.instance)), // Signup route
             );
           case '/signin':
             return CupertinoPageRoute(
@@ -42,7 +44,8 @@ class FoodHoodApp extends StatelessWidget {
             );
           case '/home':
             return CupertinoPageRoute(
-              builder: (context) => HomeScreen(), // Home route
+              builder: (context) =>
+                  HomeScreen(), // Home screen route (after signin)
             );
           default:
             return null;
@@ -51,6 +54,3 @@ class FoodHoodApp extends StatelessWidget {
     );
   }
 }
-
-
-

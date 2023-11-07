@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import '../components.dart';
 import '../auth_service.dart';
 
-
 class RegistrationScreen extends StatefulWidget {
   final AuthService auth; // AuthService object
 
@@ -33,22 +32,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  void register() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      try {
-        await widget.auth.signUp(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-        // User registration successful
-        print('User registered');
-      } catch (e) {
-        // Handle registration errors
-        print('Registration failed: $e');
-      }
-    }
   }
 
   @override
@@ -98,7 +81,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           _cityController,
         ),
         const SizedBox(height: 20),
-        _buildCupertinoButton(
+        _buildContinueButton(context,
             'Create account', const Color(0xFF337586), CupertinoColors.white),
         const SizedBox(height: 20),
         buildCenteredText('or', 14, FontWeight.w600), // Or text
@@ -195,11 +178,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  Widget _buildCupertinoButton(
-      String text, Color backgroundColor, Color textColor) {
+  Widget _buildContinueButton(BuildContext context, String text,
+      Color backgroundColor, Color textColor) {
     return CupertinoButton(
       onPressed: () async {
-        register();
+        if (_formKey.currentState?.validate() ?? false) {
+          try {
+            await widget.auth.signUp(
+              email: _emailController.text,
+              password: _passwordController.text,
+            );
+            // User registration successful
+            print('User registered');
+            Navigator.pushReplacementNamed(context, '/home');
+          } catch (e) {
+            // Handle registration errors
+            print('Registration failed: $e');
+          }
+        }
       },
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14),

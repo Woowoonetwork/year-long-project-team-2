@@ -6,8 +6,10 @@ import '../components.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LogInScreen extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController(); // text controller for email
-  final TextEditingController passwordController = TextEditingController(); // text controller for password 
+  final TextEditingController emailController =
+      TextEditingController(); // text controller for email
+  final TextEditingController passwordController =
+      TextEditingController(); // text controller for password
 
   @override
   Widget build(BuildContext context) {
@@ -32,41 +34,52 @@ class LogInScreen extends StatelessWidget {
       children: [
         buildText('Log in', 34, FontWeight.w600), // Log in text
         const SizedBox(height: 50),
-        buildCupertinoTextField('Email Address', emailController, false), // Email text field
+        buildCupertinoTextField(
+            'Email Address', emailController, false), // Email text field
         const SizedBox(height: 20),
-        buildCupertinoTextField('Password', passwordController, true), // Password text field
+        buildCupertinoTextField(
+            'Password', passwordController, true), // Password text field
         const SizedBox(height: 20),
-        buildTextButton('Forgot Password?', Alignment.centerRight,
-            const Color(0xFF337586), 12, FontWeight.w500), // Forgot password text
+        buildTextButton(
+            'Forgot Password?',
+            Alignment.centerRight,
+            const Color(0xFF337586),
+            12,
+            FontWeight.w500), // Forgot password text
         const SizedBox(height: 20),
-        buildContinueButton('Continue', const Color(0xFF337586), CupertinoColors.white), // Continue button
+        buildContinueButton(context, 'Continue', const Color(0xFF337586),
+            CupertinoColors.white),
+
         const SizedBox(height: 20),
         buildCenteredText('or', 14, FontWeight.w600), // Or text
         const SizedBox(height: 20),
         buildGoogleSignInButton(), // Google sign in button
         const SizedBox(height: 20),
-        buildSignUpText(context, "Don't have an account? ", 'Sign up', '/signup'), // Sign up text
+        buildSignUpText(context, "Don't have an account? ", 'Sign up',
+            '/signup'), // Sign up text
       ],
     );
   }
-  
+
   // Continue button
-  Widget buildContinueButton(
-      String text, Color backgroundColor, Color textColor) {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  Widget buildContinueButton(BuildContext context, String text,
+      Color backgroundColor, Color textColor) {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
     return CupertinoButton(
-      onPressed: () async{
-      try {
-        final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text,
-        );
-      print("logged in");
-      } catch (e) {
-        // Handle login errors (e.g., wrong credentials).
-        print('Login error: $e'); //prints error
-      }
-},
+      onPressed: () async {
+        try {
+          final UserCredential userCredential =
+              await _auth.signInWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text,
+          );
+          print("logged in");
+          Navigator.pushReplacementNamed(context, '/home');
+        } catch (e) {
+          // Handle login errors (e.g., wrong credentials).
+          print('Login error: $e'); //prints error
+        }
+      },
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14),
       child: Text(
