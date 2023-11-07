@@ -3,6 +3,7 @@
 
 import 'package:flutter/cupertino.dart';
 import '../components.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LogInScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController(); // text controller for email
@@ -52,8 +53,20 @@ class LogInScreen extends StatelessWidget {
   // Continue button
   Widget buildContinueButton(
       String text, Color backgroundColor, Color textColor) {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
     return CupertinoButton(
-      onPressed: () {},
+      onPressed: () async{
+      try {
+        final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+      print("logged in");
+      } catch (e) {
+        // Handle login errors (e.g., wrong credentials).
+        print('Login error: $e'); //prints error
+      }
+},
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14),
       child: Text(
