@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:FoodHood/Screens/MainPageFoodList.dart'; // Replace 'your_app' with your actual package name
+import 'package:FoodHood/Screens/MainPageFoodList.dart';
 
 void main() {
   testWidgets('Check for search bar, buttons, and list in MyWidget',
