@@ -7,7 +7,7 @@ import 'package:feather_icons/feather_icons.dart';
 // import 'package:FoodHood/Screens/browse_screen.dart';
 // import 'package:FoodHood/Screens/new_post_screen.dart';
 // import 'package:FoodHood/Screens/saved_screen.dart';
-// import 'package:FoodHood/Screens/account_screen.dart';
+import 'package:FoodHood/Screens/account_screen.dart';
 
 // TODO: Implement NavigationScreen
 class NavigationScreen extends StatelessWidget {
@@ -52,8 +52,8 @@ class NavigationScreen extends StatelessWidget {
               //   return NewPostScreen();
               // case 3:
               //   return SavedScreen();  
-              // case 4:
-              //   return AccountScreen();
+              case 4:
+                return AccountScreen();
               // Add more cases for each screen
               default:
                 return HomeScreen();

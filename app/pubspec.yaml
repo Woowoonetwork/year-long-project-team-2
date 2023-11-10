@@ -21,6 +21,11 @@ version: 1.0.0+1
 environment:
   sdk: ">=3.1.5 <4.0.0"
 
+
+
+dependency_overrides:
+      modal_bottom_sheet: ^3.0.0-pre
+
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -44,6 +49,8 @@ dependencies:
   geolocator: ^10.1.0
   fake_cloud_firestore: ^2.4.3
   firebase_auth_mocks: ^0.13.0
+  modal_bottom_sheet: ^2.1.2
+  sheet: ^0.0.4+1
 
 dev_dependencies:
 
@@ -106,7 +113,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
-
 
 flutter_native_splash:
   # This package generates native code to customize Flutter's default white native splash screen
