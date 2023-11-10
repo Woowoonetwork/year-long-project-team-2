@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'orders_sheet.dart'; // Make sure this path is correct
+import '../Components/profile_card.dart'; // Make sure this path is correct
 
 class AccountScreen extends StatelessWidget {
   final TextEditingController textController = TextEditingController();
@@ -38,12 +39,14 @@ class AccountScreen extends StatelessWidget {
               ),
               onPressed: () {
                 // TODO: Add your onPressed functionality here
-                // For example: Navigator.push(context, CupertinoPageRoute(builder: (context) => SettingsScreen()));
               },
             ),
             border: Border(bottom: BorderSide.none),
           ),
-          // The rest of your sliver widgets will follow
+          SliverToBoxAdapter(
+            child: ProfileCard(), // Add the ProfileCard to the list of slivers
+          ),
+          // Add more Sliver widgets if needed
         ],
       ),
     );
