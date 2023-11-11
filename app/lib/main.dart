@@ -1,8 +1,8 @@
 // main.dart
 // entry point of the app
 
-import 'package:FoodHood/Screens/login_screen.dart';
-import 'package:FoodHood/Screens/registration_screen.dart';
+//import 'package:FoodHood/Screens/login_screen.dart';
+//import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -23,21 +23,22 @@ class FoodHoodApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       home: AuthWrapper(), // Use AuthWrapper as the root widget
-      debugShowCheckedModeBanner: false, // Hide the debug banner in Preview mode
+      debugShowCheckedModeBanner:
+          false, // Hide the debug banner in Preview mode
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/':
             return CupertinoPageRoute(
               builder: (context) => WelcomeScreen(), // Root route
             );
-          case '/signup':
-            return CupertinoPageRoute(
-              builder: (context) => RegistrationScreen(), // Signup route
-            );
-          case '/signin':
-            return CupertinoPageRoute(
-              builder: (context) => LogInScreen(), // Signin route
-            );
+          // case '/signup':
+          //   return CupertinoPageRoute(
+          //     builder: (context) => RegistrationScreen(), // Signup route
+          //   );
+          // case '/signin':
+          //   return CupertinoPageRoute(
+          //     builder: (context) => LogInScreen(), // Signin route
+          //   );
           case '/home':
             return CupertinoPageRoute(
               builder: (context) => HomeScreen(), // Home route
@@ -49,6 +50,3 @@ class FoodHoodApp extends StatelessWidget {
     );
   }
 }
-
-
-

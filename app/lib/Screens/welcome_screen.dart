@@ -21,7 +21,7 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  // welcome screen image 
+  // welcome screen image
   Widget _buildImageSection() {
     return AspectRatio(
       aspectRatio: 430 / 359,
