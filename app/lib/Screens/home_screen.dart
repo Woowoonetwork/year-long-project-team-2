@@ -67,20 +67,20 @@ class ResponsivePage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildCategory('All'),
-        _buildCategory('Vegan'),
-        _buildCategory('Italian'),
-        _buildCategory('Halal'),
-        _buildCategory('Vegetarian'),
+        _buildCategory('All', Color.fromARGB(255, 42, 92, 71)),
+        _buildCategory('Vegan', Color.fromARGB(255, 201, 204, 44)),
+        _buildCategory('Italian', Color.fromARGB(255, 207, 51, 51)),
+        _buildCategory('Halal', Color.fromARGB(255, 34, 174, 240)),
+        _buildCategory('Vegetarian', Color.fromARGB(255, 223, 46, 214)),
       ],
     );
   }
 
-  Widget _buildCategory(String name) {
+  Widget _buildCategory(String name, Color color) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-          color: Color(0xFF337586), borderRadius: BorderRadius.circular(20)),
+      decoration:
+          BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
       child: Text(
         name,
         style: TextStyle(

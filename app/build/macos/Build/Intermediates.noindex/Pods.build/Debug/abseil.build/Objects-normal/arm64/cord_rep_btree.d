@@ -1,0 +1,40 @@
+dependencies: \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/strings/internal/cord_rep_btree.cc \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/Target\ Support\ Files/abseil/abseil-prefix.pch \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/strings/internal/cord_rep_btree.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/config.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/options.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/policy_checks.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/internal/raw_logging.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/attributes.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/internal/atomic_hook.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/log_severity.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/macros.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/optimization.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/port.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/strings/internal/cord_data_edge.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/strings/internal/cord_internal.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/internal/endian.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/casts.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/internal/identity.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/meta/type_traits.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/internal/unaligned_access.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/internal/invoke.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/container/internal/compressed_tuple.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/utility/utility.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/internal/inline_variable.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/strings/string_view.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/base/internal/throw_delegate.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/strings/internal/cord_rep_flat.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/types/span.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/types/internal/span.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/algorithm/algorithm.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/strings/internal/cord_rep_consume.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/functional/function_ref.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/functional/internal/function_ref.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/strings/str_cat.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/strings/numbers.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/numeric/bits.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/numeric/internal/bits.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/numeric/int128.h \
+  /Users/dhruvbihani/Desktop/CapstoneProject/year-long-project-team-2/app/macos/Pods/abseil/absl/numeric/int128_have_intrinsic.inc

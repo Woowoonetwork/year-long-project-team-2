@@ -29,7 +29,7 @@ class FoodHoodApp extends StatelessWidget {
         switch (settings.name) {
           case '/':
             return CupertinoPageRoute(
-              builder: (context) => WelcomeScreen(), // Root route
+              builder: (context) => HomeScreen(), // Root route
             );
           // case '/signup':
           //   return CupertinoPageRoute(
