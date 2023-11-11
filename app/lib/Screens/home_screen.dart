@@ -23,6 +23,20 @@ class ResponsivePage extends StatelessWidget {
         decoration: BoxDecoration(color: Color(0xFFEEEEEE)),
         child: Column(
           children: [
+            Padding(
+              padding: EdgeInsets.only(top: deviceWidth * 0.2),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Discover',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 24, // Adjust the font size as needed
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
             _buildSearchBar(deviceWidth),
             _buildCategoryBar(),
             _buildCard(deviceWidth, 'Chicken and Rice', 'GL Free', 'PVC Free',
