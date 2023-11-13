@@ -1,6 +1,7 @@
 // auth_wrapper.dart 
 // wrapper widget that determines whether to display the WelcomeScreen or the NavigationScreen
 
+import 'package:FoodHood/Screens/food_posting.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
@@ -16,7 +17,8 @@ class AuthWrapper extends StatelessWidget {
           final user = snapshot.data;
           if (user == null) {
             // User is not logged in, display the WelcomeScreen
-            return WelcomeScreen();
+            //return WelcomeScreen();
+            return FoodPosting();
           } else {
             // User is logged in, display the NavigationScreen with the first tab selected
             return NavigationScreen(selectedIndex: 0, onItemTapped: (int index) {

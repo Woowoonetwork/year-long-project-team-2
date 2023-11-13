@@ -2,6 +2,7 @@
 // a page that displays the navigation bar and controls the navigation between the different pages of the app
 
 //import 'package:FoodHood/Screens/home_screen.dart';
+import 'package:FoodHood/Screens/food_posting.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
@@ -58,7 +59,7 @@ class NavigationScreen extends StatelessWidget {
               // Add more cases for each screen
               default:
                 //return HomeScreen();
-                return WelcomeScreen();
+                return FoodPosting();
             }
           },
         );
