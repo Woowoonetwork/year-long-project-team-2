@@ -67,7 +67,7 @@ We've been steadily progressing over the week. Here is our auto-generated chart 
 
 ## Test Report
 
-![Untitled](testWeek9.png)
+![Untitled](./Test%20Reports/testWeek9.png)
 
 ## Additional Context
 

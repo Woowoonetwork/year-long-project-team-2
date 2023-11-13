@@ -67,7 +67,7 @@ We've been steadily progressing over the week. Here is our auto-generated chart 
 
 Here is our code coverage report for most of our screens for the week:
 
-![test report](testReportW10.png)
+![test report](./Test%20Reports/testReportW10.png)
 
 ## Additional Context
 
