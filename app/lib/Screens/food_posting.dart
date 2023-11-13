@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class FoodPosting extends StatefulWidget {
   const FoodPosting({Key? key}) : super(key: key);
@@ -8,34 +8,39 @@ FoodPostingState createState() =>FoodPostingState();
 }
 
 class FoodPostingState extends State<FoodPosting> {
-  @override
+   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Scrollable List Example'),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: Text('Image of Chicken and Rice'),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: AssetImage('chickenrice.jpeg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            Text('Your Text Goes Here'),
+          ],
         ),
-        body: MyScrollableList(),
+      ),
+      floatingActionButton: CupertinoButton.filled(
+        child: Icon(CupertinoIcons.add),
+        onPressed: () {
+          // Add your onPressed logic here
+          print('Floating Action Button Pressed');
+        },
       ),
     );
   }
-}
-
-class MyScrollableList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: 50, // Set the number of items in the list
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text('Item $index'),
-          // Add more customization as needed
-        );
-      },
-    );
-  }
-}
-
-void main() {
-  runApp(FoodPosting());
 }
