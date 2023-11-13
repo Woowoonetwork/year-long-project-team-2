@@ -8,11 +8,11 @@ FoodPostingState createState() =>FoodPostingState();
 }
 
 class FoodPostingState extends State<FoodPosting> {
-   @override
+  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text('Image of Chicken and Rice'),
+        middle: Text('image of chicken and rice'),
       ),
       child: Center(
         child: Column(
@@ -30,17 +30,12 @@ class FoodPostingState extends State<FoodPosting> {
               ),
             ),
             SizedBox(height: 16),
-            Text('Your Text Goes Here'),
+            Text(''),
           ],
         ),
       ),
-      floatingActionButton: CupertinoButton.filled(
-        child: Icon(CupertinoIcons.add),
-        onPressed: () {
-          // Add your onPressed logic here
-          print('Floating Action Button Pressed');
-        },
-      ),
+      
     );
   }
 }
+
