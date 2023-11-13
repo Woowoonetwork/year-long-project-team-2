@@ -37,16 +37,17 @@ class OrderCard extends StatelessWidget {
   }
 
   Widget _buildImageSection() {
-    return ClipRRect(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      child: Image.network(
-        "https://via.placeholder.com/382x110",
-        width: 382,
-        height: 110,
-        fit: BoxFit.fill,
-      ),
-    );
-  }
+  return ClipRRect(
+    borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+    child: Image.asset(
+      "../../assets/images/382x110.png", // Ensure this image is available in your assets
+      width: 382,
+      height: 110,
+      fit: BoxFit.fill,
+    ),
+  );
+}
+
 
   Widget _buildTitleSection() {
     return Padding(

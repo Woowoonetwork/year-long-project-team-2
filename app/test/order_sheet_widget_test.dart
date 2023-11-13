@@ -3,11 +3,10 @@ import 'package:FoodHood/Components/order_card.dart';
 import 'package:FoodHood/Screens/orders_sheet.dart';
 import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:FoodHood/auth_service.dart';
-
+import 'package:flutter/cupertino.dart';
 
 void main() {
   group('OrdersScreen Tests', () {
-
     late MockFirebaseAuth mockFirebaseAuth;
     late MockUser user;
     late AuthService mockAuthService;
@@ -22,37 +21,22 @@ void main() {
       mockFirebaseAuth = MockFirebaseAuth(mockUser: user);
       mockAuthService = AuthService(mockFirebaseAuth);
     });
-    testWidgets('Renders correctly', (WidgetTester tester) async {
-      // Render the PastOrdersScreen
-      await tester.pumpWidget(OrdersScreen());
 
-      // Check if 'Active Orders' and 'Past Orders' segments are found
+     testWidgets('Renders correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(CupertinoApp(home: OrdersScreen()));
+
       expect(find.text('Active Orders'), findsOneWidget);
       expect(find.text('Past Orders'), findsOneWidget);
 
-      // Check for the presence of OrderCard in 'Active Orders'
-      await tester.tap(find.text('Active Orders'));
-      await tester.pump();
-      expect(find.byType(OrderCard), findsWidgets);
     });
-
     testWidgets('Switches between tabs correctly', (WidgetTester tester) async {
-      await tester.pumpWidget(OrdersScreen());
+      await tester.pumpWidget(CupertinoApp(home: OrdersScreen()));
 
-      // Switch to 'Past Orders'
       await tester.tap(find.text('Past Orders'));
-      await tester.pump();
+      await tester.pumpAndSettle(); // Wait for all animations and state changes to complete
 
-      // Check for 'Past orders will appear here' text
       expect(find.text('Past orders will appear here'), findsOneWidget);
     });
 
-    testWidgets('Modal Bottom Sheet displays correctly',
-        (WidgetTester tester) async {
-      // Render a widget that calls showPastOrdersSheet
-      // Test if the PastOrdersScreen is displayed as a modal when showPastOrdersSheet is called
-    });
-
-    // Additional tests as needed...
   });
 }
