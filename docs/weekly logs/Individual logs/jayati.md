@@ -119,6 +119,33 @@ Tasks in progress (from Project Board)
 No task currently in progress as all have been completed.
 
 
+# Individual Log: Monday 30th Oct 2023 - Sunday 5th Nov 2023
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati5.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed.
+* Completed and rehearsed presentation with team.
+* Evaluated and watched other team's presentations.
+* Worked on the mapping feature
+* Completed the weekly individual log.
+* Created team log.
+
+# Tasks completed (from Project Board)
+
+* Worked on mapping feature and pushed to branch
+* Complete team log for Week 9.
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+
 Additional Information 
 
 N/A.
