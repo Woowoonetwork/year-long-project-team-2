@@ -68,6 +68,7 @@ class LogInScreen extends StatelessWidget {
     return CupertinoButton(
       onPressed: () async {
         try {
+          // ignore: unused_local_variable
           final UserCredential userCredential =
               await _auth.signInWithEmailAndPassword(
             email: emailController.text,

@@ -1,9 +1,6 @@
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
-// import 'package:FoodHood/Screens/browse_screen.dart';
-// import 'package:FoodHood/Screens/new_post_screen.dart';
-// import 'package:FoodHood/Screens/saved_screen.dart';
 import 'package:FoodHood/Screens/account_screen.dart';
 
 class NavigationScreen extends StatelessWidget {

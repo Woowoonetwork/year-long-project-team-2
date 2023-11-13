@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:FoodHood/Components/order_card.dart';
 
-class PastOrdersScreen extends StatefulWidget {
+class OrdersScreen extends StatefulWidget {
   @override
-  _PastOrdersScreenState createState() => _PastOrdersScreenState();
+  _OrdersScreenState createState() => _OrdersScreenState();
 }
 
-class _PastOrdersScreenState extends State<PastOrdersScreen> {
+class _OrdersScreenState extends State<OrdersScreen> {
   int segmentedControlGroupValue =
       0; // Initialize with 'Active Orders' selected.
 
@@ -41,8 +42,8 @@ class _PastOrdersScreenState extends State<PastOrdersScreen> {
                 const Text('Orders', style: TextStyle(letterSpacing: -1.36)),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
-              child: const 
-                  Text('Close', style: TextStyle(color: Color(0xFF337586))),
+              child: const Text('Close',
+                  style: TextStyle(color: Color(0xFF337586))),
               onPressed: () =>
                   Navigator.pop(context), // Dismiss the modal bottom sheet.
             ),
@@ -66,7 +67,7 @@ class _PastOrdersScreenState extends State<PastOrdersScreen> {
             ),
           ),
           SliverFillRemaining(
-            hasScrollBody: false,
+            hasScrollBody: true,
             child: Center(
               child: _buildContent(
                   segmentedControlGroupValue), // Display the content based on the selected segment.
@@ -76,25 +77,43 @@ class _PastOrdersScreenState extends State<PastOrdersScreen> {
       ),
     );
   }
+}
 
-  Widget _buildContent(int segmentedValue) {
-    // The content that changes based on which tab is selected.
-    switch (segmentedValue) {
-      case 0:
-        return Text('Active orders will appear here');
-      case 1:
-        return Text('Past orders will appear here');
-      default:
-        return Text('Content for the selected segment');
-    }
+Widget _buildContent(int segmentedValue) {
+  // The content that changes based on which tab is selected.
+  switch (segmentedValue) {
+    case 0:
+      return _buildActiveOrders(); // Call _buildActiveOrders to display active orders.
+    case 1:
+      return Text('Past orders will appear here');
+    default:
+      return Text('Content for the selected segment');
   }
+}
+
+Widget _buildActiveOrders() {
+  // Sample data for active orders. In a real app, this would be fetched from a database or API.
+  List<Widget> activeOrders = [
+    OrderCard(), // Your OrderCard widget.
+    // Add more OrderCard widgets or other widgets representing orders as needed.
+  ];
+
+  return ListView.builder(
+    itemCount: activeOrders.length,
+    itemBuilder: (context, index) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: activeOrders[index],
+      );
+    },
+  );
 }
 
 void showPastOrdersSheet(BuildContext context) {
   showCupertinoModalBottomSheet(
     context: context,
     builder: (BuildContext context) =>
-        PastOrdersScreen(), // Use the StatefulWidget for the modal content.
+        OrdersScreen(), // Use the StatefulWidget for the modal content.
     useRootNavigator: true,
   );
 }
