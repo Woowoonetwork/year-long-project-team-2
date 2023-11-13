@@ -140,3 +140,36 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Week 9: Monday 30th Oct 2023 - Sunday 5th Nov 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaWeek9.png)
+
+### Recap of goals
+
+- Helped assign and prioritize tasks to be completed.
+- Completed and rehearsed presentation with team.
+- Watched other team's presentations.
+- Worked on the login and signup feature.
+- Managed and updated the project board.
+- Completed the weekly logs.
+
+### Tasks completed (from Project Board)
+
+- Complete the signup and login feature.
+- Complete team log for Week 8.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
