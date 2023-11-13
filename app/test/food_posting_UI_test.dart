@@ -8,14 +8,14 @@ void main() {
     // Builds page
     await tester.pumpWidget(FoodPosting());
 
-    // Verify that bar is rendering correctly
-    expect(find.text('Scrollable List Example'), findsOneWidget);
+    // Verify that button is rendering correctly
+    expect(find.text('Reserve'), findsOneWidget);
 
-    // Verify that there is a scrollable list
-    expect(find.byType(ListView), findsOneWidget);
+    // Verify that there is a heart button
+    expect(find.byType(FloatingActionButton), findsOneWidget);
 
-    /// Verify there are 50 items in list, this number should be changed
-    expect(find.byType(ListTile), findsNWidgets(50));
+    /// Verify there are tags
+    expect(find.byType(ListTile), findsNWidgets(8));
 
   });
 }
