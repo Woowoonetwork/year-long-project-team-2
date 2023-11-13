@@ -10,5 +10,10 @@ class AuthService {
 
   Future<void> signUp({required String email, required String password}) async {
     await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+//send email verification email
+final user = FirebaseAuth.instance.currentUser;
+if (user != null && !user.emailVerified) {
+  await user.sendEmailVerification();
+}
   }
 }
