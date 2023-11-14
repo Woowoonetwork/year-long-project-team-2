@@ -3,7 +3,7 @@
   "packages": [
     {
       "name": "_fe_analyzer_shared",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-61.0.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-61.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -19,13 +19,13 @@
     },
     {
       "name": "adaptive_number",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/adaptive_number-1.0.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/adaptive_number-1.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "analyzer",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/analyzer-5.13.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/analyzer-5.13.0",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -81,19 +81,19 @@
     },
     {
       "name": "build",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/build-2.4.1",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/build-2.4.1",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
     {
       "name": "built_collection",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/built_collection-5.1.1",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/built_collection-5.1.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "built_value",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/built_value-8.7.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/built_value-8.7.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -179,7 +179,7 @@
     },
     {
       "name": "code_builder",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/code_builder-4.7.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/code_builder-4.7.0",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -235,19 +235,19 @@
     },
     {
       "name": "dart_jsonwebtoken",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/dart_jsonwebtoken-2.12.1",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/dart_jsonwebtoken-2.12.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
     {
       "name": "dart_style",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/dart_style-2.3.2",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/dart_style-2.3.2",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
     {
       "name": "ed25519_edwards",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/ed25519_edwards-0.3.1",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/ed25519_edwards-0.3.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -307,7 +307,7 @@
       "rootUri": "file:///C:/Users/ishit/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_auth-4.13.0",
 =======
       "name": "file",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/file-7.0.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/file-7.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },
@@ -320,13 +320,13 @@
     },
     {
       "name": "firebase_auth",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/firebase_auth-4.12.1",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/firebase_auth-4.12.1",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     },
     {
       "name": "firebase_auth_mocks",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/firebase_auth_mocks-0.13.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/firebase_auth_mocks-0.13.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -382,7 +382,7 @@
     },
     {
       "name": "fixnum",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/fixnum-1.1.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/fixnum-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -538,7 +538,7 @@
     },
     {
       "name": "glob",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/glob-2.1.2",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/glob-2.1.2",
       "packageUri": "lib/",
       "languageVersion": "2.19"
     },
@@ -784,9 +784,15 @@
     },
     {
       "name": "mockito",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/mockito-5.4.2",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/mockito-5.4.2",
       "packageUri": "lib/",
       "languageVersion": "2.19"
+    },
+    {
+      "name": "modal_bottom_sheet",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/modal_bottom_sheet-3.0.0-pre",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "more",
@@ -800,7 +806,7 @@
     },
     {
       "name": "package_config",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/package_config-2.1.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/package_config-2.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -866,7 +872,7 @@
     },
     {
       "name": "pub_semver",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/pub_semver-2.1.4",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/pub_semver-2.1.4",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -929,6 +935,12 @@
 >>>>>>> 3e7fc7765ca8ae9213b92372cff1b876b640430c
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "sheet",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/sheet-0.0.4+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "sky_engine",
@@ -1088,7 +1100,7 @@
     },
     {
       "name": "watcher",
-      "rootUri": "file:///Users/jayati/.pub-cache/hosted/pub.dev/watcher-1.1.0",
+      "rootUri": "file:///Users/nickchen/.pub-cache/hosted/pub.dev/watcher-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
     },

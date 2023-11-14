@@ -167,3 +167,35 @@ N/A
 
 N/A
 
+## Week 10: Monday 6th Oct 2023 - Sunday 12th Nov 2023
+
+![Peer Evaluation](./images/nickWeek10.png)
+
+## Recap of goals
+
+- Building the Order page UI and layout behaviours.
+- Implementing the components of the Order page.
+- Added widgets to the Order page.
+- Reported the testing results of the Order page.
+- Contributed to building the teamlog for the week.
+- Helped review and suggest changes to the other team members' PRs and code.
+- Ensured code consistency and created guidelines for the team.
+
+## Tasks completed
+
+- Finalize UI/UX for Order page.
+- omplete integration of all components on Order page.
+- Ensure widgets are fully functional and user-friendly.
+- Conduct thorough testing, fix bugs.
+- Update teamlog with detailed progress and challenges.
+- Review team members' contributions critically.
+- Enforce and refine code guidelines for consistency.
+- Prepare for next phase of implementing the account screen.
+
+## Tasks in progress (from Project Board)
+
+N/A
+
+## Additional Information
+
+N/A
