@@ -1,297 +1,183 @@
 // create_post.dart
 // a page that allows users to create a new post
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
 
   @override
   _CreatePostPageState createState() => _CreatePostPageState();
-}
-
-// class _CreatePostPageState extends State<CreatePostScreen> {
-//   TextEditingController titleController = TextEditingController();
-//   TextEditingController descriptionController = TextEditingController();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-    
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.stretch,
-//           children: [
-//             Text(
-//               'Title:',
-//               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//             ),
-//             SizedBox(height: 8),
-//             TextField(
-//               controller: titleController,
-//               decoration: InputDecoration(
-//                 hintText: 'Enter title...',
-//                 border: OutlineInputBorder(),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+} 
 
 class _CreatePostPageState extends State<CreatePostScreen> {
+
+  DateTime selectedDate = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 430,
-      height: 1663,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(color: Color(0xFFEEEEEE)),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 24,
-            top: 293,
-            child: Container(
-              width: 379,
-              height: 206,
-              decoration: ShapeDecoration(
-                color: Color(0xFFF8F8F8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+    return CupertinoPageScaffold(
+      backgroundColor: const Color.fromRGBO(238, 238, 238, 1.0),
+      child: CustomScrollView(
+        slivers: <Widget>[
+          CupertinoSliverNavigationBar(
+            backgroundColor: CupertinoColors.extraLightBackgroundGray,
+            largeTitle: const Text(
+              'New Post',
+              style: TextStyle(
+                letterSpacing: -1.36,
+              ),
+            ),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(CupertinoIcons.clear, color: CupertinoColors.black),
+              onPressed: () {
+                // add onPressed functionality
+              }      
+            ),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Text(
+                'Save',
+                style: TextStyle(
+                  color: Color(0xFF337586), // Your custom color
                 ),
+              ),
+              onPressed: () {
+                //Add your onPressed functionality here
+              },
+            ),
+            border: const Border(bottom: BorderSide.none),
+          ),
+          
+          //Title text
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(left: 17.0, top: 10.0),
+              child: Text(
+                "Title",
               ),
             ),
           ),
-          Positioned(
-            left: 24,
-            top: 190,
-            child: Container(
-              width: 379,
-              height: 56,
-              decoration: ShapeDecoration(
-                color: Color(0xFFF8F8F8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 125,
-            top: 633,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 69, vertical: 31),
-              clipBehavior: Clip.antiAlias,
-              decoration: ShapeDecoration(
-                color: Color(0xFFF8F8F8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'No Alt Text Entered',
-                    style: TextStyle(
-                      color: Color(0xFFA1A1A1),
-                      fontSize: 16,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w500,
-                      height: 0,
-                      letterSpacing: -0.32,
-                    ),
+
+          //Title input field
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0), // Adjust padding as needed
+              child: CupertinoTextField(
+                padding: EdgeInsets.all(10.0),
+                placeholder: 'Enter a title', // Placeholder text
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: CupertinoColors.white,
+                    width: 1.0,
                   ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            left: 24,
-            top: 265,
-            child: Text(
-              'Description',
-              style: TextStyle(
-                color: Color(0xFF222222),
-                fontSize: 16,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                height: 0,
-                letterSpacing: -0.32,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 24,
-            top: 159,
-            child: Text(
-              'Title',
-              style: TextStyle(
-                color: Color(0xFF222222),
-                fontSize: 16,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                height: 0,
-                letterSpacing: -0.32,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 128,
-            top: 386,
-            child: Text(
-              'No Description Entered',
-              style: TextStyle(
-                color: Color(0xFFA1A1A1),
-                fontSize: 16,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w500,
-                height: 0,
-                letterSpacing: -0.32,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 24,
-            top: 36,
-            child: Container(
-              width: 24,
-              height: 24,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(),
-              child: Stack(
-                children: [
-                  // Add child widgets for this stack
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            left: 24,
-            top: 605,
-            child: Text(
-              'Photo',
-              style: TextStyle(
-                color: Color(0xFF222222),
-                fontSize: 16,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                height: 0,
-                letterSpacing: -0.32,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 125,
-            top: 605,
-            child: Text(
-              'Alt Text',
-              style: TextStyle(
-                color: Color(0xFF222222),
-                fontSize: 16,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                height: 0,
-                letterSpacing: -0.32,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 24,
-            top: 926,
-            child: Text(
-              'Expiration Date',
-              style: TextStyle(
-                color: Color(0xFF222222),
-                fontSize: 16,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                height: 0,
-                letterSpacing: -0.32,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 24,
-            top: 1529,
-            child: Text(
-              'Pickup Time',
-              style: TextStyle(
-                color: Color(0xFF222222),
-                fontSize: 16,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                height: 0,
-                letterSpacing: -0.32,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 24,
-            top: 1145,
-            child: Text(
-              'Pickup Location',
-              style: TextStyle(
-                color: Color(0xFF222222),
-                fontSize: 16,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-                height: 0,
-                letterSpacing: -0.32,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 24,
-            top: 633,
-            child: Container(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 10),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(),
-                    child: Stack(
-                      children: [
-                        // Add child widgets for this stack
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            left: 24,
-            top: 1459,
-            child: Container(
-              width: 382,
-              height: 43,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-              clipBehavior: Clip.antiAlias,
-              decoration: ShapeDecoration(
-                color: Color(0xFFF8F8F8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10.0),
+                  color: CupertinoColors.white,
                 ),
               ),
-              // Add child widgets for this container
             ),
           ),
+
+          //Description text
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(left: 17.0, top: 10.0),
+              child: Text(
+                "Description",
+              ),
+            ),
+          ),
+
+          //Description input field
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0), // Adjust padding as needed
+              child: CupertinoTextField(
+                padding: EdgeInsets.symmetric(vertical: 40.0, horizontal: 10.0),
+                placeholder: 'No Description Entered', // Placeholder text
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: CupertinoColors.white,
+                    width: 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(10.0),
+                  color: CupertinoColors.white,
+                ),
+              ),
+            ),
+          ),
+
+          //Add photo picker and alt text field
+          
+
+          //Allergens text
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(left: 17.0, top: 10.0),
+              child: Text(
+                "Allergens",
+              ),
+            ),
+          ),
+
+          //Allergens search bar
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(left: 17.0, top: 10.0, right: 17.0),
+              child: CupertinoSearchTextField(
+                padding: EdgeInsets.all(10.0),
+                placeholder: 'Search',
+                onSubmitted: (String value) {
+                  // Handle search submission
+                },
+                backgroundColor: CupertinoColors.white,
+              ),
+            ),
+          ),
+
+          //Expiration Date
+          SliverToBoxAdapter(
+            child: Container( 
+              height: 80,
+              child: Padding(
+                padding: EdgeInsets.only(left: 17.0, right: 12.0, top: 10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    
+                    // First widget (Expiration date text)
+                    const Text(
+                      'Expiration Date',
+                    ),
+                    
+                    SizedBox(width: 5.0), // Adjust spacing between the widgets
+
+                    // Second widget (Date picker for expiration date)
+                    Container(
+                      width: 268,
+                      child: CupertinoDatePicker(
+                        mode: CupertinoDatePickerMode.date,
+                        initialDateTime: selectedDate,
+                        onDateTimeChanged: (DateTime newDate) {
+                          setState(() {
+                            selectedDate = newDate;
+                          });
+                        },
+                      ),     
+                    )  
+                  ],
+                ),
+              ),
+            )
+          ),
+
         ],
       ),
     );
   }
 }
+ 
+  
 
 
