@@ -141,3 +141,35 @@ N/A.
 
 ### Tasks in progress (from Project Board)
 - Test for the signup mock.
+
+---
+
+### Week 10: Monday 6th Nov 2023 - Sunday 12th Nov 2023
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/Week10_dhruv.png)
+
+#### Recap of personal goals
+- Assisted in planning out our features for the upcoming milestone.
+- prioritized the tasks to be done
+- started working on the UI for main page (home page)
+- writing the test for UI home page
+- Completed the weekly logs
+- Completed individual log
+
+
+### Tasks completed (from Project Board)
+
+- Main view food item page UI
+- Widget test for the item page UI
+- Complete week 10 weekly log
+- Complete week 10 individual log
+- Assisted in planning out the features left for the milestone and the tasks associated with them.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+- No task currently in progress as all have been completed.
+
+### Additional Information
+- N/A.
