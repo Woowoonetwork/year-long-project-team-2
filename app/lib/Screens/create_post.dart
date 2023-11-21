@@ -1,5 +1,6 @@
 // create_post.dart
 // a page that allows users to create a new post
+import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -31,9 +32,17 @@ class _CreatePostPageState extends State<CreatePostScreen> {
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
               child: const Icon(CupertinoIcons.clear, color: CupertinoColors.black),
-              onPressed: () {
+              onPressed: () async{
                 // add onPressed functionality
-                Navigator.of(context).pop();
+                //Navigator.pop(context);
+                //Navigator.of(context).pop();
+                // Show a confirmation dialog
+                bool shouldPop = await showConfirmationDialog(context);
+
+                // Pop the screen only if the user confirms
+                if (shouldPop) {
+                  Navigator.of(context).pop();
+                }
               }      
             ),
             trailing: CupertinoButton(
@@ -314,4 +323,40 @@ class _CreatePostPageState extends State<CreatePostScreen> {
       ),
     );
   }
+}
+
+Future<bool> showConfirmationDialog(BuildContext context) async {
+  bool? result = await showCupertinoDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return CupertinoAlertDialog(
+        title: const Text('Confirm Exit'),
+        content: const Text('Are you sure you want to discard your changes?'),
+        actions: <Widget>[
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.pop(context, false); // User doesn't want to exit
+            },
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.pop(context, true); // User confirms exit
+              //Navigator.of(context, rootNavigator: true).pop(context);
+              //Navigator.popUntil(context, ModalRoute.withName('/'));
+              //  Navigator.pushReplacement(
+              //   context,
+              //   CupertinoPageRoute(builder: (context) => HomeScreen()),
+              // );
+              
+            },
+            isDestructiveAction: true,
+            child: const Text('Discard'),
+          ),
+        ],
+      );
+    },
+  );
+
+  return result ?? false; // Use false if result is null
 }
