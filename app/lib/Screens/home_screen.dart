@@ -6,8 +6,35 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ResponsivePage(),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            _buildBottomButton(Icons.home, 'Home'),
+            _buildBottomButton(Icons.search, 'Search'),
+            _buildBottomButton(Icons.more_horiz, 'More'),
+            _buildBottomButton(Icons.settings, 'Settings'),
+            _buildBottomButton(Icons.person, 'Profile'),
+          ],
+        ),
+      ),
     );
   }
+}
+
+Widget _buildBottomButton(IconData icon, String label) {
+  return TextButton(
+    onPressed: () {
+      // Implement your button functionality here
+    },
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(icon),
+        Text(label, style: TextStyle(fontSize: 12)),
+      ],
+    ),
+  );
 }
 
 class ResponsivePage extends StatelessWidget {
