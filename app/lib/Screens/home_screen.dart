@@ -11,9 +11,9 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             _buildBottomButton(Icons.home, 'Home'),
-            _buildBottomButton(Icons.search, 'Search'),
-            _buildBottomButton(Icons.more_horiz, 'More'),
-            _buildBottomButton(Icons.settings, 'Settings'),
+            _buildBottomButton(Icons.map, 'Map'),
+            _buildBottomButton(Icons.add_box, 'New Post'),
+            _buildBottomButton(Icons.archive, 'Archive'),
             _buildBottomButton(Icons.person, 'Profile'),
           ],
         ),
