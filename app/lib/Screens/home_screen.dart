@@ -152,16 +152,16 @@ class ResponsivePage extends StatelessWidget {
             width: double.infinity,
             height: width * 0.9 * (110 / 382),
             decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("./assets/images/chicken_rice.jpeg"),
-                fit: BoxFit.cover,
-              ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(14),
-                topRight: Radius.circular(14),
-              ),
-            ),
+                //image: DecorationImage(
+                //image: ("./assets/images/chicken_rice.jpeg"),
+                // fit: BoxFit.cover,
+                ),
+            //borderRadius: BorderRadius.only(
+            // topLeft: Radius.circular(14),
+            //topRight: Radius.circular(14),
           ),
+          // ),
+          //  ),
           Padding(
             padding: EdgeInsets.all(8.0),
             child: Column(
