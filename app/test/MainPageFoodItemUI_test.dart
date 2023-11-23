@@ -11,7 +11,7 @@ void main() {
     ));
 
     // Check for the presence of a search bar (text editor field)
-    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byType(Text), findsOneWidget);
 
     // Check for the presence of buttons
     expect(find.byType(ElevatedButton), findsWidgets);

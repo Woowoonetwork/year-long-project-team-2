@@ -153,7 +153,7 @@ class ResponsivePage extends StatelessWidget {
             height: width * 0.9 * (110 / 382),
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage("https://via.placeholder.com/382x110"),
+                image: AssetImage("./assets/images/chicken_rice.jpeg"),
                 fit: BoxFit.cover,
               ),
               borderRadius: BorderRadius.only(
