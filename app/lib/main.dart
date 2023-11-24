@@ -9,6 +9,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/auth_wrapper.dart';
+import 'auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   // Initialize Firebase
@@ -31,17 +33,19 @@ class FoodHoodApp extends StatelessWidget {
             return CupertinoPageRoute(
               builder: (context) => HomeScreen(), // Root route
             );
-          // case '/signup':
-          //   return CupertinoPageRoute(
-          //     builder: (context) => RegistrationScreen(), // Signup route
-          //   );
-          // case '/signin':
-          //   return CupertinoPageRoute(
-          //     builder: (context) => LogInScreen(), // Signin route
-          //   );
+          case '/signup':
+            return CupertinoPageRoute(
+              builder: (context) => RegistrationScreen(
+                  auth: AuthService(FirebaseAuth.instance)), // Signup route
+            );
+          case '/signin':
+            return CupertinoPageRoute(
+              builder: (context) => LogInScreen(), // Signin route
+            );
           case '/home':
             return CupertinoPageRoute(
-              builder: (context) => HomeScreen(), // Home route
+              builder: (context) =>
+                  HomeScreen(), // Home screen route (after signin)
             );
           default:
             return null;

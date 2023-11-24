@@ -109,11 +109,7 @@ Widget buildGoogleSignInButton() {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.network(
-            'http://pngimg.com/uploads/google/google_PNG19635.png',
-            width: 20,
-            height: 20,
-          ),
+          Image.asset('assets/images/google.png', width: 20, height: 20),
           const SizedBox(width: 2),
           const Text(
             'Sign in with Google',
