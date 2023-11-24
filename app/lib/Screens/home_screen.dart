@@ -6,18 +6,18 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ResponsivePage(),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            _buildBottomButton(Icons.home, 'Home'),
-            _buildBottomButton(Icons.map, 'Map'),
-            _buildBottomButton(Icons.add_box, 'New Post'),
-            _buildBottomButton(Icons.archive, 'Archive'),
-            _buildBottomButton(Icons.person, 'Profile'),
-          ],
-        ),
-      ),
+      // bottomNavigationBar: BottomAppBar(
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //     children: <Widget>[
+      //       _buildBottomButton(Icons.home, 'Home'),
+      //       _buildBottomButton(Icons.map, 'Map'),
+      //       _buildBottomButton(Icons.add_box, 'New Post'),
+      //       _buildBottomButton(Icons.archive, 'Archive'),
+      //       _buildBottomButton(Icons.person, 'Profile'),
+      //     ],
+      //   ),
+      // ),
     );
   }
 }
