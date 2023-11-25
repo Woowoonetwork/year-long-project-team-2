@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'orders_sheet.dart'; // Make sure this path is correct
 import '../Components/profile_card.dart'; // Make sure this path is correct
+import 'package:FoodHood/Screens/settings_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   final TextEditingController textController = TextEditingController();
@@ -39,6 +40,11 @@ class AccountScreen extends StatelessWidget {
               ),
               onPressed: () {
                 // TODO: Add your onPressed functionality here
+                Navigator.of(context).push(
+                  CupertinoPageRoute(
+                    builder: (context) => SettingsScreen(),
+                  ),
+                );
               },
             ),
             border: Border(bottom: BorderSide.none),
