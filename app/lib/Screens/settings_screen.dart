@@ -37,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       
       child: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
+        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 15.0),
         child: Column(
           children: [
             //Display the profile
@@ -45,9 +45,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             SizedBox(height: 50),
 
-            // Push Notifications
+            //Push Notifications
             Padding(
-              padding: EdgeInsets.only(left: 24.0, right:17.0),
+              padding: EdgeInsets.only(left: 20.0, right:17.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -68,10 +68,135 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
 
-            // Add more settings rows as needed
+            //Accessibility Button
+            Padding(
+              padding: EdgeInsets.all(17.0),
+              child: AccessibilityButton(),
+            ),
+            
+            //Help Button
+            Padding(
+              padding: EdgeInsets.only(left:17.0, right: 17.0),
+              child: HelpButton(),
+            ),
+
+            //Sign out Button
+            Padding(
+              padding: EdgeInsets.all(17.0),
+              child: SignOutButton(),
+            ),
 
           ],
         ),
+      ),
+    );
+  }
+}
+
+class AccessibilityButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      onPressed: () {
+        // Add the button functionality here
+      },
+      color: CupertinoColors.white,
+      borderRadius: BorderRadius.circular(23),
+      padding: EdgeInsets.all(16.0),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(CupertinoIcons.eye, color: CupertinoColors.black),
+              SizedBox(width: 15.0), // Adjust the spacing between icon and text
+              Text(
+                'Accessibility',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: CupertinoColors.black,
+                ),
+              ),
+            ],
+          ),
+          Icon(
+            CupertinoIcons.forward,
+            color: CupertinoColors.black,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class HelpButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      onPressed: () {
+        // Add the button functionality here
+      },
+      color: CupertinoColors.white,
+      borderRadius: BorderRadius.circular(23),
+      padding: EdgeInsets.all(16.0),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(CupertinoIcons.question_circle, color: CupertinoColors.black),
+              SizedBox(width: 15.0), // Adjust the spacing between icon and text
+              Text(
+                'Help',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: CupertinoColors.black,
+                ),
+              ),
+            ],
+          ),
+          Icon(
+            CupertinoIcons.forward,
+            color: CupertinoColors.black,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SignOutButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      onPressed: () {
+        // Add the button functionality here
+      },
+      color: CupertinoColors.white,
+      borderRadius: BorderRadius.circular(23),
+      padding: EdgeInsets.all(16.0),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(CupertinoIcons.square_arrow_right, color: CupertinoColors.black),
+              SizedBox(width: 15.0), // Adjust the spacing between icon and text
+              Text(
+                'Sign out',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: CupertinoColors.black,
+                ),
+              ),
+            ],
+          ),
+          Icon(
+            CupertinoIcons.forward,
+            color: CupertinoColors.black,
+          ),
+        ],
       ),
     );
   }
