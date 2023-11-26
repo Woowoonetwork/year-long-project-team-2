@@ -34,6 +34,94 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 16), // Add some spacing before the text
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: CupertinoButton(
+                          child: Text(
+                            'Button 1',
+                            style: TextStyle(fontSize: 12), // Smaller font size
+                          ),
+                          color: CupertinoColors.activeBlue,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                          borderRadius: BorderRadius.circular(20),
+                          onPressed: () {
+                            // Button 1 action
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: CupertinoButton(
+                          child: Text(
+                            'Button 2',
+                            style: TextStyle(fontSize: 12), // Smaller font size
+                          ),
+                          color: CupertinoColors.activeBlue,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                          borderRadius: BorderRadius.circular(20),
+                          onPressed: () {
+                            // Button 2 action
+                          },
+                        ),
+                      ),
+                      // Add more buttons as needed
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: CupertinoButton(
+                          child: Text(
+                            'Button 3',
+                            style: TextStyle(fontSize: 12), // Smaller font size
+                          ),
+                          color: CupertinoColors.activeBlue,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                          borderRadius: BorderRadius.circular(20),
+                          onPressed: () {
+                            // Button 2 action
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: CupertinoButton(
+                          child: Text(
+                            'Button 4',
+                            style: TextStyle(fontSize: 12), // Smaller font size
+                          ),
+                          color: CupertinoColors.activeBlue,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                          borderRadius: BorderRadius.circular(20),
+                          onPressed: () {
+                            // Button 2 action
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: CupertinoButton(
+                          child: Text(
+                            'Button 5',
+                            style: TextStyle(fontSize: 12), // Smaller font size
+                          ),
+                          color: CupertinoColors.activeBlue,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                          borderRadius: BorderRadius.circular(20),
+                          onPressed: () {
+                            // Button 2 action
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 CupertinoButton(
                   child: Text('Log Out'),
                   color: CupertinoColors
