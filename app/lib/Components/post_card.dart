@@ -15,6 +15,8 @@ class PostCard extends StatelessWidget {
             // _buildImageSection(),
             _buildTitleSection(),
             _buildTagSection(),
+            Spacer(),
+
             _buildOrderInfoSection(),
           ],
         ),

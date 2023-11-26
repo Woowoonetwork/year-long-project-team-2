@@ -42,10 +42,10 @@ class HomeScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: CupertinoButton(
                           child: Text(
-                            'Button 1',
+                            'All',
                             style: TextStyle(fontSize: 12), // Smaller font size
                           ),
-                          color: CupertinoColors.activeBlue,
+                          color: Color.fromARGB(255, 21, 136, 102),
                           padding:
                               EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                           borderRadius: BorderRadius.circular(20),
@@ -58,10 +58,10 @@ class HomeScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: CupertinoButton(
                           child: Text(
-                            'Button 2',
+                            'Vegan',
                             style: TextStyle(fontSize: 12), // Smaller font size
                           ),
-                          color: CupertinoColors.activeBlue,
+                          color: Color.fromARGB(255, 214, 118, 131),
                           padding:
                               EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                           borderRadius: BorderRadius.circular(20),
@@ -75,10 +75,10 @@ class HomeScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: CupertinoButton(
                           child: Text(
-                            'Button 3',
+                            'Italian',
                             style: TextStyle(fontSize: 12), // Smaller font size
                           ),
-                          color: CupertinoColors.activeBlue,
+                          color: Color.fromARGB(255, 243, 28, 179),
                           padding:
                               EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                           borderRadius: BorderRadius.circular(20),
@@ -91,10 +91,10 @@ class HomeScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: CupertinoButton(
                           child: Text(
-                            'Button 4',
+                            'Halal',
                             style: TextStyle(fontSize: 12), // Smaller font size
                           ),
-                          color: CupertinoColors.activeBlue,
+                          color: Color.fromARGB(255, 116, 186, 243),
                           padding:
                               EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                           borderRadius: BorderRadius.circular(20),
@@ -107,10 +107,26 @@ class HomeScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: CupertinoButton(
                           child: Text(
-                            'Button 5',
+                            'Vegetarian',
                             style: TextStyle(fontSize: 12), // Smaller font size
                           ),
-                          color: CupertinoColors.activeBlue,
+                          color: Color.fromRGBO(233, 118, 11, 1),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                          borderRadius: BorderRadius.circular(20),
+                          onPressed: () {
+                            // Button 2 action
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: CupertinoButton(
+                          child: Text(
+                            'Indian',
+                            style: TextStyle(fontSize: 12), // Smaller font size
+                          ),
+                          color: Color.fromARGB(255, 86, 204, 240),
                           padding:
                               EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                           borderRadius: BorderRadius.circular(20),
