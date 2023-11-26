@@ -1,9 +1,11 @@
 // home_screen.dart
 // a page that displays the post feeds
+import 'package:FoodHood/Components/post_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import '../components.dart'; // Ensure this is the correct path to component.dart
 import '../Components/order_card.dart';
+import '../Components/post_card.dart';
 
 class HomeScreen extends StatelessWidget {
   final TextEditingController textController =
@@ -42,7 +44,7 @@ class HomeScreen extends StatelessWidget {
                   },
                 ),
 
-                OrderCard()
+                PostCard()
               ],
             ),
           ),
