@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 
 class ProfileCard extends StatelessWidget {
+  final VoidCallback onEditProfile;
+
+  ProfileCard({required this.onEditProfile});
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -22,16 +26,14 @@ class ProfileCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Container(
-                width: 70,
-                height: 70,
-                padding: const EdgeInsets.all(16),
-                margin: EdgeInsets.only(right: 16),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey2,
-                  borderRadius: BorderRadius.circular(40),
+              ClipOval(
+                child: Image.asset("assets/images/sampleProfile.png", // Replace with profile image
+                  width: 70,
+                  height: 70,
+                  fit: BoxFit.cover, // This is important to keep the image aspect ratio
                 ),
               ),
+              SizedBox(width: 16), // For spacing between image and text
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,9 +77,7 @@ class ProfileCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             minSize: 44, // Minimum tap area size
             padding: const EdgeInsets.symmetric(vertical: 16),
-            onPressed: () {
-              // TODO: Add your onTap functionality here
-            },
+            onPressed: onEditProfile, // Use the passed callback here
             child: Text(
               'Edit FoodHood Profile',
               style: TextStyle(

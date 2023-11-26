@@ -1,27 +1,48 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
+
 class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 382,
-        height: 220,
-        decoration: _buildBoxDecoration(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildImageSection(),
-            _buildTitleSection(),
-            _buildTagSection(),
-            _buildOrderInfoSection(),
-          ],
+    return SizedBox(
+      width: 382,
+      height: 220,
+      child: CupertinoContextMenu(
+        actions: <Widget>[
+          CupertinoContextMenuAction(
+            child: const Text('Edit Order'),
+            onPressed: () {
+              // Implement the Edit Order functionality
+              Navigator.pop(context);
+            },
+          ),
+          CupertinoContextMenuAction(
+            child: const Text('Cancel Order'),
+            isDestructiveAction: true,
+            onPressed: () {
+              // Implement the Cancel Order functionality
+              Navigator.pop(context);
+            },
+          ),
+        ],
+        child: Center(
+          child: Container(
+            decoration: _buildBoxDecoration(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildImageSection(),
+                _buildTitleSection(),
+                _buildTagSection(),
+                _buildOrderInfoSection(),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
-
   BoxDecoration _buildBoxDecoration() {
     return BoxDecoration(
       color: Color(0xFFF8F8F8),
@@ -39,15 +60,13 @@ class OrderCard extends StatelessWidget {
   Widget _buildImageSection() {
   return ClipRRect(
     borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-    child: Image.asset(
-      "../../assets/images/382x110.png", // Ensure this image is available in your assets
+    child: Image.asset('assets/images/samplePlaceHolderOrder.png', // Replace with order image
       width: 382,
       height: 110,
       fit: BoxFit.fill,
     ),
   );
 }
-
 
   Widget _buildTitleSection() {
     return Padding(
