@@ -168,15 +168,7 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                CupertinoButton(
-                  child: Text('Log Out'),
-                  color: CupertinoColors
-                      .activeBlue, // Choose a color for your button
-                  onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-                    // Now sign in again to refresh the user data
-                  },
-                ),
+                SizedBox(height: 16),
 
                 PostCard()
               ],
