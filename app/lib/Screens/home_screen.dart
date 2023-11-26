@@ -3,6 +3,7 @@
 import 'package:FoodHood/Components/post_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../components.dart'; // Ensure this is the correct path to component.dart
 import '../Components/order_card.dart';
 import '../Components/post_card.dart';
@@ -24,15 +25,43 @@ class HomeScreen extends StatelessWidget {
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: CupertinoSearchTextField(
-                    // search bar
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    style: const TextStyle(fontSize: 18),
-                    controller: textController,
-                    placeholder: 'Search',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: CupertinoSearchTextField(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8),
+                          style: const TextStyle(fontSize: 18),
+                          controller: textController,
+                          placeholder: 'Search',
+                        ),
+                      ),
+                      SizedBox(
+                          width:
+                              10), // Space between search bar and filter button
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 231, 228, 228),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            child: Icon(CupertinoIcons.ellipsis_vertical,
+                                size: 24),
+                            onPressed: () {
+                              // Filter button action
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+
                 SizedBox(height: 16), // Add some spacing before the text
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
