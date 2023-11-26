@@ -3,6 +3,8 @@
 
 import 'package:flutter/cupertino.dart';
 import '../Components/profile_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:FoodHood/Screens/welcome_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -170,8 +172,10 @@ class SignOutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoButton(
-      onPressed: () {
+      onPressed: () async {
         // Add the button functionality here
+        //await FirebaseAuth.instance.signOut();
+        showSignOutConfirmationDialog(context);
       },
       color: CupertinoColors.white,
       borderRadius: BorderRadius.circular(23),
@@ -198,6 +202,41 @@ class SignOutButton extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // Function to show the confirmation dialog
+  void showSignOutConfirmationDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text('Confirm Sign Out'),
+          content: Text('Are you sure you want to sign out?'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            CupertinoDialogAction(
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context).pop(); // Close the dialog
+                // Redirect to the welcome screen upon signing out
+                Navigator.of(context).pushReplacement(
+                  CupertinoPageRoute(
+                    builder: (context) => WelcomeScreen(),
+                  ),
+                );
+              },
+              isDestructiveAction: true,
+              child: Text('Sign Out'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
