@@ -1,8 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
-
 class OrderCard extends StatelessWidget {
+  final String imageLocation;
+  final String title;
+  final List<String> tags;
+  final String orderInfo;
+
+  OrderCard({
+    required this.imageLocation,
+    required this.title,
+    required this.tags,
+    required this.orderInfo,
+  });
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -11,14 +22,26 @@ class OrderCard extends StatelessWidget {
       child: CupertinoContextMenu(
         actions: <Widget>[
           CupertinoContextMenuAction(
-            child: const Text('Edit Order'),
+            child: Text(
+              'Edit Order',
+              style: TextStyle(
+                letterSpacing: -0.5,
+              ),
+            ),
+            trailingIcon: CupertinoIcons.pencil,
             onPressed: () {
               // Implement the Edit Order functionality
               Navigator.pop(context);
             },
           ),
           CupertinoContextMenuAction(
-            child: const Text('Cancel Order'),
+            child: Text(
+              'Cancel Order',
+              style: TextStyle(
+                letterSpacing:  -0.5,
+              ),
+            ),
+            trailingIcon: CupertinoIcons.trash,
             isDestructiveAction: true,
             onPressed: () {
               // Implement the Cancel Order functionality
@@ -43,6 +66,7 @@ class OrderCard extends StatelessWidget {
       ),
     );
   }
+
   BoxDecoration _buildBoxDecoration() {
     return BoxDecoration(
       color: Color(0xFFF8F8F8),
@@ -58,21 +82,22 @@ class OrderCard extends StatelessWidget {
   }
 
   Widget _buildImageSection() {
-  return ClipRRect(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-    child: Image.asset('assets/images/samplePlaceHolderOrder.png', // Replace with order image
-      width: 382,
-      height: 110,
-      fit: BoxFit.fill,
-    ),
-  );
-}
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+      child: Image.asset(
+        imageLocation, // Use the provided image location
+        width: 382,
+        height: 110,
+        fit: BoxFit.cover, // Crop image to scale
+      ),
+    );
+  }
 
   Widget _buildTitleSection() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Text(
-        'Poutine',
+        title, // Use the provided title
         style: TextStyle(
           color: CupertinoColors.black,
           fontSize: 18,
@@ -83,14 +108,29 @@ class OrderCard extends StatelessWidget {
   }
 
   Widget _buildTagSection() {
+    const double horizontalSpacing = 7.0; // Adjust the spacing as needed
+    List<Color> tagColors = [
+      Color(0x7FF8CE53), // Color for the first tag
+      Color(0x7FFF8C5B), // Color for the second tag, and so on
+      // Add more colors for additional tags
+    ];
+
+    if (tags.length != tagColors.length) {
+      throw ArgumentError("Number of tags and tagColors must match.");
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Row(
-        children: [
-          _buildTag('GL Free', Color(0x7FF8CE53)),
-          const SizedBox(width: 7),
-          _buildTag('PVC Free', Color(0x7FFF8C5B)),
-        ],
+        children: List.generate(tags.length, (index) {
+          return Row(
+            children: [
+              _buildTag(tags[index],
+                  tagColors[index]), // Use the corresponding color for each tag
+              SizedBox(width: horizontalSpacing), // Add spacing here
+            ],
+          );
+        }),
       ),
     );
   }
@@ -117,7 +157,7 @@ class OrderCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Text(
-        'Ordered on September 21, 2023',
+        orderInfo, // Use the provided orderInfo
         style: TextStyle(
           color: CupertinoColors.black.withOpacity(0.6),
           fontSize: 12,

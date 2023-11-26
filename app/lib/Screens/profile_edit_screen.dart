@@ -124,22 +124,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget _buildProfileImageUploader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 80,
-            height: 80,
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ClipOval(
+          child: Container(
+            width: 70,
+            height: 70,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(1000),
               image: DecorationImage(
                 image: AssetImage("assets/images/sampleProfile.png"),
                 fit: BoxFit.cover,
               ),
             ),
           ),
+        ),
           SizedBox(width: 16),
           Expanded(
             child: ClipRRect(
@@ -148,7 +149,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 color: CupertinoColors.systemBackground,
                 padding: EdgeInsets.zero,
                 child: Container(
-                  height: 80,
+                  height: 70,
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -161,7 +162,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         style: TextStyle(
                           fontSize: 16,
                           color: CupertinoColors.label,
-                          letterSpacing: -1.20,
+                          letterSpacing: -1.00,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

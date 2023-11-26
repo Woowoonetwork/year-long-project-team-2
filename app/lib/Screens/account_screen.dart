@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:FoodHood/Components/order_card.dart'; // Correct path for order_card.dart
-import 'package:FoodHood/Components/profile_card.dart'; // Correct path for profile_card.dart
-import 'package:FoodHood/Screens/profile_edit_screen.dart'; // Correct path for profile_edit_screen.dart
+import 'package:feather_icons/feather_icons.dart';
+import 'package:FoodHood/Components/profile_card.dart';
+import 'package:FoodHood/Components/order_card.dart';
+import 'package:FoodHood/Screens/profile_edit_screen.dart';
 
 class AccountScreen extends StatefulWidget {
   @override
@@ -11,6 +12,23 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   int segmentedControlGroupValue =
       0; // Initialize with 'Active Orders' selected.
+
+  List<OrderCard> activeOrders = [
+    OrderCard(
+      imageLocation: 'assets/images/sampleFoodPic.png',
+      title: 'Poutine',
+      tags: ['GL Free', 'PVC Free'],
+      orderInfo: 'Ordered on September 21, 2023',
+    ),
+    OrderCard(
+      imageLocation: 'assets/images/sampleFoodPic.png',
+      title: 'Burger',
+      tags: ['Vegan', 'Organic'],
+      orderInfo: 'Ordered on September 22, 2023',
+    ),
+    // Add more OrderCard widgets as needed
+  ];
+  List<OrderCard> pastOrders = [];
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +49,10 @@ class _AccountScreenState extends State<AccountScreen> {
                   onEditProfile: () => _navigateToEditProfile(context))),
           _buildOrdersSectionTitle(),
           _buildSegmentControl(myTabs),
-          _buildOrdersContent(segmentedControlGroupValue),
+          SliverPadding(
+            padding: const EdgeInsets.only(bottom: 100.0),
+            sliver: _buildOrdersContent(segmentedControlGroupValue),
+          ),
         ],
       ),
     );
@@ -76,7 +97,7 @@ class _AccountScreenState extends State<AccountScreen> {
   SliverToBoxAdapter _buildSegmentControl(Map<int, Widget> myTabs) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
         child: CupertinoSlidingSegmentedControl<int>(
           children: myTabs,
           onValueChanged: (int? newValue) {
@@ -93,21 +114,26 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildOrdersContent(int segmentedValue) {
     switch (segmentedValue) {
       case 0:
-        return _buildActiveOrdersSliver();
+        // Replace this with the logic to check if there are active orders
+        if (activeOrders.isNotEmpty) {
+          return _buildActiveOrdersSliver(activeOrders);
+        } else {
+          return _buildPlaceholderText();
+        }
       case 1:
-        return _buildPastOrdersSliver();
+        // Replace this with the logic to check if there are past orders
+        if (pastOrders.isNotEmpty) {
+          return _buildPastOrdersSliver(pastOrders);
+        } else {
+          return _buildPlaceholderText();
+        }
       default:
         return SliverToBoxAdapter(
             child: Text('Content for the selected segment'));
     }
   }
 
-  SliverList _buildActiveOrdersSliver() {
-    List<Widget> activeOrders = [
-      OrderCard(),
-      // Add more OrderCard widgets as needed
-    ];
-
+  SliverList _buildActiveOrdersSliver(List<Widget> activeOrders) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) => Padding(
@@ -119,15 +145,41 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  SliverFillRemaining _buildPastOrdersSliver() {
+  SliverList _buildPastOrdersSliver(List<Widget> activeOrders) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: pastOrders[index],
+        ),
+        childCount: pastOrders.length,
+      ),
+    );
+  }
+
+  SliverFillRemaining _buildPlaceholderText() {
     return SliverFillRemaining(
       hasScrollBody: false, // Prevents the sliver from being scrollable
-      child: Center(
-        child: Text(
-          'Past orders will appear here',
-          style: TextStyle(fontSize: 16),
-          textAlign: TextAlign
-              .center, // This is technically not needed as Center widget will take care of it.
+      child: SizedBox(
+        height: 200, // Set a fixed height here
+        child: Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                FeatherIcons.box,
+                size: 40,
+                color: CupertinoColors.systemGrey,
+              ),
+              SizedBox(
+                  height: 20), // Provides spacing between the icon and text
+              Text(
+                'No orders available',
+                style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
