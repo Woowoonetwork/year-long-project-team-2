@@ -44,14 +44,15 @@ class HomeScreen extends StatelessWidget {
                       Expanded(
                         flex: 1,
                         child: Container(
+                          height: 38,
+                          width: 20,
                           decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 231, 228, 228),
-                            borderRadius: BorderRadius.circular(8),
+                            color: Color.fromARGB(255, 221, 217, 217),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: CupertinoButton(
                             padding: EdgeInsets.zero,
-                            child: Icon(CupertinoIcons.ellipsis_vertical,
-                                size: 24),
+                            child: Icon(CupertinoIcons.sort_down, size: 24),
                             onPressed: () {
                               // Filter button action
                             },
