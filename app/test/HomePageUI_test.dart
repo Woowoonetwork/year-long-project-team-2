@@ -22,5 +22,7 @@ void main() {
     // Check for the presence of a list
     expect(find.byType(CupertinoSearchTextField), findsWidgets);
     // expect(find.byType(ListView), findsOneWidget);
+
+    expect(find.byType(SingleChildScrollView), findsWidgets);
   });
 }
