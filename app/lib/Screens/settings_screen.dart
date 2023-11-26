@@ -17,8 +17,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return CupertinoPageScaffold(
       backgroundColor: const Color.fromRGBO(238, 238, 238, 1.0),
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: Color.fromRGBO(238, 238, 238, 1.0),
-        middle: Text(
+        backgroundColor: const Color.fromRGBO(238, 238, 238, 1.0),
+        middle: const Text(
           'Settings',
           style: TextStyle(
             letterSpacing: -1.36,
@@ -27,13 +27,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
-          child: Icon(CupertinoIcons.arrow_left, color: CupertinoColors.black),
+          child: const Icon(CupertinoIcons.arrow_left, color: CupertinoColors.black),
           onPressed: () async {
             // add onPressed functionality
             Navigator.of(context).pop();
           },
         ),
-        border: Border(bottom: BorderSide.none),
+        border: const Border(bottom: BorderSide.none),
       ),
       
       child: SingleChildScrollView(
