@@ -196,8 +196,8 @@ if(userID!=null){
   await addDocument(
     collectionName: 'user',
     filename: userID,
-    fieldNames: ['firstName', 'lastName', 'province', 'city', 'email'],
-    fieldValues: [_firstNameController.text, _lastNameController.text, _provinceController.text, _cityController.text, _emailController.text],
+    fieldNames: ['firstName', 'lastName', 'province', 'city', 'email', 'itemsSold', 'description'],
+    fieldValues: [_firstNameController.text, _lastNameController.text, _provinceController.text, _cityController.text, _emailController.text, [], ''],
   );
 print("added new user doc");
 }
