@@ -12,7 +12,6 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   int segmentedControlGroupValue =
       0; // Initialize with 'Active Orders' selected.
-
   List<OrderCard> activeOrders = [
     OrderCard(
       imageLocation: 'assets/images/sampleFoodPic.png',
@@ -47,6 +46,8 @@ class _AccountScreenState extends State<AccountScreen> {
           SliverToBoxAdapter(
               child: ProfileCard(
                   onEditProfile: () => _navigateToEditProfile(context))),
+          _buildEditProfileButton(), // New method to create the Edit Profile button
+
           _buildOrdersSectionTitle(),
           _buildSegmentControl(myTabs),
           SliverPadding(
@@ -64,7 +65,9 @@ class _AccountScreenState extends State<AccountScreen> {
       largeTitle: Text('Account', style: TextStyle(letterSpacing: -1.34)),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
-        child: Text('Settings', style: TextStyle(color: Color(0xFF337586))),
+        child: Text('Settings',
+            style: TextStyle(
+                fontWeight: FontWeight.w500, color: Color(0xFF337586))),
         onPressed: () => _navigateToSettings(context),
       ),
       border: Border(bottom: BorderSide.none),
@@ -179,6 +182,31 @@ class _AccountScreenState extends State<AccountScreen> {
                 textAlign: TextAlign.center,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // New method to build the Edit Profile button
+  Widget _buildEditProfileButton() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: CupertinoButton(
+          color: Color(0xFF337586),
+          borderRadius: BorderRadius.circular(10),
+          minSize: 44,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          onPressed: () => _navigateToEditProfile(context),
+          child: Text(
+            'Edit FoodHood Profile',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              letterSpacing: -0.8,
+              color: CupertinoColors.white,
+            ),
           ),
         ),
       ),

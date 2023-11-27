@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io'; // Import Dart's IO library to use File
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditProfilePage extends StatefulWidget {
   @override
@@ -8,30 +10,58 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _aboutMeController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   String _selectedProvince = 'BC';
   String _selectedCity = 'Kelowna';
+  String?  _profileImagePath; // New variable to store the path of the selected profile image
 
-  final List<String> provinces = [
-    'BC',
-    'ON',
-    'QC',
-    'AB',
-    'NS'
-  ]; // Example provinces
-  final Map<String, List<String>> cities = {
-    'BC': ['Vancouver', 'Victoria', 'Kelowna'],
-    'ON': ['Toronto', 'Ottawa', 'Mississauga'],
-    'QC': ['Montreal', 'Quebec City', 'Laval'],
-    'AB': ['Calgary', 'Edmonton', 'Red Deer'],
-    'NS': ['Halifax', 'Sydney', 'Truro'],
-  };
+  @override
+  void initState() {
+    super.initState();
+    fetchProvincesAndCities();
+  }
+
+  void fetchProvincesAndCities() async {
+  FirebaseFirestore.instance.collection('location').doc('rLxaYnbNB4x6Rpvil1Oe').get().then((documentSnapshot) {
+    if (documentSnapshot.exists) {
+      Map<String, dynamic> data = documentSnapshot.get('location');
+      Map<String, List<String>> fetchedCities = {};
+
+      data.forEach((province, citiesList) {
+        // Ensure the citiesList is a List of Strings
+        if (citiesList is List) {
+          fetchedCities[province] = List<String>.from(citiesList);
+        }
+      });
+
+      if (fetchedCities.isNotEmpty) {
+        setState(() {
+          provinces = fetchedCities.keys.toList();
+          cities = fetchedCities;
+          // After fetching, set the initial province and city
+          _selectedProvince = provinces.first;
+          _selectedCity = cities[_selectedProvince]?.first ?? '';
+        });
+      }
+    }
+  }).catchError((error) {
+    // Handle any errors here
+    print("Error fetching data: $error");
+  });
+}
+
+
+
+  List<String> provinces = []; // Updated to be fetched from Firestore
+  Map<String, List<String>> cities = {}; // Updated to be fetched from Firestore
 
   @override
   void dispose() {
-    _fullNameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _aboutMeController.dispose();
     _emailController.dispose();
     super.dispose();
@@ -69,9 +99,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Column(
       children: <Widget>[
         _buildProfileImageUploader(context),
-        _buildTextField('Full Name', 'Jason Bean', _fullNameController),
+
+        Row(
+          children: <Widget>[
+            Expanded(
+              child:
+                  _buildTextField('First Name', 'First Name', _firstNameController),
+            ),
+            Expanded(
+              child: _buildTextField('Last Name', 'Last Name', _lastNameController),
+            ),
+          ],
+        ),
+        // ... The rest of your widgets go here
+
         _buildLargeTextField('About Me', _aboutMeController),
-        _buildTextField('Email', 'Js123@gmail.com', _emailController),
+        _buildTextField('Email', 'Enter Email here', _emailController),
         Row(
           children: <Widget>[
             Expanded(
@@ -124,32 +167,37 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Widget _buildProfileImageUploader(BuildContext context) {
-  return Padding(
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ClipOval(
-          child: Container(
-            width: 70,
-            height: 70,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/sampleProfile.png"),
-                fit: BoxFit.cover,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ClipOval(
+            child: Container(
+              width: 85,
+              height: 85,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  // Use FileImage if an image has been picked, otherwise use AssetImage
+                  image: _profileImagePath != null
+                      ? FileImage(
+                          File(_profileImagePath!)) // Cast the path to a File
+                      : AssetImage("assets/images/sampleProfile.png")
+                          as ImageProvider, // Explicitly cast AssetImage to ImageProvider
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
-        ),
           SizedBox(width: 16),
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: CupertinoButton(
-                color: CupertinoColors.systemBackground,
+                color: CupertinoColors.tertiarySystemBackground,
                 padding: EdgeInsets.zero,
                 child: Container(
-                  height: 70,
+                  height: 80,
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -162,7 +210,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         style: TextStyle(
                           fontSize: 16,
                           color: CupertinoColors.label,
-                          letterSpacing: -1.00,
+                          letterSpacing: -.80,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -195,7 +243,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _buildTextField(
       String label, String placeholder, TextEditingController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -206,7 +254,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   fontWeight: FontWeight.w500)),
           SizedBox(height: 8),
           Container(
-            height: 58,
+            height: 54,
             child: CupertinoTextField(
               controller: controller,
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -243,7 +291,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
           SizedBox(height: 8),
           Container(
-            height: 206, // Fixed height for the container
+            height: 180, // Fixed height for the container
             child: CupertinoTextField(
               controller: controller,
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -427,5 +475,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
       ),
     );
+  }
+
+  void _uploadImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _profileImagePath = image.path; // Update the profile image path
+      });
+    }
   }
 }

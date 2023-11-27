@@ -1,12 +1,37 @@
 import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileCard extends StatelessWidget {
   final VoidCallback onEditProfile;
 
   ProfileCard({required this.onEditProfile});
 
+  String getCurrentUserEmail() {
+    final user = FirebaseAuth.instance.currentUser;
+    return user?.email ?? 'No email found';
+  }
+
+  String getCurrentUserName() {
+    final user = FirebaseAuth.instance.currentUser;
+    return user?.displayName ?? 'FoodHood User';
+  }
+
+  String getCurrentUserPhoto() {
+    final user = FirebaseAuth.instance.currentUser;
+    return user?.photoURL ?? 'assets/images/sampleProfile.png';
+  }
+
+  String getCurrentUserLocation() {
+    final user = FirebaseAuth.instance.currentUser;
+    return 'Location not defined';
+  }
+
   @override
   Widget build(BuildContext context) {
+    String email = getCurrentUserEmail();
+    String name = getCurrentUserName();
+    String photo = getCurrentUserPhoto();
+
     return Column(
       children: [
         Container(
@@ -27,10 +52,12 @@ class ProfileCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               ClipOval(
-                child: Image.asset("assets/images/sampleProfile.png", // Replace with profile image
+                child: Image.asset(
+                  photo,
                   width: 70,
                   height: 70,
-                  fit: BoxFit.cover, // This is important to keep the image aspect ratio
+                  fit: BoxFit
+                      .cover, // This is important to keep the image aspect ratio
                 ),
               ),
               SizedBox(width: 16), // For spacing between image and text
@@ -39,7 +66,7 @@ class ProfileCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Jason Bean',
+                      name,
                       style: TextStyle(
                         color: CupertinoColors.label,
                         fontSize: 24,
@@ -48,7 +75,7 @@ class ProfileCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Js123@gmail.com',
+                      email,
                       style: TextStyle(
                         color: CupertinoColors.secondaryLabel,
                         fontSize: 12,
@@ -56,7 +83,7 @@ class ProfileCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Kelowna, BC',
+                      getCurrentUserLocation(),
                       style: TextStyle(
                         color: CupertinoColors.secondaryLabel,
                         fontSize: 12,
@@ -67,26 +94,6 @@ class ProfileCard extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-        Container(
-          width: double.infinity,
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          child: CupertinoButton(
-            color: Color(0xFF337586),
-            borderRadius: BorderRadius.circular(10),
-            minSize: 44, // Minimum tap area size
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            onPressed: onEditProfile, // Use the passed callback here
-            child: Text(
-              'Edit FoodHood Profile',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.8,
-                color: CupertinoColors.white,
-              ),
-            ),
           ),
         ),
       ],
