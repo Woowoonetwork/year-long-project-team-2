@@ -450,7 +450,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
         ),
         message: Text(
-            'Are you sure you want to delete your $action? You will permanently lose all the data associated with this account.'),
+            'Are you sure you want to $action?'),
         actions: <Widget>[
           CupertinoActionSheetAction(
             child: Text(
