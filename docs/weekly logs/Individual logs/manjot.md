@@ -116,3 +116,73 @@ N/A.
 
 ### Tasks in progress (from Project Board)
 None
+
+##week 10
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/manjot_week10.jpg)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Completed the weekly logs.
+- Implemented logout feature
+- Implemented email verification
+- Updated cloud firestores rules to allow authenticated and authorized users to read/write from the database
+- Error resolution in teammates' code
+
+### Tasks completed (from Project Board)
+
+- Added email verification using a dynamically generated link from a no-reply email of our project
+- Created the logout button and implemented its functionality
+- Rewrote cloud firestore rules on the firebase console
+- Resolved the error to log a user out if a user's information does not exist (and remove cache from app)
+- Manually tested the code and fixed bugs.
+- Complete Week 10 individual log
+- Assisted in planning out the features left for the milestone and the tasks associated with them.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+##week 11 and 12
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/manjotWeek12.jpg)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Completed the weekly logs.
+- Updated cloud firestores rules to allow authenticated and authorized users to read/write from the database more securely
+- Error resolution in teammates' code
+- Created public_page, where a user's public information is viewable
+- Wrote functions to read, write, query and dynamically generate IDs for documents on firestore
+
+### Tasks completed (from Project Board)
+
+- Updated cloud firestore rules on the firebase console
+- Manually tested the code and fixed bugs.
+- Manually tested and fixed bugs in other team members' code
+- Completed Week 12 individual log
+- Assisted in planning out the features left for the milestone and the tasks associated with them.
+- Reviewed other team members' PRs and assigned team members to PRs.
+- Created public_page, where a user's public information is viewable
+- Wrote functions to read, write, query and dynamically generate IDs for documents on firestore
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.

@@ -1,8 +1,8 @@
 // home_screen.dart
-// a page that displays the post feeds
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import '../components.dart'; // Ensure this is the correct path to component.dart
+import 'public_page.dart'; // Import the PublicPage screen
 
 class HomeScreen extends StatelessWidget {
   final TextEditingController textController =
@@ -37,6 +37,20 @@ class HomeScreen extends StatelessWidget {
                   onPressed: () async {
                     await FirebaseAuth.instance.signOut();
                     // Now sign in again to refresh the user data
+                  },
+                ),
+                SizedBox(height: 16), // Add some spacing before the new button
+                CupertinoButton(
+                  child: Text('Flint Carmintail'),
+                  color: CupertinoColors.systemGreen, // Choose a color for your button
+                  onPressed: () {
+                    // Navigate to the PublicPage screen
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => PublicPage(),
+                      ),
+                    );
                   },
                 ),
               ],

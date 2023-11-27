@@ -162,13 +162,101 @@ N/A.
 ### Tasks completed (from Project Board)
 
 - Complete the signup and login feature.
-- Complete team log for Week 8.
+- Complete team log for Week 9.
 - Reviewed other team members' PRs and assigned team members to PRs.
 
 
 ### Tasks in progress (from Project Board)
 
 No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+
+---
+---
+
+## Week 10: Monday 6th Nov 2023 - Sunday 12th Nov 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaWeek10.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Started working on the "create post" feature from the project plan.
+- Completed the widget test for it.
+- Worked on the design code of the "create post" screen.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Create a post UI and widget test.
+    - Completed a widget test for the UI of the screen.
+    - Design code of the "create post screen"
+        - Added various input text fields for various details about the food.
+        - Added "save" and "close" buttons.
+        - Manually tested the code and fixed bugs.
+- Complete Week 10 team log
+- Complete Week 10 individual log
+- Assisted in planning out the features left for the milestone and the tasks associated with them.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Weeks 11 and 12: Monday 13th Nov 2023 - Sunday 26th Nov 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaWeek11and12.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Continued working on the "create post" feature from the project plan.
+- Created the settings page with UI and widget tests and functionality.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Create a post feature.
+    - Modified the widget test for the UI of the screen.
+    - Design code of the "create post screen"
+        - Modified the design to look similar to Figma.
+        - Manually tested the code and fixed bugs.
+    - Functionality
+        - Added functionality to the create post by enabling it to write to firestore.
+- Settings page
+    - Created a widget test for the settings page UI.
+    - Completed the design code for the settings page.
+    - Added functionality to it.
+- Complete Weeks 11 and 12 team log
+- Complete Week 12 individual log
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- Design more tests for the create post feature.
 
 ### Additional Information
 

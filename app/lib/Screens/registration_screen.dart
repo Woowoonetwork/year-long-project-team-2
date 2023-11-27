@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import '../components.dart';
 import '../auth_service.dart';
+import '../firestore_service.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final AuthService auth; // AuthService object
@@ -190,6 +191,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             );
             // User registration successful
             print('User registered');
+String? userID = await widget.auth.getUserId();
+if(userID!=null){
+  await addDocument(
+    collectionName: 'user',
+    filename: userID,
+    fieldNames: ['firstName', 'lastName', 'province', 'city', 'email', 'itemsSold', 'description', 'posts'],
+    fieldValues: [_firstNameController.text, _lastNameController.text, _provinceController.text, _cityController.text, _emailController.text, [], '', []],
+  );
+print("added new user doc");
+}
             Navigator.pushReplacementNamed(context, '/home');
           } catch (e) {
             // Handle registration errors
