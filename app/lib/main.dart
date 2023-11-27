@@ -2,6 +2,7 @@
 // entry point of the app
 
 import 'package:FoodHood/Screens/login_screen.dart';
+import 'package:FoodHood/Screens/navigation_screen.dart';
 import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,13 +12,17 @@ import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/auth_wrapper.dart';
 import 'auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   // Initialize Firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Run the app
-  runApp(FoodHoodApp());
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]) // Restrict orientation to portrait
+      .then((_) {
+    runApp(FoodHoodApp());
+  });
 }
 
 class FoodHoodApp extends StatelessWidget {
@@ -47,6 +52,11 @@ class FoodHoodApp extends StatelessWidget {
               builder: (context) =>
                   HomeScreen(), // Home screen route (after signin)
             );
+          case '/nav':
+            return CupertinoPageRoute(
+              builder: (context) =>
+                  NavigationScreen(selectedIndex: 0, onItemTapped: (index) {}), // Navigation screen route (after signin)
+            );  
           default:
             return null;
         }
