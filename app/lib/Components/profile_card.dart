@@ -2,9 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileCard extends StatelessWidget {
-  final VoidCallback onEditProfile;
 
-  ProfileCard({required this.onEditProfile});
+  ProfileCard();
 
   String getCurrentUserEmail() {
     final user = FirebaseAuth.instance.currentUser;
