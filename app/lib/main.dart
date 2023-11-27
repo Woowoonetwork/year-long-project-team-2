@@ -9,6 +9,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/auth_wrapper.dart';
+import 'auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   // Initialize Firebase
@@ -23,7 +25,8 @@ class FoodHoodApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoApp(
       home: AuthWrapper(), // Use AuthWrapper as the root widget
-      debugShowCheckedModeBanner: false, // Hide the debug banner in Preview mode
+      debugShowCheckedModeBanner:
+          false, // Hide the debug banner in Preview mode
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/':
@@ -32,7 +35,8 @@ class FoodHoodApp extends StatelessWidget {
             );
           case '/signup':
             return CupertinoPageRoute(
-              builder: (context) => RegistrationScreen(), // Signup route
+              builder: (context) => RegistrationScreen(
+                  auth: AuthService(FirebaseAuth.instance)), // Signup route
             );
           case '/signin':
             return CupertinoPageRoute(
@@ -40,7 +44,8 @@ class FoodHoodApp extends StatelessWidget {
             );
           case '/home':
             return CupertinoPageRoute(
-              builder: (context) => HomeScreen(), // Home route
+              builder: (context) =>
+                  HomeScreen(), // Home screen route (after signin)
             );
           default:
             return null;
@@ -49,6 +54,3 @@ class FoodHoodApp extends StatelessWidget {
     );
   }
 }
-
-
-

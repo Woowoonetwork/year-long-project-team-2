@@ -85,7 +85,7 @@ We've been steadily progressing over the week. Here is our auto-generated chart 
 
 ## Test Report
 
-![testReport](testReport.png)
+![testReport](./Test%20Reports/testReport.png)
 
 ## Additional Context
 
