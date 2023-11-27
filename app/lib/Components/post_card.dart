@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class PostCard extends StatelessWidget {
@@ -98,13 +99,33 @@ class PostCard extends StatelessWidget {
   Widget _buildOrderInfoSection() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Text(
-        'Posted by Jason Bean   24 mins ago',
-        style: TextStyle(
-          color: CupertinoColors.black.withOpacity(0.6),
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
+      child: Row(
+        children: [
+          // Image or placeholder
+          Container(
+            width: 24, // Set the width of the image placeholder
+            height: 24, // Set the height of the image placeholder
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.grey, // Placeholder color
+              // Uncomment below and replace 'path/to/your/image' with actual image path
+              // image: DecorationImage(
+              //   image: AssetImage('path/to/your/image'),
+              //   fit: BoxFit.cover,
+              // ),
+            ),
+          ),
+          SizedBox(width: 8), // Space between image and text
+          // Text
+          Text(
+            'Posted by Jason Bean   24 mins ago',
+            style: TextStyle(
+              color: CupertinoColors.black.withOpacity(0.6),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
