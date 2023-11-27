@@ -35,19 +35,19 @@ class FoodHoodApp extends StatelessWidget {
               builder: (context) => FoodPosting(), // Root route
             );
           case '/signup':
-            return CupertinoPageRoute(
-              builder: (context) => RegistrationScreen(
-                  auth: AuthService(FirebaseAuth.instance)), // Signup route
-            );
+            // return CupertinoPageRoute(
+            //   builder: (context) => RegistrationScreen(
+            //       auth: AuthService(FirebaseAuth.instance)), // Signup route
+            // );
           case '/signin':
             //return CupertinoPageRoute(
               //builder: (context) => LogInScreen(), // Signin route
             //);
           case '/home':
-            return CupertinoPageRoute(
-              builder: (context) =>
-                  HomeScreen(), // Home screen route (after signin)
-            );
+            // return CupertinoPageRoute(
+            //   builder: (context) =>
+            //       HomeScreen(), // Home screen route (after signin)
+            // );
           default:
             return CupertinoPageRoute(
               builder: (context) => FoodPosting(), // Root route
