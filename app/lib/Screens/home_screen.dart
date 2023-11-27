@@ -1,19 +1,12 @@
 // home_screen.dart
-<<<<<<< HEAD
 // a page that displays the post feeds
 import 'package:FoodHood/Components/post_card.dart';
-=======
->>>>>>> master
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../components.dart'; // Ensure this is the correct path to component.dart
-<<<<<<< HEAD
 import '../Components/order_card.dart';
 import '../Components/post_card.dart';
-=======
-import 'public_page.dart'; // Import the PublicPage screen
->>>>>>> master
 
 class HomeScreen extends StatelessWidget {
   final TextEditingController textController =
@@ -174,26 +167,9 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-<<<<<<< HEAD
                 SizedBox(height: 16),
 
                 PostCard()
-=======
-                SizedBox(height: 16), // Add some spacing before the new button
-                CupertinoButton(
-                  child: Text('Flint Carmintail'),
-                  color: CupertinoColors.systemGreen, // Choose a color for your button
-                  onPressed: () {
-                    // Navigate to the PublicPage screen
-                    Navigator.push(
-                      context,
-                      CupertinoPageRoute(
-                        builder: (context) => PublicPage(),
-                      ),
-                    );
-                  },
-                ),
->>>>>>> master
               ],
             ),
           ),
