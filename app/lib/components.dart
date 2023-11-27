@@ -45,7 +45,6 @@ class Styles {
   );
 }
 
-
 CupertinoNavigationBar buildNavigationBar(BuildContext context) {
   return CupertinoNavigationBar(
     backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -70,9 +69,10 @@ CupertinoSliverNavigationBar buildMainNavigationBar(
     largeTitle: Text(
       title,
       style: TextStyle(
-        letterSpacing: -1.36,
+        letterSpacing: -1.0,
       ),
     ),
+    stretch: true, // Enable stretch behavior
   );
 }
 
@@ -169,8 +169,8 @@ Widget buildTextButton(String text, Alignment alignment, Color color,
   );
 }
 
-
-Widget buildSignUpText(BuildContext context, String description, String link, String destination) {
+Widget buildSignUpText(
+    BuildContext context, String description, String link, String destination) {
   return Align(
     alignment: Alignment.center,
     child: GestureDetector(
@@ -198,9 +198,8 @@ Widget buildSignUpText(BuildContext context, String description, String link, St
   );
 }
 
-  Widget buildCenteredText(
-      String text, double fontSize, FontWeight fontWeight) {
-    return Center(
-      child: buildText(text, fontSize, fontWeight),
-    );
-  }
+Widget buildCenteredText(String text, double fontSize, FontWeight fontWeight) {
+  return Center(
+    child: buildText(text, fontSize, fontWeight),
+  );
+}
