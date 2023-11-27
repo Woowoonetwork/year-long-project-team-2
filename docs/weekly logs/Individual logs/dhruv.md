@@ -173,3 +173,35 @@ N/A.
 
 ### Additional Information
 - N/A.
+
+---
+---
+
+### Individual Log: Monday 13th Nov 2023 - Sunday 26th Nov 2023
+
+## Tasks Worked On During the week
+![Peer Evaluation](./images/Week12_dhruv.png)
+
+## Recap of personal goals
+- Planned the features to be completed for this milestone
+- Continued working on the Home page
+- Created another Post card file so that all the posts can be in one place
+- Added placeholders to add the image to the home page
+- Added the tag buttons to filter the post
+- Made the test for the UI better . Added multiple things to it. Test passed
+- Reviewed multiple branches
+- Helped with the team log
+- Completed the individual log
+
+## Tasks completed (from Project Board)
+- Modify the home screen UI to fix bugs
+- Design tests for the home screen (viewing all posts)
+- Complete the week 11 and 12 team log
+- Complete the week 11 and 12 individual logs
+
+## Tasks in progress (from Project Board)
+- Complete the home screen (viewing all posts) by adding functionality
+
+Additional Information 
+
+N/A.
