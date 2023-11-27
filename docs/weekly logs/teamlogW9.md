@@ -1,6 +1,6 @@
 # Weekly Team Log
 
-## Team 2: Monday 23rd Oct 2023 - Sunday 29th Oct 2023
+## Team 2: Monday 30th Oct 2023 - Sunday 5th Nov 2023
 
 GitHub username mapping:
 
@@ -67,7 +67,7 @@ We've been steadily progressing over the week. Here is our auto-generated chart 
 
 ## Test Report
 
-![Untitled](testWeek9.png)
+![Untitled](./Test%20Reports/testWeek9.png)
 
 ## Additional Context
 

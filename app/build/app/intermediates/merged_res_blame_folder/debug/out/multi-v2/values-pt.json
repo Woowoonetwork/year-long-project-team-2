@@ -4,7 +4,21 @@
             "outputFile": "com.example.foodhood.app-mergeDebugResources-15:/values-pt/values-pt.xml",
             "map": [
                 {
+<<<<<<< HEAD
                     "source": "/Users/jayati/.gradle/caches/transforms-3/c2aff38445ebad8ddeaa989ecf50f56e/transformed/core-1.9.0/res/values-pt/values-pt.xml",
+=======
+                    "source": "C:\\Users\\mnjts\\.gradle\\caches\\transforms-3\\6d3bbaf4594b8ed85e4722883be764b3\\transformed\\browser-1.4.0\\res\\values-pt\\values-pt.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,170,269,381",
+                        "endColumns": "114,98,111,105",
+                        "endOffsets": "165,264,376,482"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\mnjts\\.gradle\\caches\\transforms-3\\c2aff38445ebad8ddeaa989ecf50f56e\\transformed\\core-1.9.0\\res\\values-pt\\values-pt.xml",
+>>>>>>> master
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -19,6 +33,7 @@
                         "endColumns": "100",
                         "endOffsets": "583"
                     }
+<<<<<<< HEAD
                 },
                 {
                     "source": "/Users/jayati/.gradle/caches/transforms-3/6d3bbaf4594b8ed85e4722883be764b3/transformed/browser-1.4.0/res/values-pt/values-pt.xml",
@@ -29,6 +44,8 @@
                         "endColumns": "114,98,111,105",
                         "endOffsets": "165,264,376,482"
                     }
+=======
+>>>>>>> master
                 }
             ]
         }

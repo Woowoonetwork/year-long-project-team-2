@@ -4,7 +4,11 @@
             "outputFile": "com.example.foodhood.app-mergeDebugResources-15:/values-el/values-el.xml",
             "map": [
                 {
+<<<<<<< HEAD
                     "source": "/Users/jayati/.gradle/caches/transforms-3/781e5567158e59d38ee2b89930f9808b/transformed/jetified-play-services-base-18.1.0/res/values-el/values.xml",
+=======
+                    "source": "C:\\Users\\mnjts\\.gradle\\caches\\transforms-3\\781e5567158e59d38ee2b89930f9808b\\transformed\\jetified-play-services-base-18.1.0\\res\\values-el\\values.xml",
+>>>>>>> master
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
@@ -21,6 +25,7 @@
                     }
                 },
                 {
+<<<<<<< HEAD
                     "source": "/Users/jayati/.gradle/caches/transforms-3/c2aff38445ebad8ddeaa989ecf50f56e/transformed/core-1.9.0/res/values-el/values-el.xml",
                     "from": {
                         "startLines": "2",
@@ -39,6 +44,9 @@
                 },
                 {
                     "source": "/Users/jayati/.gradle/caches/transforms-3/58aa1384bde170d075503b845cfcf44c/transformed/jetified-play-services-basement-18.1.0/res/values-el/values.xml",
+=======
+                    "source": "C:\\Users\\mnjts\\.gradle\\caches\\transforms-3\\58aa1384bde170d075503b845cfcf44c\\transformed\\jetified-play-services-basement-18.1.0\\res\\values-el\\values.xml",
+>>>>>>> master
                     "from": {
                         "startLines": "4",
                         "startColumns": "0",
@@ -55,7 +63,11 @@
                     }
                 },
                 {
+<<<<<<< HEAD
                     "source": "/Users/jayati/.gradle/caches/transforms-3/6d3bbaf4594b8ed85e4722883be764b3/transformed/browser-1.4.0/res/values-el/values-el.xml",
+=======
+                    "source": "C:\\Users\\mnjts\\.gradle\\caches\\transforms-3\\6d3bbaf4594b8ed85e4722883be764b3\\transformed\\browser-1.4.0\\res\\values-el\\values-el.xml",
+>>>>>>> master
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",
@@ -70,6 +82,26 @@
                         "endColumns": "109,106,124,109",
                         "endOffsets": "2526,2633,2758,2868"
                     }
+<<<<<<< HEAD
+=======
+                },
+                {
+                    "source": "C:\\Users\\mnjts\\.gradle\\caches\\transforms-3\\c2aff38445ebad8ddeaa989ecf50f56e\\transformed\\core-1.9.0\\res\\values-el\\values-el.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "100",
+                        "endOffsets": "151"
+                    },
+                    "to": {
+                        "startLines": "24",
+                        "startColumns": "4",
+                        "startOffsets": "2873",
+                        "endColumns": "100",
+                        "endOffsets": "2969"
+                    }
+>>>>>>> master
                 }
             ]
         }

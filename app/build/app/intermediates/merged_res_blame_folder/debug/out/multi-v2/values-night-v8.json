@@ -4,7 +4,11 @@
             "outputFile": "com.example.foodhood.app-mergeDebugResources-15:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
+<<<<<<< HEAD
                     "source": "/Users/jayati/year-long-project-team-2/app/android/app/src/main/res/values-night/styles.xml",
+=======
+                    "source": "D:\\UBC\\cosc 499\\github assignments\\year-long-project-team-2\\app\\android\\app\\src\\main\\res\\values-night\\styles.xml",
+>>>>>>> master
                     "from": {
                         "startLines": "3,18",
                         "startColumns": "4,4",

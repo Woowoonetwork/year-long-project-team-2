@@ -151,3 +151,36 @@ Additional Information
 N/A.
 
 
+# Individual Log: Monday 6th Nov 2023 - Sunday 12th Nov 2023
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati6.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed.
+* Worked on UI for food item post page.
+* Created UI test for food item post page.
+* Completed the weekly individual log.
+* Created gitignore file for everyone to start with
+* Created team log.
+
+# Tasks completed (from Project Board)
+
+* Food details page and UI and widget test
+* Add a .gitignore file
+* Completed team log for the week
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+
+Additional Information 
+
+N/A.
+
+

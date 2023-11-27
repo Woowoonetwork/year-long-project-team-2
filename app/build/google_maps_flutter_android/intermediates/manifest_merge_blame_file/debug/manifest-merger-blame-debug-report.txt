@@ -4,8 +4,14 @@
 4
 5    <uses-sdk
 6        android:minSdkVersion="20"
+<<<<<<< HEAD
 6-->/Users/jayati/.pub-cache/hosted/pub.dev/google_maps_flutter_android-2.5.3/android/src/main/AndroidManifest.xml
 7        android:targetSdkVersion="20" />
 7-->/Users/jayati/.pub-cache/hosted/pub.dev/google_maps_flutter_android-2.5.3/android/src/main/AndroidManifest.xml
+=======
+6-->C:\Users\mnjts\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.5.3\android\src\main\AndroidManifest.xml
+7        android:targetSdkVersion="20" />
+7-->C:\Users\mnjts\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.5.3\android\src\main\AndroidManifest.xml
+>>>>>>> master
 8
 9</manifest>
