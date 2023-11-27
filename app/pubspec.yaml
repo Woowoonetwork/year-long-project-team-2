@@ -51,6 +51,7 @@ dependencies:
   firebase_auth_mocks: ^0.13.0
   modal_bottom_sheet: ^2.1.2
   sheet: ^0.0.4+1
+  image_picker: ^1.0.4
 
 dev_dependencies:
 
@@ -75,8 +76,7 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - assets/images/smilelyface.png
-    - assets/images/google.png
+    - assets/images/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
