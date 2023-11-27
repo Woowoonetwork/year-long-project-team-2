@@ -17,7 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: const Color.fromRGBO(238, 238, 238, 1.0),
+      backgroundColor: CupertinoColors.systemBackground,
       navigationBar: CupertinoNavigationBar(
         backgroundColor: const Color.fromRGBO(238, 238, 238, 1.0),
         middle: const Text(
