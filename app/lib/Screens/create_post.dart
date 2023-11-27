@@ -2,10 +2,11 @@
 // a page that allows users to create a new post
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-//import '../auth_service.dart';
 import '../firestore_service.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:FoodHood/Screens/home_screen.dart';
+// import 'package:FoodHood/Screens/navigation_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -67,15 +68,18 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                 ),
               ),
               onPressed: () async{
-                //Add your onPressed functionality here
-                //String? userID = await widget.auth.getUserId();
-                String file_name = "Post 1";
+                // Save the input information to Firestore.
+                final user = FirebaseAuth.instance.currentUser;
+                //Access the user's email id and replace special characters in it to adhere to Firestore's document name rules
+                String userEmail = user?.email?.replaceAll('.', '_').replaceAll('@', '_') ?? 'default email'; 
                 addDocument(
                   collectionName: 'post_details',
-                  filename: file_name,
+                  filename: userEmail,
                   fieldNames: ['title', 'description', 'allergens', 'expiration_date','category', 'pickup_location', 'pickup_instructions', 'pickup_time'],
                   fieldValues: [title_controller.text, desc_controller.text, allergen_controller.text, Timestamp.fromDate(selectedDate), category_controller.text, pickup_loc_controller.text,pickup_instr_controller.text, Timestamp.fromDate(selectedTime)],
                 );
+                // Close the current screen
+                //Navigator.of(context).pop();
               },
             ),
             border: const Border(bottom: BorderSide.none),
@@ -394,11 +398,12 @@ Future<bool> showConfirmationDialog(BuildContext context) async {
             onPressed: () {
               Navigator.pop(context, true); // User confirms exit
               //Navigator.of(context, rootNavigator: true).pop(context);
-              //Navigator.popUntil(context, ModalRoute.withName('/'));
+              //Navigator.popUntil(context, 'ModalRoute.withName('/')');
               //  Navigator.pushReplacement(
               //   context,
               //   CupertinoPageRoute(builder: (context) => HomeScreen()),
               // );
+              //Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context) => NavigationScreen(selectedIndex: 0, onItemTapped: (int index) {})));
               
             },
             isDestructiveAction: true,
