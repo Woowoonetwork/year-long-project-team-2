@@ -25,3 +25,30 @@ Future<void> addDocument({
     print('Error adding document: $e');
   }
 }
+
+Future<Map<String, dynamic>?> readDocument({
+  required String collectionName,
+  required String docName,
+}) async {
+  try {
+    // Create a reference to the Firestore collection
+    CollectionReference collectionReference =
+        FirebaseFirestore.instance.collection(collectionName);
+
+    // Get the document snapshot
+    DocumentSnapshot documentSnapshot = await collectionReference.doc(docName).get();
+
+    // Check if the document exists
+    if (documentSnapshot.exists) {
+      // Access the data from the document
+      Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+      return data;
+    } else {
+      print('Document does not exist.');
+      return null;
+    }
+  } catch (e) {
+    print('Error reading document: $e');
+    return null;
+  }
+}
