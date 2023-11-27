@@ -167,3 +167,70 @@ N/A
 
 N/A
 
+## Week 10: Monday 6th Oct 2023 - Sunday 12th Nov 2023
+
+![Peer Evaluation](./images/nickWeek10.png)
+
+## Recap of goals
+
+- Building the Order page UI and layout behaviours.
+- Implementing the components of the Order page.
+- Added widgets to the Order page.
+- Reported the testing results of the Order page.
+- Contributed to building the teamlog for the week.
+- Helped review and suggest changes to the other team members' PRs and code.
+- Ensured code consistency and created guidelines for the team.
+
+## Tasks completed
+
+- Finalize UI/UX for Order page.
+- omplete integration of all components on Order page.
+- Ensure widgets are fully functional and user-friendly.
+- Conduct thorough testing, fix bugs.
+- Update teamlog with detailed progress and challenges.
+- Review team members' contributions critically.
+- Enforce and refine code guidelines for consistency.
+- Prepare for next phase of implementing the account screen.
+
+## Tasks in progress (from Project Board)
+
+N/A
+
+## Additional Information
+
+N/A
+
+
+## Week 11 & 12: Monday 13th Oct 2023 - Sunday 26th Nov 2023
+
+![Peer Evaluation](./images/nickWeek11&12.png)
+
+## Recap of goals
+
+- Building the Account page UI and layout behaviours.
+- Implementing the components of the Account page.
+- Added widgets to the Account page.
+- Reported the testing results of the Account page.
+- Contributed to building the teamlog for the week.
+- Helped review and suggest changes to the other team members' PRs and code.
+- Ensured code consistency and created guidelines for the team.
+
+## Tasks completed
+
+- Fetched account info from profile (only email for now bc other info are not associated with an account)
+- Photo picker for profile photo
+- Location Pickers -> Provinces and cities can be fetched from fb as well, and updatable.
+- Segmented view for the order page
+- Empty placeholder view for when the order is empty
+- Context Menu when pressed on an order with quick action like edit/remove order from history
+- Refined order/post components
+- Added Widget tests
+- Resolved bugs and added other feature improvements, like page scrolling behaviour and bottom tab bar etc
+
+## Tasks in progress (from Project Board)
+
+N/A
+
+## Additional Information
+
+N/A

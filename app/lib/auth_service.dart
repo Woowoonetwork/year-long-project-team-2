@@ -16,4 +16,14 @@ if (user != null && !user.emailVerified) {
   await user.sendEmailVerification();
 }
   }
+
+  Future<String?> getUserId() async {
+    try {
+      User? user = _firebaseAuth.currentUser;
+      return user?.uid;
+    } catch (e) {
+      print('Error getting user ID: $e');
+      return null;
+    }
+  }
 }
