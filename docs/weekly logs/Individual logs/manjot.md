@@ -151,3 +151,38 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
+
+##week 11 and 12
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/manjotWeek12.jpg)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Completed the weekly logs.
+- Updated cloud firestores rules to allow authenticated and authorized users to read/write from the database more securely
+- Error resolution in teammates' code
+- Created public_page, where a user's public information is viewable
+- Wrote functions to read, write, query and dynamically generate IDs for documents on firestore
+
+### Tasks completed (from Project Board)
+
+- Updated cloud firestore rules on the firebase console
+- Manually tested the code and fixed bugs.
+- Manually tested and fixed bugs in other team members' code
+- Completed Week 12 individual log
+- Assisted in planning out the features left for the milestone and the tasks associated with them.
+- Reviewed other team members' PRs and assigned team members to PRs.
+- Created public_page, where a user's public information is viewable
+- Wrote functions to read, write, query and dynamically generate IDs for documents on firestore
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
