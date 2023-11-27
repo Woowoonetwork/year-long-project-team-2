@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+String x = "GL Free";
+
 class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -14,10 +16,10 @@ class PostCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // _buildImageSection(),
+
+            Spacer(),
             _buildTitleSection(),
             _buildTagSection(),
-            Spacer(),
-
             _buildOrderInfoSection(),
           ],
         ),
@@ -70,7 +72,7 @@ class PostCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Row(
         children: [
-          _buildTag('GL Free', Color(0x7FF8CE53)),
+          _buildTag(x, Color(0x7FF8CE53)),
           const SizedBox(width: 7),
           _buildTag('PVC Free', Color(0x7FFF8C5B)),
         ],

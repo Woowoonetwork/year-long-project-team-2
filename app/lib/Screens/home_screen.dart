@@ -100,7 +100,6 @@ class HomeScreen extends StatelessWidget {
                           },
                         ),
                       ),
-                      // Add more buttons as needed
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         child: CupertinoButton(
