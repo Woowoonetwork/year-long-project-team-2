@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import '../firestore_service.dart';
 
-String x = "GL Free";
-
 class PostCard extends StatefulWidget {
   @override
   _PostCardState createState() => _PostCardState();
@@ -14,6 +12,8 @@ class _PostCardState extends State<PostCard> {
   String firstname = 'Loading...';
   String lastname = 'Loading...';
   String title = 'Loading...';
+  String tag1 = 'Loading...';
+  String tag2 = 'Loading...';
 
   @override
   void initState() {
@@ -35,6 +35,8 @@ class _PostCardState extends State<PostCard> {
           firstname = documentData['FirstName'] ?? 'No Name';
           lastname = documentData['LastName'] ?? 'No Name';
           title = documentData['Title'] ?? 'No Title';
+          tag1 = documentData['Tag1'] ?? 'No Tag';
+          tag2 = documentData['Tag2'] ?? 'No Tag';
           // Update other fields similarly
         });
       } else {
@@ -42,6 +44,8 @@ class _PostCardState extends State<PostCard> {
           firstname = 'No Data Found';
           lastname = 'No Data Found';
           title = 'No Data Found';
+          tag1 = 'No Data Found';
+          tag2 = 'No Data Found';
         });
       }
     } catch (e) {
@@ -49,6 +53,9 @@ class _PostCardState extends State<PostCard> {
       setState(() {
         firstname = 'Error loading data';
         lastname = 'Error loading data';
+        title = 'Error loading data';
+        tag1 = 'Error loading data';
+        tag2 = 'Error loading data';
       });
     }
   }
@@ -120,9 +127,9 @@ class _PostCardState extends State<PostCard> {
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Row(
         children: [
-          _buildTag(x, Color(0x7FF8CE53)),
+          _buildTag(tag1, Color(0x7FF8CE53)),
           const SizedBox(width: 7),
-          _buildTag('PVC Free', Color(0x7FFF8C5B)),
+          _buildTag(tag2, Color(0x7FFF8C5B)),
         ],
       ),
     );
