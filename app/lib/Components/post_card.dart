@@ -11,7 +11,9 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
-  String firstname = 'Loading...'; // Default text
+  String firstname = 'Loading...';
+  String lastname = 'Loading...';
+  String title = 'Loading...';
 
   @override
   void initState() {
@@ -31,17 +33,22 @@ class _PostCardState extends State<PostCard> {
       if (documentData != null) {
         setState(() {
           firstname = documentData['FirstName'] ?? 'No Name';
+          lastname = documentData['LastName'] ?? 'No Name';
+          title = documentData['Title'] ?? 'No Title';
           // Update other fields similarly
         });
       } else {
         setState(() {
           firstname = 'No Data Found';
+          lastname = 'No Data Found';
+          title = 'No Data Found';
         });
       }
     } catch (e) {
       print('Error fetching data: $e');
       setState(() {
         firstname = 'Error loading data';
+        lastname = 'Error loading data';
       });
     }
   }
@@ -98,7 +105,7 @@ class _PostCardState extends State<PostCard> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Text(
-        'Poutine',
+        title,
         style: TextStyle(
           color: CupertinoColors.black,
           fontSize: 18,
@@ -161,7 +168,7 @@ class _PostCardState extends State<PostCard> {
           SizedBox(width: 8), // Space between image and text
           // Text
           Text(
-            'Posted by ' + firstname + ' 24 mins ago',
+            'Posted by ' + firstname + ' ' + lastname + ' 24 mins ago',
             style: TextStyle(
               color: CupertinoColors.black.withOpacity(0.6),
               fontSize: 12,
