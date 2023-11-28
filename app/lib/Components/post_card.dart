@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import '../firestore_service.dart';
+import 'dart:math' as math;
 
 class PostCard extends StatefulWidget {
   @override
@@ -12,9 +13,11 @@ class _PostCardState extends State<PostCard> {
   String firstname = 'Loading...';
   String lastname = 'Loading...';
   String title = 'Loading...';
-  String tag1 = 'Loading...';
-  String tag2 = 'Loading...';
+  //String tag1 = 'Loading...';
+  //String tag2 = 'Loading...';
   String userid = 'Loading...';
+  List<String> tags = [];
+  Map<String, Color> tagColors = {};
 
   @override
   void initState() {
@@ -36,19 +39,24 @@ class _PostCardState extends State<PostCard> {
           //firstname = documentData['FirstName'] ?? 'No Name';
           //lastname = documentData['LastName'] ?? 'No Name';
           title = documentData['Title'] ?? 'No Title';
-          tag1 = documentData['Tag1'] ?? 'No Tag';
-          tag2 = documentData['Tag2'] ?? 'No Tag';
+          tags = documentData['tag'].split(',');
+          //tag1 = documentData['Tag1'] ?? 'No Tag';
+          //tag2 = documentData['Tag2'] ?? 'No Tag';
           userid = documentData['UserId'] ?? 'No Id';
-          // Update other fields similarly
+
+          for (var tag in tags) {
+            tagColors[tag] = getRandomColor();
+          }
         });
       } else {
         setState(() {
           firstname = 'No Data Found';
           lastname = 'No Data Found';
           title = 'No Data Found';
-          tag1 = 'No Data Found';
-          tag2 = 'No Data Found';
+          // tag1 = 'No Data Found';
+          //tag2 = 'No Data Found';
           userid = 'No Data Found';
+          tags = "no tag available" as List<String>;
         });
       }
     } catch (e) {
@@ -57,9 +65,10 @@ class _PostCardState extends State<PostCard> {
         firstname = 'Error loading data';
         lastname = 'Error loading data';
         title = 'Error loading data';
-        tag1 = 'Error loading data';
-        tag2 = 'Error loading data';
+        // tag1 = 'Error loading data';
+        //tag2 = 'Error loading data';
         userid = 'Error loading data ';
+        tags = 'Error loading data' as List<String>;
       });
     }
 
@@ -158,12 +167,11 @@ class _PostCardState extends State<PostCard> {
   Widget _buildTagSection() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      child: Row(
-        children: [
-          _buildTag(tag1, Color(0x7FF8CE53)),
-          const SizedBox(width: 7),
-          _buildTag(tag2, Color(0x7FFF8C5B)),
-        ],
+      child: Wrap(
+        spacing: 8,
+        children: tags
+            .map((tag) => _buildTag(tag.trim(), tagColors[tag] ?? Colors.grey))
+            .toList(),
       ),
     );
   }
@@ -218,5 +226,13 @@ class _PostCardState extends State<PostCard> {
         ],
       ),
     );
+  }
+
+  Color getRandomColor() {
+    // Adjust these values to change the color range
+    int r = math.Random().nextInt(255);
+    int g = math.Random().nextInt(255);
+    int b = math.Random().nextInt(255);
+    return Color.fromRGBO(r, g, b, 1);
   }
 }
