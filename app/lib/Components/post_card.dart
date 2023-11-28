@@ -14,6 +14,7 @@ class _PostCardState extends State<PostCard> {
   String title = 'Loading...';
   String tag1 = 'Loading...';
   String tag2 = 'Loading...';
+  String userid = 'Loading...';
 
   @override
   void initState() {
@@ -32,11 +33,12 @@ class _PostCardState extends State<PostCard> {
       // Update the UI with the fetched data
       if (documentData != null) {
         setState(() {
-          firstname = documentData['FirstName'] ?? 'No Name';
-          lastname = documentData['LastName'] ?? 'No Name';
+          //firstname = documentData['FirstName'] ?? 'No Name';
+          //lastname = documentData['LastName'] ?? 'No Name';
           title = documentData['Title'] ?? 'No Title';
           tag1 = documentData['Tag1'] ?? 'No Tag';
           tag2 = documentData['Tag2'] ?? 'No Tag';
+          userid = documentData['UserId'] ?? 'No Id';
           // Update other fields similarly
         });
       } else {
@@ -46,6 +48,7 @@ class _PostCardState extends State<PostCard> {
           title = 'No Data Found';
           tag1 = 'No Data Found';
           tag2 = 'No Data Found';
+          userid = 'No Data Found';
         });
       }
     } catch (e) {
@@ -56,6 +59,36 @@ class _PostCardState extends State<PostCard> {
         title = 'Error loading data';
         tag1 = 'Error loading data';
         tag2 = 'Error loading data';
+        userid = 'Error loading data ';
+      });
+    }
+
+    try {
+      // Replace 'your_collection_name' and 'your_document_name' with actual values
+      Map<String, dynamic>? documentData = await readDocument(
+        collectionName: 'user',
+        docName: userid,
+      );
+
+      // Update the UI with the fetched data
+      if (documentData != null) {
+        setState(() {
+          firstname = documentData['firstName'] ?? 'No Name';
+          lastname = documentData['lastName'] ?? 'No Name';
+
+          // Update other fields similarly
+        });
+      } else {
+        setState(() {
+          firstname = 'No Data Found';
+          lastname = 'No Data Found';
+        });
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+      setState(() {
+        firstname = 'Error loading data';
+        lastname = 'Error loading data';
       });
     }
   }
