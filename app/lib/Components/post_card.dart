@@ -1,10 +1,51 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import '../firestore_service.dart';
 
 String x = "GL Free";
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
+  @override
+  _PostCardState createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  String firstname = 'Loading...'; // Default text
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      // Replace 'your_collection_name' and 'your_document_name' with actual values
+      Map<String, dynamic>? documentData = await readDocument(
+        collectionName: 'post_details',
+        docName: 'Test1',
+      );
+
+      // Update the UI with the fetched data
+      if (documentData != null) {
+        setState(() {
+          firstname = documentData['FirstName'] ?? 'No Name';
+          // Update other fields similarly
+        });
+      } else {
+        setState(() {
+          firstname = 'No Data Found';
+        });
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+      setState(() {
+        firstname = 'Error loading data';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -120,7 +161,7 @@ class PostCard extends StatelessWidget {
           SizedBox(width: 8), // Space between image and text
           // Text
           Text(
-            'Posted by Jason Bean   24 mins ago',
+            'Posted by ' + firstname + ' 24 mins ago',
             style: TextStyle(
               color: CupertinoColors.black.withOpacity(0.6),
               fontSize: 12,
