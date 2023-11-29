@@ -1,112 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import '../firestore_service.dart';
 import 'dart:math' as math;
 
-// ignore: must_be_immutable
 class PostCard extends StatelessWidget {
-// class _PostCardState extends State<PostCard> {
-  late String firstname = 'Loading ...';
-  late String lastname = 'Loading ...';
-  late String title = 'Loading ...';
-//   //String tag1 = 'Loading...';
-//   //String tag2 = 'Loading...';
-//   String userid = 'Loading...';
-  late List<String> tags = [];
-  Map<String, Color> tagColors = {};
+  final String firstname;
+  final String lastname;
+  final String title;
+  final List<String> tags;
 
-  @override
-  // void initState() {
-  //   super.initState();
-  //   fetchData();
-  // }
+  // Define your colors here
+  final List<Color> colors = [
+    Colors.lightGreenAccent, // Light Green
+    Colors.lightBlueAccent, // Light Blue
+    Colors.pinkAccent[100]!, // Light Pink
+    Colors.yellowAccent[100]! // Light Yellow
+  ];
 
-  // Future<void> fetchData() async {
-  //   try {
-  //     // Replace 'your_collection_name' and 'your_document_name' with actual values
-  //     Map<String, dynamic>? documentData = await readDocument(
-  //       collectionName: 'post_details',
-  //       docName: 'Test1',
-  //     );
-
-  //     // Update the UI with the fetched data
-  //     if (documentData != null) {
-  //       setState(() {
-  //         //firstname = documentData['FirstName'] ?? 'No Name';
-  //         //lastname = documentData['LastName'] ?? 'No Name';
-  //         title = documentData['Title'] ?? 'No Title';
-  //         tags = documentData['tag'].split(',');
-  //         //tag1 = documentData['Tag1'] ?? 'No Tag';
-  //         //tag2 = documentData['Tag2'] ?? 'No Tag';
-  //         userid = documentData['UserId'] ?? 'No Id';
-
-  //         for (var tag in tags) {
-  //           tagColors[tag] = getRandomColor();
-  //         }
-  //       });
-  //     } else {
-  //       setState(() {
-  //         firstname = 'No Data Found';
-  //         lastname = 'No Data Found';
-  //         title = 'No Data Found';
-  //         // tag1 = 'No Data Found';
-  //         //tag2 = 'No Data Found';
-  //         userid = 'No Data Found';
-  //         tags = "no tag available" as List<String>;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print('Error fetching data: $e');
-  //     setState(() {
-  //       firstname = 'Error loading data';
-  //       lastname = 'Error loading data';
-  //       title = 'Error loading data';
-  //       // tag1 = 'Error loading data';
-  //       //tag2 = 'Error loading data';
-  //       userid = 'Error loading data ';
-  //       tags = 'Error loading data' as List<String>;
-  //     });
-  //   }
-
-  //   try {
-  //     // Replace 'your_collection_name' and 'your_document_name' with actual values
-  //     Map<String, dynamic>? documentData = await readDocument(
-  //       collectionName: 'user',
-  //       docName: userid,
-  //     );
-
-  //     // Update the UI with the fetched data
-  //     if (documentData != null) {
-  //       setState(() {
-  //         firstname = documentData['firstName'] ?? 'No Name';
-  //         lastname = documentData['lastName'] ?? 'No Name';
-
-  //         // Update other fields similarly
-  //       });
-  //     } else {
-  //       setState(() {
-  //         firstname = 'No Data Found';
-  //         lastname = 'No Data Found';
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print('Error fetching data: $e');
-  //     setState(() {
-  //       firstname = 'Error loading data';
-  //       lastname = 'Error loading data';
-  //     });
-  //   }
-  // }
   PostCard({
     Key? key,
     required this.title,
     required this.tags,
     required this.firstname,
     required this.lastname,
-  }) : super(key: key) {
-    tagColors = {for (var tag in tags) tag: getRandomColor()};
-  }
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -118,8 +34,6 @@ class PostCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // _buildImageSection(),
-
             Spacer(),
             _buildTitleSection(),
             _buildTagSection(),
@@ -144,18 +58,6 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  // Widget _buildImageSection() {
-  //   return ClipRRect(
-  //     borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-  //     child: Image.asset(
-  //       "../../assets/images/382x110.png", // Ensure this image is available in your assets
-  //       width: 382,
-  //       height: 110,
-  //       fit: BoxFit.fill,
-  //     ),
-  //   );
-  // }
-
   Widget _buildTitleSection() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -176,7 +78,7 @@ class PostCard extends StatelessWidget {
       child: Wrap(
         spacing: 8,
         children: tags
-            .map((tag) => _buildTag(tag.trim(), tagColors[tag] ?? Colors.grey))
+            .map((tag) => _buildTag(tag.trim(), _getRandomColor()))
             .toList(),
       ),
     );
@@ -205,24 +107,17 @@ class PostCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
-          // Image or placeholder
           Container(
-            width: 24, // Set the width of the image placeholder
-            height: 24, // Set the height of the image placeholder
+            width: 24,
+            height: 24,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.grey, // Placeholder color
-              // Uncomment below and replace 'path/to/your/image' with actual image path
-              // image: DecorationImage(
-              //   image: AssetImage('path/to/your/image'),
-              //   fit: BoxFit.cover,
-              // ),
+              color: Colors.grey,
             ),
           ),
-          SizedBox(width: 8), // Space between image and text
-          // Text
+          SizedBox(width: 8),
           Text(
-            'Posted by ' + firstname + ' ' + lastname + ' 24 mins ago',
+            'Posted by $firstname $lastname 24 mins ago',
             style: TextStyle(
               color: CupertinoColors.black.withOpacity(0.6),
               fontSize: 12,
@@ -234,11 +129,8 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Color getRandomColor() {
-    // Adjust these values to change the color range
-    int r = math.Random().nextInt(255);
-    int g = math.Random().nextInt(255);
-    int b = math.Random().nextInt(255);
-    return Color.fromRGBO(r, g, b, 1);
+  Color _getRandomColor() {
+    var random = math.Random();
+    return colors[random.nextInt(colors.length)];
   }
 }
