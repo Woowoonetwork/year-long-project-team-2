@@ -57,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           setState(() {
             postCards.add(postCard);
+            postCards.add(SizedBox(height: 16));
             print('Added a PostCard for document $docName');
           });
         }
@@ -222,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                SizedBox(height: 16),
+                SizedBox(height: 15),
                 Expanded(
                   child: ListView(
                     children: postCards, // Display the list of PostCard widgets
