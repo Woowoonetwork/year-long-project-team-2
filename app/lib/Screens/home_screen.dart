@@ -25,9 +25,10 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchPosts();
   }
 
-  Future<void> fetchPosts() async {
-    // Replace with the actual logic to fetch document names
+  Future<List<Widget>> fetchPosts() async {
+    List<Widget> fetchedPostCards = [];
     List<String> documentNames = ['Test1', 'Test2'];
+
     for (String docName in documentNames) {
       try {
         Map<String, dynamic>? documentData = await readDocument(
@@ -55,26 +56,25 @@ class _HomeScreenState extends State<HomeScreen> {
             lastname: userData?['lastName'] ?? 'Unknown',
           );
 
-          setState(() {
-            postCards.add(postCard);
-            postCards.add(SizedBox(height: 16));
-            print('Added a PostCard for document $docName');
-          });
+          fetchedPostCards.add(postCard);
+          fetchedPostCards
+              .add(SizedBox(height: 16)); // For spacing between cards
         }
       } catch (e) {
         print('Error fetching data: $e');
       }
     }
+
+    return fetchedPostCards;
   }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor:
-          CupertinoColors.systemGroupedBackground, // background color
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       child: CustomScrollView(
         slivers: <Widget>[
-          buildMainNavigationBar(context, 'Discover'), // navigation bar
+          buildMainNavigationBar(context, 'Discover'),
           SliverFillRemaining(
             child: Column(
               children: <Widget>[
@@ -225,12 +225,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 SizedBox(height: 15),
                 Expanded(
-                  child: ListView(
-                    children: postCards, // Display the list of PostCard widgets
+                  child: FutureBuilder<List<Widget>>(
+                    future: fetchPosts(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Center(child: Text("Error: ${snapshot.error}"));
+                      }
+                      if (!snapshot.hasData) {
+                        return Center(child: Text("No Posts Available"));
+                      }
+                      return ListView(
+                        children: snapshot.data!,
+                      );
+                    },
                   ),
                 ),
-
-                //PostCard()
               ],
             ),
           ),
