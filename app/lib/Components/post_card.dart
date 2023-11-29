@@ -4,103 +4,107 @@ import 'package:flutter/widgets.dart';
 import '../firestore_service.dart';
 import 'dart:math' as math;
 
-class PostCard extends StatefulWidget {
-  @override
-  _PostCardState createState() => _PostCardState();
-}
-
-class _PostCardState extends State<PostCard> {
-  String firstname = 'Loading...';
-  String lastname = 'Loading...';
-  String title = 'Loading...';
-  //String tag1 = 'Loading...';
-  //String tag2 = 'Loading...';
-  String userid = 'Loading...';
-  List<String> tags = [];
+// ignore: must_be_immutable
+class PostCard extends StatelessWidget {
+// class _PostCardState extends State<PostCard> {
+  late String firstname = 'Loading ...';
+  late String lastname = 'Loading ...';
+  late String title = 'Loading ...';
+//   //String tag1 = 'Loading...';
+//   //String tag2 = 'Loading...';
+//   String userid = 'Loading...';
+  late List<String> tags = [];
   Map<String, Color> tagColors = {};
 
   @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
+  // void initState() {
+  //   super.initState();
+  //   fetchData();
+  // }
 
-  Future<void> fetchData() async {
-    try {
-      // Replace 'your_collection_name' and 'your_document_name' with actual values
-      Map<String, dynamic>? documentData = await readDocument(
-        collectionName: 'post_details',
-        docName: 'Test1',
-      );
+  // Future<void> fetchData() async {
+  //   try {
+  //     // Replace 'your_collection_name' and 'your_document_name' with actual values
+  //     Map<String, dynamic>? documentData = await readDocument(
+  //       collectionName: 'post_details',
+  //       docName: 'Test1',
+  //     );
 
-      // Update the UI with the fetched data
-      if (documentData != null) {
-        setState(() {
-          //firstname = documentData['FirstName'] ?? 'No Name';
-          //lastname = documentData['LastName'] ?? 'No Name';
-          title = documentData['Title'] ?? 'No Title';
-          tags = documentData['tag'].split(',');
-          //tag1 = documentData['Tag1'] ?? 'No Tag';
-          //tag2 = documentData['Tag2'] ?? 'No Tag';
-          userid = documentData['UserId'] ?? 'No Id';
+  //     // Update the UI with the fetched data
+  //     if (documentData != null) {
+  //       setState(() {
+  //         //firstname = documentData['FirstName'] ?? 'No Name';
+  //         //lastname = documentData['LastName'] ?? 'No Name';
+  //         title = documentData['Title'] ?? 'No Title';
+  //         tags = documentData['tag'].split(',');
+  //         //tag1 = documentData['Tag1'] ?? 'No Tag';
+  //         //tag2 = documentData['Tag2'] ?? 'No Tag';
+  //         userid = documentData['UserId'] ?? 'No Id';
 
-          for (var tag in tags) {
-            tagColors[tag] = getRandomColor();
-          }
-        });
-      } else {
-        setState(() {
-          firstname = 'No Data Found';
-          lastname = 'No Data Found';
-          title = 'No Data Found';
-          // tag1 = 'No Data Found';
-          //tag2 = 'No Data Found';
-          userid = 'No Data Found';
-          tags = "no tag available" as List<String>;
-        });
-      }
-    } catch (e) {
-      print('Error fetching data: $e');
-      setState(() {
-        firstname = 'Error loading data';
-        lastname = 'Error loading data';
-        title = 'Error loading data';
-        // tag1 = 'Error loading data';
-        //tag2 = 'Error loading data';
-        userid = 'Error loading data ';
-        tags = 'Error loading data' as List<String>;
-      });
-    }
+  //         for (var tag in tags) {
+  //           tagColors[tag] = getRandomColor();
+  //         }
+  //       });
+  //     } else {
+  //       setState(() {
+  //         firstname = 'No Data Found';
+  //         lastname = 'No Data Found';
+  //         title = 'No Data Found';
+  //         // tag1 = 'No Data Found';
+  //         //tag2 = 'No Data Found';
+  //         userid = 'No Data Found';
+  //         tags = "no tag available" as List<String>;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching data: $e');
+  //     setState(() {
+  //       firstname = 'Error loading data';
+  //       lastname = 'Error loading data';
+  //       title = 'Error loading data';
+  //       // tag1 = 'Error loading data';
+  //       //tag2 = 'Error loading data';
+  //       userid = 'Error loading data ';
+  //       tags = 'Error loading data' as List<String>;
+  //     });
+  //   }
 
-    try {
-      // Replace 'your_collection_name' and 'your_document_name' with actual values
-      Map<String, dynamic>? documentData = await readDocument(
-        collectionName: 'user',
-        docName: userid,
-      );
+  //   try {
+  //     // Replace 'your_collection_name' and 'your_document_name' with actual values
+  //     Map<String, dynamic>? documentData = await readDocument(
+  //       collectionName: 'user',
+  //       docName: userid,
+  //     );
 
-      // Update the UI with the fetched data
-      if (documentData != null) {
-        setState(() {
-          firstname = documentData['firstName'] ?? 'No Name';
-          lastname = documentData['lastName'] ?? 'No Name';
+  //     // Update the UI with the fetched data
+  //     if (documentData != null) {
+  //       setState(() {
+  //         firstname = documentData['firstName'] ?? 'No Name';
+  //         lastname = documentData['lastName'] ?? 'No Name';
 
-          // Update other fields similarly
-        });
-      } else {
-        setState(() {
-          firstname = 'No Data Found';
-          lastname = 'No Data Found';
-        });
-      }
-    } catch (e) {
-      print('Error fetching data: $e');
-      setState(() {
-        firstname = 'Error loading data';
-        lastname = 'Error loading data';
-      });
-    }
-  }
+  //         // Update other fields similarly
+  //       });
+  //     } else {
+  //       setState(() {
+  //         firstname = 'No Data Found';
+  //         lastname = 'No Data Found';
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching data: $e');
+  //     setState(() {
+  //       firstname = 'Error loading data';
+  //       lastname = 'Error loading data';
+  //     });
+  //   }
+  // }
+  PostCard({
+    Key? key,
+    required this.title,
+    required this.tags,
+    required this.firstname,
+    required this.lastname,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

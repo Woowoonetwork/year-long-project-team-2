@@ -1,16 +1,70 @@
 // home_screen.dart
 // a page that displays the post feeds
 import 'package:FoodHood/Components/post_card.dart';
+import 'package:FoodHood/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../firestore_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../components.dart'; // Ensure this is the correct path to component.dart
 import '../Components/order_card.dart';
 import '../Components/post_card.dart';
 
-class HomeScreen extends StatelessWidget {
-  final TextEditingController textController =
-      TextEditingController(); // text controller for search bar
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+} // text controller for search bar
+
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController textController = TextEditingController();
+  List<Widget> postCards = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPosts();
+  }
+
+  Future<void> fetchPosts() async {
+    // Replace with the actual logic to fetch document names
+    List<String> documentNames = ['Test1', 'Test2'];
+    for (String docName in documentNames) {
+      try {
+        Map<String, dynamic>? documentData = await readDocument(
+          collectionName: 'post_details',
+          docName: docName,
+        );
+        if (documentData != null) {
+          print('Document data for $docName: $documentData');
+          // Assuming 'Tags' is a comma-separated string
+          List<String> tags = documentData['tag'].split(',');
+          String title = documentData['Title'] ?? 'No Title';
+
+          // Fetch user details (assuming 'UserId' is in documentData)
+          String userId = documentData['UserId'] ?? 'Unknown';
+          Map<String, dynamic>? userData = await readDocument(
+            collectionName: 'user',
+            docName: userId,
+          );
+
+          // Create a PostCard with fetched data
+          var postCard = PostCard(
+            title: title,
+            tags: tags,
+            firstname: userData?['firstName'] ?? 'Unknown',
+            lastname: userData?['lastName'] ?? 'Unknown',
+          );
+
+          setState(() {
+            postCards.add(postCard);
+            print('Added a PostCard for document $docName');
+          });
+        }
+      } catch (e) {
+        print('Error fetching data: $e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,9 +221,15 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 16),
 
-                PostCard()
+                SizedBox(height: 16),
+                Expanded(
+                  child: ListView(
+                    children: postCards, // Display the list of PostCard widgets
+                  ),
+                ),
+
+                //PostCard()
               ],
             ),
           ),
