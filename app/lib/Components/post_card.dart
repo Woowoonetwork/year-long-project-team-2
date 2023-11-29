@@ -104,7 +104,9 @@ class PostCard extends StatelessWidget {
     required this.tags,
     required this.firstname,
     required this.lastname,
-  }) : super(key: key);
+  }) : super(key: key) {
+    tagColors = {for (var tag in tags) tag: getRandomColor()};
+  }
 
   @override
   Widget build(BuildContext context) {
