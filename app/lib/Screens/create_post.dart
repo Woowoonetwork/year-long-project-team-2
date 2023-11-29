@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:FoodHood/Screens/home_screen.dart';
+import 'package:FoodHood/Screens/home_screen.dart';
 // import 'package:FoodHood/Screens/navigation_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -32,11 +32,11 @@ class _CreatePostPageState extends State<CreatePostScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: const Color.fromRGBO(238, 238, 238, 1.0),
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
-            backgroundColor: CupertinoColors.extraLightBackgroundGray,
+            backgroundColor: CupertinoColors.systemGroupedBackground,
             largeTitle: const Text(
               'New Post',
               style: TextStyle(
@@ -105,11 +105,11 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                 placeholder: 'Enter a title', // Placeholder text
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: CupertinoColors.white,
+                    color: CupertinoColors.secondarySystemGroupedBackground,
                     width: 1.0,
                   ),
                   borderRadius: BorderRadius.circular(10.0),
-                  color: CupertinoColors.white,
+                  color: CupertinoColors.secondarySystemGroupedBackground,
                 ),
               ),
             ),
@@ -135,11 +135,11 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                 placeholder: 'No Description Entered', // Placeholder text
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: CupertinoColors.white,
+                    color: CupertinoColors.secondarySystemGroupedBackground,
                     width: 1.0,
                   ),
                   borderRadius: BorderRadius.circular(10.0),
-                  color: CupertinoColors.white,
+                  color: CupertinoColors.secondarySystemGroupedBackground,
                 ),
               ),
             ),
@@ -172,7 +172,7 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                     allergen_search_value = value;
                   });
                 },
-                backgroundColor: CupertinoColors.white,
+                backgroundColor: CupertinoColors.secondarySystemGroupedBackground,
                 onChanged: (value){
                   setState(() {
                     allergen_search_value = value;
@@ -242,7 +242,7 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                     category_search_value = value;
                   });
                 },
-                backgroundColor: CupertinoColors.white,
+                backgroundColor: CupertinoColors.secondarySystemGroupedBackground,
                 onChanged: (value){
                   setState(() {
                     category_search_value = value;
@@ -276,7 +276,7 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                     pickup_loc_search_value = value;
                   });
                 },
-                backgroundColor: CupertinoColors.white,
+                backgroundColor: CupertinoColors.secondarySystemGroupedBackground,
                 onChanged: (value){
                   setState(() {
                     pickup_loc_search_value = value;
@@ -323,11 +323,11 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                 placeholder: 'No pickup instructions entered', // Placeholder text
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: CupertinoColors.white,
+                    color: CupertinoColors.secondarySystemGroupedBackground,
                     width: 1.0,
                   ),
                   borderRadius: BorderRadius.circular(10.0),
-                  color: CupertinoColors.white,
+                  color: CupertinoColors.secondarySystemGroupedBackground,
                 ),
               ),
             ),
@@ -371,7 +371,7 @@ class _CreatePostPageState extends State<CreatePostScreen> {
 
           //Add space after all widgets
           const SliverToBoxAdapter(
-            child: SizedBox(height: 50.0),
+            child: SizedBox(height: 100.0),
           )
 
         ],
@@ -399,10 +399,10 @@ Future<bool> showConfirmationDialog(BuildContext context) async {
               Navigator.pop(context, true); // User confirms exit
               //Navigator.of(context, rootNavigator: true).pop(context);
               //Navigator.popUntil(context, 'ModalRoute.withName('/')');
-              //  Navigator.pushReplacement(
-              //   context,
-              //   CupertinoPageRoute(builder: (context) => HomeScreen()),
-              // );
+               Navigator.pushReplacement(
+                context,
+                CupertinoPageRoute(builder: (context) => HomeScreen()),
+              );
               //Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context) => NavigationScreen(selectedIndex: 0, onItemTapped: (int index) {})));
               
             },
