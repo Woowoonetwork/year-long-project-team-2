@@ -1,8 +1,12 @@
 // create_post.dart
 // a page that allows users to create a new post
-import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../firestore_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:FoodHood/Screens/home_screen.dart';
+// import 'package:FoodHood/Screens/navigation_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -13,16 +17,26 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostPageState extends State<CreatePostScreen> {
 
-  DateTime selectedDateandTime = DateTime.now();
+  DateTime selectedDate = DateTime.now();
+  DateTime selectedTime = DateTime.now();
+  TextEditingController title_controller = TextEditingController();
+  TextEditingController desc_controller = TextEditingController();
+  TextEditingController pickup_instr_controller = TextEditingController();
+  TextEditingController allergen_controller = TextEditingController();
+  String allergen_search_value = '';
+  TextEditingController category_controller = TextEditingController();
+  String category_search_value = '';
+  TextEditingController pickup_loc_controller = TextEditingController();
+  String pickup_loc_search_value = '';
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: const Color.fromRGBO(238, 238, 238, 1.0),
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
-            backgroundColor: CupertinoColors.extraLightBackgroundGray,
+            backgroundColor: CupertinoColors.systemGroupedBackground,
             largeTitle: const Text(
               'New Post',
               style: TextStyle(
@@ -53,8 +67,19 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                   color: Color(0xFF337586), // Your custom color
                 ),
               ),
-              onPressed: () {
-                //Add your onPressed functionality here
+              onPressed: () async{
+                // Save the input information to Firestore.
+                final user = FirebaseAuth.instance.currentUser;
+                //Access the user's email id and replace special characters in it to adhere to Firestore's document name rules
+                String userEmail = user?.email?.replaceAll('.', '_').replaceAll('@', '_') ?? 'default email'; 
+                addDocument(
+                  collectionName: 'post_details',
+                  filename: userEmail,
+                  fieldNames: ['title', 'description', 'allergens', 'expiration_date','category', 'pickup_location', 'pickup_instructions', 'pickup_time'],
+                  fieldValues: [title_controller.text, desc_controller.text, allergen_controller.text, Timestamp.fromDate(selectedDate), category_controller.text, pickup_loc_controller.text,pickup_instr_controller.text, Timestamp.fromDate(selectedTime)],
+                );
+                // Close the current screen
+                //Navigator.of(context).pop();
               },
             ),
             border: const Border(bottom: BorderSide.none),
@@ -75,15 +100,16 @@ class _CreatePostPageState extends State<CreatePostScreen> {
             child: Padding(
               padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0), // Adjust padding as needed
               child: CupertinoTextField(
+                controller: title_controller,
                 padding: EdgeInsets.all(10.0),
                 placeholder: 'Enter a title', // Placeholder text
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: CupertinoColors.white,
+                    color: CupertinoColors.secondarySystemGroupedBackground,
                     width: 1.0,
                   ),
                   borderRadius: BorderRadius.circular(10.0),
-                  color: CupertinoColors.white,
+                  color: CupertinoColors.secondarySystemGroupedBackground,
                 ),
               ),
             ),
@@ -105,14 +131,15 @@ class _CreatePostPageState extends State<CreatePostScreen> {
               padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0), // Adjust padding as needed
               child: CupertinoTextField(
                 padding: EdgeInsets.symmetric(vertical: 40.0, horizontal: 10.0),
+                controller: desc_controller,
                 placeholder: 'No Description Entered', // Placeholder text
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: CupertinoColors.white,
+                    color: CupertinoColors.secondarySystemGroupedBackground,
                     width: 1.0,
                   ),
                   borderRadius: BorderRadius.circular(10.0),
-                  color: CupertinoColors.white,
+                  color: CupertinoColors.secondarySystemGroupedBackground,
                 ),
               ),
             ),
@@ -136,12 +163,21 @@ class _CreatePostPageState extends State<CreatePostScreen> {
             child: Padding(
               padding: EdgeInsets.only(left: 17.0, top: 10.0, right: 17.0, bottom: 60.0),
               child: CupertinoSearchTextField(
+                controller: allergen_controller,
                 padding: EdgeInsets.all(10.0),
                 placeholder: 'Search',
                 onSubmitted: (String value) {
                   // Handle search submission
+                  setState(() {
+                    allergen_search_value = value;
+                  });
                 },
-                backgroundColor: CupertinoColors.white,
+                backgroundColor: CupertinoColors.secondarySystemGroupedBackground,
+                onChanged: (value){
+                  setState(() {
+                    allergen_search_value = value;
+                  });
+                },
               ),
             ),
           ),
@@ -168,10 +204,10 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                       width: 268,
                       child: CupertinoDatePicker(
                         mode: CupertinoDatePickerMode.date,
-                        initialDateTime: selectedDateandTime,
+                        initialDateTime: selectedDate,
                         onDateTimeChanged: (DateTime newDate) {
                           setState(() {
-                            selectedDateandTime = newDate;
+                            selectedDate = newDate;
                           });
                         },
                       ),     
@@ -197,12 +233,21 @@ class _CreatePostPageState extends State<CreatePostScreen> {
             child: Padding(
               padding: EdgeInsets.only(left: 17.0, top: 10.0, right: 17.0, bottom: 60.0),
               child: CupertinoSearchTextField(
+                controller: category_controller,
                 padding: EdgeInsets.all(10.0),
                 placeholder: 'Search',
                 onSubmitted: (String value) {
                   // Handle search submission
+                  setState(() {
+                    category_search_value = value;
+                  });
                 },
-                backgroundColor: CupertinoColors.white,
+                backgroundColor: CupertinoColors.secondarySystemGroupedBackground,
+                onChanged: (value){
+                  setState(() {
+                    category_search_value = value;
+                  });
+                },
               ),
             ),
           ),
@@ -222,12 +267,21 @@ class _CreatePostPageState extends State<CreatePostScreen> {
             child: Padding(
               padding: EdgeInsets.only(left: 17.0, top: 10.0, right: 17.0, bottom: 60.0),
               child: CupertinoSearchTextField(
+                controller: pickup_loc_controller,
                 padding: EdgeInsets.all(10.0),
                 placeholder: 'Search',
                 onSubmitted: (String value) {
                   // Handle search submission
+                  setState(() {
+                    pickup_loc_search_value = value;
+                  });
                 },
-                backgroundColor: CupertinoColors.white,
+                backgroundColor: CupertinoColors.secondarySystemGroupedBackground,
+                onChanged: (value){
+                  setState(() {
+                    pickup_loc_search_value = value;
+                  });
+                },
               ),
             ),
           ),
@@ -264,15 +318,16 @@ class _CreatePostPageState extends State<CreatePostScreen> {
             child: Padding(
               padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0), // Adjust padding as needed
               child: CupertinoTextField(
+                controller: pickup_instr_controller,
                 padding: EdgeInsets.all(10.0),
                 placeholder: 'No pickup instructions entered', // Placeholder text
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: CupertinoColors.white,
+                    color: CupertinoColors.secondarySystemGroupedBackground,
                     width: 1.0,
                   ),
                   borderRadius: BorderRadius.circular(10.0),
-                  color: CupertinoColors.white,
+                  color: CupertinoColors.secondarySystemGroupedBackground,
                 ),
               ),
             ),
@@ -300,10 +355,10 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                       width: 268,
                       child: CupertinoDatePicker(
                         mode: CupertinoDatePickerMode.time,
-                        initialDateTime: selectedDateandTime,
+                        initialDateTime: selectedTime,
                         onDateTimeChanged: (DateTime newTime) {
                           setState(() {
-                            selectedDateandTime = newTime;
+                            selectedTime = newTime;
                           });
                         },
                       ),     
@@ -316,7 +371,7 @@ class _CreatePostPageState extends State<CreatePostScreen> {
 
           //Add space after all widgets
           const SliverToBoxAdapter(
-            child: SizedBox(height: 50.0),
+            child: SizedBox(height: 100.0),
           )
 
         ],
@@ -343,11 +398,12 @@ Future<bool> showConfirmationDialog(BuildContext context) async {
             onPressed: () {
               Navigator.pop(context, true); // User confirms exit
               //Navigator.of(context, rootNavigator: true).pop(context);
-              //Navigator.popUntil(context, ModalRoute.withName('/'));
-              //  Navigator.pushReplacement(
-              //   context,
-              //   CupertinoPageRoute(builder: (context) => HomeScreen()),
-              // );
+              //Navigator.popUntil(context, 'ModalRoute.withName('/')');
+               Navigator.pushReplacement(
+                context,
+                CupertinoPageRoute(builder: (context) => HomeScreen()),
+              );
+              //Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context) => NavigationScreen(selectedIndex: 0, onItemTapped: (int index) {})));
               
             },
             isDestructiveAction: true,
