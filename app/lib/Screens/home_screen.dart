@@ -23,56 +23,75 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    fetchPosts();
+    textController.addListener(_onSearchTextChanged);
+    _loadInitialPosts();
   }
 
-  Future<List<Widget>> fetchPosts() async {
-    List<Widget> fetchedPostCards = [];
-    //List<String> documentNames = ['ishita1809_gmail_com', 'post 2'];
+  void _loadInitialPosts() async {
+    var fetchedPostCards = await fetchPosts('');
+    setState(() {
+      postCards = fetchedPostCards;
+    });
+  }
 
-    // for (String docName in documentNames) {
+  @override
+  void dispose() {
+    textController.removeListener(_onSearchTextChanged);
+    textController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchTextChanged() async {
+    var fetchedPostCards = await fetchPosts(textController.text.toLowerCase());
+    setState(() {
+      postCards = fetchedPostCards; // Update the UI with the filtered list
+    });
+  }
+
+  Future<List<Widget>> fetchPosts(String searchString) async {
+    List<Widget> fetchedPostCards = [];
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('post_details')
-          .orderBy('post_timestamp',
-              descending: true) // Sorting in descending order
+          .orderBy('post_timestamp', descending: true)
           .get();
-      // Map<String, dynamic>? documentData = await readDocument(
-      //   collectionName: 'post_details',
-      //   docName: docName,
-      // );
+
       for (var document in querySnapshot.docs) {
         Map<String, dynamic> documentData =
             document.data() as Map<String, dynamic>;
 
         if (documentData != null) {
-          print('Document data for $documentData: $documentData');
-          // Assuming 'Tags' is a comma-separated string
-          List<String> tags = documentData['category'].split(',');
           String title = documentData['title'] ?? 'No Title';
-          DateTime createdAt;
 
-          createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
+          // Check if the title contains the search string
+          if (title.toLowerCase().contains(searchString)) {
+            print('Document data for $documentData: $documentData');
+            // Assuming 'Tags' is a comma-separated string
+            List<String> tags = documentData['category'].split(',');
+            DateTime createdAt;
 
-          // Fetch user details (assuming 'UserId' is in documentData)
-          String userId = documentData['user_id'] ?? 'Unknown';
-          Map<String, dynamic>? userData = await readDocument(
-            collectionName: 'user',
-            docName: userId,
-          );
+            createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
 
-          // Create a PostCard with fetched data
-          var postCard = PostCard(
-            title: title,
-            tags: tags,
-            firstname: userData?['firstName'] ?? 'Unknown',
-            lastname: userData?['lastName'] ?? 'Unknown',
-            timeAgo: timeAgoSinceDate(createdAt),
-          );
+            // Fetch user details (assuming 'UserId' is in documentData)
+            String userId = documentData['user_id'] ?? 'Unknown';
+            Map<String, dynamic>? userData = await readDocument(
+              collectionName: 'user',
+              docName: userId,
+            );
 
-          fetchedPostCards.add(postCard);
-          fetchedPostCards
-              .add(SizedBox(height: 16)); // For spacing between cards
+            // Create a PostCard with fetched data
+            var postCard = PostCard(
+              title: title,
+              tags: tags,
+              firstname: userData?['firstName'] ?? 'Unknown',
+              lastname: userData?['lastName'] ?? 'Unknown',
+              timeAgo: timeAgoSinceDate(createdAt),
+            );
+
+            fetchedPostCards.add(postCard);
+            fetchedPostCards
+                .add(SizedBox(height: 16)); // For spacing between cards
+          }
         }
       }
     } catch (e) {
@@ -104,6 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: const TextStyle(fontSize: 18),
                           controller: textController,
                           placeholder: 'Search',
+                          onChanged: (String value) {
+                            _onSearchTextChanged(); // Call this method whenever the text changes
+                          },
                         ),
                       ),
                       SizedBox(
@@ -238,22 +260,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 SizedBox(height: 15),
                 Expanded(
-                  child: FutureBuilder<List<Widget>>(
-                    future: fetchPosts(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(child: Text("Error: ${snapshot.error}"));
-                      }
-                      if (!snapshot.hasData) {
-                        return Center(child: Text("No Posts Available"));
-                      }
-                      return ListView(
-                        children: snapshot.data!,
-                      );
-                    },
+                  child: ListView(
+                    children: postCards,
                   ),
                 ),
               ],
