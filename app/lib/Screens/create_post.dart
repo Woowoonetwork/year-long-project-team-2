@@ -29,6 +29,11 @@ class _CreatePostPageState extends State<CreatePostScreen> {
   TextEditingController pickup_loc_controller = TextEditingController();
   String pickup_loc_search_value = '';
 
+  List<String> selectedItems = [];
+  List<String> customItemList = ['Custom Item 1', 'Custom Item 2', 'Custom Item 3', 'Custom Item 4', 'Custom Item 5'];
+  
+
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -45,7 +50,7 @@ class _CreatePostPageState extends State<CreatePostScreen> {
             ),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.clear, color: CupertinoColors.black),
+              child: const Icon(CupertinoIcons.clear, color: CupertinoColors.black, size: 24.0,),
               onPressed: () async{
                 // add onPressed functionality
                 //Navigator.pop(context);
@@ -72,17 +77,41 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                 final user = FirebaseAuth.instance.currentUser;
                 //Access the user's email id and replace special characters in it to adhere to Firestore's document name rules
                 String userEmail = user?.email?.replaceAll('.', '_').replaceAll('@', '_') ?? 'default email'; 
+                String userId = user?.uid ?? 'default uid';
                 addDocument(
                   collectionName: 'post_details',
-                  filename: userEmail,
-                  fieldNames: ['title', 'description', 'allergens', 'expiration_date','category', 'pickup_location', 'pickup_instructions', 'pickup_time'],
-                  fieldValues: [title_controller.text, desc_controller.text, allergen_controller.text, Timestamp.fromDate(selectedDate), category_controller.text, pickup_loc_controller.text,pickup_instr_controller.text, Timestamp.fromDate(selectedTime)],
+                  filename: "post 2",
+                  fieldNames: [
+                    'title',
+                    'description',
+                    'allergens',
+                    'expiration_date',
+                    'category',
+                    'pickup_location',
+                    'pickup_instructions',
+                    'pickup_time',
+                    'user_id', 
+                    'post_timestamp'
+                  ],
+                  fieldValues: [
+                    title_controller.text,
+                    desc_controller.text,
+                    allergen_controller.text,
+                    Timestamp.fromDate(selectedDate),
+                    category_controller.text,
+                    pickup_loc_controller.text,
+                    pickup_instr_controller.text,
+                    Timestamp.fromDate(selectedTime),
+                    userId,
+                    FieldValue.serverTimestamp(),
+                  ],
                 );
                 // Close the current screen
                 //Navigator.of(context).pop();
               },
             ),
             border: const Border(bottom: BorderSide.none),
+            stretch: true,
           ),
           
           //Title text
@@ -372,10 +401,70 @@ class _CreatePostPageState extends State<CreatePostScreen> {
           //Add space after all widgets
           const SliverToBoxAdapter(
             child: SizedBox(height: 100.0),
-          )
+          ),
+
+          SliverToBoxAdapter(
+            child: CupertinoButton(
+              child: Text("Open Picker"),
+              onPressed: (){
+                //Add functionality
+                _showMultiSelectPicker(context);
+              },
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Text('Selected Items: ${selectedItems.join(', ')}'),
+          ),
+
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 100.0),
+          ),
 
         ],
       ),
+    );
+  }
+
+  void _showMultiSelectPicker(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 300,
+          child: CupertinoPicker.builder(
+            itemExtent: 60.0,
+            onSelectedItemChanged: (int index) {
+              // Handle selection logic here
+              // You can update the selected items list based on user interaction
+            },
+            itemBuilder: (BuildContext context, int index) {
+              // This is where you build each item in the picker
+              print('Index: $index, List Length: ${customItemList.length}');
+
+              return CupertinoButton(
+                //title: Text('Item $index'),
+                
+                onPressed: () {
+                  // Handle tap/click event to update the selected items list
+                  setState(() {
+                    if (index >= 0 && index < customItemList.length) {
+                      if (selectedItems.contains(customItemList[index])) {
+                        selectedItems.remove(customItemList[index]);
+                      } else {
+                        selectedItems.add(customItemList[index]);
+                      }
+                    }
+                    else{
+                      print('Invalid index: $index');
+                    }
+                  });
+                },
+                child: Text(customItemList[index]),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
