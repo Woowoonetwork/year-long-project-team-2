@@ -27,20 +27,24 @@ class PostCard extends StatelessWidget {
       : super(key: key);
 
   @override
+  @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 382,
-        height: 220,
-        decoration: _buildBoxDecoration(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Spacer(),
-            _buildTitleSection(),
-            _buildTagSection(),
-            _buildOrderInfoSection(),
-          ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16), // Add padding here
+      child: Center(
+        child: Container(
+          width: 382,
+          height: 220,
+          decoration: _buildBoxDecoration(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Spacer(),
+              _buildTitleSection(),
+              _buildTagSection(),
+              _buildOrderInfoSection(),
+            ],
+          ),
         ),
       ),
     );
