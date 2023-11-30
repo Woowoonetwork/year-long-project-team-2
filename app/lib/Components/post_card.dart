@@ -7,6 +7,7 @@ class PostCard extends StatelessWidget {
   final String lastname;
   final String title;
   final List<String> tags;
+  final String timeAgo;
 
   // Define your colors here
   final List<Color> colors = [
@@ -16,13 +17,14 @@ class PostCard extends StatelessWidget {
     Colors.yellowAccent[100]! // Light Yellow
   ];
 
-  PostCard({
-    Key? key,
-    required this.title,
-    required this.tags,
-    required this.firstname,
-    required this.lastname,
-  }) : super(key: key);
+  PostCard(
+      {Key? key,
+      required this.title,
+      required this.tags,
+      required this.firstname,
+      required this.lastname,
+      required this.timeAgo})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +119,7 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 8),
           Text(
-            'Posted by $firstname $lastname 24 mins ago',
+            'Posted by $firstname $lastname $timeAgo',
             style: TextStyle(
               color: CupertinoColors.black.withOpacity(0.6),
               fontSize: 12,

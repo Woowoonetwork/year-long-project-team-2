@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../components.dart'; // Ensure this is the correct path to component.dart
 import '../Components/order_card.dart';
 import '../Components/post_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -27,22 +28,34 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Widget>> fetchPosts() async {
     List<Widget> fetchedPostCards = [];
-    List<String> documentNames = ['Test1', 'Test2'];
+    //List<String> documentNames = ['ishita1809_gmail_com', 'post 2'];
 
-    for (String docName in documentNames) {
-      try {
-        Map<String, dynamic>? documentData = await readDocument(
-          collectionName: 'post_details',
-          docName: docName,
-        );
+    // for (String docName in documentNames) {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('post_details')
+          .orderBy('post_timestamp',
+              descending: true) // Sorting in descending order
+          .get();
+      // Map<String, dynamic>? documentData = await readDocument(
+      //   collectionName: 'post_details',
+      //   docName: docName,
+      // );
+      for (var document in querySnapshot.docs) {
+        Map<String, dynamic> documentData =
+            document.data() as Map<String, dynamic>;
+
         if (documentData != null) {
-          print('Document data for $docName: $documentData');
+          print('Document data for $documentData: $documentData');
           // Assuming 'Tags' is a comma-separated string
-          List<String> tags = documentData['tag'].split(',');
-          String title = documentData['Title'] ?? 'No Title';
+          List<String> tags = documentData['category'].split(',');
+          String title = documentData['title'] ?? 'No Title';
+          DateTime createdAt;
+
+          createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
 
           // Fetch user details (assuming 'UserId' is in documentData)
-          String userId = documentData['UserId'] ?? 'Unknown';
+          String userId = documentData['user_id'] ?? 'Unknown';
           Map<String, dynamic>? userData = await readDocument(
             collectionName: 'user',
             docName: userId,
@@ -54,17 +67,17 @@ class _HomeScreenState extends State<HomeScreen> {
             tags: tags,
             firstname: userData?['firstName'] ?? 'Unknown',
             lastname: userData?['lastName'] ?? 'Unknown',
+            timeAgo: timeAgoSinceDate(createdAt),
           );
 
           fetchedPostCards.add(postCard);
           fetchedPostCards
               .add(SizedBox(height: 16)); // For spacing between cards
         }
-      } catch (e) {
-        print('Error fetching data: $e');
       }
+    } catch (e) {
+      print('Error fetching data: $e');
     }
-
     return fetchedPostCards;
   }
 
@@ -249,5 +262,20 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  String timeAgoSinceDate(DateTime dateTime) {
+    final duration = DateTime.now().difference(dateTime);
+    if (duration.inDays > 8) {
+      return '${dateTime.month}/${dateTime.day}/${dateTime.year}'; // Return the date
+    } else if (duration.inDays >= 1) {
+      return '${duration.inDays} days ago';
+    } else if (duration.inHours >= 1) {
+      return '${duration.inHours} hours ago';
+    } else if (duration.inMinutes >= 1) {
+      return '${duration.inMinutes} mins ago';
+    } else {
+      return 'Just now';
+    }
   }
 }
