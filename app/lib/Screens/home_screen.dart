@@ -23,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    textController.addListener(_onSearchTextChanged);
     _loadInitialPosts();
   }
 
@@ -36,15 +35,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    textController.removeListener(_onSearchTextChanged);
+    textController.removeListener(_executeSearch);
     textController.dispose();
     super.dispose();
   }
 
-  void _onSearchTextChanged() async {
+  void _executeSearch() async {
     var fetchedPostCards = await fetchPosts(textController.text.toLowerCase());
     setState(() {
-      postCards = fetchedPostCards; // Update the UI with the filtered list
+      postCards = fetchedPostCards;
     });
   }
 
@@ -123,10 +122,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: const TextStyle(fontSize: 18),
                           controller: textController,
                           placeholder: 'Search',
-                          onChanged: (String value) {
-                            _onSearchTextChanged(); // Call this method whenever the text changes
-                          },
+                          // onChanged: (String value) {
+                          //   _onSearchTextChanged(); // Call this method whenever the text changes
+                          // },
                         ),
+                      ),
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        child: Icon(CupertinoIcons.search, size: 24),
+                        onPressed: _executeSearch,
                       ),
                       SizedBox(
                           width:
