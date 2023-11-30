@@ -4,6 +4,7 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/profile_card.dart';
 import 'package:FoodHood/Components/order_card.dart';
 import 'package:FoodHood/Screens/profile_edit_screen.dart';
+import 'package:FoodHood/Components/colors.dart';
 
 class AccountScreen extends StatefulWidget {
   @override
@@ -40,13 +41,12 @@ class _AccountScreenState extends State<AccountScreen> {
     };
 
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: groupedBackgroundColor,
       child: CustomScrollView(
         slivers: <Widget>[
           _buildNavigationBar(context),
-          SliverToBoxAdapter(
-              child: ProfileCard()), // Display the profile card
-                 
+          SliverToBoxAdapter(child: ProfileCard()), // Display the profile card
+
           _buildEditProfileButton(), // New method to create the Edit Profile button
 
           _buildOrdersSectionTitle(),
@@ -62,13 +62,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   CupertinoSliverNavigationBar _buildNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: groupedBackgroundColor,
       largeTitle: Text('Account', style: TextStyle(letterSpacing: -1.34)),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
         child: Text('Settings',
-            style: TextStyle(
-                fontWeight: FontWeight.w500, color: Color(0xFF337586))),
+            style: TextStyle(fontWeight: FontWeight.w500, color: accentColor)),
         onPressed: () => _navigateToSettings(context),
       ),
       border: Border(bottom: BorderSide.none),
@@ -167,7 +166,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return SliverFillRemaining(
       hasScrollBody: false, // Prevents the sliver from being scrollable
       child: SizedBox(
-        height: 200, // Set a fixed height here
+        height: 50, // Set a fixed height here
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -197,7 +196,7 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: CupertinoButton(
-          color: Color(0xFF337586),
+          color: accentColor,
           borderRadius: BorderRadius.circular(10),
           minSize: 44,
           padding: const EdgeInsets.symmetric(vertical: 16),
