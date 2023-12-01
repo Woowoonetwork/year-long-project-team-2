@@ -69,12 +69,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (documentData != null) {
           String title = documentData['title'] ?? 'No Title';
+          List<String> tags = documentData['category'].split(',');
+          bool matchesSearchString =
+              title.toLowerCase().contains(searchString) ||
+                  tags.any((tag) => tag.toLowerCase().contains(searchString));
 
           // Check if the title contains the search string
-          if (title.toLowerCase().contains(searchString)) {
+          if (matchesSearchString) {
             print('Document data for $documentData: $documentData');
             // Assuming 'Tags' is a comma-separated string
-            List<String> tags = documentData['category'].split(',');
+
             DateTime createdAt;
 
             createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
