@@ -1,6 +1,7 @@
 // home_screen.dart
 // a page that displays the post feeds
 import 'package:FoodHood/Components/post_card.dart';
+import 'package:FoodHood/Screens/create_post.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../firestore_service.dart';
@@ -103,172 +104,197 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: CustomScrollView(
-        slivers: <Widget>[
-          buildMainNavigationBar(context, 'Discover'),
-          SliverFillRemaining(
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        flex: 4,
-                        child: CupertinoSearchTextField(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 8),
-                          style: const TextStyle(fontSize: 18),
-                          controller: textController,
-                          placeholder: 'Search',
-                          // onChanged: (String value) {
-                          //   _onSearchTextChanged(); // Call this method whenever the text changes
-                          // },
-                        ),
-                      ),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        child: Icon(CupertinoIcons.search, size: 24),
-                        onPressed: _executeSearch,
-                      ),
-                      SizedBox(
-                          width:
-                              10), // Space between search bar and filter button
-                      Expanded(
-                        flex: 1,
-                        child: Container(
-                          height: 38,
-                          width: 20,
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 221, 217, 217),
-                            borderRadius: BorderRadius.circular(10),
+      child: Stack(
+        children: [
+          CustomScrollView(
+            slivers: <Widget>[
+              buildMainNavigationBar(context, 'Discover'),
+              SliverFillRemaining(
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            flex: 4,
+                            child: CupertinoSearchTextField(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 8),
+                              style: const TextStyle(fontSize: 18),
+                              controller: textController,
+                              placeholder: 'Search',
+                              // onChanged: (String value) {
+                              //   _onSearchTextChanged(); // Call this method whenever the text changes
+                              // },
+                            ),
                           ),
-                          child: CupertinoButton(
+                          CupertinoButton(
                             padding: EdgeInsets.zero,
-                            child: Icon(CupertinoIcons.sort_down, size: 24),
-                            onPressed: () {
-                              // Filter button action
-                            },
+                            child: Icon(CupertinoIcons.search, size: 24),
+                            onPressed: _executeSearch,
                           ),
-                        ),
+                          SizedBox(
+                              width:
+                                  10), // Space between search bar and filter button
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              height: 38,
+                              width: 20,
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 221, 217, 217),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: CupertinoButton(
+                                padding: EdgeInsets.zero,
+                                child: Icon(CupertinoIcons.sort_down, size: 24),
+                                onPressed: () {
+                                  // Filter button action
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
 
-                SizedBox(height: 16), // Add some spacing before the text
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: CupertinoButton(
-                          child: Text(
-                            'All',
-                            style: TextStyle(fontSize: 12), // Smaller font size
+                    SizedBox(height: 16), // Add some spacing before the text
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: CupertinoButton(
+                              child: Text(
+                                'All',
+                                style: TextStyle(
+                                    fontSize: 12), // Smaller font size
+                              ),
+                              color: Color.fromARGB(255, 21, 136, 102),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 5),
+                              borderRadius: BorderRadius.circular(20),
+                              onPressed: () {
+                                // Button 1 action
+                              },
+                            ),
                           ),
-                          color: Color.fromARGB(255, 21, 136, 102),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                          borderRadius: BorderRadius.circular(20),
-                          onPressed: () {
-                            // Button 1 action
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: CupertinoButton(
-                          child: Text(
-                            'Vegan',
-                            style: TextStyle(fontSize: 12), // Smaller font size
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: CupertinoButton(
+                              child: Text(
+                                'Vegan',
+                                style: TextStyle(
+                                    fontSize: 12), // Smaller font size
+                              ),
+                              color: Color.fromARGB(255, 214, 118, 131),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 5),
+                              borderRadius: BorderRadius.circular(20),
+                              onPressed: () {
+                                // Button 2 action
+                              },
+                            ),
                           ),
-                          color: Color.fromARGB(255, 214, 118, 131),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                          borderRadius: BorderRadius.circular(20),
-                          onPressed: () {
-                            // Button 2 action
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: CupertinoButton(
-                          child: Text(
-                            'Italian',
-                            style: TextStyle(fontSize: 12), // Smaller font size
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: CupertinoButton(
+                              child: Text(
+                                'Italian',
+                                style: TextStyle(
+                                    fontSize: 12), // Smaller font size
+                              ),
+                              color: Color.fromARGB(255, 243, 28, 179),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 5),
+                              borderRadius: BorderRadius.circular(20),
+                              onPressed: () {
+                                // Button 2 action
+                              },
+                            ),
                           ),
-                          color: Color.fromARGB(255, 243, 28, 179),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                          borderRadius: BorderRadius.circular(20),
-                          onPressed: () {
-                            // Button 2 action
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: CupertinoButton(
-                          child: Text(
-                            'Halal',
-                            style: TextStyle(fontSize: 12), // Smaller font size
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: CupertinoButton(
+                              child: Text(
+                                'Halal',
+                                style: TextStyle(
+                                    fontSize: 12), // Smaller font size
+                              ),
+                              color: Color.fromARGB(255, 116, 186, 243),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 5),
+                              borderRadius: BorderRadius.circular(20),
+                              onPressed: () {
+                                // Button 2 action
+                              },
+                            ),
                           ),
-                          color: Color.fromARGB(255, 116, 186, 243),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                          borderRadius: BorderRadius.circular(20),
-                          onPressed: () {
-                            // Button 2 action
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: CupertinoButton(
-                          child: Text(
-                            'Vegetarian',
-                            style: TextStyle(fontSize: 12), // Smaller font size
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: CupertinoButton(
+                              child: Text(
+                                'Vegetarian',
+                                style: TextStyle(
+                                    fontSize: 12), // Smaller font size
+                              ),
+                              color: Color.fromRGBO(233, 118, 11, 1),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 5),
+                              borderRadius: BorderRadius.circular(20),
+                              onPressed: () {
+                                // Button 2 action
+                              },
+                            ),
                           ),
-                          color: Color.fromRGBO(233, 118, 11, 1),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                          borderRadius: BorderRadius.circular(20),
-                          onPressed: () {
-                            // Button 2 action
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: CupertinoButton(
-                          child: Text(
-                            'Indian',
-                            style: TextStyle(fontSize: 12), // Smaller font size
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: CupertinoButton(
+                              child: Text(
+                                'Indian',
+                                style: TextStyle(
+                                    fontSize: 12), // Smaller font size
+                              ),
+                              color: Color.fromARGB(255, 86, 204, 240),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 5),
+                              borderRadius: BorderRadius.circular(20),
+                              onPressed: () {
+                                // Button 2 action
+                              },
+                            ),
                           ),
-                          color: Color.fromARGB(255, 86, 204, 240),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                          borderRadius: BorderRadius.circular(20),
-                          onPressed: () {
-                            // Button 2 action
-                          },
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
 
-                SizedBox(height: 15),
-                Expanded(
-                  child: ListView(
-                    children: postCards,
-                  ),
+                    SizedBox(height: 15),
+                    Expanded(
+                      child: ListView(
+                        children: postCards,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 100.0,
+            right: 30.0,
+            child: CupertinoButton(
+              onPressed: () {
+                Navigator.of(context).push(CupertinoPageRoute(
+                    builder: (context) => CreatePostScreen()));
+              },
+              child: Icon(CupertinoIcons.add),
+              color: Color.fromRGBO(51, 117, 134, 1.0),
+              padding: EdgeInsets.all(18.0), // Adjust padding to control size
+              borderRadius:
+                  BorderRadius.circular(40.0), // Adjust the radius as needed
             ),
           ),
         ],
