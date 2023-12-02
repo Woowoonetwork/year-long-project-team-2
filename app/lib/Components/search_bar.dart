@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:FoodHood/cupertino_chip_widget.dart';
+import 'package:FoodHood/Components/cupertino_chip_widget.dart';
 
 class SearchBar extends StatefulWidget {
   final List<String> itemList;

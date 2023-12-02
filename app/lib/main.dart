@@ -10,16 +10,20 @@ import 'package:FoodHood/Screens/welcome_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-//import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/auth_wrapper.dart';
 import 'auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:FoodHood/firestore_service.dart';
 
 void main() async {
   // Initialize Firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Call the function to add a pre-defined list of allergens and categories
+  await addAllergensCategoriesAndPL();
+
   // Run the app
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]) // Restrict orientation to portrait
       .then((_) {
@@ -38,7 +42,7 @@ class FoodHoodApp extends StatelessWidget {
         switch (settings.name) {
           case '/':
             return CupertinoPageRoute(
-              builder: (context) => FoodPosting(), // Root route
+              builder: (context) => WelcomeScreen(), // Root route
             );
           case '/signup':
             return CupertinoPageRoute(
