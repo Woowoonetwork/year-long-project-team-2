@@ -3,8 +3,13 @@ import 'package:FoodHood/Components/cupertino_chip_widget.dart';
 
 class SearchBar extends StatefulWidget {
   final List<String> itemList;
+  final Function(List<String>) onItemsSelected;
 
-  const SearchBar({required this.itemList, Key? key}) : super(key: key);
+  const SearchBar({
+    required this.itemList, 
+    required this.onItemsSelected,
+    Key? key
+    }) : super(key: key);
 
   @override
   createState() => _SearchBarState();
@@ -45,6 +50,7 @@ class _SearchBarState extends State<SearchBar> {
     setState(() {
       selectedItems.add(item);
       filteredList = [];
+      widget.onItemsSelected(selectedItems); // Callback to notify parent about selected items
     });
   }
 

@@ -6,7 +6,7 @@ Future<void> addAllergensCategoriesAndPL() async {
   await addDocument(
     collectionName: 'Data',
     filename: 'Allergens',
-    fieldNames: ['items'],
+    fieldNames: ['allergens'],
     fieldValues: [allergens],
   );
 
@@ -15,7 +15,7 @@ Future<void> addAllergensCategoriesAndPL() async {
   await addDocument(
     collectionName: 'Data',
     filename: 'Categories',
-    fieldNames: ['items'],
+    fieldNames: ['categories'],
     fieldValues: [categories],
   );
 
