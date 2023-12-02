@@ -1,6 +1,7 @@
 // login_screen.dart
 // a page that allows the user to log in to the app
 
+import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
 import '../components.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,16 +15,41 @@ class LogInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemBackground, // background color
-      navigationBar: buildBackNavigationBar(context), // navigation bar
+      backgroundColor: groupedBackgroundColor,
+      navigationBar: buildBackNavigationBar(context),
       child: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: buildLoginForm(context),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                buildLoginForm(context),
+                buildBottomGroup(context), // New method for bottom group
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+// Extract the bottom group into its own method
+  Widget buildBottomGroup(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        buildContinueButton(context, 'Continue', accentColor,
+            CupertinoColors.white), // Continue button
+        const SizedBox(height: 20),
+
+        buildCenteredText('or', 14, FontWeight.w600),
+        const SizedBox(height: 20),
+        buildGoogleSignInButton(context),
+        const SizedBox(height: 20),
+        buildSignUpText(
+            context, "Don't have an account? ", 'Sign up', '/signup'),
+      ],
     );
   }
 
@@ -34,11 +60,11 @@ class LogInScreen extends StatelessWidget {
       children: [
         buildText('Log in', 34, FontWeight.w600), // Log in text
         const SizedBox(height: 50),
-        buildCupertinoTextField(
-            'Email Address', emailController, false), // Email text field
+        buildCupertinoTextField('Email Address', emailController, false,
+            context), // Email text field
         const SizedBox(height: 20),
-        buildCupertinoTextField(
-            'Password', passwordController, true), // Password text field
+        buildCupertinoTextField('Password', passwordController, true,
+            context), // Password text field
         const SizedBox(height: 20),
         buildTextButton(
             'Forgot Password?',
@@ -47,16 +73,6 @@ class LogInScreen extends StatelessWidget {
             12,
             FontWeight.w500), // Forgot password text
         const SizedBox(height: 20),
-        buildContinueButton(context, 'Continue', const Color(0xFF337586),
-            CupertinoColors.white),
-
-        const SizedBox(height: 20),
-        buildCenteredText('or', 14, FontWeight.w600), // Or text
-        const SizedBox(height: 20),
-        buildGoogleSignInButton(), // Google sign in button
-        const SizedBox(height: 20),
-        buildSignUpText(context, "Don't have an account? ", 'Sign up',
-            '/signup'), // Sign up text
       ],
     );
   }

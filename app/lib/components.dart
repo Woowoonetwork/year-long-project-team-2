@@ -2,44 +2,40 @@
 // Themeing components
 
 import 'package:flutter/cupertino.dart';
+import 'package:FoodHood/Components/colors.dart';
 
 class Styles {
-  static const TextStyle titleStyle = TextStyle(
+  static TextStyle titleStyle = TextStyle(
     color: CupertinoColors.label,
     fontSize: 28,
-    fontFamily: 'Inter',
     fontWeight: FontWeight.w600,
     letterSpacing: -1.36,
   );
 
-  static const TextStyle descriptionStyle = TextStyle(
+  static TextStyle descriptionStyle = TextStyle(
     color: CupertinoColors.secondaryLabel,
     fontSize: 16,
-    fontFamily: 'Inter',
     fontWeight: FontWeight.w500,
     letterSpacing: -0.80,
   );
 
-  static const TextStyle buttonTextStyle = TextStyle(
+  static TextStyle buttonTextStyle = TextStyle(
     color: CupertinoColors.systemBackground,
     fontSize: 18,
-    fontFamily: 'Inter',
     fontWeight: FontWeight.w600,
     letterSpacing: -0.90,
   );
 
-  static const TextStyle signUpTextStyle = TextStyle(
-    color: Color(0xFF337586),
+  static TextStyle signUpTextStyle = TextStyle(
+    color: accentColor,
     fontSize: 12,
-    fontFamily: 'Inter',
     fontWeight: FontWeight.w600,
     letterSpacing: -0.20,
   );
 
-  static const TextStyle signUpLinkStyle = TextStyle(
-    color: Color(0xFF42BCDB),
+  static TextStyle signUpLinkStyle = TextStyle(
+    color: secondaryColor,
     fontSize: 12,
-    fontFamily: 'Inter',
     fontWeight: FontWeight.w600,
     letterSpacing: -0.20,
   );
@@ -47,13 +43,13 @@ class Styles {
 
 CupertinoNavigationBar buildNavigationBar(BuildContext context) {
   return CupertinoNavigationBar(
-    backgroundColor: CupertinoColors.systemGroupedBackground,
-    border: const Border(
+    backgroundColor: groupedBackgroundColor,
+    border: Border(
       bottom: BorderSide.none,
     ),
     leading: CupertinoButton(
       padding: EdgeInsets.zero,
-      child: const Icon(CupertinoIcons.back, color: Color(0xFF337586)),
+      child: Icon(CupertinoIcons.back, color: Color(0xFF337586)),
       onPressed: () => Navigator.pop(context),
     ),
   );
@@ -62,7 +58,7 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
 CupertinoSliverNavigationBar buildMainNavigationBar(
     BuildContext context, String title) {
   return CupertinoSliverNavigationBar(
-    backgroundColor: CupertinoColors.systemGroupedBackground,
+    backgroundColor: groupedBackgroundColor,
     border: const Border(
       bottom: BorderSide.none,
     ),
@@ -78,32 +74,35 @@ CupertinoSliverNavigationBar buildMainNavigationBar(
 
 CupertinoNavigationBar buildBackNavigationBar(BuildContext context) {
   return CupertinoNavigationBar(
-    backgroundColor: CupertinoColors.systemBackground,
+    backgroundColor: groupedBackgroundColor,
     border: const Border(
       bottom: BorderSide.none,
     ),
     leading: CupertinoButton(
       padding: EdgeInsets.zero,
-      child: const Icon(CupertinoIcons.back, color: Color(0xFF337586)),
+      child: Icon(CupertinoIcons.back,
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)),
       onPressed: () => Navigator.pop(context),
     ),
   );
 }
 
-Widget buildGoogleSignInButton() {
+Widget buildGoogleSignInButton(BuildContext context) {
   return Container(
     width: double.infinity,
     height: 50,
     decoration: BoxDecoration(
       border: Border.all(
-        color: CupertinoColors.systemGrey,
+        color:
+            CupertinoDynamicColor.resolve(CupertinoColors.systemGrey, context),
         width: 1,
       ),
       borderRadius: BorderRadius.circular(14),
     ),
     child: CupertinoButton(
       onPressed: () {},
-      color: CupertinoColors.white,
+      color: CupertinoDynamicColor.resolve(
+          CupertinoColors.tertiarySystemBackground, context),
       borderRadius: BorderRadius.circular(14),
       padding: EdgeInsets.zero,
       child: Row(
@@ -111,10 +110,11 @@ Widget buildGoogleSignInButton() {
         children: [
           Image.asset('assets/images/google.png', width: 20, height: 20),
           const SizedBox(width: 2),
-          const Text(
+          Text(
             'Sign in with Google',
             style: TextStyle(
-              color: Color(0xFF757575),
+              color:
+                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -125,20 +125,21 @@ Widget buildGoogleSignInButton() {
   );
 }
 
-Widget buildCupertinoTextField(
-    String placeholder, TextEditingController controller, bool obscureText) {
+Widget buildCupertinoTextField(String placeholder,
+    TextEditingController controller, bool obscureText, BuildContext context) {
   return CupertinoTextField(
     controller: controller,
     obscureText: obscureText,
     placeholder: placeholder,
-    padding: const EdgeInsets.all(16.0),
-    placeholderStyle: const TextStyle(
-      color: Color(0xFFA1A1A1),
+    padding: EdgeInsets.all(16.0),
+    placeholderStyle: TextStyle(
+      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
     decoration: BoxDecoration(
-      color: const Color(0xFFF8F8F8),
+      color: CupertinoDynamicColor.resolve(
+          CupertinoColors.tertiarySystemBackground, context),
       borderRadius: BorderRadius.circular(12),
     ),
   );
@@ -179,7 +180,7 @@ Widget buildSignUpText(
         text: TextSpan(
           text: description,
           style: TextStyle(
-            color: Color(0xFF337586),
+            color: accentColor,
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
@@ -187,7 +188,7 @@ Widget buildSignUpText(
             TextSpan(
               text: link,
               style: TextStyle(
-                color: Color(0xFF43BDDC),
+                color: secondaryColor,
                 fontWeight: FontWeight.w500,
               ),
             ),
