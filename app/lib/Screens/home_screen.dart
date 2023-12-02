@@ -4,6 +4,7 @@ import 'package:FoodHood/Components/post_card.dart';
 import 'package:FoodHood/Screens/create_post.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math' as math;
 import '../firestore_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController textController = TextEditingController();
   List<Widget> postCards = [];
+  Map<String, Color> tagColors = {};
 
   @override
   void initState() {
@@ -78,6 +80,14 @@ class _HomeScreenState extends State<HomeScreen> {
           if (matchesSearchString) {
             print('Document data for $documentData: $documentData');
             // Assuming 'Tags' is a comma-separated string
+            List<Color> assignedColors = tags.map((tag) {
+              tag = tag.trim();
+              if (!tagColors.containsKey(tag)) {
+                tagColors[tag] =
+                    _getRandomColor(); // Assign a new color if not already assigned
+              }
+              return tagColors[tag]!;
+            }).toList();
 
             DateTime createdAt;
 
@@ -94,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
             var postCard = PostCard(
               title: title,
               tags: tags,
+              tagColors: assignedColors,
               firstname: userData?['firstName'] ?? 'Unknown',
               lastname: userData?['lastName'] ?? 'Unknown',
               timeAgo: timeAgoSinceDate(createdAt),
@@ -326,5 +337,16 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       return 'Just now';
     }
+  }
+
+  Color _getRandomColor() {
+    var random = math.Random();
+    var colors = [
+      Colors.lightGreenAccent,
+      Colors.lightBlueAccent,
+      Colors.pinkAccent[100]!,
+      Colors.yellowAccent[100]!
+    ];
+    return colors[random.nextInt(colors.length)];
   }
 }

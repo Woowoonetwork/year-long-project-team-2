@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 class PostCard extends StatelessWidget {
   final String firstname;
   final String lastname;
   final String title;
   final List<String> tags;
+  final List<Color> tagColors;
   final String timeAgo;
 
   // Define your colors here
@@ -21,6 +21,7 @@ class PostCard extends StatelessWidget {
       {Key? key,
       required this.title,
       required this.tags,
+      required this.tagColors,
       required this.firstname,
       required this.lastname,
       required this.timeAgo})
@@ -90,9 +91,9 @@ class PostCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Wrap(
         spacing: 8,
-        children: tags
-            .map((tag) => _buildTag(tag.trim(), _getRandomColor()))
-            .toList(),
+        children: List<Widget>.generate(tags.length, (index) {
+          return _buildTag(tags[index].trim(), tagColors[index]);
+        }),
       ),
     );
   }
@@ -140,10 +141,5 @@ class PostCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _getRandomColor() {
-    var random = math.Random();
-    return colors[random.nextInt(colors.length)];
   }
 }
