@@ -1,3 +1,4 @@
+import 'package:FoodHood/Screens/settings_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/profile_card.dart';
@@ -82,6 +83,8 @@ class _AccountScreenState extends State<AccountScreen> {
 
   void _navigateToSettings(BuildContext context) {
     // Implement navigation to settings screen
+    Navigator.of(context)
+        .push(CupertinoPageRoute(builder: (context) => SettingsScreen()));
   }
 
   SliverToBoxAdapter _buildOrdersSectionTitle() {

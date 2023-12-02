@@ -17,7 +17,6 @@ class AuthWrapper extends StatelessWidget {
           final user = snapshot.data;
           if (user == null) {
             // User is not logged in, display the WelcomeScreen
-            //return WelcomeScreen();
             return WelcomeScreen();
           } else {
             // User is logged in, display the NavigationScreen with the first tab selected
