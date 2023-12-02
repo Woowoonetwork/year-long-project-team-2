@@ -133,10 +133,9 @@ class CombinedTexts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         InfoText(),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         RatingText(),
       ],
     );
@@ -147,8 +146,7 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 386,
-      height: 21,
+      padding: const EdgeInsets.symmetric(horizontal: 14.0),
       child: Row(
         children: [
           IconPlaceholder(),

@@ -1,7 +1,7 @@
 // main.dart
 // entry point of the app
 
-import 'package:FoodHood/Screens/food_posting.dart';
+import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/Screens/login_screen.dart';
 import 'package:FoodHood/Screens/navigation_screen.dart';
