@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (documentData != null) {
           String title = documentData['title'] ?? 'No Title';
-          List<String> tags = documentData['category'].split(',');
+          List<String> tags = documentData['categories'].split(',');
           bool matchesSearchString =
               title.toLowerCase().contains(searchString) ||
                   tags.any((tag) => tag.toLowerCase().contains(searchString));
