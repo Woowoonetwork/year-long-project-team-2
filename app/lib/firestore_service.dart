@@ -1,5 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+Future<void> addAllergensCategoriesAndPL() async {
+  // Add Allergens
+  List<String> allergens = ['Milk', 'Peanuts', 'Egg', 'Soy', 'Wheat', 'Fish', 'Shellfish', 'Sesame'];
+  await addDocument(
+    collectionName: 'Data',
+    filename: 'Allergens',
+    fieldNames: ['allergens'],
+    fieldValues: [allergens],
+  );
+
+  // Add Categories
+  List<String> categories = ['Vegan', 'Vegetarian', 'Halal', 'Chicken', 'Indian', 'Italian', 'Chinese'];
+  await addDocument(
+    collectionName: 'Data',
+    filename: 'Categories',
+    fieldNames: ['categories'],
+    fieldValues: [categories],
+  );
+
+  // Add Pickup Locations
+  List<String> pick_locations = ['Walmart', 'Safeway', 'Superstore', 'Ogopogo Statue', 'Orchard Park'];
+  await addDocument(
+    collectionName: 'Data',
+    filename: 'Pickup Locations',
+    fieldNames: ['items'],
+    fieldValues: [pick_locations],
+  );
+}
+
+
 Future<void> addDocument({
   required String collectionName,
   required String filename,

@@ -1,22 +1,23 @@
-import 'package:FoodHood/Screens/food_posting.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
 
 void main() {
-  testWidgets('FoodPosting UI Test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(FoodPostingBig());
+  testWidgets('Posting page builds correctly', (WidgetTester tester) async {
+    await tester.pumpWidget(CupertinoApp(home: PostDetailView()));
 
-    // Verify that the back button is present.
-    expect(find.byIcon(CupertinoIcons.back), findsOneWidget);
+    expect(find.byType(AvailabilityIndicator), findsOneWidget,
+        reason: 'availability indicator not found');
+    expect(find.byType(InfoRow), findsOneWidget, reason: 'inforow not found');
+    expect(find.byType(InfoCardsRow), findsOneWidget, reason: 'row not found');
+    expect(find.byType(PickupInformation), findsOneWidget,
+        reason: 'pickup info not found');
+    expect(find.byType(AllergensSection), findsOneWidget,
+        reason: 'allergens not found');
+    expect(find.byType(ReserveButton), findsOneWidget,
+        reason: 'reserve button not found');
 
-    // Verify that the heart and share buttons are present.
-    expect(find.byIcon(CupertinoIcons.heart), findsOneWidget);
-    expect(find.byIcon(CupertinoIcons.share), findsOneWidget);
-
-    // Verify that the reserve button is present.
-    expect(find.byType(CupertinoButton), findsWidgets);
+    await tester.tap(find.byType(ReserveButton));
+    await tester.pump();
   });
 }
