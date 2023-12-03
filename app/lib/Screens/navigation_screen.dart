@@ -35,10 +35,10 @@ class NavigationScreen extends StatelessWidget {
             icon: Icon(FeatherIcons.map),
             label: '', // label is now empty
           ),
-          BottomNavigationBarItem(
-            icon: Icon(FeatherIcons.plusSquare),
-            label: '', // label is now empty
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(FeatherIcons.plusSquare),
+          //   label: '', // label is now empty
+          // ),
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.archive),
             label: '', // label is now empty
@@ -55,11 +55,11 @@ class NavigationScreen extends StatelessWidget {
             return HomeScreen();
           // case 1:
           //   return BrowseScreen();
-          case 2:
-            return CreatePostScreen();
+          // case 2:
+          //   return CreatePostScreen();
           // case 3:
           //   return SavedScreen();  
-          case 4:
+          case 3:
             return AccountScreen();
           default:
             return HomeScreen();
