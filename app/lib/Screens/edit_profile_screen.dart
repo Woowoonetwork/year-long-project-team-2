@@ -5,8 +5,12 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart'; // Import Firebase Storage
 
 class EditProfilePage extends StatefulWidget {
+  final Function? onProfileUpdated;
+
+  EditProfilePage({this.onProfileUpdated});
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
 }
@@ -25,6 +29,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String profileImagePath =
       ''; // Variable to store the path of the selected profile image
   bool isLoading = false; // Initialize as false
+  bool _isImageChanged = false;
 
   @override
   void initState() {
@@ -128,18 +133,86 @@ class _EditProfilePageState extends State<EditProfilePage> {
   ObstructingPreferredSizeWidget buildNavigationBar(BuildContext context) {
     return CupertinoNavigationBar(
       leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Icon(FeatherIcons.x,
-              size: 22,
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.label, context))),
-      trailing: Text(
-        'Save',
-        style: TextStyle(color:accentColor, fontWeight: FontWeight.w500),
+        onTap: () => Navigator.of(context).pop(),
+        child: Icon(FeatherIcons.x,
+            size: 22,
+            color:
+                CupertinoDynamicColor.resolve(CupertinoColors.label, context)),
+      ),
+      trailing: CupertinoButton(
+        padding: EdgeInsets.zero,
+        child: Text(
+          'Save',
+          style: TextStyle(color: accentColor, fontWeight: FontWeight.w500),
+        ),
+        onPressed: () async {
+          // Define what onComplete should do
+          VoidCallback onComplete = () => Navigator.of(context)
+              .pop('updated'); // Pop with a result if needed
+
+          // Call _updateUserProfile and pass onComplete
+          _updateUserProfile(null, onComplete);
+        },
       ),
       backgroundColor: groupedBackgroundColor,
       border: Border(),
     );
+  }
+
+  void _updateUserProfile([String? imageUrl, VoidCallback? onComplete]) async {
+    try {
+      // Get the current user's ID
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+
+      // Create a map of data to update
+      Map<String, dynamic> updateData = {
+        'firstName': _firstNameController.text,
+        'lastName': _lastNameController.text,
+        'aboutMe': _aboutMeController.text,
+        'email': _emailController.text,
+        'province': selectedProvince,
+        'city': selectedCity,
+      };
+
+      // Only update the profile image if a new image was selected
+      if (imageUrl != null) {
+        updateData['profileImagePath'] = imageUrl;
+      }
+
+      // Update the user's profile in Firestore
+      await FirebaseFirestore.instance
+          .collection('user')
+          .doc(userId)
+          .update(updateData);
+      print("Profile updated successfully");
+
+      // If an onComplete callback is provided, call it
+      if (onComplete != null) {
+        onComplete();
+      }
+      widget.onProfileUpdated?.call();
+    } catch (e) {
+      print("Error updating profile: $e");
+    }
+  }
+
+  Future<String?> _uploadImageToFirebase(File imageFile) async {
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      String fileName = 'profile_$userId.jpg';
+      Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_images')
+          .child(fileName);
+
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      await uploadTask.whenComplete(() => null);
+      String downloadUrl = await storageRef.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
   }
 
   Widget buildProfileForm(BuildContext context) {
@@ -347,7 +420,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               placeholder: 'No Bio Provided', // Placeholder text
               placeholderStyle: TextStyle(
-                color: CupertinoColors.systemGrey,
+                color: CupertinoColors.label.resolveFrom(context),
               ),
               decoration: BoxDecoration(
                 color: CupertinoColors.tertiarySystemBackground,
@@ -355,7 +428,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               textAlign: TextAlign.center, // Center the text
               style: TextStyle(
-                color: CupertinoColors.black, // Text color
+                color:CupertinoColors.label.resolveFrom(context),
               ),
             ),
           ),
@@ -372,7 +445,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         height: 50,
         width: double.infinity, // Makes the button take full width
         child: CupertinoButton(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemBackground, context),
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.tertiarySystemBackground, context),
           borderRadius: BorderRadius.circular(12),
           onPressed: onPressed,
           child: Text(
@@ -419,14 +493,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   child: Text(currentValue,
                       style: TextStyle(
                           color: isPlaceholder
-                              ? CupertinoDynamicColor.resolve(CupertinoColors.secondaryLabel, context)
+                              ? CupertinoDynamicColor.resolve(
+                                  CupertinoColors.secondaryLabel, context)
                               : CupertinoDynamicColor.resolve(
                                   CupertinoColors.label, context),
                           fontSize:
                               17.0)), // Use systemGrey if it's a placeholder, otherwise black
                 ),
                 Icon(FeatherIcons.chevronDown,
-                    color: CupertinoDynamicColor.resolve(CupertinoColors.secondaryLabel, context)),
+                    color: CupertinoDynamicColor.resolve(
+                        CupertinoColors.secondaryLabel, context)),
               ],
             ),
           ),
@@ -446,7 +522,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
       context: context,
       builder: (_) => Container(
         height: 250,
-        color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemBackground, context),
+        color: CupertinoDynamicColor.resolve(
+            CupertinoColors.tertiarySystemBackground, context),
         child: Column(
           children: [
             // Button Bar for Done and Cancel
@@ -457,18 +534,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   child: Text(
                     'Cancel',
                     style: TextStyle(
-                      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+                      color: CupertinoDynamicColor.resolve(
+                          CupertinoColors.label, context),
                     ),
                   ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 CupertinoButton(
-                  child: Text(
-                    'Done',
-                     style: TextStyle(
-                      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-                    )
-                  ),
+                  child: Text('Done',
+                      style: TextStyle(
+                        color: CupertinoDynamicColor.resolve(
+                            CupertinoColors.label, context),
+                      )),
                   onPressed: () {
                     if (onSelectedItemChanged != null) {
                       onSelectedItemChanged(options[initialItem]);

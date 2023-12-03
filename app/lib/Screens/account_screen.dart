@@ -3,8 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/profile_card.dart';
 import 'package:FoodHood/Components/order_card.dart';
-import 'package:FoodHood/Screens/profile_edit_screen.dart';
+import 'package:FoodHood/Screens/edit_profile_screen.dart';
 import 'package:FoodHood/Components/colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AccountScreen extends StatefulWidget {
   @override
@@ -12,24 +15,82 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  int segmentedControlGroupValue =
-      0; // Initialize with 'Active Orders' selected.
-  List<OrderCard> activeOrders = [
-    OrderCard(
-      imageLocation: 'assets/images/sampleFoodPic.png',
-      title: 'Poutine',
-      tags: ['GL Free', 'PVC Free'],
-      orderInfo: 'Ordered on September 21, 2023',
-    ),
-    OrderCard(
-      imageLocation: 'assets/images/sampleFoodPic.png',
-      title: 'Burger',
-      tags: ['Vegan', 'Organic'],
-      orderInfo: 'Ordered on September 22, 2023',
-    ),
-    // Add more OrderCard widgets as needed
-  ];
+  int segmentedControlGroupValue = 0;
+  List<Widget> activeOrders = [];
   List<OrderCard> pastOrders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    setUpPostStreamListener();
+  }
+
+  void setUpPostStreamListener() {
+    String currentUserUID = getCurrentUserUID();
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .where('user_id', isEqualTo: currentUserUID)
+        .orderBy('post_timestamp', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      if (mounted) {
+        if (snapshot.docs.isEmpty) {
+          // Handle the case where there are no posts for the user
+          print('No posts found for the current user.');
+        } else {
+          // Update the active orders if posts are available
+          updateActiveOrders(snapshot.docs);
+        }
+      }
+    }, onError: (error) {
+      if (error is FirebaseException && error.code == 'failed-precondition') {
+        // Specific message for index creation requirement
+        print(
+            'No Post Details index found.');
+      } else {
+        // General error handling
+        print('Error listening to post changes: $error');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void updateActiveOrders(List<QueryDocumentSnapshot> documents) {
+    setState(() {
+      activeOrders = documents.map((doc) {
+        var data = doc.data();
+        // Ensure the data is in the correct format
+        if (data is Map<String, dynamic>) {
+          return createOrderCard(data);
+        } else {
+          // Handle the case where data is not in the expected format
+          print('Document data is not a Map<String, dynamic>');
+          return SizedBox.shrink(); // Return an empty widget for this case
+        }
+      }).toList();
+    });
+  }
+
+  OrderCard createOrderCard(Map<String, dynamic> documentData) {
+    String title = documentData['title'] ?? 'No Title';
+    List<String> tags = documentData['categories'].split(',');
+    DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
+
+    return OrderCard(
+      imageLocation: 'assets/images/sampleFoodPic.png',
+      title: title,
+      tags: tags,
+      orderInfo: 'Ordered on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
+    );
+  }
+
+  String getCurrentUserUID() {
+    return FirebaseAuth.instance.currentUser?.uid ?? '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +136,15 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void _navigateToEditProfile(BuildContext context) {
-    Navigator.of(context)
-        .push(CupertinoPageRoute(builder: (context) => EditProfilePage()));
+  void _navigateToEditProfile(BuildContext context) async {
+    final result = await Navigator.of(context).push(
+      CupertinoPageRoute(builder: (context) => EditProfilePage()),
+    );
+
+    if (result == 'updated') {
+      // Fetch the updated data for the ProfileCard
+      setState(() {}); // You may call a method to refresh the data if necessary
+    }
   }
 
   void _navigateToSettings(BuildContext context) {

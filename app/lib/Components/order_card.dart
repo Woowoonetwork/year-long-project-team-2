@@ -1,5 +1,5 @@
+import 'package:FoodHood/Screens/food_posting.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 
 class OrderCard extends StatelessWidget {
   final String imageLocation;
@@ -45,21 +45,24 @@ class OrderCard extends StatelessWidget {
             },
           ),
         ],
-        child: Container(
-          decoration: _buildBoxDecoration(context),
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start, // Keep children left-aligned
-            children: [
-              // Center the image
-              Center(
-                child: _buildImageSection(context),
-              ),
-              // The rest of the sections are left-aligned
-              _buildTitleSection(context),
-              _buildTagSection(context),
-              _buildOrderInfoSection(context),
-            ],
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (context) => FoodPosting()),
+            );
+          },
+          child: Container(
+            decoration: _buildBoxDecoration(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: _buildImageSection(context)),
+                _buildTitleSection(context),
+                _buildTagSection(context),
+                _buildOrderInfoSection(context),
+              ],
+            ),
           ),
         ),
       ),
@@ -85,10 +88,10 @@ class OrderCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
       child: Image.asset(
-        imageLocation, // Use the provided image location
+        imageLocation,
         width: MediaQuery.of(context).size.width,
         height: 110,
-        fit: BoxFit.cover, // Crop image to scale
+        fit: BoxFit.cover,
       ),
     );
   }
@@ -97,10 +100,9 @@ class OrderCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Text(
-        title, // Use the provided title
+        title,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(
-              CupertinoColors.label, context), // Use dynamic label color
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
@@ -109,31 +111,29 @@ class OrderCard extends StatelessWidget {
   }
 
   Widget _buildTagSection(BuildContext context) {
-    const double horizontalSpacing = 7.0; // Adjust the spacing as needed
-    List<Color> tagColors = [
-      Color(0x7FF8CE53), // Color for the first tag
-      Color(0x7FFF8C5B), // Color for the second tag, and so on
-      // Add more colors for additional tags
-    ];
-
-    if (tags.length != tagColors.length) {
-      throw ArgumentError("Number of tags and tagColors must match.");
-    }
-
+    const double horizontalSpacing = 7.0;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Row(
         children: List.generate(tags.length, (index) {
           return Row(
             children: [
-              _buildTag(tags[index], tagColors[index],
-                  context), // Use the provided tag
-              SizedBox(width: horizontalSpacing), // Add spacing here
+              _buildTag(tags[index], _generateTagColor(index), context),
+              SizedBox(width: horizontalSpacing),
             ],
           );
         }),
       ),
     );
+  }
+
+  Color _generateTagColor(int index) {
+    List<Color> availableColors = [
+      Color(0x7FF8CE53),
+      Color(0x7FFF8C5B),
+      // Add more colors here
+    ];
+    return availableColors[index % availableColors.length];
   }
 
   Widget _buildTag(String text, Color color, BuildContext context) {
@@ -146,8 +146,7 @@ class OrderCard extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(
-              CupertinoColors.label, context), // Use dynamic label color
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
           fontSize: 10,
           fontWeight: FontWeight.w600,
         ),
@@ -159,10 +158,10 @@ class OrderCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Text(
-        orderInfo, // Use the provided orderInfo
+        orderInfo,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.secondaryLabel,
-              context), // Use dynamic secondary label color
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.secondaryLabel, context),
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),

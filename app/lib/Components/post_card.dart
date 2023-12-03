@@ -15,8 +15,6 @@ class PostCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // _buildImageSection(),
-
             Spacer(),
             _buildTitleSection(),
             _buildTagSection(),
