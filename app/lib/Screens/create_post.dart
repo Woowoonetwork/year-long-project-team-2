@@ -1,13 +1,12 @@
 // create_post.dart
 // a page that allows users to create a new post
 import 'package:flutter/cupertino.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+//import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 import 'package:FoodHood/Components/search_bar.dart' as CustomSearchBar;
-import 'package:flutter/material.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -91,15 +90,6 @@ Future<void> fetchData() async {
   TextEditingController title_controller = TextEditingController();
   TextEditingController desc_controller = TextEditingController();
   TextEditingController pickup_instr_controller = TextEditingController();
-  TextEditingController allergen_controller = TextEditingController();
-  String allergen_search_value = '';
-  TextEditingController category_controller = TextEditingController();
-  String category_search_value = '';
-  TextEditingController pickup_loc_controller = TextEditingController();
-  String pickup_loc_search_value = '';
-
-  List<String> selectedItems = [];
-  List<String> customItems = ['help', 'please'];
 
   List<String> selectedAllergens = [];
   List<String> selectedCategories = [];
@@ -228,25 +218,6 @@ Future<void> fetchData() async {
             ),
           ),
 
-          // SliverToBoxAdapter(
-          //   child: FutureBuilder(
-          //     future: fetchAllergens(),
-          //     builder: (context, snapshot) {
-          //       if (snapshot.connectionState == ConnectionState.waiting) {
-          //         return Center(
-          //           child: CircularProgressIndicator(),
-          //         );
-          //       } else if (snapshot.hasError) {
-          //         return Center(
-          //           child: Text('Error loading allergens: ${snapshot.error}'),
-          //         );
-          //       } else {
-          //         return CustomSearchBar.SearchBar(itemList: allergensList);
-          //       }
-          //     },
-          //   ),
-          // ),
-
           // Category text
           __buildTextField(text: "Category"),
 
@@ -284,42 +255,6 @@ Future<void> fetchData() async {
             ) ,
           ),
 
-          // //Expiration Date
-          // SliverToBoxAdapter(
-          //   child: Container( 
-          //     height: 80,
-          //     child: Padding(
-          //       padding: EdgeInsets.only(left: 17.0, right: 12.0, top: 10.0),
-          //       child: Row(
-          //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //         children: [
-                    
-          //           // First widget (Expiration date text)
-          //           const Text(
-          //             'Expiration Date',
-          //           ),
-                    
-          //           SizedBox(width: 5.0), // Adjust spacing between the widgets
-
-          //           // Second widget (Date picker for expiration date)
-          //           Container(
-          //             width: 268,
-          //             child: CupertinoDatePicker(
-          //               mode: CupertinoDatePickerMode.date,
-          //               initialDateTime: selectedDate,
-          //               onDateTimeChanged: (DateTime newDate) {
-          //                 setState(() {
-          //                   selectedDate = newDate;
-          //                 });
-          //               },
-          //             ),     
-          //           )  
-          //         ],
-          //       ),
-          //     ),
-          //   )
-          // ),
-
           // Pickup location text
           __buildTextField(text: "Pickup Location"),
 
@@ -334,29 +269,6 @@ Future<void> fetchData() async {
               },
             ),
           ),
-
-          // SliverToBoxAdapter(
-          //   child: Padding(
-          //     padding: EdgeInsets.only(left: 17.0, top: 10.0, right: 17.0, bottom: 60.0),
-          //     child: CupertinoSearchTextField(
-          //       controller: pickup_loc_controller,
-          //       padding: EdgeInsets.all(10.0),
-          //       placeholder: 'Search',
-          //       onSubmitted: (String value) {
-          //         // Handle search submission
-          //         setState(() {
-          //           pickup_loc_search_value = value;
-          //         });
-          //       },
-          //       backgroundColor: CupertinoColors.secondarySystemGroupedBackground,
-          //       onChanged: (value){
-          //         setState(() {
-          //           pickup_loc_search_value = value;
-          //         });
-          //       },
-          //     ),
-          //   ),
-          // ),
 
           //Map displaying location 
           // SliverToBoxAdapter(
@@ -428,70 +340,11 @@ Future<void> fetchData() async {
             child: SizedBox(height: 100.0),
           ),
 
-          // SliverToBoxAdapter(
-          //   child: CupertinoButton(
-          //     child: Text("Open Picker"),
-          //     onPressed: (){
-          //       //Add functionality
-          //       //_showMultiSelectPicker(context);
-          //     },
-          //   ),
-          // ),
-          // SliverToBoxAdapter(
-          //   child: Text('Selected Items: ${selectedItems.join(', ')}'),
-          // ),
-
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 100.0),
-          ),
 
         ],
       ),
     );
   }
-
-  // void _showMultiSelectPicker(BuildContext context) {
-  //   showCupertinoModalPopup(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Container(
-  //         height: 300,
-  //         child: CupertinoPicker.builder(
-  //           itemExtent: 60.0,
-  //           onSelectedItemChanged: (int index) {
-  //             // Handle selection logic here
-  //             // You can update the selected items list based on user interaction
-  //           },
-  //           itemBuilder: (BuildContext context, int index) {
-  //             // This is where you build each item in the picker
-  //             print('Index: $index, List Length: ${customItemList.length}');
-
-  //             return CupertinoButton(
-  //               //title: Text('Item $index'),
-                
-  //               onPressed: () {
-  //                 // Handle tap/click event to update the selected items list
-  //                 setState(() {
-  //                   if (index >= 0 && index < customItemList.length) {
-  //                     if (selectedItems.contains(customItemList[index])) {
-  //                       selectedItems.remove(customItemList[index]);
-  //                     } else {
-  //                       selectedItems.add(customItemList[index]);
-  //                     }
-  //                   }
-  //                   else{
-  //                     print('Invalid index: $index');
-  //                   }
-  //                 });
-  //               },
-  //               child: Text(customItemList[index]),
-  //             );
-  //           },
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   // Reusable widget to build the text fields
   Widget __buildTextField({
