@@ -1,9 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:FoodHood/Screens/create_post.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'mock.dart';
 
-void main(){
+void main() async{
+  
+  // This ensures the following firebase setup and initialization code runs only once.
+  setUpAll(() async {
+
+    // Ensure the test environment is set up correctly  
+    TestWidgetsFlutterBinding.ensureInitialized();
+
+    // Mock Firebase Analytics
+    setupFirebaseAnalyticsMocks(); 
+
+    // Initialize Firebase only if it hasn't been initialized yet
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp();
+    }
+  });
+  
   testWidgets('Create Post Screen UI Test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(CupertinoApp(
@@ -28,6 +45,36 @@ void main(){
 
     // Verify that the Google Map widget is present
     //expect(find.byType(GoogleMap), findsOneWidget);
+
+    // Test functionality upon clicking on the "Save" button
+    // Find the "Save" button and tap it
+    await tester.tap(find.text('Save'));
+    // Wait for animations to complete
+    await tester.pumpAndSettle();
+    // Verify that the confirmation dialogue appears
+    expect(find.text('Missing Information'), findsOneWidget);
+    expect(find.text('Please enter all the information before saving.'), findsOneWidget);
+    // Tap the "OK" button in the confirmation dialogue
+    await tester.tap(find.text('OK'));
+    // Wait for animations to complete
+    await tester.pumpAndSettle();
+    // Verify that the screen is still open (not popped)
+    expect(find.byType(CreatePostScreen), findsOneWidget);
+
+    // Test functionality upon clicking the "cancel" button
+    // Find the Cancel button icon and tap it
+    await tester.tap(find.byIcon(CupertinoIcons.clear));
+    // Wait for animations to complete
+    await tester.pumpAndSettle();
+    // Verify that the confirmation dialogue appears
+    expect(find.text('Confirm Exit'), findsOneWidget);
+    expect(find.text('Are you sure you want to discard your changes?'), findsOneWidget);
+    // Tap the "Discard" button in the confirmation dialogue
+    await tester.tap(find.text('Discard'));
+    // Wait for animations to complete
+    await tester.pumpAndSettle();
+    // Verify that the screen is popped (closed)
+    expect(find.byType(CreatePostScreen), findsNothing);
 
   });
 }
