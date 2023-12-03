@@ -4,7 +4,6 @@
 import 'package:flutter/cupertino.dart';
 import '../Components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:FoodHood/Screens/welcome_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
