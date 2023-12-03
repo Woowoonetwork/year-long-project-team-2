@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 //import status
 
@@ -19,13 +20,13 @@ class _PostDetailViewState extends State<PostDetailView> {
   String description = '';
   DateTime pickup_time = DateTime.now();
   DateTime expiration_date = DateTime.now();
-  DateTime parsedExpirationDate = DateTime.now();
   String pickup_location = '';
   String pickup_instructions = '';
   String title = '';
   List<dynamic> reviews = [];
   double rating = 0.0;
   String userid = '';
+  DateTime post_timestamp = DateTime.now();
 
   @override
   void initState() {
@@ -47,20 +48,13 @@ class _PostDetailViewState extends State<PostDetailView> {
           title = documentData['title'] ?? '';
           pickup_instructions = documentData['pickup_instructions'] ?? '';
           userid = documentData['user_id'] ?? '';
-
-          try {
-            pickup_time = DateTime.parse(documentData['pickup_time']);
-          } catch (e) {
-            pickup_time = DateTime.now();
-          }
-          try {
-            //DateTime createdAt =
-            // (documentData['post_timestamp'] as Timestamp).toDate();
-            print(documentData['expiration_date']);
-          } catch (e) {}
-
-          pickup_location = documentData['pickup_location'] ?? '';
           rating = documentData['rating'] ?? 0.0;
+          pickup_location = documentData['pickup_location'] ?? '';
+          pickup_time = (documentData['pickup_time'] as Timestamp).toDate();
+          expiration_date =
+              (documentData['expiration_date'] as Timestamp).toDate();
+          post_timestamp =
+              (documentData['post_timestamp'] as Timestamp).toDate();
         });
       } else {
         print('Document does not exist or is null.');
@@ -111,9 +105,7 @@ class _PostDetailViewState extends State<PostDetailView> {
       child: SafeArea(
         child: ListView(
           children: [
-            const Image(
-                image: AssetImage('assets/images/sampleFoodPic.png'),
-                fit: BoxFit.fill),
+            SizedBox(height: 200),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -145,10 +137,14 @@ class _PostDetailViewState extends State<PostDetailView> {
                             ),
                   ),
                   const SizedBox(height: 8),
-                  InfoRow(firstName: firstName, lastName: lastName),
+                  InfoRow(
+                    firstName: firstName,
+                    lastName: lastName,
+                    post_timestamp: post_timestamp,
+                  ),
                   const SizedBox(height: 16),
                   InfoCardsRow(
-                    expirationDate: parsedExpirationDate,
+                    expirationDate: expiration_date,
                     pickupTime: pickup_time,
                     allergens: allergens,
                   ),
@@ -222,16 +218,20 @@ class AvailabilityIndicator extends StatelessWidget {
 class CombinedTexts extends StatelessWidget {
   final String firstName;
   final String lastName;
+  final DateTime post_timestamp;
 
-  CombinedTexts({required this.firstName, required this.lastName});
+  CombinedTexts(
+      {required this.firstName,
+      required this.lastName,
+      required this.post_timestamp});
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         InfoText(
-          firstName: firstName,
-          lastName: lastName,
-        ),
+            firstName: firstName,
+            lastName: lastName,
+            post_timestamp: timeAgoSinceDate(post_timestamp)),
         SizedBox(width: 8),
         RatingText(),
       ],
@@ -242,8 +242,12 @@ class CombinedTexts extends StatelessWidget {
 class InfoRow extends StatelessWidget {
   final String firstName;
   final String lastName;
+  final DateTime post_timestamp;
 
-  InfoRow({required this.firstName, required this.lastName});
+  InfoRow(
+      {required this.firstName,
+      required this.lastName,
+      required this.post_timestamp});
 
   @override
   Widget build(BuildContext context) {
@@ -257,6 +261,7 @@ class InfoRow extends StatelessWidget {
               child: CombinedTexts(
             firstName: firstName,
             lastName: lastName,
+            post_timestamp: post_timestamp,
           )),
         ],
       ),
@@ -281,8 +286,12 @@ class IconPlaceholder extends StatelessWidget {
 class InfoText extends StatelessWidget {
   final String firstName;
   final String lastName;
+  final String post_timestamp;
 
-  InfoText({required this.firstName, required this.lastName});
+  InfoText(
+      {required this.firstName,
+      required this.lastName,
+      required this.post_timestamp});
   @override
   Widget build(BuildContext context) {
     return RichText(
@@ -294,9 +303,9 @@ class InfoText extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
         children: <TextSpan>[
-          TextSpan(text: 'Prepared by $firstName $lastName'),
-          const TextSpan(
-              text: '   Posted 32 mins ago',
+          TextSpan(text: 'Cooked by $firstName $lastName'),
+          TextSpan(
+              text: '   Posted $post_timestamp',
               style: TextStyle(letterSpacing: -0.48)),
         ],
       ),
@@ -343,6 +352,9 @@ class InfoCardsRow extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    String formattedExp = DateFormat('d MMM yyyy').format(expirationDate);
+    String formattedPick = DateFormat('h:mm a').format(pickupTime);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -352,7 +364,7 @@ class InfoCardsRow extends StatelessWidget {
             child: buildInfoCard(
               icon: FeatherIcons.clock,
               title: 'Expiration Date',
-              subtitle: DateFormat('yyyy-MM-dd HH:mm').format(expirationDate),
+              subtitle: formattedExp,
               context: context,
             ),
           ),
@@ -361,7 +373,7 @@ class InfoCardsRow extends StatelessWidget {
             child: buildInfoCard(
               icon: FeatherIcons.mapPin,
               title: 'Pickup Time',
-              subtitle: 'Today, 12:03pm',
+              subtitle: formattedPick,
               context: context,
             ),
           ),
@@ -528,6 +540,21 @@ class CupertinoCard extends StatelessWidget {
       ),
       child: child,
     );
+  }
+}
+
+String timeAgoSinceDate(DateTime dateTime) {
+  final duration = DateTime.now().difference(dateTime);
+  if (duration.inDays > 8) {
+    return '${dateTime.month}/${dateTime.day}/${dateTime.year}';
+  } else if (duration.inDays >= 1) {
+    return '${duration.inDays} day(s) ago';
+  } else if (duration.inHours >= 1) {
+    return '${duration.inHours} hours ago';
+  } else if (duration.inMinutes >= 1) {
+    return '${duration.inMinutes} min ago';
+  } else {
+    return 'Just now';
   }
 }
 
