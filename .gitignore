@@ -5,3 +5,4 @@ app/.dart_tool/package_config.json
 app/.dart_tool
 app/.dart_tool
 app/ios/Podfile.lock
+app/build
