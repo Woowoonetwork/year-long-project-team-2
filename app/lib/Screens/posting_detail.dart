@@ -1,10 +1,71 @@
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/firestore_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:feather_icons/feather_icons.dart';
 
 //import status
 
-class PostDetailView extends StatelessWidget {
+class PostDetailView extends StatefulWidget {
+  @override
+  _PostDetailViewState createState() => _PostDetailViewState();
+}
+
+class _PostDetailViewState extends State<PostDetailView> {
+  String firstName = '';
+  String lastName = '';
+  String allergens = '';
+  String description = '';
+  DateTime pickup_time = DateTime.now();
+  DateTime expiration_date = DateTime.now();
+  String pickup_location = '';
+  String pickup_instructions = '';
+  String title = '';
+  List<dynamic> reviews = [];
+  double rating = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      Map<String, dynamic>? documentData = await readDocument(
+        collectionName: 'post_details',
+        docName: '09a03b03-d37c-40d3-bd1c-36eed27113a5',
+      );
+
+      if (documentData != null) {
+        setState(() {
+          allergens = documentData!['allergens'] ?? '';
+          description = documentData!['description'] ?? '';
+          title = documentData!['title'] ?? '';
+          pickup_instructions = documentData!['pickup_instructions'] ?? '';
+
+          try {
+            pickup_time = DateTime.parse(documentData['pickup_time']);
+          } catch (e) {
+            pickup_time = DateTime.now();
+          }
+          try {
+            expiration_date = DateTime.parse(documentData['expiration_date']);
+          } catch (e) {
+            expiration_date = DateTime.now();
+          }
+
+          pickup_location = documentData['pickup_location'] ?? '';
+          rating = documentData['rating'] ?? 0.0;
+        });
+      } else {
+        print('Document does not exist or is null.');
+      }
+    } catch (e) {
+      print('Error fetching document: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -40,9 +101,9 @@ class PostDetailView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Chicken and Rice',
+                          title,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             letterSpacing: -1.34,
@@ -50,12 +111,12 @@ class PostDetailView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      AvailabilityIndicator(isReserved: true),
+                      AvailabilityIndicator(isReserved: false),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Succulent grilled chicken breast marinated in a zesty lemon-garlic sauce, served atop a bed of fluffy cilantro-lime rice. Accompanied by a side of steamed asparagus spears and drizzled with a tangy mango salsa.',
+                    description,
                     style:
                         CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                               color: CupertinoColors.systemGrey,
@@ -395,7 +456,7 @@ class CupertinoCard extends StatelessWidget {
           BoxShadow(
             color: CupertinoColors.systemGrey.withOpacity(0.5),
             blurRadius: 5.0,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -403,3 +464,5 @@ class CupertinoCard extends StatelessWidget {
     );
   }
 }
+
+//backend beginning
