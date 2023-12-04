@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
 
 class PostCard extends StatelessWidget {
   final String firstname;
@@ -36,7 +37,11 @@ class PostCard extends StatelessWidget {
         padding:
             EdgeInsets.zero, // Removes default padding from CupertinoButton
         onPressed: () {
-          print('Post card was clicked');
+          print("GestureDetector tapped");
+          Navigator.push(
+            context,
+            CupertinoPageRoute(builder: (context) => PostDetailView()),
+          );
         },
         child: Center(
           child: Container(
