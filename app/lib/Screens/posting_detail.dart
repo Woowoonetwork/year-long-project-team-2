@@ -50,7 +50,7 @@ class PostDetailView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      AvailabilityIndicator(isReserved: true),
+                      AvailabilityIndicator(isReserved: false),
                     ],
                   ),
                   const SizedBox(height: 8),

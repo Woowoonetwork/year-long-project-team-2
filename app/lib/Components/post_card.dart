@@ -10,6 +10,8 @@ class PostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        print("GestureDetector tapped");
+
         // Navigate to the post detail page when the card is tapped
         Navigator.push(
           context,
@@ -34,7 +36,6 @@ class PostCard extends StatelessWidget {
       ),
     );
   }
-
 
   BoxDecoration _buildBoxDecoration() {
     return BoxDecoration(
