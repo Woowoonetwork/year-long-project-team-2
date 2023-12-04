@@ -234,3 +234,49 @@ N/A
 ## Additional Information
 
 N/A
+
+
+## Week 13: Monday 27th Oct 2023 - Sunday 3rd Dec 2023
+
+![Peer Evaluation](./images/nickWeek13.png)
+
+## Recap of goals
+
+- Profile card now updates and listen for changes from the Firebase.
+- Orders from profile now fetches from firebase
+- Linked views between order and order detail view
+- Loading indicators when fetching from the fb
+- Pickers now uses stored values from firebase
+- Implemented edge case when there's no posts, placeholders etc.
+- Mock firebase test for the functionalities
+- Resolve other UI bugs
+- Contributed to building the teamlog for the week.
+- Helped review and suggest changes to the other team members' PRs and code.
+- Ensured code consistency and created guidelines for the team.
+- Helped with the presentation slides and demo.
+- Helped with writing up the design document.
+
+## Tasks completed 
+
+- The profile card has been updated to synchronize with Firebase changes.
+- Orders are now retrieved from Firebase.
+- Linked views have been established between the order list and order detail view.
+- Loading indicators have been added for better user experience during Firebase data retrieval.
+- Pickers now utilize values stored in Firebase.
+- Special consideration has been given to handling cases where there are no posts, using placeholders, and similar scenarios.
+- Mock Firebase tests have been created to validate functionality.
+- Various UI bugs have been addressed and resolved.
+- Contribution was made to the weekly team log.
+- Assistance was provided in reviewing and suggesting improvements for team members' Pull Requests and code.
+- Ensured code consistency and established guidelines for the team.
+- Assisted in creating presentation slides and preparing the demo.
+- Contributed to the development of the design document.
+
+
+## Tasks in progress (from Project Board)
+
+N/A
+
+## Additional Information
+
+N/A
