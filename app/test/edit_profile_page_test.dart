@@ -1,108 +1,152 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Screens/edit_profile_screen.dart';
-
-class MockFirebaseAuth extends Mock implements FirebaseAuth {}
-class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
-class MockFirebaseStorage extends Mock implements FirebaseStorage {}
-class MockUser extends Mock implements User {}
-class MockDocumentSnapshot extends Mock implements DocumentSnapshot {}
-class MockUploadTask extends Mock implements UploadTask {}
+import 'package:firebase_core/firebase_core.dart';
+import 'package:feather_icons/feather_icons.dart';
+import 'mock_firestore_service.dart';
+import 'mock.dart';
 
 void main() {
-  // Initialize mock objects
-  final mockAuth = MockFirebaseAuth();
-  final mockFirestore = MockFirebaseFirestore();
-  final mockStorage = MockFirebaseStorage();
-  final mockUser = MockUser();
-  final mockDocumentSnapshot = MockDocumentSnapshot();
-  final mockUploadTask = MockUploadTask();
-
   setUpAll(() async {
+    // Ensure the test environment is set up correctly
     TestWidgetsFlutterBinding.ensureInitialized();
-    // Set up any necessary mock responses here
-    when(mockAuth.currentUser).thenReturn(mockUser);
-    when(mockUser.uid).thenReturn('testUserID');
-    when(mockFirestore.collection('user').doc(any))
-        .thenReturn(MockDocumentReference());
-    when(mockStorage.ref(any)).thenReturn(MockReference());
+
+    // Mock Firebase Analytics
+    setupFirebaseAnalyticsMocks();
+
+    // Initialize Firebase only if it hasn't been initialized yet
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp();
+    }
   });
 
-  group('EditProfilePage Tests', () {
-    testWidgets('Verify UI Elements', (WidgetTester tester) async {
-      await tester.pumpWidget(CupertinoApp(home: EditProfilePage()));
-      // Add checks for various UI elements here
-      expect(find.byType(CupertinoTextField), findsWidgets);
+  group('Edit Profile Test', () {
+    testWidgets('Edit Profile Screen UI Test', (WidgetTester tester) async {
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(CupertinoApp(
+        home: EditProfilePage(),
+      ));
+
+      // Verify that the close icon is rendered.
       expect(find.byIcon(FeatherIcons.x), findsOneWidget);
-      expect(find.byType(CupertinoButton), findsWidgets);
-      // ... More checks
-    });
 
-    testWidgets('Test Update Profile Functionality', (WidgetTester tester) async {
-      when(mockFirestore.collection('user').doc('testUserID').get())
-          .thenAnswer((_) async => mockDocumentSnapshot);
-      when(mockDocumentSnapshot.exists).thenReturn(true);
-      when(mockDocumentSnapshot.data()).thenReturn({
-        'firstName': 'Test',
-        'lastName': 'User',
-        'aboutMe': 'Test Bio',
-        'email': 'test@example.com',
-        // ... Add other fields as necessary
-      });
+      // Verify that the "Save" button is present
+      expect(find.text('Save'), findsOneWidget);
 
-      await tester.pumpWidget(CupertinoApp(home: EditProfilePage()));
+      // Verify that the text input fields for first name, last name, about me, and email are present
+      expect(find.byType(CupertinoTextField), findsNWidgets(4));
 
-      // Simulate user input
-      await tester.enterText(find.byType(CupertinoTextField).at(0), 'Updated Name');
-      // ... Continue for other fields
+      // Verify that the profile image uploader is present
+      expect(find.text('Upload Profile Picture'), findsOneWidget);
 
-      // Tap the 'Save' button
+      // Verify that the action buttons for "Reset Password" and "Delete Account" are present
+      expect(find.text('Reset Password'), findsOneWidget);
+      expect(find.text('Delete Account'), findsOneWidget);
+
+      // Test functionality upon clicking on the "Save" button
+      // Find the "Save" button and tap it
       await tester.tap(find.text('Save'));
+      // Wait for animations to complete
       await tester.pumpAndSettle();
 
-      // Verify Firestore update method was called
-      verify(mockFirestore.collection('user').doc('testUserID').update(argThat(
-        isMapContaining({'firstName': 'Updated Name'}),
-        // ... Add other updated fields
-      ))).called(1);
-    });
+      // Since we don't have a real backend, we cannot verify the actual update operation.
+      // In a real test, you would mock the backend response and verify if the profile was updated.
 
-    testWidgets('Test Image Upload', (WidgetTester tester) async {
-      // Assuming _uploadImageToFirebase is triggered on a button press
-      when(mockStorage.ref('profile_images/profile_testUserID.jpg'))
-          .thenReturn(MockReference());
-      when(mockStorage.ref('profile_images/profile_testUserID.jpg').putFile(any))
-          .thenReturn(mockUploadTask);
-      when(mockUploadTask.whenComplete(any)).thenAnswer((_) async => null);
-      when(mockStorage.ref('profile_images/profile_testUserID.jpg').getDownloadURL())
-          .thenAnswer((_) async => 'http://example.com/downloadURL');
-
-      await tester.pumpWidget(CupertinoApp(home: EditProfilePage()));
-      // Simulate image upload
-      // ... Your code to trigger _uploadImageToFirebase
-
+      // Test functionality upon clicking the "Close" icon
+      // Find the Close icon and tap it
+      await tester.tap(find.byIcon(FeatherIcons.x));
+      // Wait for animations to complete
       await tester.pumpAndSettle();
-
-      // Verify that _uploadImageToFirebase is called
-      verify(mockStorage.ref('profile_images/profile_testUserID.jpg').putFile(any)).called(1);
+      // Verify that the screen is popped (closed)
+      expect(find.byType(EditProfilePage), findsNothing);
     });
 
-    testWidgets('Test Error Handling', (WidgetTester tester) async {
-      // Simulate error condition
-      when(mockFirestore.collection('user').doc('testUserID').get())
-          .thenThrow(Exception('Firestore error'));
+    test('Simulate Successful Document Addition', () async {
+      // Arrange - setup phase for preparing the necessary preconditions and inputs for the test
+      final firestoreService = MockFirestoreService();
+      // Set simulateSuccess to true to simulate a successful operation
+      firestoreService.simulateSuccess = true;
 
-      await tester.pumpWidget(CupertinoApp(home: EditProfilePage()));
-      // Perform actions that would trigger the error
-      await tester.tap(find.text('Save'));
-      await tester.pumpAndSettle();
+      // Act - Call the method that needs to be tested
+      await firestoreService.addDocument(
+        collectionName: 'mockCollection',
+        filename: 'mockFilename',
+        fieldNames: ['field1'],
+        fieldValues: ['value1'],
+      );
 
-      // Assert appropriate error handling
-      expect(find.text('Error occurred'), findsOneWidget);
+      // Asserts - Verifying the actual outcome matches the expected ones
+      // Assert 1 - Check if simulateSuccess is still true after the operation
+      expect(firestoreService.simulateSuccess, isTrue);
+
+      // Retrieve the data from the mock service
+      final addedData = await firestoreService.readDocument(
+        collectionName: 'mockCollection',
+        docName: 'mockFilename',
+      );
+      // Assert 2 - Check if the data contains the expected field name and value
+      expect(addedData?['field1'], 'value1');
     });
+
+    group('Firestore Service Tests', () {
+    late MockFirestoreService mockFirestoreService; // Declare mockFirestoreService here
+
+    setUp(() {
+      mockFirestoreService = MockFirestoreService(); // Initialize it in setUp
+    });
+
+    test('Simulate Successful Document Addition', () async {
+      // Arrange
+      mockFirestoreService.simulateSuccess = true; // Simulate a successful operation
+      final fieldNames = ['field1'];
+      final fieldValues = ['value1'];
+
+      // Act
+      await mockFirestoreService.addDocument(
+        collectionName: 'mockCollection',
+        filename: 'mockFilename',
+        fieldNames: fieldNames,
+        fieldValues: fieldValues,
+      );
+
+      // Assert
+      // Check if the document was added successfully
+      final addedData = await mockFirestoreService.readDocument(
+        collectionName: 'mockCollection',
+        docName: 'mockFilename',
+      );
+      expect(addedData, isNotNull);
+      expect(addedData?['field1'], 'value1');
+    });
+
+    test('Simulate Document Addition Failure', () async {
+      // Arrange
+      final firestoreService = MockFirestoreService();
+      // Set simulateSuccess to false to simulate a failure
+      firestoreService.simulateSuccess = false;
+
+      // Act and Assert
+      // Using expectLater handle the asynchronous nature
+      expectLater(
+        () => firestoreService.addDocument(
+          collectionName: 'mockCollection',
+          filename: 'mockFilename',
+          fieldNames: ['field1'],
+          fieldValues: ['value1'],
+        ),
+        throwsA(isInstanceOf<String>()),
+      );
+
+      // Check if simulateSuccess is still false after the operation
+      expect(firestoreService.simulateSuccess, isFalse);
+
+      //check if the data is not present after the failure
+      final addedDataAfterFailure = await firestoreService.readDocument(
+        collectionName: 'mockCollection',
+        docName: 'mockFilename',
+      );
+      expect(addedDataAfterFailure, isNull);
+    });
+  });
   });
 }

@@ -1,4 +1,4 @@
-import 'package:FoodHood/Screens/food_posting.dart';
+import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:flutter/cupertino.dart';
 
 class OrderCard extends StatelessWidget {
@@ -49,7 +49,7 @@ class OrderCard extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              CupertinoPageRoute(builder: (context) => FoodPosting()),
+              CupertinoPageRoute(builder: (context) => PostDetailView()),
             );
           },
           child: Container(
