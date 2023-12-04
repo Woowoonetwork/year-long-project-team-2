@@ -1,30 +1,78 @@
+import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 
 class OrderCard extends StatelessWidget {
+  final String imageLocation;
+  final String title;
+  final List<String> tags;
+  final String orderInfo;
+  final VoidCallback? onEdit;
+  final VoidCallback? onCancel;
+
+  OrderCard({
+    required this.imageLocation,
+    required this.title,
+    required this.tags,
+    required this.orderInfo,
+    this.onEdit, // Optional callback for editing
+    this.onCancel, // Optional callback for canceling
+  });
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 382,
-        height: 220,
-        decoration: _buildBoxDecoration(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildImageSection(),
-            _buildTitleSection(),
-            _buildTagSection(),
-            _buildOrderInfoSection(),
-          ],
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 220,
+      child: CupertinoContextMenu(
+        actions: <Widget>[
+          // Edit Order Action
+          CupertinoContextMenuAction(
+            child: Text('Edit Order'),
+            trailingIcon: CupertinoIcons.pencil,
+            onPressed: () {
+              onEdit?.call(); // Call the edit callback if it's provided
+              Navigator.pop(context);
+            },
+          ),
+          // Cancel Order Action
+          CupertinoContextMenuAction(
+            child: Text('Cancel Order'),
+            trailingIcon: CupertinoIcons.trash,
+            isDestructiveAction: true,
+            onPressed: () {
+              onCancel?.call(); // Call the cancel callback if it's provided
+              Navigator.pop(context);
+            },
+          ),
+        ],
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (context) => PostDetailView()),
+            );
+          },
+          child: Container(
+            decoration: _buildBoxDecoration(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: _buildImageSection(context)),
+                _buildTitleSection(context),
+                _buildTagSection(context),
+                _buildOrderInfoSection(context),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  BoxDecoration _buildBoxDecoration() {
+  BoxDecoration _buildBoxDecoration(BuildContext context) {
     return BoxDecoration(
-      color: Color(0xFFF8F8F8),
+      color: CupertinoDynamicColor.resolve(
+          CupertinoColors.tertiarySystemBackground, context),
       borderRadius: BorderRadius.circular(14),
       boxShadow: [
         BoxShadow(
@@ -36,26 +84,25 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSection() {
-  return ClipRRect(
-    borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-    child: Image.asset(
-      "../../assets/images/382x110.png", // Ensure this image is available in your assets
-      width: 382,
-      height: 110,
-      fit: BoxFit.fill,
-    ),
-  );
-}
+  Widget _buildImageSection(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+      child: Image.asset(
+        imageLocation,
+        width: MediaQuery.of(context).size.width,
+        height: 110,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
 
-
-  Widget _buildTitleSection() {
+  Widget _buildTitleSection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Text(
-        'Poutine',
+        title,
         style: TextStyle(
-          color: CupertinoColors.black,
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
@@ -63,20 +110,33 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTagSection() {
+  Widget _buildTagSection(BuildContext context) {
+    const double horizontalSpacing = 7.0;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Row(
-        children: [
-          _buildTag('GL Free', Color(0x7FF8CE53)),
-          const SizedBox(width: 7),
-          _buildTag('PVC Free', Color(0x7FFF8C5B)),
-        ],
+        children: List.generate(tags.length, (index) {
+          return Row(
+            children: [
+              _buildTag(tags[index], _generateTagColor(index), context),
+              SizedBox(width: horizontalSpacing),
+            ],
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildTag(String text, Color color) {
+  Color _generateTagColor(int index) {
+    List<Color> availableColors = [
+      Color(0x7FF8CE53),
+      Color(0x7FFF8C5B),
+      // Add more colors here
+    ];
+    return availableColors[index % availableColors.length];
+  }
+
+  Widget _buildTag(String text, Color color, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
@@ -86,7 +146,7 @@ class OrderCard extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoColors.black,
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
           fontSize: 10,
           fontWeight: FontWeight.w600,
         ),
@@ -94,13 +154,14 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderInfoSection() {
+  Widget _buildOrderInfoSection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Text(
-        'Ordered on September 21, 2023',
+        orderInfo,
         style: TextStyle(
-          color: CupertinoColors.black.withOpacity(0.6),
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.secondaryLabel, context),
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),

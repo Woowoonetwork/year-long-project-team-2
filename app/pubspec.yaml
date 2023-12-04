@@ -21,10 +21,8 @@ version: 1.0.0+1
 environment:
   sdk: ">=3.1.5 <4.0.0"
 
-
-
 dependency_overrides:
-      modal_bottom_sheet: ^3.0.0-pre
+  modal_bottom_sheet: ^3.0.0-pre
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -33,6 +31,7 @@ dependency_overrides:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  intl: ^0.17.0
   flutter:
     sdk: flutter
 
@@ -51,13 +50,15 @@ dependencies:
   firebase_auth_mocks: ^0.13.0
   modal_bottom_sheet: ^2.1.2
   sheet: ^0.0.4+1
+  image_picker: ^1.0.4
+  uuid: ^4.0.0
+  firebase_storage: ^11.5.3
 
 dev_dependencies:
-
   flutter_test:
     sdk: flutter
 
-  mockito: ^5.0.0
+  mockito: 5.4.3
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -75,8 +76,7 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - assets/images/smilelyface.png
-    - assets/images/google.png
+    - assets/images/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -125,7 +125,7 @@ flutter_native_splash:
   # IMPORTANT NOTE: These parameter do not affect the configuration of Android 12 and later, which
   # handle splash screens differently that prior versions of Android.  Android 12 and later must be
   # configured specifically in the android_12 section below.
-  
+
   # color or background_image is the only required parameter.  Use color to set the background
   # of your splash screen to a solid color.  Use background_image to set the background of your
   # splash screen to a png image.  This is useful for gradients. The image will be stretch to the

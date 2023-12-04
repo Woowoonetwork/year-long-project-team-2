@@ -1,8 +1,9 @@
-// auth_wrapper.dart 
+// auth_wrapper.dart
 // wrapper widget that determines whether to display the WelcomeScreen or the NavigationScreen
 
+import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
 import 'package:FoodHood/Screens/navigation_screen.dart';
 
@@ -19,15 +20,16 @@ class AuthWrapper extends StatelessWidget {
             return WelcomeScreen();
           } else {
             // User is logged in, display the NavigationScreen with the first tab selected
-            return NavigationScreen(selectedIndex: 0, onItemTapped: (int index) {
-              // Handle navigation tab changes here if necessary
-            });
+            return NavigationScreen(
+                selectedIndex: 0,
+                onItemTapped: (int index) {
+                  // Handle navigation tab changes here if necessary
+                });
           }
         }
-        
-        return Scaffold(
-          body: Center(
-            child: CircularProgressIndicator(),
+        return CupertinoPageScaffold(
+          child: Center(
+            child: CupertinoActivityIndicator(),
           ),
         );
       },

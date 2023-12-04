@@ -1,23 +1,38 @@
 // main.dart
 // entry point of the app
 
+import 'package:FoodHood/Screens/posting_detail.dart';
+import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/Screens/login_screen.dart';
+import 'package:FoodHood/Screens/navigation_screen.dart';
+import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/auth_wrapper.dart';
 import 'auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+import 'package:FoodHood/firestore_service.dart';
 
 void main() async {
   // Initialize Firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Call the function to add a pre-defined list of allergens and categories
+  await addAllergensCategoriesAndPL();
+
   // Run the app
-  runApp(FoodHoodApp());
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown
+  ]) // Restrict orientation to portrait
+      .then((_) {
+    runApp(FoodHoodApp());
+  });
 }
 
 class FoodHoodApp extends StatelessWidget {
@@ -33,6 +48,7 @@ class FoodHoodApp extends StatelessWidget {
             return CupertinoPageRoute(
               builder: (context) => WelcomeScreen(), // Root route
             );
+
           case '/signup':
             return CupertinoPageRoute(
               builder: (context) => RegistrationScreen(
@@ -40,15 +56,25 @@ class FoodHoodApp extends StatelessWidget {
             );
           case '/signin':
             return CupertinoPageRoute(
-              builder: (context) => LogInScreen(), // Signin route
+              builder: (context) => LogInScreen(),
             );
           case '/home':
             return CupertinoPageRoute(
+              builder: (context) => HomeScreen(),
+            );
+          case '/nav':
+            return CupertinoPageRoute(
               builder: (context) =>
-                  HomeScreen(), // Home screen route (after signin)
+                  NavigationScreen(selectedIndex: 0, onItemTapped: (index) {}),
+            );
+          case '/posting':
+            return CupertinoPageRoute(
+              builder: (context) => PostDetailView(),
             );
           default:
-            return null;
+            return CupertinoPageRoute(
+              builder: (context) => HomeScreen(),
+            );
         }
       },
     );
