@@ -205,3 +205,44 @@ N/A.
 Additional Information 
 
 N/A.
+
+---
+---
+
+## Week 13: Monday 27th Oct 2023 - Sunday 3rd Dec 2023
+
+## Tasks Worked On During the week
+![Peer Evaluation](./images/Week13_dhruv.png)
+## Recap of personal goals
+- Planned the features to be completed for this milestone
+- Started working on the backend functionality of the home page 
+- Created a method to read data from the firebase (title, name, tags etc)
+- Arrannging all the post in descending order by time
+- Making all the posts cards clickable
+- Work on the implementation of the search bar 
+- Search bar allows user to enter text and filter the post based on the text entered
+- Created test for reading the data from a mock firebase
+- Created test for search bar 
+- Work on the design documentation to be submitted
+- Complete team log 
+- Complete individual log
+
+## Tasks completed (from Project Board)
+- Home page backend funct
+- Home screen data reading backend functionality
+- Create a search bar for the home screen for users to search through posts (backend)
+- Create a test for verifying successful document read
+- Recap of features for design doc
+- Database design for design doc
+- Complete Week 13 individual log
+- Complete Week 13 team log
+
+## Tasks in progress (from Project Board)
+- All the task from the project board is completed
+
+Additional Information 
+
+N/A.
+
+---
+---

@@ -186,3 +186,34 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
+
+##week 13
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/manjotWeek13.jpg)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Completed the weekly logs.
+- debugging code
+- Worked on the database design
+- Attended group meetings
+
+### Tasks completed (from Project Board)
+
+- fixed bugs in code
+- Completed Week 13 individual log
+- Assisted in planning out the features left for the milestone and the tasks associated with them.
+- Reviewed other team members' PRs and assigned team members to PRs.
+- Worked on the database design
+
+### Tasks in progress (from Project Board)
+
+No task currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.

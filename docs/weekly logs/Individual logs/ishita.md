@@ -261,3 +261,53 @@ N/A.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Week 13: Monday 27th Nov 2023 - Sunday 3rd Dec 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaWeek13.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Continued working on the backend for the "create post" feature.
+- Created a custom cupertino chip widget for UI.
+- Created a custom reusable search bar component that searches through a pre-defined list of items and displays the selected items as chips.
+- Created a mock firestore service to mock firestore addDcoument and readDocument functions to test adding and reading data.
+- Modified the create post widget test to include more test cases.
+- Added a mock test to verify document additon.
+- Modified the settings page and settings UI test by fixing bugs.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Fix bugs in settings page
+- Fix the UI widget test of settings
+- Create a post backend feature.
+    - Modified the widget test for the UI of the screen to add more test cases.
+    - Added data to firestore using a function created by a team member.
+- Create a custom search bar which includes backend implementation for the pre-defined lists of allergens, categories, and pickup locations.
+    - Created a custom cupertino chip widget to display the selected items from the search bar
+- Create a mock firestore service for testing document reading and writing.
+- Create a mock test for verifying successful document addition.
+- Recap of features of design doc.
+- System architecture for design doc.
+- Complete Week 13 team log.
+- Complete Week 13 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- Design more tests for the create post feature.
+
+### Additional Information
+
+N/A.
