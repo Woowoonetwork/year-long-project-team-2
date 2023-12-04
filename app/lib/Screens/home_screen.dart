@@ -12,6 +12,7 @@ import '../components.dart'; // Ensure this is the correct path to component.dar
 import '../Components/order_card.dart';
 import '../Components/post_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController textController = TextEditingController();
   List<Widget> postCards = [];
   Map<String, Color> tagColors = {};
+  StreamSubscription<QuerySnapshot>? postsSubscription; // Add this line
 
   @override
   void initState() {
@@ -30,11 +32,69 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadInitialPosts();
   }
 
-  void _loadInitialPosts() async {
-    var fetchedPostCards = await fetchPosts('');
-    setState(() {
-      postCards = fetchedPostCards;
+  void _loadInitialPosts() {
+    // Set up a live listener
+    postsSubscription = FirebaseFirestore.instance
+        .collection('post_details')
+        .orderBy('post_timestamp', descending: true)
+        .snapshots()
+        .listen((snapshot) async {
+      // Note the 'async' keyword here
+      var fetchedPostCards =
+          await _processSnapshot(snapshot); // Await the result
+      setState(() {
+        postCards = fetchedPostCards; // Assign the awaited result to postCards
+      });
     });
+  }
+
+  Future<List<Widget>> _processSnapshot(QuerySnapshot snapshot) async {
+    List<Widget> fetchedPostCards = [];
+    try {
+      for (var document in snapshot.docs) {
+        Map<String, dynamic> documentData =
+            document.data() as Map<String, dynamic>;
+
+        String title = documentData['title'] ?? 'No Title';
+        List<String> tags = documentData['categories'].split(',');
+
+        // Assign colors to tags
+        List<Color> assignedColors = tags.map((tag) {
+          tag = tag.trim();
+          if (!tagColors.containsKey(tag)) {
+            tagColors[tag] =
+                _getRandomColor(); // Assign a new color if not already assigned
+          }
+          return tagColors[tag]!;
+        }).toList();
+
+        DateTime createdAt;
+        createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
+
+        // Fetch user details (assuming 'UserId' is in documentData)
+        String userId = documentData['user_id'] ?? 'Unknown';
+        Map<String, dynamic>? userData = await readDocument(
+          collectionName: 'user',
+          docName: userId,
+        );
+
+        // Create a PostCard with fetched data
+        var postCard = PostCard(
+          title: title,
+          tags: tags,
+          tagColors: assignedColors,
+          firstname: userData?['firstName'] ?? 'Unknown',
+          lastname: userData?['lastName'] ?? 'Unknown',
+          timeAgo: timeAgoSinceDate(createdAt),
+        );
+
+        fetchedPostCards.add(postCard);
+        fetchedPostCards.add(SizedBox(height: 16)); // For spacing between cards
+      }
+    } catch (e) {
+      print('Error processing snapshot: $e');
+    }
+    return fetchedPostCards;
   }
 
   @override
