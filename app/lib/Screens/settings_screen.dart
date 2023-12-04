@@ -4,7 +4,6 @@
 import 'package:flutter/cupertino.dart';
 import '../Components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:FoodHood/Screens/welcome_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -17,9 +16,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemBackground,
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: const Color.fromRGBO(238, 238, 238, 1.0),
+        backgroundColor: CupertinoColors.systemGroupedBackground,
         middle: const Text(
           'Settings',
           style: TextStyle(
@@ -102,7 +101,7 @@ class AccessibilityButton extends StatelessWidget {
       onPressed: () {
         // Add the button functionality here
       },
-      color: CupertinoColors.white,
+      color: CupertinoColors.secondarySystemGroupedBackground,
       borderRadius: BorderRadius.circular(23),
       padding: EdgeInsets.all(16.0),
       child: const Row(
@@ -139,7 +138,7 @@ class HelpButton extends StatelessWidget {
       onPressed: () {
         // Add the button functionality here
       },
-      color: CupertinoColors.white,
+      color: CupertinoColors.secondarySystemGroupedBackground,
       borderRadius: BorderRadius.circular(23),
       padding: EdgeInsets.all(16.0),
       child: const Row(
@@ -173,11 +172,9 @@ class SignOutButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoButton(
       onPressed: () async {
-        // Add the button functionality here
-        //await FirebaseAuth.instance.signOut();
         showSignOutConfirmationDialog(context);
       },
-      color: CupertinoColors.white,
+      color: CupertinoColors.secondarySystemGroupedBackground,
       borderRadius: BorderRadius.circular(23),
       padding: EdgeInsets.all(16.0),
       child: const Row(
@@ -222,14 +219,10 @@ class SignOutButton extends StatelessWidget {
             ),
             CupertinoDialogAction(
               onPressed: () async {
+                // Sign out
                 await FirebaseAuth.instance.signOut();
-                Navigator.of(context).pop(); // Close the dialog
-                // Redirect to the welcome screen upon signing out
-                Navigator.of(context).pushReplacement(
-                  CupertinoPageRoute(
-                    builder: (context) => WelcomeScreen(),
-                  ),
-                );
+                // Navigate to the welcome screen
+                Navigator.popUntil(context, ModalRoute.withName('/'));
               },
               isDestructiveAction: true,
               child: Text('Sign Out'),
