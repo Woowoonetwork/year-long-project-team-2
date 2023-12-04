@@ -12,9 +12,9 @@ class _PublicPageState extends State<PublicPage> {
   late String lastName;
   late String city;
   late String province;
-  double rating = 5.0; // You can change this based on the actual rating from the document
-  int itemsSold = 0; // Now calculated based on the length of reviews
-  List<String> reviews = []; // You can change this based on the actual reviews from the document
+  double rating = 5.0;
+  int itemsSold = 0;
+  List<String> reviews = [];
 
   @override
   void initState() {
@@ -23,7 +23,6 @@ class _PublicPageState extends State<PublicPage> {
   }
 
   Future<void> fetchData() async {
-    // Replace 'your_collection_name' and 'your_document_name' with actual values
     Map<String, dynamic>? documentData = await readDocument(
       collectionName: 'user',
       docName: 'afkwlDWxekVhdgV1YPZFK7E34UH3',
@@ -31,19 +30,13 @@ class _PublicPageState extends State<PublicPage> {
 
     if (documentData != null) {
       setState(() {
-        // Get data from the document
         firstName = documentData['firstName'];
         lastName = documentData['lastName'];
         city = documentData['city'];
         province = documentData['province'];
-        rating = 5.0; // Replace this with actual rating from the document
-        reviews = documentData['reviews'] ?? []; // Get reviews from the document
-
-        // Calculate itemsSold based on the length of reviews
+        rating = 5.0;
+        reviews = documentData['reviews'] ?? [];
         itemsSold = reviews.length;
-
-        // Do not read reviews from the document, just set it to an empty list
-        // reviews = [];
       });
     }
   }
@@ -120,8 +113,7 @@ class _PublicPageState extends State<PublicPage> {
                 reviews.isEmpty
                     ? Text('No reviews')
                     : Column(
-                        children: reviews
-                            .reversed
+                        children: reviews.reversed
                             .take(3)
                             .map((review) => Text(review))
                             .toList(),

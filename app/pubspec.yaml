@@ -21,10 +21,8 @@ version: 1.0.0+1
 environment:
   sdk: ">=3.1.5 <4.0.0"
 
-
-
 dependency_overrides:
-      modal_bottom_sheet: ^3.0.0-pre
+  modal_bottom_sheet: ^3.0.0-pre
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -33,6 +31,7 @@ dependency_overrides:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  intl: ^0.17.0
   flutter:
     sdk: flutter
 
@@ -53,9 +52,9 @@ dependencies:
   sheet: ^0.0.4+1
   image_picker: ^1.0.4
   uuid: ^4.0.0
+  firebase_storage: ^11.5.3
 
 dev_dependencies:
-
   flutter_test:
     sdk: flutter
 
@@ -126,7 +125,7 @@ flutter_native_splash:
   # IMPORTANT NOTE: These parameter do not affect the configuration of Android 12 and later, which
   # handle splash screens differently that prior versions of Android.  Android 12 and later must be
   # configured specifically in the android_12 section below.
-  
+
   # color or background_image is the only required parameter.  Use color to set the background
   # of your splash screen to a solid color.  Use background_image to set the background of your
   # splash screen to a png image.  This is useful for gradients. The image will be stretch to the

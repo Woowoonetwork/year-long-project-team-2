@@ -8,7 +8,7 @@ import 'dart:math' as math;
 import '../firestore_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../components.dart'; // Ensure this is the correct path to component.dart
+import '../components.dart';
 import '../Components/order_card.dart';
 import '../Components/post_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadInitialPosts();
   }
 
+
   void _loadInitialPosts() {
     // Set up a live listener
     postsSubscription = FirebaseFirestore.instance
@@ -45,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         postCards = fetchedPostCards; // Assign the awaited result to postCards
       });
+
     });
   }
 
@@ -123,23 +125,25 @@ class _HomeScreenState extends State<HomeScreen> {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('post_details')
           .orderBy('post_timestamp', descending: true)
-          .get();
+          .get(); //query to display the post cards in a descending order by time
 
       for (var document in querySnapshot.docs) {
         Map<String, dynamic> documentData =
             document.data() as Map<String, dynamic>;
 
         if (documentData != null) {
-          String title = documentData['title'] ?? 'No Title';
-          List<String> tags = documentData['categories'].split(',');
+          String title = documentData['title'] ?? 'No Title'; //retrieving title
+          List<String> tags =
+              documentData['categories'].split(','); //retrieveing tags
           bool matchesSearchString =
               title.toLowerCase().contains(searchString) ||
-                  tags.any((tag) => tag.toLowerCase().contains(searchString));
+                  tags.any((tag) => tag
+                      .toLowerCase()
+                      .contains(searchString)); //search bar condition check
 
           // Check if the title contains the search string
           if (matchesSearchString) {
             print('Document data for $documentData: $documentData');
-            // Assuming 'Tags' is a comma-separated string
             List<Color> assignedColors = tags.map((tag) {
               tag = tag.trim();
               if (!tagColors.containsKey(tag)) {
@@ -151,7 +155,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
             DateTime createdAt;
 
-            createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
+            createdAt = (documentData['post_timestamp'] as Timestamp)
+                .toDate(); //retrieving the time when the post is created
 
             // Fetch user details (assuming 'UserId' is in documentData)
             String userId = documentData['user_id'] ?? 'Unknown';
@@ -208,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               controller: textController,
                               placeholder: 'Search',
                               onChanged: (String value) {
-                                _onSearchTextChanged(); // Call this method whenever the text changes
+                                _onSearchTextChanged(); // Call whenever the text changes
                               },
                             ),
                           ),
@@ -242,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
 
-                    SizedBox(height: 16), // Add some spacing before the text
+                    SizedBox(height: 16), // Adding spacing before the text
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
@@ -252,8 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: CupertinoButton(
                               child: Text(
                                 'All',
-                                style: TextStyle(
-                                    fontSize: 12), // Smaller font size
+                                style: TextStyle(fontSize: 12),
                               ),
                               color: Color.fromARGB(255, 21, 136, 102),
                               padding: EdgeInsets.symmetric(
@@ -294,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   horizontal: 15, vertical: 5),
                               borderRadius: BorderRadius.circular(20),
                               onPressed: () {
-                                // Button 2 action
+                                // Button 3 action
                               },
                             ),
                           ),
@@ -311,7 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   horizontal: 15, vertical: 5),
                               borderRadius: BorderRadius.circular(20),
                               onPressed: () {
-                                // Button 2 action
+                                // Button 4 action
                               },
                             ),
                           ),
@@ -328,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   horizontal: 15, vertical: 5),
                               borderRadius: BorderRadius.circular(20),
                               onPressed: () {
-                                // Button 2 action
+                                // Button 5 action
                               },
                             ),
                           ),
@@ -345,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   horizontal: 15, vertical: 5),
                               borderRadius: BorderRadius.circular(20),
                               onPressed: () {
-                                // Button 2 action
+                                // Button 6 action
                               },
                             ),
                           ),
@@ -374,9 +378,9 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Icon(CupertinoIcons.add),
               color: Color.fromRGBO(51, 117, 134, 1.0),
-              padding: EdgeInsets.all(18.0), // Adjust padding to control size
-              borderRadius:
-                  BorderRadius.circular(40.0), // Adjust the radius as needed
+              padding:
+                  EdgeInsets.all(18.0), // Adjusting padding to control size
+              borderRadius: BorderRadius.circular(40.0),
             ),
           ),
         ],
@@ -384,6 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+//Method for getting when the post was created
   String timeAgoSinceDate(DateTime dateTime) {
     final duration = DateTime.now().difference(dateTime);
     if (duration.inDays > 8) {
@@ -399,6 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+//get a random colour for the tags . Choosing a colour between four
   Color _getRandomColor() {
     var random = math.Random();
     var colors = [

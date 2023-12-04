@@ -1,8 +1,23 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:FoodHood/Screens/settings_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'mock.dart';
 
 void main(){
+  setUpAll(() async {
+
+    // Ensure the test environment is set up correctly  
+    TestWidgetsFlutterBinding.ensureInitialized();
+
+    // Mock Firebase Analytics
+    setupFirebaseAnalyticsMocks(); 
+
+    // Initialize Firebase only if it hasn't been initialized yet
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp();
+    }
+  });
   testWidgets('Create Post Screen UI Test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(CupertinoApp(

@@ -1,10 +1,87 @@
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/firestore_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:feather_icons/feather_icons.dart';
+import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 //import status
 
-class PostDetailView extends StatelessWidget {
+class PostDetailView extends StatefulWidget {
+  @override
+  _PostDetailViewState createState() => _PostDetailViewState();
+}
+
+class _PostDetailViewState extends State<PostDetailView> {
+  String firstName = '';
+  String lastName = '';
+  String allergens = '';
+  String description = '';
+  DateTime pickup_time = DateTime.now();
+  DateTime expiration_date = DateTime.now();
+  String pickup_location = '';
+  String pickup_instructions = '';
+  String title = '';
+  List<dynamic> reviews = [];
+  double rating = 0.0;
+  String userid = '';
+  DateTime post_timestamp = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      Map<String, dynamic>? documentData = await readDocument(
+        collectionName: 'post_details',
+        docName: '26eb541c-b28d-4586-8354-12e7035218f3',
+      );
+
+      if (documentData != null) {
+        setState(() {
+          allergens = documentData['allergens'] ?? '';
+          description = documentData['description'] ?? '';
+          title = documentData['title'] ?? '';
+          pickup_instructions = documentData['pickup_instructions'] ?? '';
+          userid = documentData['user_id'] ?? '';
+          rating = documentData['rating'] ?? 0.0;
+          pickup_location = documentData['pickup_location'] ?? '';
+          pickup_time = (documentData['pickup_time'] as Timestamp).toDate();
+          expiration_date =
+              (documentData['expiration_date'] as Timestamp).toDate();
+          post_timestamp =
+              (documentData['post_timestamp'] as Timestamp).toDate();
+        });
+      } else {
+        print('Document does not exist or is null.');
+      }
+    } catch (e) {
+      print('Error fetching document: $e');
+    }
+
+    try {
+      Map<String, dynamic>? documentData = await readDocument(
+        collectionName: 'user',
+        docName: userid,
+      );
+
+      if (documentData != null) {
+        setState(() {
+          firstName = documentData['firstName'];
+          lastName = documentData['lastName'];
+        });
+      } else {
+        print('Document does not exist or is null.');
+      }
+    } catch (e) {
+      print('Error fetching document: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -28,9 +105,7 @@ class PostDetailView extends StatelessWidget {
       child: SafeArea(
         child: ListView(
           children: [
-            const Image(
-                image: AssetImage('assets/images/sampleFoodPic.png'),
-                fit: BoxFit.fill),
+            SizedBox(height: 200),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -40,9 +115,9 @@ class PostDetailView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Chicken and Rice',
+                          title,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             letterSpacing: -1.34,
@@ -50,24 +125,35 @@ class PostDetailView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      AvailabilityIndicator(isReserved: true),
+                      AvailabilityIndicator(isReserved: false),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Succulent grilled chicken breast marinated in a zesty lemon-garlic sauce, served atop a bed of fluffy cilantro-lime rice. Accompanied by a side of steamed asparagus spears and drizzled with a tangy mango salsa.',
+                    description,
                     style:
                         CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                               color: CupertinoColors.systemGrey,
                             ),
                   ),
                   const SizedBox(height: 8),
-                  InfoRow(),
+                  InfoRow(
+                    firstName: firstName,
+                    lastName: lastName,
+                    post_timestamp: post_timestamp,
+                  ),
                   const SizedBox(height: 16),
-                  InfoCardsRow(),
-                  PickupInformation(),
+                  InfoCardsRow(
+                    expirationDate: expiration_date,
+                    pickupTime: pickup_time,
+                    allergens: allergens,
+                  ),
+                  PickupInformation(
+                    pickup_instructions: pickup_instructions,
+                    pickup_location: pickup_location,
+                  ),
                   const SizedBox(height: 16),
-                  AllergensSection(),
+                  AllergensSection(allergens: allergens),
                   Center(
                     child: ReserveButton(
                       isReserved: false,
@@ -130,11 +216,22 @@ class AvailabilityIndicator extends StatelessWidget {
 }
 
 class CombinedTexts extends StatelessWidget {
+  final String firstName;
+  final String lastName;
+  final DateTime post_timestamp;
+
+  CombinedTexts(
+      {required this.firstName,
+      required this.lastName,
+      required this.post_timestamp});
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        InfoText(),
+        InfoText(
+            firstName: firstName,
+            lastName: lastName,
+            post_timestamp: timeAgoSinceDate(post_timestamp)),
         SizedBox(width: 8),
         RatingText(),
       ],
@@ -143,6 +240,15 @@ class CombinedTexts extends StatelessWidget {
 }
 
 class InfoRow extends StatelessWidget {
+  final String firstName;
+  final String lastName;
+  final DateTime post_timestamp;
+
+  InfoRow(
+      {required this.firstName,
+      required this.lastName,
+      required this.post_timestamp});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -151,7 +257,12 @@ class InfoRow extends StatelessWidget {
         children: [
           IconPlaceholder(),
           const SizedBox(width: 8),
-          Expanded(child: CombinedTexts()),
+          Expanded(
+              child: CombinedTexts(
+            firstName: firstName,
+            lastName: lastName,
+            post_timestamp: post_timestamp,
+          )),
         ],
       ),
     );
@@ -173,6 +284,14 @@ class IconPlaceholder extends StatelessWidget {
 }
 
 class InfoText extends StatelessWidget {
+  final String firstName;
+  final String lastName;
+  final String post_timestamp;
+
+  InfoText(
+      {required this.firstName,
+      required this.lastName,
+      required this.post_timestamp});
   @override
   Widget build(BuildContext context) {
     return RichText(
@@ -184,9 +303,9 @@ class InfoText extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
         children: <TextSpan>[
-          const TextSpan(text: 'Prepared by Harry Styles'),
-          const TextSpan(
-              text: '   Posted 32 mins ago',
+          TextSpan(text: 'Cooked by $firstName $lastName'),
+          TextSpan(
+              text: '   Posted $post_timestamp',
               style: TextStyle(letterSpacing: -0.48)),
         ],
       ),
@@ -222,8 +341,20 @@ class RatingText extends StatelessWidget {
 }
 
 class InfoCardsRow extends StatelessWidget {
+  final DateTime expirationDate;
+  final DateTime pickupTime;
+  final String allergens;
+
+  InfoCardsRow({
+    required this.expirationDate,
+    required this.pickupTime,
+    required this.allergens,
+  });
   @override
   Widget build(BuildContext context) {
+    String formattedExp = DateFormat('d MMM yyyy').format(expirationDate);
+    String formattedPick = DateFormat('h:mm a').format(pickupTime);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -233,7 +364,7 @@ class InfoCardsRow extends StatelessWidget {
             child: buildInfoCard(
               icon: FeatherIcons.clock,
               title: 'Expiration Date',
-              subtitle: '2023-10-21',
+              subtitle: formattedExp,
               context: context,
             ),
           ),
@@ -242,7 +373,7 @@ class InfoCardsRow extends StatelessWidget {
             child: buildInfoCard(
               icon: FeatherIcons.mapPin,
               title: 'Pickup Time',
-              subtitle: 'Today, 12:03pm',
+              subtitle: formattedPick,
               context: context,
             ),
           ),
@@ -301,6 +432,11 @@ class InfoCardsRow extends StatelessWidget {
 }
 
 class PickupInformation extends StatelessWidget {
+  final String pickup_instructions;
+  final String pickup_location;
+  PickupInformation(
+      {required this.pickup_instructions, required this.pickup_location});
+
   @override
   Widget build(BuildContext context) {
     return CupertinoCard(
@@ -314,14 +450,14 @@ class PickupInformation extends StatelessWidget {
               style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
             ),
             const SizedBox(height: 8),
-            const Text('Today, 12:03pm'),
+            Text(pickup_instructions),
             const SizedBox(height: 16),
             Text(
               'Meeting Point',
               style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
             ),
             const SizedBox(height: 8),
-            const Text('330, 1130 Trello Way\nKelowna, BC\nV1V 5E0'),
+            Text(pickup_location),
           ],
         ),
       ),
@@ -330,6 +466,10 @@ class PickupInformation extends StatelessWidget {
 }
 
 class AllergensSection extends StatelessWidget {
+  final String allergens;
+  AllergensSection({
+    required this.allergens,
+  });
   @override
   Widget build(BuildContext context) {
     return CupertinoCard(
@@ -343,8 +483,7 @@ class AllergensSection extends StatelessWidget {
               style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
             ),
             const SizedBox(height: 8),
-            const Text(
-                'Peanuts, Tree nuts (e.g., almonds, cashews, walnuts), Milk, Eggs, Soy'),
+            Text(allergens),
           ],
         ),
       ),
@@ -370,7 +509,7 @@ class ReserveButton extends StatelessWidget {
         onPressed: isReserved
             ? null
             : () {
-                // Add reserving logic here
+                // Add the reserving logic here once you get the method thing
               },
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -395,7 +534,7 @@ class CupertinoCard extends StatelessWidget {
           BoxShadow(
             color: CupertinoColors.systemGrey.withOpacity(0.5),
             blurRadius: 5.0,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -403,3 +542,20 @@ class CupertinoCard extends StatelessWidget {
     );
   }
 }
+
+String timeAgoSinceDate(DateTime dateTime) {
+  final duration = DateTime.now().difference(dateTime);
+  if (duration.inDays > 8) {
+    return '${dateTime.month}/${dateTime.day}/${dateTime.year}';
+  } else if (duration.inDays >= 1) {
+    return '${duration.inDays} day(s) ago';
+  } else if (duration.inHours >= 1) {
+    return '${duration.inHours} hours ago';
+  } else if (duration.inMinutes >= 1) {
+    return '${duration.inMinutes} min ago';
+  } else {
+    return 'Just now';
+  }
+}
+
+//backend beginning

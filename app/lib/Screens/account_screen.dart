@@ -1,9 +1,21 @@
+/* 
+
+Account Screen
+
+- The account screen is the screen that displays the user's profile information and orders.
+
+*/
+
 import 'package:FoodHood/Screens/settings_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/profile_card.dart';
 import 'package:FoodHood/Components/order_card.dart';
-import 'package:FoodHood/Screens/profile_edit_screen.dart';
+import 'package:FoodHood/Screens/edit_profile_screen.dart';
+import 'package:FoodHood/Components/colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AccountScreen extends StatefulWidget {
   @override
@@ -11,24 +23,77 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  int segmentedControlGroupValue =
-      0; // Initialize with 'Active Orders' selected.
-  List<OrderCard> activeOrders = [
-    OrderCard(
-      imageLocation: 'assets/images/sampleFoodPic.png',
-      title: 'Poutine',
-      tags: ['GL Free', 'PVC Free'],
-      orderInfo: 'Ordered on September 21, 2023',
-    ),
-    OrderCard(
-      imageLocation: 'assets/images/sampleFoodPic.png',
-      title: 'Burger',
-      tags: ['Vegan', 'Organic'],
-      orderInfo: 'Ordered on September 22, 2023',
-    ),
-    // Add more OrderCard widgets as needed
-  ];
+  int segmentedControlGroupValue = 0;
+  List<Widget> activeOrders = [];
   List<OrderCard> pastOrders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    setUpPostStreamListener();
+  }
+
+  void setUpPostStreamListener() {
+    String currentUserUID = getCurrentUserUID();
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .where('user_id', isEqualTo: currentUserUID)
+        .orderBy('post_timestamp', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      if (mounted) {
+        if (snapshot.docs.isEmpty) {
+          print('No posts found for the current user.');
+        } else {
+          // Update the active orders if posts are available
+          updateActiveOrders(snapshot.docs);
+        }
+      }
+    }, onError: (error) {
+      if (error is FirebaseException && error.code == 'failed-precondition') {
+        print(
+            'No Post Details index found.');
+      } else {
+        print('Error listening to post changes: $error');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void updateActiveOrders(List<QueryDocumentSnapshot> documents) {
+    setState(() {
+      activeOrders = documents.map((doc) {
+        var data = doc.data();
+        if (data is Map<String, dynamic>) {
+          return createOrderCard(data);
+        } else {
+          print('Document data is not a Map<String, dynamic>');
+          return SizedBox.shrink(); 
+        }
+      }).toList();
+    });
+  }
+
+  OrderCard createOrderCard(Map<String, dynamic> documentData) {
+    String title = documentData['title'] ?? 'No Title';
+    List<String> tags = documentData['categories'].split(',');
+    DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
+
+    return OrderCard(
+      imageLocation: 'assets/images/sampleFoodPic.png',
+      title: title,
+      tags: tags,
+      orderInfo: 'Ordered on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
+    );
+  }
+
+  String getCurrentUserUID() {
+    return FirebaseAuth.instance.currentUser?.uid ?? '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +105,12 @@ class _AccountScreenState extends State<AccountScreen> {
     };
 
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: groupedBackgroundColor,
       child: CustomScrollView(
         slivers: <Widget>[
           _buildNavigationBar(context),
-          SliverToBoxAdapter(
-              child: ProfileCard()), // Display the profile card
-                 
+          SliverToBoxAdapter(child: ProfileCard()), // Display the profile card
+
           _buildEditProfileButton(), // New method to create the Edit Profile button
 
           _buildOrdersSectionTitle(),
@@ -62,13 +126,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   CupertinoSliverNavigationBar _buildNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: groupedBackgroundColor,
       largeTitle: Text('Account', style: TextStyle(letterSpacing: -1.34)),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
         child: Text('Settings',
-            style: TextStyle(
-                fontWeight: FontWeight.w500, color: Color(0xFF337586))),
+            style: TextStyle(fontWeight: FontWeight.w500, color: accentColor)),
         onPressed: () => _navigateToSettings(context),
       ),
       border: Border(bottom: BorderSide.none),
@@ -76,9 +139,15 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void _navigateToEditProfile(BuildContext context) {
-    Navigator.of(context)
-        .push(CupertinoPageRoute(builder: (context) => EditProfilePage()));
+  void _navigateToEditProfile(BuildContext context) async {
+    final result = await Navigator.of(context).push(
+      CupertinoPageRoute(builder: (context) => EditProfilePage()),
+    );
+
+    if (result == 'updated') {
+      
+      setState(() {});
+    }
   }
 
   void _navigateToSettings(BuildContext context) {
@@ -120,14 +189,12 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildOrdersContent(int segmentedValue) {
     switch (segmentedValue) {
       case 0:
-        // Replace this with the logic to check if there are active orders
         if (activeOrders.isNotEmpty) {
           return _buildActiveOrdersSliver(activeOrders);
         } else {
           return _buildPlaceholderText();
         }
       case 1:
-        // Replace this with the logic to check if there are past orders
         if (pastOrders.isNotEmpty) {
           return _buildPastOrdersSliver(pastOrders);
         } else {
@@ -163,11 +230,12 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
+// Method to build the placeholder text when there are no orders  
   SliverFillRemaining _buildPlaceholderText() {
     return SliverFillRemaining(
       hasScrollBody: false, // Prevents the sliver from being scrollable
       child: SizedBox(
-        height: 200, // Set a fixed height here
+        height: 50, 
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -178,7 +246,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 color: CupertinoColors.systemGrey,
               ),
               SizedBox(
-                  height: 20), // Provides spacing between the icon and text
+                  height: 20), 
               Text(
                 'No orders available',
                 style: TextStyle(fontSize: 16),
@@ -191,13 +259,13 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // New method to build the Edit Profile button
+  // Method to build the Edit Profile button
   Widget _buildEditProfileButton() {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: CupertinoButton(
-          color: Color(0xFF337586),
+          color: accentColor,
           borderRadius: BorderRadius.circular(10),
           minSize: 44,
           padding: const EdgeInsets.symmetric(vertical: 16),

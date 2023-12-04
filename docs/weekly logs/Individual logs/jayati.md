@@ -217,4 +217,44 @@ Additional Information
 
 N/A.
 
+# Individual Log: Monday 27th Nov 2023 - Sunday 3rd Nov 2023
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati8.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed.
+* Continued fixing bugs for food postings page
+* Updated food postings page
+* Created the backend for the posting detail page
+* Created tests for the backend
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+
+* Post details backend implementation reading data
+* Modularize post-details code for efficiency
+* Create a test for verifying correct document read for post-details
+* Recap of features for design doc
+* System architecture design for design doc
+* Database design for design doc
+* Created video for the milestone
+* Completed team log for the week
+* Completed individual log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+N/A
+
+
+
+Additional Information 
+
+N/A.
+
+
 

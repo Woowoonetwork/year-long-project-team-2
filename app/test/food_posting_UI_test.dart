@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
+import 'package:FoodHood/Screens/posting_detail.dart';
 
 void main() {
   testWidgets('Posting page builds correctly', (WidgetTester tester) async {
