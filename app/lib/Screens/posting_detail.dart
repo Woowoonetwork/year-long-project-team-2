@@ -38,7 +38,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     try {
       Map<String, dynamic>? documentData = await readDocument(
         collectionName: 'post_details',
-        docName: '09a03b03-d37c-40d3-bd1c-36eed27113a5',
+        docName: '26eb541c-b28d-4586-8354-12e7035218f3',
       );
 
       if (documentData != null) {
