@@ -1,5 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:FoodHood/Screens/posting_detail.dart';
+
+String x = "GL Free";
 
 class PostCard extends StatelessWidget {
   final String firstname;
@@ -30,28 +34,29 @@ class PostCard extends StatelessWidget {
   @override
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: CupertinoButton(
-        padding:
-            EdgeInsets.zero, // Removes default padding from CupertinoButton
-        onPressed: () {
-          print('Post card was clicked');
-        },
-        child: Center(
-          child: Container(
-            width: 382,
-            height: 220,
-            decoration: _buildBoxDecoration(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Spacer(),
-                _buildTitleSection(),
-                _buildTagSection(),
-                _buildOrderInfoSection(),
-              ],
-            ),
+    return GestureDetector(
+      onTap: () {
+        print("GestureDetector tapped");
+
+        // Navigate to the post detail page when the card is tapped
+        Navigator.push(
+          context,
+          CupertinoPageRoute(builder: (context) => PostDetailView()),
+        );
+      },
+      child: Center(
+        child: Container(
+          width: 382,
+          height: 220,
+          decoration: _buildBoxDecoration(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Spacer(),
+              _buildTitleSection(),
+              _buildTagSection(),
+              _buildOrderInfoSection(),
+            ],
           ),
         ),
       ),

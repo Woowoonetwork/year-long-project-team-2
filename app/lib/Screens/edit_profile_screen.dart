@@ -1,10 +1,16 @@
+import 'dart:io'; // Import required for File
+import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io'; // Import Dart's IO library to use File
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart'; // Import Firebase Storage
 
 class EditProfilePage extends StatefulWidget {
+  final Function? onProfileUpdated;
+
+  EditProfilePage({this.onProfileUpdated});
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
 }
@@ -14,49 +20,90 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _aboutMeController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  String _selectedProvince = 'BC';
-  String _selectedCity = 'Kelowna';
-  String?  _profileImagePath; // New variable to store the path of the selected profile image
+  String firstName = '';
+  String lastName = '';
+  String aboutMe = '';
+  String email = '';
+  String selectedProvince = '';
+  String selectedCity = '';
+  String profileImagePath =
+      ''; // Variable to store the path of the selected profile image
+  bool isLoading = false; // Initialize as false
+  bool _isImageChanged = false;
 
   @override
   void initState() {
     super.initState();
+    fetchUserDetails();
     fetchProvincesAndCities();
   }
 
   void fetchProvincesAndCities() async {
-  FirebaseFirestore.instance.collection('location').doc('rLxaYnbNB4x6Rpvil1Oe').get().then((documentSnapshot) {
-    if (documentSnapshot.exists) {
-      Map<String, dynamic> data = documentSnapshot.get('location');
-      Map<String, List<String>> fetchedCities = {};
+    try {
+      var documentSnapshot = await FirebaseFirestore.instance
+          .collection('location')
+          .doc('rLxaYnbNB4x6Rpvil1Oe')
+          .get();
 
-      data.forEach((province, citiesList) {
-        // Ensure the citiesList is a List of Strings
-        if (citiesList is List) {
-          fetchedCities[province] = List<String>.from(citiesList);
-        }
-      });
+      if (documentSnapshot.exists) {
+        Map<String, dynamic> data = documentSnapshot.get('location');
+        Map<String, List<String>> fetchedCities = {};
 
-      if (fetchedCities.isNotEmpty) {
-        setState(() {
-          provinces = fetchedCities.keys.toList();
-          cities = fetchedCities;
-          // After fetching, set the initial province and city
-          _selectedProvince = provinces.first;
-          _selectedCity = cities[_selectedProvince]?.first ?? '';
+        data.forEach((province, citiesList) {
+          if (citiesList is List) {
+            fetchedCities[province] = List<String>.from(citiesList);
+          }
         });
+
+        if (fetchedCities.isNotEmpty) {
+          setState(() {
+            provinces = fetchedCities.keys.toList();
+            cities = fetchedCities;
+            selectedProvince ??= provinces.first;
+            selectedCity ??= cities[selectedProvince]?.first ?? '';
+          });
+        }
+      }
+    } catch (error) {
+      print("Error fetching data: $error");
+    }
+  }
+
+  void fetchUserDetails() async {
+    setState(() => isLoading = true);
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+
+          _firstNameController.text = data['firstName'] ?? '';
+          _lastNameController.text = data['lastName'] ?? '';
+          _aboutMeController.text = data['aboutMe'] ?? '';
+          _emailController.text = user.email ?? data['email'] ?? '';
+
+          setState(() {
+            selectedProvince = data['province'] ?? selectedProvince;
+            selectedCity = data['city'] ?? selectedCity;
+            profileImagePath = data['profileImagePath'] ?? profileImagePath;
+          });
+        }
+      } catch (e) {
+        print("Error fetching user details: $e");
       }
     }
-  }).catchError((error) {
-    // Handle any errors here
-    print("Error fetching data: $error");
-  });
-}
 
+    setState(() => isLoading = false);
+  }
 
-
-  List<String> provinces = []; // Updated to be fetched from Firestore
-  Map<String, List<String>> cities = {}; // Updated to be fetched from Firestore
+  List<String> provinces = [];
+  Map<String, List<String>> cities = {};
 
   @override
   void dispose() {
@@ -70,49 +117,120 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: _buildNavigationBar(context),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(8),
-          child: _buildProfileForm(context),
-        ),
-      ),
+      backgroundColor: groupedBackgroundColor,
+      navigationBar: buildNavigationBar(context),
+      child: isLoading
+          ? Center(child: CupertinoActivityIndicator())
+          : SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(8),
+                child: buildProfileForm(context),
+              ),
+            ),
     );
   }
 
-  ObstructingPreferredSizeWidget _buildNavigationBar(BuildContext context) {
+  ObstructingPreferredSizeWidget buildNavigationBar(BuildContext context) {
     return CupertinoNavigationBar(
       leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Icon(FeatherIcons.x, size: 22, color: CupertinoColors.label)),
-      trailing: Text(
-        'Save',
-        style: TextStyle(color: Color(0xFF337586), fontWeight: FontWeight.w500),
+        onTap: () => Navigator.of(context).pop(),
+        child: Icon(FeatherIcons.x,
+            size: 22,
+            color:
+                CupertinoDynamicColor.resolve(CupertinoColors.label, context)),
       ),
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      trailing: CupertinoButton(
+        padding: EdgeInsets.zero,
+        child: Text(
+          'Save',
+          style: TextStyle(color: accentColor, fontWeight: FontWeight.w500),
+        ),
+        onPressed: () async {
+          // Define what onComplete should do
+          VoidCallback onComplete = () => Navigator.of(context)
+              .pop('updated'); // Pop with a result if needed
+
+          // Call _updateUserProfile and pass onComplete
+          _updateUserProfile(null, onComplete);
+        },
+      ),
+      backgroundColor: groupedBackgroundColor,
       border: Border(),
     );
   }
 
-  Widget _buildProfileForm(BuildContext context) {
+  void _updateUserProfile([String? imageUrl, VoidCallback? onComplete]) async {
+    try {
+      // Get the current user's ID
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+
+      // Create a map of data to update
+      Map<String, dynamic> updateData = {
+        'firstName': _firstNameController.text,
+        'lastName': _lastNameController.text,
+        'aboutMe': _aboutMeController.text,
+        'email': _emailController.text,
+        'province': selectedProvince,
+        'city': selectedCity,
+      };
+
+      // Only update the profile image if a new image was selected
+      if (imageUrl != null) {
+        updateData['profileImagePath'] = imageUrl;
+      }
+
+      // Update the user's profile in Firestore
+      await FirebaseFirestore.instance
+          .collection('user')
+          .doc(userId)
+          .update(updateData);
+      print("Profile updated successfully");
+
+      // If an onComplete callback is provided, call it
+      if (onComplete != null) {
+        onComplete();
+      }
+      widget.onProfileUpdated?.call();
+    } catch (e) {
+      print("Error updating profile: $e");
+    }
+  }
+
+  Future<String?> _uploadImageToFirebase(File imageFile) async {
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      String fileName = 'profile_$userId.jpg';
+      Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_images')
+          .child(fileName);
+
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      await uploadTask.whenComplete(() => null);
+      String downloadUrl = await storageRef.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
+  }
+
+  Widget buildProfileForm(BuildContext context) {
     return Column(
       children: <Widget>[
         _buildProfileImageUploader(context),
-
         Row(
           children: <Widget>[
             Expanded(
-              child:
-                  _buildTextField('First Name', 'First Name', _firstNameController),
+              child: _buildTextField(
+                  'First Name', 'First Name', _firstNameController),
             ),
             Expanded(
-              child: _buildTextField('Last Name', 'Last Name', _lastNameController),
+              child: _buildTextField(
+                  'Last Name', 'Last Name', _lastNameController),
             ),
           ],
         ),
-        // ... The rest of your widgets go here
-
         _buildLargeTextField('About Me', _aboutMeController),
         _buildTextField('Email', 'Enter Email here', _emailController),
         Row(
@@ -121,12 +239,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: _buildPickerField(
                 context,
                 'Province',
-                _selectedProvince,
+                selectedProvince,
                 provinces,
                 (String newValue) {
                   setState(() {
-                    _selectedProvince = newValue;
-                    _selectedCity = cities[_selectedProvince]?.first ?? '';
+                    selectedProvince = newValue;
+                    selectedCity = cities[selectedProvince]?.first ?? '';
                   });
                 },
               ),
@@ -135,11 +253,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: _buildPickerField(
                 context,
                 'City',
-                _selectedCity,
-                cities[_selectedProvince] ?? [],
+                selectedCity,
+                cities[selectedProvince] ?? [],
                 (String newValue) {
                   setState(() {
-                    _selectedCity = newValue;
+                    selectedCity = newValue;
                   });
                 },
               ),
@@ -147,7 +265,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.fromLTRB(0, 16, 0, 12),
           child: _buildActionButtons(
             'Reset Password',
             CupertinoColors.activeBlue,
@@ -179,9 +297,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
               decoration: BoxDecoration(
                 image: DecorationImage(
                   // Use FileImage if an image has been picked, otherwise use AssetImage
-                  image: _profileImagePath != null
+                  image: profileImagePath != ''
                       ? FileImage(
-                          File(_profileImagePath!)) // Cast the path to a File
+                          File(profileImagePath!)) // Cast the path to a File
                       : AssetImage("assets/images/sampleProfile.png")
                           as ImageProvider, // Explicitly cast AssetImage to ImageProvider
                   fit: BoxFit.cover,
@@ -203,13 +321,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(FeatherIcons.uploadCloud,
-                          size: 22, color: CupertinoColors.label),
+                          size: 22,
+                          color: CupertinoDynamicColor.resolve(
+                              CupertinoColors.label, context)),
                       SizedBox(width: 8),
                       Text(
                         'Upload Profile Picture',
                         style: TextStyle(
                           fontSize: 16,
-                          color: CupertinoColors.label,
+                          color: CupertinoDynamicColor.resolve(
+                              CupertinoColors.label, context),
                           letterSpacing: -.80,
                           fontWeight: FontWeight.w500,
                         ),
@@ -249,8 +370,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
         children: [
           Text(label,
               style: TextStyle(
-                  color: CupertinoColors.black,
-                  letterSpacing: -1.0,
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context),
+                  letterSpacing: -0.80,
                   fontWeight: FontWeight.w500)),
           SizedBox(height: 8),
           Container(
@@ -265,7 +387,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     17.0, // Match the default font size of CupertinoTextField
               ),
               decoration: BoxDecoration(
-                color: CupertinoColors.white,
+                color: CupertinoColors.tertiarySystemBackground,
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
@@ -284,8 +406,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
           Text(
             label,
             style: TextStyle(
-              letterSpacing: -1.0,
-              color: CupertinoColors.black,
+              letterSpacing: -0.80,
+              color:
+                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -297,15 +420,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               placeholder: 'No Bio Provided', // Placeholder text
               placeholderStyle: TextStyle(
-                color: CupertinoColors.systemGrey,
+                color: CupertinoColors.label.resolveFrom(context),
               ),
               decoration: BoxDecoration(
-                color: CupertinoColors.white,
+                color: CupertinoColors.tertiarySystemBackground,
                 borderRadius: BorderRadius.circular(12),
               ),
               textAlign: TextAlign.center, // Center the text
               style: TextStyle(
-                color: CupertinoColors.black, // Text color
+                color:CupertinoColors.label.resolveFrom(context),
               ),
             ),
           ),
@@ -322,7 +445,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         height: 50,
         width: double.infinity, // Makes the button take full width
         child: CupertinoButton(
-          color: CupertinoColors.white,
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.tertiarySystemBackground, context),
           borderRadius: BorderRadius.circular(12),
           onPressed: onPressed,
           child: Text(
@@ -351,13 +475,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
         children: [
           Text(label,
               style: TextStyle(
-                  color: CupertinoColors.black,
-                  letterSpacing: -1.0,
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context),
+                  letterSpacing: -0.80,
                   fontWeight: FontWeight.w500)),
           SizedBox(height: 8),
           CupertinoButton(
             padding: EdgeInsets.all(12),
-            color: CupertinoColors.white,
+            color: CupertinoColors.tertiarySystemBackground,
             borderRadius: BorderRadius.circular(12),
             onPressed: () => _showCupertinoPicker(
                 context, options, currentValue, onSelectedItemChanged),
@@ -368,13 +493,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   child: Text(currentValue,
                       style: TextStyle(
                           color: isPlaceholder
-                              ? CupertinoColors.systemGrey
-                              : CupertinoColors.black,
+                              ? CupertinoDynamicColor.resolve(
+                                  CupertinoColors.secondaryLabel, context)
+                              : CupertinoDynamicColor.resolve(
+                                  CupertinoColors.label, context),
                           fontSize:
                               17.0)), // Use systemGrey if it's a placeholder, otherwise black
                 ),
                 Icon(FeatherIcons.chevronDown,
-                    color: CupertinoColors.systemGrey),
+                    color: CupertinoDynamicColor.resolve(
+                        CupertinoColors.secondaryLabel, context)),
               ],
             ),
           ),
@@ -394,7 +522,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
       context: context,
       builder: (_) => Container(
         height: 250,
-        color: CupertinoColors.white,
+        color: CupertinoDynamicColor.resolve(
+            CupertinoColors.tertiarySystemBackground, context),
         child: Column(
           children: [
             // Button Bar for Done and Cancel
@@ -402,11 +531,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 CupertinoButton(
-                  child: Text('Cancel'),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: CupertinoDynamicColor.resolve(
+                          CupertinoColors.label, context),
+                    ),
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 CupertinoButton(
-                  child: Text('Done'),
+                  child: Text('Done',
+                      style: TextStyle(
+                        color: CupertinoDynamicColor.resolve(
+                            CupertinoColors.label, context),
+                      )),
                   onPressed: () {
                     if (onSelectedItemChanged != null) {
                       onSelectedItemChanged(options[initialItem]);
@@ -419,7 +558,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // Picker
             Expanded(
               child: CupertinoPicker(
-                backgroundColor: CupertinoColors.white,
+                backgroundColor: CupertinoColors.tertiarySystemBackground,
                 itemExtent: 30,
                 scrollController: FixedExtentScrollController(
                   initialItem: initialItem,
@@ -446,11 +585,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
             fontWeight: FontWeight.w500,
             color: CupertinoColors.secondaryLabel,
             fontSize: 16,
-            letterSpacing: -0.41,
+            letterSpacing: -0.80,
           ),
         ),
-        message: Text(
-            'Are you sure you want to $action?'),
+        message: Text('Are you sure you want to $action?'),
         actions: <Widget>[
           CupertinoActionSheetAction(
             child: Text(
@@ -458,7 +596,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               style: TextStyle(
                 color: CupertinoColors.destructiveRed,
                 fontWeight: FontWeight.w500,
-                letterSpacing: -0.41,
+                letterSpacing: -0.80,
               ),
             ),
             onPressed: () {
@@ -483,7 +621,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     if (image != null) {
       setState(() {
-        _profileImagePath = image.path; // Update the profile image path
+        profileImagePath = image.path; // Update the profile image path
       });
     }
   }
