@@ -1,40 +1,62 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:FoodHood/Screens/posting_detail.dart';
-
-String x = "GL Free";
 
 class PostCard extends StatelessWidget {
+  final String firstname;
+  final String lastname;
+  final String title;
+  final List<String> tags;
+  final List<Color> tagColors;
+  final String timeAgo;
+
+  // Define your colors here
+  final List<Color> colors = [
+    Colors.lightGreenAccent, // Light Green
+    Colors.lightBlueAccent, // Light Blue
+    Colors.pinkAccent[100]!, // Light Pink
+    Colors.yellowAccent[100]! // Light Yellow
+  ];
+
+  PostCard(
+      {Key? key,
+      required this.title,
+      required this.tags,
+      required this.tagColors,
+      required this.firstname,
+      required this.lastname,
+      required this.timeAgo})
+      : super(key: key);
+
+  @override
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to the post detail page when the card is tapped
-        Navigator.push(
-          context,
-          CupertinoPageRoute(builder: (context) => PostDetailView()),
-        );
-      },
-      child: Center(
-        child: Container(
-          width: 382,
-          height: 220,
-          decoration: _buildBoxDecoration(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Spacer(),
-              _buildTitleSection(),
-              _buildTagSection(),
-              _buildOrderInfoSection(),
-            ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: CupertinoButton(
+        padding:
+            EdgeInsets.zero, // Removes default padding from CupertinoButton
+        onPressed: () {
+          print('Post card was clicked');
+        },
+        child: Center(
+          child: Container(
+            width: 382,
+            height: 220,
+            decoration: _buildBoxDecoration(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Spacer(),
+                _buildTitleSection(),
+                _buildTagSection(),
+                _buildOrderInfoSection(),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-
 
   BoxDecoration _buildBoxDecoration() {
     return BoxDecoration(
@@ -50,23 +72,11 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  // Widget _buildImageSection() {
-  //   return ClipRRect(
-  //     borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-  //     child: Image.asset(
-  //       "../../assets/images/382x110.png", // Ensure this image is available in your assets
-  //       width: 382,
-  //       height: 110,
-  //       fit: BoxFit.fill,
-  //     ),
-  //   );
-  // }
-
   Widget _buildTitleSection() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Text(
-        'Poutine',
+        title,
         style: TextStyle(
           color: CupertinoColors.black,
           fontSize: 18,
@@ -79,12 +89,11 @@ class PostCard extends StatelessWidget {
   Widget _buildTagSection() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      child: Row(
-        children: [
-          _buildTag(x, Color(0x7FF8CE53)),
-          const SizedBox(width: 7),
-          _buildTag('PVC Free', Color(0x7FFF8C5B)),
-        ],
+      child: Wrap(
+        spacing: 8,
+        children: List<Widget>.generate(tags.length, (index) {
+          return _buildTag(tags[index].trim(), tagColors[index]);
+        }),
       ),
     );
   }
@@ -112,24 +121,17 @@ class PostCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
-          // Image or placeholder
           Container(
-            width: 24, // Set the width of the image placeholder
-            height: 24, // Set the height of the image placeholder
+            width: 24,
+            height: 24,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.grey, // Placeholder color
-              // Uncomment below and replace 'path/to/your/image' with actual image path
-              // image: DecorationImage(
-              //   image: AssetImage('path/to/your/image'),
-              //   fit: BoxFit.cover,
-              // ),
+              color: Colors.grey,
             ),
           ),
-          SizedBox(width: 8), // Space between image and text
-          // Text
+          SizedBox(width: 8),
           Text(
-            'Posted by Jason Bean   24 mins ago',
+            'Posted by $firstname $lastname $timeAgo',
             style: TextStyle(
               color: CupertinoColors.black.withOpacity(0.6),
               fontSize: 12,
