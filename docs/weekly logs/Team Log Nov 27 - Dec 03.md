@@ -88,13 +88,13 @@ We do not have any tasks currently in progress as all tasks have been completed.
 
 We've been steadily progressing over the week. Here is our auto-generated chart from GitHub for the week.
 
-![Untitled](/)
+![Untitled](./Burnup%20Charts/BurnupWeek13.png)
 
 ## Test Report
 
 Here is our code coverage report for most of our screens for the week:
 
-![Untitled](./Test%20Reports/TestReportW13.png)
+![Untitled](./Test%20Reports/TestReportWeek13.png)
 
 ## Additional Context
 
