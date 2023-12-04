@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
 
-// Predefined Theme Colors
-
 /* 
   Use groupedBackgroundColor for the background color of any list views or grouped content.
   Use backgroundColor for the background color of any other content.
@@ -47,7 +45,6 @@ final CupertinoDynamicColor quaternaryColor =
   color: Color(0xFFD4E2DF),
   darkColor: Color(0xFF7f8785),
 );
-
 
 /* 
   Complementary colours
