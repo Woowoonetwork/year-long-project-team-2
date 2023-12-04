@@ -88,13 +88,13 @@ We do not have any tasks currently in progress as all tasks have been completed.
 
 We've been steadily progressing over the week. Here is our auto-generated chart from GitHub for the week.
 
-![Untitled](Team%20Log%20Nov%2027%20-%20Dec%2003%206cea057d49324d52b6d59c53828ee8bf/Untitled.png)
+![Untitled](/)
 
 ## Test Report
 
 Here is our code coverage report for most of our screens for the week:
 
-![Untitled](Team%20Log%20Nov%2027%20-%20Dec%2003%206cea057d49324d52b6d59c53828ee8bf/Untitled%201.png)
+![Untitled](./Test%20Reports/TestReportW13.png)
 
 ## Additional Context
 
