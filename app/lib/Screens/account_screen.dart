@@ -1,3 +1,11 @@
+/* 
+
+Account Screen
+
+- The account screen is the screen that displays the user's profile information and orders.
+
+*/
+
 import 'package:FoodHood/Screens/settings_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
@@ -35,7 +43,6 @@ class _AccountScreenState extends State<AccountScreen> {
         .listen((snapshot) {
       if (mounted) {
         if (snapshot.docs.isEmpty) {
-          // Handle the case where there are no posts for the user
           print('No posts found for the current user.');
         } else {
           // Update the active orders if posts are available
@@ -44,11 +51,9 @@ class _AccountScreenState extends State<AccountScreen> {
       }
     }, onError: (error) {
       if (error is FirebaseException && error.code == 'failed-precondition') {
-        // Specific message for index creation requirement
         print(
             'No Post Details index found.');
       } else {
-        // General error handling
         print('Error listening to post changes: $error');
       }
     });
@@ -63,13 +68,11 @@ class _AccountScreenState extends State<AccountScreen> {
     setState(() {
       activeOrders = documents.map((doc) {
         var data = doc.data();
-        // Ensure the data is in the correct format
         if (data is Map<String, dynamic>) {
           return createOrderCard(data);
         } else {
-          // Handle the case where data is not in the expected format
           print('Document data is not a Map<String, dynamic>');
-          return SizedBox.shrink(); // Return an empty widget for this case
+          return SizedBox.shrink(); 
         }
       }).toList();
     });
@@ -142,8 +145,8 @@ class _AccountScreenState extends State<AccountScreen> {
     );
 
     if (result == 'updated') {
-      // Fetch the updated data for the ProfileCard
-      setState(() {}); // You may call a method to refresh the data if necessary
+      
+      setState(() {});
     }
   }
 
@@ -186,14 +189,12 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildOrdersContent(int segmentedValue) {
     switch (segmentedValue) {
       case 0:
-        // Replace this with the logic to check if there are active orders
         if (activeOrders.isNotEmpty) {
           return _buildActiveOrdersSliver(activeOrders);
         } else {
           return _buildPlaceholderText();
         }
       case 1:
-        // Replace this with the logic to check if there are past orders
         if (pastOrders.isNotEmpty) {
           return _buildPastOrdersSliver(pastOrders);
         } else {
@@ -229,11 +230,12 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
+// Method to build the placeholder text when there are no orders  
   SliverFillRemaining _buildPlaceholderText() {
     return SliverFillRemaining(
       hasScrollBody: false, // Prevents the sliver from being scrollable
       child: SizedBox(
-        height: 50, // Set a fixed height here
+        height: 50, 
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -244,7 +246,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 color: CupertinoColors.systemGrey,
               ),
               SizedBox(
-                  height: 20), // Provides spacing between the icon and text
+                  height: 20), 
               Text(
                 'No orders available',
                 style: TextStyle(fontSize: 16),
@@ -257,7 +259,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // New method to build the Edit Profile button
+  // Method to build the Edit Profile button
   Widget _buildEditProfileButton() {
     return SliverToBoxAdapter(
       child: Padding(

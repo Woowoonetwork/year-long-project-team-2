@@ -1,11 +1,20 @@
-import 'dart:io'; // Import required for File
+/* 
+
+Edit Profile Screen
+
+- This screen allows the user to edit their profile information, including their name, email, bio, and profile picture.
+
+*/
+
+
+import 'dart:io';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart'; // Import Firebase Storage
+import 'package:firebase_storage/firebase_storage.dart'; 
 
 class EditProfilePage extends StatefulWidget {
   final Function? onProfileUpdated;
@@ -347,9 +356,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   if (image != null) {
                     // Update the UI or do something with the selected image
                     setState(() {
-                      // For example, you could save the path of the selected image
-                      // and use it somewhere in your app
-                      // _selectedImagePath = image.path;
+                     
                     });
                   }
                 },
@@ -464,7 +471,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       String currentValue,
       List<String> options,
       ValueChanged<String> onSelectedItemChanged) {
-    // Determine if the current value is a valid selection or should be treated as placeholder text
     bool isPlaceholder =
         currentValue.isEmpty || !options.contains(currentValue);
 
@@ -498,7 +504,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               : CupertinoDynamicColor.resolve(
                                   CupertinoColors.label, context),
                           fontSize:
-                              17.0)), // Use systemGrey if it's a placeholder, otherwise black
+                              17.0)), 
                 ),
                 Icon(FeatherIcons.chevronDown,
                     color: CupertinoDynamicColor.resolve(
@@ -526,7 +532,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             CupertinoColors.tertiarySystemBackground, context),
         child: Column(
           children: [
-            // Button Bar for Done and Cancel
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -621,7 +626,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     if (image != null) {
       setState(() {
-        profileImagePath = image.path; // Update the profile image path
+        profileImagePath = image.path;
       });
     }
   }
