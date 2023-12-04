@@ -509,7 +509,7 @@ class ReserveButton extends StatelessWidget {
         onPressed: isReserved
             ? null
             : () {
-                // Add reserving logic here
+                // Add the reserving logic here once you get the method thing
               },
         borderRadius: BorderRadius.circular(8.0),
       ),
