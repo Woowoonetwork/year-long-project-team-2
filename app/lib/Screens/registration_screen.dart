@@ -1,14 +1,17 @@
 // registration_screen.dart
 // a screen that allows users to register for an account
 
+import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import '../components.dart';
 import '../auth_service.dart';
 import '../firestore_service.dart';
+import 'package:feather_icons/feather_icons.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:FoodHood/Screens/home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  final AuthService auth; // AuthService object
+  final AuthService auth;
 
   RegistrationScreen({Key? key, required this.auth}) : super(key: key);
 
@@ -17,9 +20,7 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  final GlobalKey<FormState> _formKey =
-      GlobalKey<FormState>(); // Global key for input validation
-  // Create controllers for each text field
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -27,26 +28,39 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _provinceController = TextEditingController();
   final _cityController = TextEditingController();
 
-  // Dispose of controllers when the widget is disposed
+  String _selectedProvince = '';
+  String _selectedCity = '';
+
+  List<String> provinces = []; // Updated to be fetched from Firestore
+  Map<String, List<String>> cities = {}; // Updated to be fetched from Firestore
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProvincesAndCities();
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _provinceController.dispose();
+    _cityController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // main body of the screen
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemBackground,
-      navigationBar: buildBackNavigationBar(context), // navigation bar
+      backgroundColor: groupedBackgroundColor,
+      navigationBar: buildBackNavigationBar(context),
       child: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Form(
-              // Form widget for input validation
               key: _formKey,
               child: _buildSignupForm(context),
             ),
@@ -62,48 +76,55 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildText('Create an account', 34, FontWeight.w600, -1.36),
+        buildText(
+            'Create an account', 34, FontWeight.w600), // Create an account text
         const SizedBox(height: 50),
-        _buildTwoFieldsRow(
+        buildTwoFieldsRow(
           'First Name',
           _firstNameController,
           'Last Name',
           _lastNameController,
         ),
         const SizedBox(height: 20),
-        _buildCupertinoTextField('Email Address', _emailController, false),
+        buildCupertinoTextField('Email Address', _emailController, false,
+            context), // Email text field
         const SizedBox(height: 20),
-        _buildCupertinoTextField('Password', _passwordController, true),
+        buildCupertinoTextField('Password', _passwordController, true, context),
         const SizedBox(height: 20),
-        _buildTwoFieldsRow(
+        buildTwoPickerFieldsRow(
           'Province',
-          _provinceController,
+          _selectedProvince,
+          provinces,
+          (value) {
+            setState(() {
+              _selectedProvince = value;
+              _selectedCity = cities[_selectedProvince]?.first ?? '';
+            });
+          },
           'City',
-          _cityController,
+          _selectedCity,
+          cities[_selectedProvince] ?? [],
+          (value) {
+            setState(() {
+              _selectedCity = value;
+            });
+          },
         ),
         const SizedBox(height: 20),
-        _buildContinueButton(context,
-            'Create account', const Color(0xFF337586), CupertinoColors.white),
+        _buildContinueButton(
+            context, 'Create account', accentColor, CupertinoColors.white),
         const SizedBox(height: 20),
         buildCenteredText('or', 14, FontWeight.w600), // Or text
         const SizedBox(height: 20),
-        _buildGoogleSignInButton(),
+        buildGoogleSignInButton(context), // Google sign in button
         const SizedBox(height: 20),
-        _buildSignInText(context),
+        buildSignUpText(context, "Already have an account? ", 'Sign in',
+            '/signin'), // Sign up text
       ],
     );
   }
 
-  /* Helper functions 
-   _buildTwoFieldsRow Build a row with two text fields 
-   _buildSignInText Build the sign in text at the bottom of the screen
-   _buildCupertinoTextField Build a Cupertino text field
-   _buildCupertinoButton Build a Cupertino button
-   _buildText Build a text widget
-   _buildGoogleSignInButton Build a Google sign in button
-   */
-
-  Row _buildTwoFieldsRow(
+  Row buildTwoFieldsRow(
     String placeholder1,
     TextEditingController controller1,
     String placeholder2,
@@ -114,68 +135,48 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(right: 10.0),
-            child: _buildCupertinoTextField(placeholder1, controller1, false),
+            child: buildCupertinoTextField(
+                placeholder1, controller1, false, context),
           ),
         ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(left: 10.0),
-            child: _buildCupertinoTextField(placeholder2, controller2, false),
+            child: buildCupertinoTextField(
+                placeholder2, controller2, false, context),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSignInText(BuildContext context) {
-    return Center(
-      child: RichText(
-        text: TextSpan(
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF337586),
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.20,
-          ),
-          children: [
-            const TextSpan(text: 'Already have an account? '),
-            TextSpan(
-              text: 'Sign in',
-              style: const TextStyle(
-                color: Color(0xFF42BCDB),
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.20,
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  Navigator.pushNamed(context, '/signin');
-                },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCupertinoTextField(
-    String placeholder,
-    TextEditingController controller,
-    bool obscureText,
+  Row buildTwoPickerFieldsRow(
+    String placeholder1,
+    String currentValue1,
+    List<String> options1,
+    ValueChanged<String> onSelectedItemChanged1,
+    String placeholder2,
+    String currentValue2,
+    List<String> options2,
+    ValueChanged<String> onSelectedItemChanged2,
   ) {
-    return CupertinoTextField(
-      controller: controller,
-      obscureText: obscureText,
-      placeholder: placeholder,
-      padding: const EdgeInsets.all(16.0),
-      placeholderStyle: const TextStyle(
-        color: Color(0xFFA1A1A1),
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      ),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F8F8),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return Row(
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(right: 10.0),
+            child: buildPickerField(context, placeholder1, currentValue1,
+                options1, onSelectedItemChanged1),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10.0),
+            child: buildPickerField(context, placeholder2, currentValue2,
+                options2, onSelectedItemChanged2),
+          ),
+        ),
+      ],
     );
   }
 
@@ -184,27 +185,76 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return CupertinoButton(
       onPressed: () async {
         if (_formKey.currentState?.validate() ?? false) {
-          try {
-            await widget.auth.signUp(
-              email: _emailController.text,
-              password: _passwordController.text,
+          // Check if all fields are filled
+          if (_firstNameController.text.isNotEmpty &&
+              _lastNameController.text.isNotEmpty &&
+              _emailController.text.isNotEmpty &&
+              _passwordController.text.isNotEmpty &&
+              _selectedProvince.isNotEmpty &&
+              _selectedCity.isNotEmpty) {
+            try {
+              await widget.auth.signUp(
+                email: _emailController.text,
+                password: _passwordController.text,
+              );
+              // User registration successful
+              print('User registered');
+              String? userID = await widget.auth.getUserId();
+              if (userID != null) {
+                await addDocument(
+                  collectionName: 'user',
+                  filename: userID,
+                  fieldNames: [
+                    'firstName',
+                    'lastName',
+                    'province',
+                    'city',
+                    'email',
+                    'itemsSold',
+                    'description',
+                    'posts'
+                  ],
+                  fieldValues: [
+                    _firstNameController.text,
+                    _lastNameController.text,
+                    _provinceController.text,
+                    _cityController.text,
+                    _emailController.text,
+                    [],
+                    '',
+                    []
+                  ],
+                );
+                print("added new user doc");
+              }
+              // Navigate to the home screen
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/nav',
+                (route) => false,
+                arguments: {'selectedIndex': 0},
+              );
+            } catch (e) {
+              // Handle registration errors
+              print('Registration failed: $e');
+            }
+          } else {
+            // Show Cupertino alert dialog
+            showCupertinoDialog(
+              context: context,
+              builder: (BuildContext context) => CupertinoAlertDialog(
+                title: Text('Incomplete Form'),
+                content: Text('Please fill all the fields to register.'),
+                actions: <CupertinoDialogAction>[
+                  CupertinoDialogAction(
+                    isDefaultAction: true,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              ),
             );
-            // User registration successful
-            print('User registered');
-String? userID = await widget.auth.getUserId();
-if(userID!=null){
-  await addDocument(
-    collectionName: 'user',
-    filename: userID,
-    fieldNames: ['firstName', 'lastName', 'province', 'city', 'email', 'itemsSold', 'description', 'posts'],
-    fieldValues: [_firstNameController.text, _lastNameController.text, _provinceController.text, _cityController.text, _emailController.text, [], '', []],
-  );
-print("added new user doc");
-}
-            Navigator.pushReplacementNamed(context, '/home');
-          } catch (e) {
-            // Handle registration errors
-            print('Registration failed: $e');
           }
         }
       },
@@ -221,6 +271,137 @@ print("added new user doc");
     );
   }
 
+  void fetchProvincesAndCities() async {
+    try {
+      // Use the readDocument function to get the location data
+      Map<String, dynamic>? locationData = await readDocument(
+        collectionName: 'location',
+        docName: 'rLxaYnbNB4x6Rpvil1Oe',
+      );
+
+      if (locationData != null) {
+        // Access the 'location' field in the fetched data
+        Map<String, dynamic> data = locationData['location'];
+
+        // Rest of your code to process the location data
+        Map<String, List<String>> fetchedCities = {};
+
+        data.forEach((province, citiesList) {
+          if (citiesList is List) {
+            fetchedCities[province] = List<String>.from(citiesList);
+          }
+        });
+
+        if (fetchedCities.isNotEmpty) {
+          setState(() {
+            provinces = fetchedCities.keys.toList();
+            cities = fetchedCities;
+
+            _selectedProvince = provinces.isNotEmpty ? provinces.first : '';
+            _selectedCity = cities[_selectedProvince]?.isNotEmpty == true
+                ? cities[_selectedProvince]!.first
+                : '';
+          });
+        }
+      }
+    } catch (error) {
+      print("Error fetching data: $error");
+    }
+  }
+
+  Widget buildPickerField(
+      BuildContext context,
+      String label,
+      String currentValue,
+      List<String> options,
+      ValueChanged<String> onSelectedItemChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CupertinoButton(
+          padding: EdgeInsets.all(12),
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.tertiarySystemBackground, context),
+          borderRadius: BorderRadius.circular(12),
+          onPressed: () => _showCupertinoPicker(
+              context, options, currentValue, onSelectedItemChanged),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(currentValue,
+                    style: TextStyle(
+                        color: currentValue == label
+                            ? CupertinoDynamicColor.resolve(
+                                CupertinoColors.placeholderText, context)
+                            : CupertinoDynamicColor.resolve(
+                                CupertinoColors.label, context),
+                        fontSize:
+                            17.0)), // Use systemGrey if it's a placeholder, otherwise black
+              ),
+              Icon(FeatherIcons.chevronDown,
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showCupertinoPicker(BuildContext context, List<String> options,
+      String? currentValue, ValueChanged<String>? onSelectedItemChanged) {
+    int initialItem = 0;
+    if (currentValue != null && options.contains(currentValue)) {
+      initialItem = options.indexOf(currentValue);
+    }
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => Container(
+        height: 250,
+        color: CupertinoColors.white,
+        child: Column(
+          children: [
+            // Button Bar for Done and Cancel
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CupertinoButton(
+                  child: Text('Cancel'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                CupertinoButton(
+                  child: Text('Done'),
+                  onPressed: () {
+                    if (onSelectedItemChanged != null) {
+                      onSelectedItemChanged(options[initialItem]);
+                    }
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+            // Picker
+            Expanded(
+              child: CupertinoPicker(
+                backgroundColor: CupertinoColors.white,
+                itemExtent: 30,
+                scrollController: FixedExtentScrollController(
+                  initialItem: initialItem,
+                ),
+                children: options.map((e) => Text(e)).toList(),
+                onSelectedItemChanged: (index) {
+                  initialItem = index;
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildText(String text, double fontSize, FontWeight fontWeight,
       double letterSpacing) {
     return Text(
@@ -229,43 +410,6 @@ print("added new user doc");
         fontSize: fontSize,
         fontWeight: fontWeight,
         letterSpacing: letterSpacing,
-      ),
-    );
-  }
-
-  Widget _buildGoogleSignInButton() {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: CupertinoColors.systemGrey, // Border color
-          width: 1, // Thickness of the border
-        ),
-        borderRadius:
-            BorderRadius.circular(14), // Border radius of the container
-      ),
-      child: CupertinoButton(
-        onPressed: () {},
-        color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(14),
-        padding: EdgeInsets.zero,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/google.png', // Google logo image
-                width: 20,
-                height: 20),
-            const SizedBox(width: 2),
-            const Text(
-              'Sign in with Google',
-              style: TextStyle(
-                color: Color(0xFF757575),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

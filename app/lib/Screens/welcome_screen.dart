@@ -21,7 +21,7 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 
-  // welcome screen image 
+  // welcome screen image
   Widget _buildImageSection() {
     return AspectRatio(
       aspectRatio: 430 / 359,
@@ -40,15 +40,15 @@ class WelcomeScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Welcome to FoodHood',
+          Text('Welcome to FoodHood',
               textAlign: TextAlign.center, style: Styles.titleStyle),
-          const SizedBox(height: 28),
-          const Text(
+          SizedBox(height: 28),
+          Text(
             'FoodHood is a platform where one can donate or receive extra home-made food.',
             textAlign: TextAlign.center,
             style: Styles.descriptionStyle,
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: 28),
           CupertinoButton(
             color: const Color(0xFF337586),
             padding: const EdgeInsets.all(16),
@@ -56,7 +56,7 @@ class WelcomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, '/signin');
             },
-            child: const Text('Log in', style: Styles.buttonTextStyle),
+            child: Text('Log in', style: Styles.buttonTextStyle),
           ),
           const SizedBox(height: 28),
           Center(

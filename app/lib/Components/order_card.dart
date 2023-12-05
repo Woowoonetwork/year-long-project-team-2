@@ -1,3 +1,4 @@
+import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -129,9 +130,11 @@ class OrderCard extends StatelessWidget {
 
   Color _generateTagColor(int index) {
     List<Color> availableColors = [
-      Color(0x7FF8CE53),
-      Color(0x7FFF8C5B),
-      // Add more colors here
+      yellow,
+      orange,
+      blue,
+      babyPink,
+      Cyan
     ];
     return availableColors[index % availableColors.length];
   }

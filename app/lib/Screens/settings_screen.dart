@@ -222,7 +222,7 @@ class SignOutButton extends StatelessWidget {
                 // Sign out
                 await FirebaseAuth.instance.signOut();
                 // Navigate to the welcome screen
-                Navigator.popUntil(context, ModalRoute.withName('/'));
+                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
               },
               isDestructiveAction: true,
               child: Text('Sign Out'),
