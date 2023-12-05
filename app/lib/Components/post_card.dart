@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
+import 'package:FoodHood/Components/colors.dart';
 
 class PostCard extends StatelessWidget {
   final String firstname;
@@ -47,14 +48,14 @@ class PostCard extends StatelessWidget {
           child: Container(
             width: 382,
             height: 220,
-            decoration: _buildBoxDecoration(),
+            decoration: _buildBoxDecoration(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Spacer(),
-                _buildTitleSection(),
-                _buildTagSection(),
-                _buildOrderInfoSection(),
+                _buildTitleSection(context),
+                _buildTagSection(context),
+                _buildOrderInfoSection(context),
               ],
             ),
           ),
@@ -63,9 +64,10 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  BoxDecoration _buildBoxDecoration() {
+  BoxDecoration _buildBoxDecoration(BuildContext context) {
     return BoxDecoration(
-      color: Color(0xFFF8F8F8),
+      color: CupertinoDynamicColor.resolve(
+          CupertinoColors.tertiarySystemBackground, context),
       borderRadius: BorderRadius.circular(14),
       boxShadow: [
         BoxShadow(
@@ -77,13 +79,13 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTitleSection() {
+  Widget _buildTitleSection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Text(
         title,
         style: TextStyle(
-          color: CupertinoColors.black,
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
@@ -91,19 +93,24 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTagSection() {
+  Widget _buildTagSection(BuildContext context) {
+    const double horizontalSpacing = 7.0;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      child: Wrap(
-        spacing: 8,
-        children: List<Widget>.generate(tags.length, (index) {
-          return _buildTag(tags[index].trim(), tagColors[index]);
+      child: Row(
+        children: List.generate(tags.length, (index) {
+          return Row(
+            children: [
+              _buildTag(tags[index], _generateTagColor(index), context),
+              SizedBox(width: horizontalSpacing),
+            ],
+          );
         }),
       ),
     );
   }
 
-  Widget _buildTag(String text, Color color) {
+  Widget _buildTag(String text, Color color, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
@@ -113,7 +120,7 @@ class PostCard extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoColors.black,
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
           fontSize: 10,
           fontWeight: FontWeight.w600,
         ),
@@ -121,14 +128,19 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderInfoSection() {
+  Color _generateTagColor(int index) {
+    List<Color> availableColors = [yellow, orange, blue, babyPink, Cyan];
+    return availableColors[index % availableColors.length];
+  }
+
+  Widget _buildOrderInfoSection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
           Container(
-            width: 24,
-            height: 24,
+            width: 20,
+            height: 20,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.grey,
@@ -138,7 +150,8 @@ class PostCard extends StatelessWidget {
           Text(
             'Posted by $firstname $lastname $timeAgo',
             style: TextStyle(
-              color: CupertinoColors.black.withOpacity(0.6),
+              color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.secondaryLabel, context),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

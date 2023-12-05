@@ -78,13 +78,14 @@ class LogInScreen extends StatelessWidget {
   }
 
   // Continue button
+  // Continue button with error handling and message formatting
   Widget buildContinueButton(BuildContext context, String text,
       Color backgroundColor, Color textColor) {
     final FirebaseAuth _auth = FirebaseAuth.instance;
+
     return CupertinoButton(
       onPressed: () async {
         try {
-          // ignore: unused_local_variable
           final UserCredential userCredential =
               await _auth.signInWithEmailAndPassword(
             email: emailController.text,
@@ -92,16 +93,36 @@ class LogInScreen extends StatelessWidget {
           );
           print("logged in");
 
-          //Navigate to the home screen
+          // Navigate to the home screen
           Navigator.of(context).pushNamedAndRemoveUntil(
             '/nav',
             (route) => false,
             arguments: {'selectedIndex': 0},
           );
-          
         } catch (e) {
-          // Handle login errors (e.g., wrong credentials).
-          print('Login error: $e'); //prints error
+          String errorMessage = e.toString();
+          // Remove error code prefix
+          errorMessage = errorMessage.replaceAll(RegExp(r'\[.*?\]\s'), '');
+
+          // Display formatted error in Cupertino alert dialog
+          showCupertinoDialog(
+            context: context,
+            builder: (context) {
+              return CupertinoAlertDialog(
+                title: Text('Login Error'),
+                content: Text(errorMessage),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+          print('Login error: $errorMessage'); //prints formatted error
         }
       },
       color: backgroundColor,

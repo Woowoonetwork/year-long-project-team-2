@@ -65,7 +65,7 @@ CupertinoSliverNavigationBar buildMainNavigationBar(
     largeTitle: Text(
       title,
       style: TextStyle(
-        letterSpacing: -1.0,
+        letterSpacing: -1.1,
       ),
     ),
     stretch: true, // Enable stretch behavior

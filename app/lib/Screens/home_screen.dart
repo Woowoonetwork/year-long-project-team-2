@@ -1,17 +1,15 @@
 // home_screen.dart
 // a page that displays the post feeds
+import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/post_card.dart';
 import 'package:FoodHood/Screens/create_post.dart';
 import 'package:FoodHood/firestore_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math' as math;
-import '../firestore_service.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import '../components.dart';
-import '../Components/order_card.dart';
-import '../Components/post_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// feather icon
+import 'package:feather_icons/feather_icons.dart';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
@@ -24,29 +22,37 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> postCards = [];
   Map<String, Color> tagColors = {};
   StreamSubscription<QuerySnapshot>? postsSubscription; // Add this line
+  bool isLoading = true;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     textController.addListener(_onSearchTextChanged);
     _loadInitialPosts();
+    _focusNode.addListener(_onFocusChange);
   }
 
+  void _onFocusChange() {
+    // Call setState to trigger the UI update when the focus changes
+    setState(() {});
+  }
 
   void _loadInitialPosts() {
-    // Set up a live listener
+    setState(() {
+      isLoading = true; // Start loading
+    });
+
     postsSubscription = FirebaseFirestore.instance
         .collection('post_details')
         .orderBy('post_timestamp', descending: true)
         .snapshots()
         .listen((snapshot) async {
-      // Note the 'async' keyword here
-      var fetchedPostCards =
-          await _processSnapshot(snapshot); // Await the result
+      var fetchedPostCards = await _processSnapshot(snapshot);
       setState(() {
-        postCards = fetchedPostCards; // Assign the awaited result to postCards
+        postCards = fetchedPostCards;
+        isLoading = false; // Loading complete
       });
-
     });
   }
 
@@ -104,19 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
     textController.removeListener(_onSearchTextChanged);
     textController.dispose();
     super.dispose();
-  }
-
-  // void _executeSearch() async {
-  //   var fetchedPostCards = await fetchPosts(textController.text.toLowerCase());
-  //   setState(() {
-  //     postCards = fetchedPostCards;
-  //   });
-  // }
-  void _onSearchTextChanged() async {
-    var fetchedPostCards = await fetchPosts(textController.text.toLowerCase());
-    setState(() {
-      postCards = fetchedPostCards; // Update the UI with the filtered list
-    });
+    _focusNode.dispose();
   }
 
   Future<List<Widget>> fetchPosts(String searchString) async {
@@ -131,54 +125,49 @@ class _HomeScreenState extends State<HomeScreen> {
         Map<String, dynamic> documentData =
             document.data() as Map<String, dynamic>;
 
-        if (documentData != null) {
-          String title = documentData['title'] ?? 'No Title'; //retrieving title
-          List<String> tags =
-              documentData['categories'].split(','); //retrieveing tags
-          bool matchesSearchString =
-              title.toLowerCase().contains(searchString) ||
-                  tags.any((tag) => tag
-                      .toLowerCase()
-                      .contains(searchString)); //search bar condition check
+        String title = documentData['title'] ?? 'No Title'; //retrieving title
+        List<String> tags =
+            documentData['categories'].split(','); //retrieveing tags
+        bool matchesSearchString = title.toLowerCase().contains(searchString) ||
+            tags.any((tag) => tag
+                .toLowerCase()
+                .contains(searchString)); //search bar condition check
 
-          // Check if the title contains the search string
-          if (matchesSearchString) {
-            print('Document data for $documentData: $documentData');
-            List<Color> assignedColors = tags.map((tag) {
-              tag = tag.trim();
-              if (!tagColors.containsKey(tag)) {
-                tagColors[tag] =
-                    _getRandomColor(); // Assign a new color if not already assigned
-              }
-              return tagColors[tag]!;
-            }).toList();
+        // Check if the title contains the search string
+        if (matchesSearchString) {
+          List<Color> assignedColors = tags.map((tag) {
+            tag = tag.trim();
+            if (!tagColors.containsKey(tag)) {
+              tagColors[tag] =
+                  _getRandomColor(); // Assign a new color if not already assigned
+            }
+            return tagColors[tag]!;
+          }).toList();
 
-            DateTime createdAt;
+          DateTime createdAt;
 
-            createdAt = (documentData['post_timestamp'] as Timestamp)
-                .toDate(); //retrieving the time when the post is created
+          createdAt = (documentData['post_timestamp'] as Timestamp)
+              .toDate(); //retrieving the time when the post is created
 
-            // Fetch user details (assuming 'UserId' is in documentData)
-            String userId = documentData['user_id'] ?? 'Unknown';
-            Map<String, dynamic>? userData = await readDocument(
-              collectionName: 'user',
-              docName: userId,
-            );
+          // Fetch user details (assuming 'UserId' is in documentData)
+          String userId = documentData['user_id'] ?? 'Unknown';
+          Map<String, dynamic>? userData = await readDocument(
+            collectionName: 'user',
+            docName: userId,
+          );
 
-            // Create a PostCard with fetched data
-            var postCard = PostCard(
-              title: title,
-              tags: tags,
-              tagColors: assignedColors,
-              firstname: userData?['firstName'] ?? 'Unknown',
-              lastname: userData?['lastName'] ?? 'Unknown',
-              timeAgo: timeAgoSinceDate(createdAt),
-            );
+          // Create a PostCard with fetched data
+          var postCard = PostCard(
+            title: title,
+            tags: tags,
+            tagColors: assignedColors,
+            firstname: userData?['firstName'] ?? 'Unknown',
+            lastname: userData?['lastName'] ?? 'Unknown',
+            timeAgo: timeAgoSinceDate(createdAt),
+          );
 
-            fetchedPostCards.add(postCard);
-            fetchedPostCards
-                .add(SizedBox(height: 16)); // For spacing between cards
-          }
+          fetchedPostCards.add(postCard);
+          fetchedPostCards.add(SizedBox(height: 16));
         }
       }
     } catch (e) {
@@ -190,200 +179,199 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: groupedBackgroundColor,
       child: Stack(
         children: [
           CustomScrollView(
             slivers: <Widget>[
               buildMainNavigationBar(context, 'Discover'),
-              SliverFillRemaining(
+              SliverToBoxAdapter(
                 child: Column(
                   children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            flex: 4,
-                            child: CupertinoSearchTextField(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 8),
-                              style: const TextStyle(fontSize: 18),
-                              controller: textController,
-                              placeholder: 'Search',
-                              onChanged: (String value) {
-                                _onSearchTextChanged(); // Call whenever the text changes
-                              },
-                            ),
-                          ),
-                          // CupertinoButton(
-                          //   padding: EdgeInsets.zero,
-                          //   child: Icon(CupertinoIcons.search, size: 24),
-                          //   onPressed: _executeSearch,
-                          // ),
-                          SizedBox(
-                              width:
-                                  10), // Space between search bar and filter button
-                          Expanded(
-                            flex: 1,
-                            child: Container(
-                              height: 38,
-                              width: 20,
-                              decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 221, 217, 217),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: CupertinoButton(
-                                padding: EdgeInsets.zero,
-                                child: Icon(CupertinoIcons.sort_down, size: 24),
-                                onPressed: () {
-                                  // Filter button action
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 16), // Adding spacing before the text
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: CupertinoButton(
-                              child: Text(
-                                'All',
-                                style: TextStyle(fontSize: 12),
-                              ),
-                              color: Color.fromARGB(255, 21, 136, 102),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 5),
-                              borderRadius: BorderRadius.circular(20),
-                              onPressed: () {
-                                // Button 1 action
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: CupertinoButton(
-                              child: Text(
-                                'Vegan',
+                    _buildSearchBar(context),
+                    SizedBox(height: 16),
+                    _buildCategoryButtons(),
+                    SizedBox(height: 16),
+                    if (isLoading)
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            CupertinoActivityIndicator(),
+                            SizedBox(height: 10),
+                            Text('Loading',
                                 style: TextStyle(
-                                    fontSize: 12), // Smaller font size
-                              ),
-                              color: Color.fromARGB(255, 214, 118, 131),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 5),
-                              borderRadius: BorderRadius.circular(20),
-                              onPressed: () {
-                                // Button 2 action
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: CupertinoButton(
-                              child: Text(
-                                'Italian',
-                                style: TextStyle(
-                                    fontSize: 12), // Smaller font size
-                              ),
-                              color: Color.fromARGB(255, 243, 28, 179),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 5),
-                              borderRadius: BorderRadius.circular(20),
-                              onPressed: () {
-                                // Button 3 action
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: CupertinoButton(
-                              child: Text(
-                                'Halal',
-                                style: TextStyle(
-                                    fontSize: 12), // Smaller font size
-                              ),
-                              color: Color.fromARGB(255, 116, 186, 243),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 5),
-                              borderRadius: BorderRadius.circular(20),
-                              onPressed: () {
-                                // Button 4 action
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: CupertinoButton(
-                              child: Text(
-                                'Vegetarian',
-                                style: TextStyle(
-                                    fontSize: 12), // Smaller font size
-                              ),
-                              color: Color.fromRGBO(233, 118, 11, 1),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 5),
-                              borderRadius: BorderRadius.circular(20),
-                              onPressed: () {
-                                // Button 5 action
-                              },
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: CupertinoButton(
-                              child: Text(
-                                'Indian',
-                                style: TextStyle(
-                                    fontSize: 12), // Smaller font size
-                              ),
-                              color: Color.fromARGB(255, 86, 204, 240),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 5),
-                              borderRadius: BorderRadius.circular(20),
-                              onPressed: () {
-                                // Button 6 action
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 15),
-                    Expanded(
-                      child: ListView(
-                        children: postCards,
-                      ),
-                    ),
+                                    color: CupertinoColors.secondaryLabel
+                                        .resolveFrom(context))),
+                          ],
+                        ),
+                      )
+                    else
+                      for (Widget postCard in postCards) postCard,
+                    SizedBox(height: 100),
                   ],
                 ),
               ),
             ],
           ),
-          Positioned(
-            bottom: 100.0,
-            right: 30.0,
-            child: CupertinoButton(
-              onPressed: () {
-                Navigator.of(context).push(CupertinoPageRoute(
-                    builder: (context) => CreatePostScreen()));
-              },
-              child: Icon(CupertinoIcons.add),
-              color: Color.fromRGBO(51, 117, 134, 1.0),
-              padding:
-                  EdgeInsets.all(18.0), // Adjusting padding to control size
-              borderRadius: BorderRadius.circular(40.0),
-            ),
-          ),
+          _buildAddButton(context),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
+    bool isFocused = _focusNode.hasFocus;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: CupertinoSearchTextField(
+                suffixIcon: Icon(
+                  FeatherIcons.x,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  size: 20,
+                ),
+                placeholderStyle: TextStyle(
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: CupertinoColors.label.resolveFrom(context),
+                ),
+                backgroundColor: CupertinoColors.tertiarySystemBackground,
+                controller: textController,
+                placeholder: 'Search',
+                onChanged: (String value) {
+                  _onSearchTextChanged();
+                },
+              ),
+            ),
+            // Only include the SizedBox and filter button if there is no text.
+            if (!isFocused) ...[
+              SizedBox(width: 10),
+              _buildFilterButton(),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onSearchTextChanged() async {
+    setState(() {});
+
+    // Fetch the post cards based on the search text.
+    var fetchedPostCards = await fetchPosts(textController.text.toLowerCase());
+
+    // Then, update the UI once the fetch operation is complete.
+    setState(() {
+      postCards = fetchedPostCards;
+    });
+  }
+
+  Widget _buildFilterButton() {
+    return Container(
+      height: 37,
+      width: 37,
+      decoration: BoxDecoration(
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        child: Icon(FeatherIcons.filter,
+            color: CupertinoColors.secondaryLabel.resolveFrom(
+                context), // Use the label color from the current theme (light or dark
+            size: 20),
+        onPressed: () {
+          // Filter button action
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategoryButtons() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Wrap(
+          spacing: 8.0, // Space between each button
+          children: <Widget>[
+            _buildCategoryButton('All', accentColor),
+            _buildCategoryButton('Vegan', yellow),
+            _buildCategoryButton('Italian', orange),
+            _buildCategoryButton('Halal', blue),
+            _buildCategoryButton('Vegetarian', babyPink),
+            _buildCategoryButton('Indian', orange),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryButton(String title, Color color) {
+    return ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: 61, // Set the minimum width
+          maxHeight: 37, // Set the height
+        ),
+        child: CupertinoButton(
+          child: Text(title,
+              style: TextStyle(
+                  color: CupertinoColors.white,
+                  fontSize: 16,
+                  letterSpacing: -.8,
+                  fontWeight:
+                      FontWeight.w600)), // Adjust the font style as needed
+          color: color,
+          padding: EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 6), // Adjust the padding for proper pill shape
+          borderRadius: BorderRadius.circular(
+              40), // This value might need to be half of the total vertical padding for a perfect pill shape
+          onPressed: () {
+            // Category button action
+          },
+        ));
+  }
+
+  Widget _buildAddButton(BuildContext context) {
+    return Positioned(
+      bottom: 116.0,
+      right: 16.0,
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: CupertinoColors.systemGrey3,
+              spreadRadius: 2, // Spread radius
+              blurRadius: 10, // Blur radius
+              offset: Offset(0, 0), // changes position of shadow
+            ),
+          ],
+          shape:
+              BoxShape.circle, // To keep the container circular like the button
+        ),
+        child: CupertinoButton(
+          onPressed: () {
+            Navigator.of(context).push(
+                CupertinoPageRoute(builder: (context) => CreatePostScreen()));
+          },
+          child:
+              Icon(FeatherIcons.plus, color: CupertinoColors.white, size: 30),
+          color: accentColor,
+          padding: EdgeInsets.all(16.0),
+          borderRadius: BorderRadius.circular(40.0),
+        ),
       ),
     );
   }
@@ -408,10 +396,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Color _getRandomColor() {
     var random = math.Random();
     var colors = [
-      Colors.lightGreenAccent,
-      Colors.lightBlueAccent,
-      Colors.pinkAccent[100]!,
-      Colors.yellowAccent[100]!
+      yellow,
+      orange,
+      blue,
+      babyPink,
     ];
     return colors[random.nextInt(colors.length)];
   }

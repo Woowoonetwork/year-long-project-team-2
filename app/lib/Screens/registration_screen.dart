@@ -111,8 +111,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           },
         ),
         const SizedBox(height: 20),
-        _buildContinueButton(context, 'Create account', accentColor,
-            CupertinoColors.white),
+        _buildContinueButton(
+            context, 'Create account', accentColor, CupertinoColors.white),
         const SizedBox(height: 20),
         buildCenteredText('or', 14, FontWeight.w600), // Or text
         const SizedBox(height: 20),
@@ -150,7 +150,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
- Row buildTwoPickerFieldsRow(
+  Row buildTwoPickerFieldsRow(
     String placeholder1,
     String currentValue1,
     List<String> options1,
@@ -165,69 +165,96 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(right: 10.0),
-            child: buildPickerField(
-                context, placeholder1, currentValue1, options1, onSelectedItemChanged1),
+            child: buildPickerField(context, placeholder1, currentValue1,
+                options1, onSelectedItemChanged1),
           ),
         ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(left: 10.0),
-            child: buildPickerField(
-                context, placeholder2, currentValue2, options2, onSelectedItemChanged2),
+            child: buildPickerField(context, placeholder2, currentValue2,
+                options2, onSelectedItemChanged2),
           ),
         ),
       ],
     );
   }
+
   Widget _buildContinueButton(BuildContext context, String text,
       Color backgroundColor, Color textColor) {
     return CupertinoButton(
       onPressed: () async {
         if (_formKey.currentState?.validate() ?? false) {
-          try {
-            await widget.auth.signUp(
-              email: _emailController.text,
-              password: _passwordController.text,
-            );
-            // User registration successful
-            print('User registered');
-            String? userID = await widget.auth.getUserId();
-            if (userID != null) {
-              await addDocument(
-                collectionName: 'user',
-                filename: userID,
-                fieldNames: [
-                  'firstName',
-                  'lastName',
-                  'province',
-                  'city',
-                  'email',
-                  'itemsSold',
-                  'description',
-                  'posts'
-                ],
-                fieldValues: [
-                  _firstNameController.text,
-                  _lastNameController.text,
-                  _provinceController.text,
-                  _cityController.text,
-                  _emailController.text,
-                  [],
-                  '',
-                  []
-                ],
+          // Check if all fields are filled
+          if (_firstNameController.text.isNotEmpty &&
+              _lastNameController.text.isNotEmpty &&
+              _emailController.text.isNotEmpty &&
+              _passwordController.text.isNotEmpty &&
+              _selectedProvince.isNotEmpty &&
+              _selectedCity.isNotEmpty) {
+            try {
+              await widget.auth.signUp(
+                email: _emailController.text,
+                password: _passwordController.text,
               );
-              print("added new user doc");
+              // User registration successful
+              print('User registered');
+              String? userID = await widget.auth.getUserId();
+              if (userID != null) {
+                await addDocument(
+                  collectionName: 'user',
+                  filename: userID,
+                  fieldNames: [
+                    'firstName',
+                    'lastName',
+                    'province',
+                    'city',
+                    'email',
+                    'itemsSold',
+                    'description',
+                    'posts'
+                  ],
+                  fieldValues: [
+                    _firstNameController.text,
+                    _lastNameController.text,
+                    _provinceController.text,
+                    _cityController.text,
+                    _emailController.text,
+                    [],
+                    '',
+                    []
+                  ],
+                );
+                print("added new user doc");
+              }
+              // Navigate to the home screen
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/nav',
+                (route) => false,
+                arguments: {'selectedIndex': 0},
+              );
+            } catch (e) {
+              // Handle registration errors
+              print('Registration failed: $e');
             }
-            // Navigate to the home screen
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              '/nav',
-              (route) => false,
-              arguments: {'selectedIndex': 0},
+          } else {
+            // Show Cupertino alert dialog
+            showCupertinoDialog(
+              context: context,
+              builder: (BuildContext context) => CupertinoAlertDialog(
+                title: Text('Incomplete Form'),
+                content: Text('Please fill all the fields to register.'),
+                actions: <CupertinoDialogAction>[
+                  CupertinoDialogAction(
+                    isDefaultAction: true,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              ),
             );
-          } catch (e) {
-            // Handle registration errors
-            print('Registration failed: $e');
           }
         }
       },
@@ -255,7 +282,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       if (locationData != null) {
         // Access the 'location' field in the fetched data
         Map<String, dynamic> data = locationData['location'];
-        
+
         // Rest of your code to process the location data
         Map<String, List<String>> fetchedCities = {};
 
@@ -282,42 +309,44 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-
   Widget buildPickerField(
       BuildContext context,
       String label,
       String currentValue,
       List<String> options,
       ValueChanged<String> onSelectedItemChanged) {
-
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CupertinoButton(
-            padding: EdgeInsets.all(12),
-            color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemBackground,context),
-            borderRadius: BorderRadius.circular(12),
-            onPressed: () => _showCupertinoPicker(
-                context, options, currentValue, onSelectedItemChanged),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(currentValue,
-                      style: TextStyle(
-                          color: currentValue == label
-                              ? CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context)
-                              : CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-                          fontSize:
-                              17.0)), // Use systemGrey if it's a placeholder, otherwise black
-                ),
-                Icon(FeatherIcons.chevronDown,
-                    color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)),
-              ],
-            ),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CupertinoButton(
+          padding: EdgeInsets.all(12),
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.tertiarySystemBackground, context),
+          borderRadius: BorderRadius.circular(12),
+          onPressed: () => _showCupertinoPicker(
+              context, options, currentValue, onSelectedItemChanged),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(currentValue,
+                    style: TextStyle(
+                        color: currentValue == label
+                            ? CupertinoDynamicColor.resolve(
+                                CupertinoColors.placeholderText, context)
+                            : CupertinoDynamicColor.resolve(
+                                CupertinoColors.label, context),
+                        fontSize:
+                            17.0)), // Use systemGrey if it's a placeholder, otherwise black
+              ),
+              Icon(FeatherIcons.chevronDown,
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context)),
+            ],
           ),
-        ],
-      );  
+        ),
+      ],
+    );
   }
 
   void _showCupertinoPicker(BuildContext context, List<String> options,
