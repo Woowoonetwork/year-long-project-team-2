@@ -64,9 +64,12 @@ class FoodHoodApp extends StatelessWidget {
             );
           case '/nav':
             return CupertinoPageRoute(
-              builder: (context) =>
-                  NavigationScreen(selectedIndex: 0, onItemTapped: (index) {}),
+              builder: (context) => NavigationScreen(
+                selectedIndex: ModalRoute.of(context)?.settings.arguments as int? ?? 0,
+                onItemTapped: (index) {},
+              ),
             );
+
           case '/posting':
             return CupertinoPageRoute(
               builder: (context) => PostDetailView(),

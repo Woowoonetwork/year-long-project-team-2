@@ -7,7 +7,8 @@ import '../components.dart';
 import '../auth_service.dart';
 import '../firestore_service.dart';
 import 'package:feather_icons/feather_icons.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:FoodHood/Screens/home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final AuthService auth;
@@ -218,7 +219,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               );
               print("added new user doc");
             }
-            Navigator.pushReplacementNamed(context, '/home');
+            // Navigate to the home screen
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/nav',
+              (route) => false,
+              arguments: {'selectedIndex': 0},
+            );
           } catch (e) {
             // Handle registration errors
             print('Registration failed: $e');
@@ -239,17 +245,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   void fetchProvincesAndCities() async {
-    FirebaseFirestore.instance
-        .collection('location')
-        .doc('rLxaYnbNB4x6Rpvil1Oe')
-        .get()
-        .then((documentSnapshot) {
-      if (documentSnapshot.exists) {
-        Map<String, dynamic> data = documentSnapshot.get('location');
+    try {
+      // Use the readDocument function to get the location data
+      Map<String, dynamic>? locationData = await readDocument(
+        collectionName: 'location',
+        docName: 'rLxaYnbNB4x6Rpvil1Oe',
+      );
+
+      if (locationData != null) {
+        // Access the 'location' field in the fetched data
+        Map<String, dynamic> data = locationData['location'];
+        
+        // Rest of your code to process the location data
         Map<String, List<String>> fetchedCities = {};
 
         data.forEach((province, citiesList) {
-          // Ensure the citiesList is a List of Strings
           if (citiesList is List) {
             fetchedCities[province] = List<String>.from(citiesList);
           }
@@ -259,17 +269,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           setState(() {
             provinces = fetchedCities.keys.toList();
             cities = fetchedCities;
-            // After fetching, set the initial province and city
-            _selectedProvince = provinces.first;
-            _selectedCity = cities[_selectedProvince]?.first ?? '';
+
+            _selectedProvince = provinces.isNotEmpty ? provinces.first : '';
+            _selectedCity = cities[_selectedProvince]?.isNotEmpty == true
+                ? cities[_selectedProvince]!.first
+                : '';
           });
         }
       }
-    }).catchError((error) {
-      // Handle any errors here
+    } catch (error) {
       print("Error fetching data: $error");
-    });
+    }
   }
+
 
   Widget buildPickerField(
       BuildContext context,

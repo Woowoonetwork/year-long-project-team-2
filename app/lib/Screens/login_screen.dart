@@ -91,7 +91,14 @@ class LogInScreen extends StatelessWidget {
             password: passwordController.text,
           );
           print("logged in");
-          Navigator.pushReplacementNamed(context, '/home');
+
+          //Navigate to the home screen
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/nav',
+            (route) => false,
+            arguments: {'selectedIndex': 0},
+          );
+          
         } catch (e) {
           // Handle login errors (e.g., wrong credentials).
           print('Login error: $e'); //prints error
