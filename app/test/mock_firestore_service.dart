@@ -1,9 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mockito/mockito.dart';
 
 class FirestoreService {
   Future<void> addAllergensCategoriesAndPL() async {
-    // Your mock implementation for addAllergensCategoriesAndPL
     print("Mocked allergens, categories, and pickup locations added successfully!");
   }
 
@@ -13,7 +11,6 @@ class FirestoreService {
     required List<String> fieldNames,
     required List<dynamic> fieldValues,
   }) async {
-    // Your mock implementation for addDocument
     print('Mocked document added successfully!');
   }
 
@@ -21,7 +18,7 @@ class FirestoreService {
     required String collectionName,
     required String docName,
   }) async {
-    // Your mock implementation for readDocument
+    // Mock implementation for readDocument
   }
 }
 
@@ -31,7 +28,6 @@ class MockFirestoreService extends Mock implements FirestoreService {
 
   @override
   Future<void> addAllergensCategoriesAndPL() {
-    // Your mock implementation for addAllergensCategoriesAndPL
     return Future.value();
   }
 
@@ -42,14 +38,11 @@ class MockFirestoreService extends Mock implements FirestoreService {
     required List<String> fieldNames,
     required List<dynamic> fieldValues,
   }) {
-    // Mock implementation for addDocument
     if (simulateSuccess) {
-      // Create a map representing the document and add it to the mock database
       final documentData = Map.fromIterables(fieldNames, fieldValues);
       mockDatabase[collectionName + '/' + filename] = documentData;
       return Future.value();
     } else {
-      // Simulate failure by throwing an error
       return Future.error('Simulated failure');
     }
   }
@@ -59,7 +52,6 @@ class MockFirestoreService extends Mock implements FirestoreService {
     required String collectionName,
     required String docName,
   }) {
-    // Your mock implementation for readDocument
     return Future.value(mockDatabase[collectionName + '/' + docName]);
   }
 }
