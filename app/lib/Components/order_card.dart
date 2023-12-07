@@ -50,8 +50,11 @@ class OrderCard extends StatelessWidget {
             },
           ),
         ],
-        child: GestureDetector(
-          onTap: () {
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            onTap(postId);
+            print("GestureDetector tapped");
             Navigator.push(
               context,
               CupertinoPageRoute(

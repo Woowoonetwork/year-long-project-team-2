@@ -26,7 +26,6 @@ class _AccountScreenState extends State<AccountScreen> {
   int segmentedControlGroupValue = 0;
   List<Widget> activeOrders = [];
   List<OrderCard> pastOrders = [];
-  String postId = '';
 
   @override
   void initState() {
@@ -66,18 +65,18 @@ class _AccountScreenState extends State<AccountScreen> {
 
   void _onOrderCardTap(String postId) {
     setState(() {
-      postId = postId; // Update the post_detail variable
+      postId = postId;
     });
     print(postId + 'accountscreen');
-    // Here you can add additional logic, like navigating to a detail screen
   }
 
   void updateActiveOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
       activeOrders = documents.map((doc) {
         var data = doc.data();
+        var postId = doc.id;
         if (data is Map<String, dynamic>) {
-          return createOrderCard(data);
+          return createOrderCard(data, postId);
         } else {
           print('Document data is not a Map<String, dynamic>');
           return SizedBox.shrink();
@@ -86,7 +85,7 @@ class _AccountScreenState extends State<AccountScreen> {
     });
   }
 
-  OrderCard createOrderCard(Map<String, dynamic> documentData) {
+  OrderCard createOrderCard(Map<String, dynamic> documentData, String postId) {
     String title = documentData['title'] ?? 'No Title';
     List<String> tags = documentData['categories'].split(',');
     DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
@@ -96,8 +95,8 @@ class _AccountScreenState extends State<AccountScreen> {
       title: title,
       tags: tags,
       orderInfo: 'Ordered on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
-      onTap: _onOrderCardTap,
       postId: postId,
+      onTap: _onOrderCardTap,
     );
   }
 
