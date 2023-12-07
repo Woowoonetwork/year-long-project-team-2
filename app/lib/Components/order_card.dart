@@ -9,12 +9,16 @@ class OrderCard extends StatelessWidget {
   final String orderInfo;
   final VoidCallback? onEdit;
   final VoidCallback? onCancel;
+  final Function(String) onTap; // New callback parameter
+  final String postId;
 
   OrderCard({
     required this.imageLocation,
     required this.title,
     required this.tags,
     required this.orderInfo,
+    required this.onTap,
+    required this.postId,
     this.onEdit, // Optional callback for editing
     this.onCancel, // Optional callback for canceling
   });
@@ -50,7 +54,10 @@ class OrderCard extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              CupertinoPageRoute(builder: (context) => PostDetailView()),
+              CupertinoPageRoute(
+                  builder: (context) => PostDetailView(
+                        postId: postId,
+                      )),
             );
           },
           child: Container(
@@ -129,13 +136,7 @@ class OrderCard extends StatelessWidget {
   }
 
   Color _generateTagColor(int index) {
-    List<Color> availableColors = [
-      yellow,
-      orange,
-      blue,
-      babyPink,
-      Cyan
-    ];
+    List<Color> availableColors = [yellow, orange, blue, babyPink, Cyan];
     return availableColors[index % availableColors.length];
   }
 

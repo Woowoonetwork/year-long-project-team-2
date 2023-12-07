@@ -5,10 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../Components/post_card.dart';
 
 //import status
 
 class PostDetailView extends StatefulWidget {
+  final String postId;
+  PostDetailView({required this.postId});
+
   @override
   _PostDetailViewState createState() => _PostDetailViewState();
 }
@@ -31,14 +35,14 @@ class _PostDetailViewState extends State<PostDetailView> {
   @override
   void initState() {
     super.initState();
-    fetchData();
+    fetchData(widget.postId);
   }
 
-  Future<void> fetchData() async {
+  Future<void> fetchData(String postId) async {
     try {
       Map<String, dynamic>? documentData = await readDocument(
         collectionName: 'post_details',
-        docName: '26eb541c-b28d-4586-8354-12e7035218f3',
+        docName: postId,
       );
 
       if (documentData != null) {
