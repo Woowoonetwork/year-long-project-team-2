@@ -10,6 +10,8 @@ class PostCard extends StatelessWidget {
   final List<String> tags;
   final List<Color> tagColors;
   final String timeAgo;
+  final Function(String) onTap; // New callback parameter
+  final String postId; // Add a postId parameter
 
   // Define your colors here
   final List<Color> colors = [
@@ -19,15 +21,17 @@ class PostCard extends StatelessWidget {
     Colors.yellowAccent[100]! // Light Yellow
   ];
 
-  PostCard(
-      {Key? key,
-      required this.title,
-      required this.tags,
-      required this.tagColors,
-      required this.firstname,
-      required this.lastname,
-      required this.timeAgo})
-      : super(key: key);
+  PostCard({
+    Key? key,
+    required this.title,
+    required this.tags,
+    required this.tagColors,
+    required this.firstname,
+    required this.lastname,
+    required this.timeAgo,
+    required this.onTap, // Initialize in the constructor
+    required this.postId, // Initialize postId
+  }) : super(key: key);
 
   @override
   @override
@@ -38,6 +42,7 @@ class PostCard extends StatelessWidget {
         padding:
             EdgeInsets.zero, // Removes default padding from CupertinoButton
         onPressed: () {
+          onTap(postId);
           print("GestureDetector tapped");
           Navigator.push(
             context,

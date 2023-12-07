@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   StreamSubscription<QuerySnapshot>? postsSubscription; // Add this line
   bool isLoading = true;
   final FocusNode _focusNode = FocusNode();
+  String? post_detail_id;
 
   @override
   void initState() {
@@ -94,6 +95,8 @@ class _HomeScreenState extends State<HomeScreen> {
           firstname: userData?['firstName'] ?? 'Unknown',
           lastname: userData?['lastName'] ?? 'Unknown',
           timeAgo: timeAgoSinceDate(createdAt),
+          onTap: _onPostCardTap,
+          postId: document.id,
         );
 
         fetchedPostCards.add(postCard);
@@ -111,6 +114,14 @@ class _HomeScreenState extends State<HomeScreen> {
     textController.dispose();
     super.dispose();
     _focusNode.dispose();
+  }
+
+  void _onPostCardTap(String postId) {
+    setState(() {
+      post_detail_id = postId; // Update the post_detail variable
+    });
+    print(post_detail_id);
+    // Here you can add additional logic, like navigating to a detail screen
   }
 
   Future<List<Widget>> fetchPosts(String searchString) async {
@@ -164,6 +175,8 @@ class _HomeScreenState extends State<HomeScreen> {
             firstname: userData?['firstName'] ?? 'Unknown',
             lastname: userData?['lastName'] ?? 'Unknown',
             timeAgo: timeAgoSinceDate(createdAt),
+            onTap: _onPostCardTap,
+            postId: document.id,
           );
 
           fetchedPostCards.add(postCard);
