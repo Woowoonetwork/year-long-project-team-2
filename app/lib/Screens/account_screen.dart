@@ -51,8 +51,7 @@ class _AccountScreenState extends State<AccountScreen> {
       }
     }, onError: (error) {
       if (error is FirebaseException && error.code == 'failed-precondition') {
-        print(
-            'No Post Details index found.');
+        print('No Post Details index found.');
       } else {
         print('Error listening to post changes: $error');
       }
@@ -64,21 +63,29 @@ class _AccountScreenState extends State<AccountScreen> {
     super.dispose();
   }
 
+  void _onOrderCardTap(String postId) {
+    setState(() {
+      postId = postId;
+    });
+    print(postId + 'accountscreen');
+  }
+
   void updateActiveOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
       activeOrders = documents.map((doc) {
         var data = doc.data();
+        var postId = doc.id;
         if (data is Map<String, dynamic>) {
-          return createOrderCard(data);
+          return createOrderCard(data, postId);
         } else {
           print('Document data is not a Map<String, dynamic>');
-          return SizedBox.shrink(); 
+          return SizedBox.shrink();
         }
       }).toList();
     });
   }
 
-  OrderCard createOrderCard(Map<String, dynamic> documentData) {
+  OrderCard createOrderCard(Map<String, dynamic> documentData, String postId) {
     String title = documentData['title'] ?? 'No Title';
     List<String> tags = documentData['categories'].split(',');
     DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
@@ -88,6 +95,8 @@ class _AccountScreenState extends State<AccountScreen> {
       title: title,
       tags: tags,
       orderInfo: 'Ordered on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
+      postId: postId,
+      onTap: _onOrderCardTap,
     );
   }
 
@@ -145,7 +154,6 @@ class _AccountScreenState extends State<AccountScreen> {
     );
 
     if (result == 'updated') {
-      
       setState(() {});
     }
   }
@@ -230,12 +238,12 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-// Method to build the placeholder text when there are no orders  
+// Method to build the placeholder text when there are no orders
   SliverFillRemaining _buildPlaceholderText() {
     return SliverFillRemaining(
       hasScrollBody: false, // Prevents the sliver from being scrollable
       child: SizedBox(
-        height: 50, 
+        height: 50,
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -245,8 +253,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 size: 40,
                 color: CupertinoColors.systemGrey,
               ),
-              SizedBox(
-                  height: 20), 
+              SizedBox(height: 20),
               Text(
                 'No orders available',
                 style: TextStyle(fontSize: 16),

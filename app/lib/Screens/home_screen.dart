@@ -118,10 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onPostCardTap(String postId) {
     setState(() {
-      post_detail_id = postId; // Update the post_detail variable
+      post_detail_id = postId;
     });
     print(post_detail_id);
-    // Here you can add additional logic, like navigating to a detail screen
   }
 
   Future<List<Widget>> fetchPosts(String searchString) async {

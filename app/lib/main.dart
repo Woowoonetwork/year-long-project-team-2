@@ -21,7 +21,7 @@ void main() async {
   // Initialize Firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+
   // Call the function to add a pre-defined list of allergens and categories
   await addAllergensCategoriesAndPL();
 
@@ -65,15 +65,12 @@ class FoodHoodApp extends StatelessWidget {
           case '/nav':
             return CupertinoPageRoute(
               builder: (context) => NavigationScreen(
-                selectedIndex: ModalRoute.of(context)?.settings.arguments as int? ?? 0,
+                selectedIndex:
+                    ModalRoute.of(context)?.settings.arguments as int? ?? 0,
                 onItemTapped: (index) {},
               ),
             );
 
-          case '/posting':
-            return CupertinoPageRoute(
-              builder: (context) => PostDetailView(),
-            );
           default:
             return CupertinoPageRoute(
               builder: (context) => HomeScreen(),

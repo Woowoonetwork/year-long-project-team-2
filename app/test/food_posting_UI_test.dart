@@ -18,7 +18,10 @@ void main() {
     }
   });
   testWidgets('Posting page builds correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(CupertinoApp(home: PostDetailView()));
+    await tester.pumpWidget(CupertinoApp(
+        home: PostDetailView(
+      postId: '26eb541c-b28d-4586-8354-12e7035218f3',
+    )));
 
     expect(find.byType(AvailabilityIndicator), findsOneWidget,
         reason: 'availability indicator not found');
