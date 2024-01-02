@@ -1,16 +1,15 @@
 // main.dart
 // entry point of the app
 
-import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/Screens/login_screen.dart';
 import 'package:FoodHood/Screens/navigation_screen.dart';
-import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:flutter/material.dart';
 import 'package:FoodHood/auth_wrapper.dart';
 import 'auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -39,6 +38,11 @@ class FoodHoodApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
+      localizationsDelegates: [
+        DefaultMaterialLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
       home: AuthWrapper(), // Use AuthWrapper as the root widget
       debugShowCheckedModeBanner:
           false, // Hide the debug banner in Preview mode
@@ -70,7 +74,6 @@ class FoodHoodApp extends StatelessWidget {
                 onItemTapped: (index) {},
               ),
             );
-
           default:
             return CupertinoPageRoute(
               builder: (context) => HomeScreen(),

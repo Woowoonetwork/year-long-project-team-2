@@ -1,191 +1,260 @@
-import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/firestore_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Components/foodAppBar.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:FoodHood/ViewModels/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../Components/post_card.dart';
-
-//import status
 
 class PostDetailView extends StatefulWidget {
   final String postId;
-  PostDetailView({required this.postId});
+
+  const PostDetailView({Key? key, required this.postId}) : super(key: key);
 
   @override
   _PostDetailViewState createState() => _PostDetailViewState();
 }
 
 class _PostDetailViewState extends State<PostDetailView> {
-  String firstName = '';
-  String lastName = '';
-  String allergens = '';
-  String description = '';
-  DateTime pickup_time = DateTime.now();
-  DateTime expiration_date = DateTime.now();
-  String pickup_location = '';
-  String pickup_instructions = '';
-  String title = '';
-  List<dynamic> reviews = [];
-  double rating = 0.0;
-  String userid = '';
-  DateTime post_timestamp = DateTime.now();
+  late PostDetailViewModel viewModel;
+  bool isLoading = true; // Added to track loading status
 
   @override
   void initState() {
     super.initState();
-    fetchData(widget.postId);
+    viewModel = PostDetailViewModel(widget.postId);
+
+    // Await the completion of fetchData
+    viewModel.fetchData(widget.postId).then((_) {
+      setState(() {
+        isLoading = false;
+      });
+    });
   }
 
-  Future<void> fetchData(String postId) async {
-    try {
-      Map<String, dynamic>? documentData = await readDocument(
-        collectionName: 'post_details',
-        docName: postId,
-      );
-
-      if (documentData != null) {
-        setState(() {
-          allergens = documentData['allergens'] ?? '';
-          description = documentData['description'] ?? '';
-          title = documentData['title'] ?? '';
-          pickup_instructions = documentData['pickup_instructions'] ?? '';
-          userid = documentData['user_id'] ?? '';
-          rating = documentData['rating'] ?? 0.0;
-          pickup_location = documentData['pickup_location'] ?? '';
-          pickup_time = (documentData['pickup_time'] as Timestamp).toDate();
-          expiration_date =
-              (documentData['expiration_date'] as Timestamp).toDate();
-          post_timestamp =
-              (documentData['post_timestamp'] as Timestamp).toDate();
-        });
-      } else {
-        print('Document does not exist or is null.');
-      }
-    } catch (e) {
-      print('Error fetching document: $e');
-    }
-
-    try {
-      Map<String, dynamic>? documentData = await readDocument(
-        collectionName: 'user',
-        docName: userid,
-      );
-
-      if (documentData != null) {
-        setState(() {
-          firstName = documentData['firstName'];
-          lastName = documentData['lastName'];
-        });
-      } else {
-        print('Document does not exist or is null.');
-      }
-    } catch (e) {
-      print('Error fetching document: $e');
-    }
-  }
-
+// Define your colors here
+  final List<Color> colors = [
+    Colors.lightGreenAccent, // Light Green
+    Colors.lightBlueAccent, // Light Blue
+    Colors.pinkAccent[100]!, // Light Pink
+    Colors.yellowAccent[100]! // Light Yellow
+  ];
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.systemBackground,
-        leading: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: const Icon(FeatherIcons.chevronLeft,
-                size: 28, color: CupertinoColors.label)),
-        trailing: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(FeatherIcons.heart,
-                size: 22, color: CupertinoColors.systemRed),
-            SizedBox(width: 15),
-            Icon(FeatherIcons.share,
-                size: 22, color: CupertinoColors.systemBlue)
-          ],
-        ),
+    return Scaffold(
+      backgroundColor:
+          CupertinoDynamicColor.resolve(detailsBackgroundColor, context),
+      body: isLoading ? _buildLoadingScreen() : _buildContent(context),
+    );
+  }
+
+  Widget _buildLoadingScreen() {
+    return Center(
+      child: CupertinoActivityIndicator(
+        radius: 16,
       ),
-      child: SafeArea(
-        child: ListView(
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    return AnimatedBuilder(
+      animation: viewModel,
+      builder: (context, _) {
+        return Column(
           children: [
-            SizedBox(height: 200),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -1.34,
-                            fontSize: 30,
-                          ),
+            Expanded(
+              child: RefreshIndicator(
+                  child: CustomScrollView(
+                    physics: BouncingScrollPhysics(),
+                    slivers: [
+                      FoodAppBar(),
+                      SliverList(
+                        delegate: SliverChildListDelegate(
+                          [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildPostTitleSection(),
+                                const SizedBox(height: 16),
+                                _buildDescription(),
+                                const SizedBox(height: 16),
+                                _buildInfoCards(),
+                                _buildPickupInformation(),
+                                const SizedBox(height: 16),
+                                _buildAllergensSection(),
+                                const SizedBox(height: 16),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      AvailabilityIndicator(isReserved: false),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    description,
-                    style:
-                        CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                              color: CupertinoColors.systemGrey,
-                            ),
+                  onRefresh: () => Future.value(true)),
+            ),
+            Container(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 24),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ReserveButton(isReserved: false),
                   ),
-                  const SizedBox(height: 8),
-                  InfoRow(
-                    firstName: firstName,
-                    lastName: lastName,
-                    post_timestamp: post_timestamp,
-                  ),
-                  const SizedBox(height: 16),
-                  InfoCardsRow(
-                    expirationDate: expiration_date,
-                    pickupTime: pickup_time,
-                    allergens: allergens,
-                  ),
-                  PickupInformation(
-                    pickup_instructions: pickup_instructions,
-                    pickup_location: pickup_location,
-                  ),
-                  const SizedBox(height: 16),
-                  AllergensSection(allergens: allergens),
-                  Center(
-                    child: ReserveButton(
-                      isReserved: false,
-                    ),
-                  )
                 ],
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPostTitleSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text(
+              viewModel.title, // Updated to use viewModel
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: CupertinoColors.label.resolveFrom(context),
+                letterSpacing: -1.45,
+                fontSize: 28,
+              ),
+            ),
+          ),
+          AvailabilityIndicator(
+              isReserved: false), // Placeholder, update as needed
+        ],
+      ),
+    );
+  }
+
+  Color _generateTagColor(int index) {
+    List<Color> availableColors = [yellow, orange, blue, babyPink, Cyan];
+    return availableColors[index % availableColors.length];
+  }
+
+  Widget _buildDescription() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            viewModel.description, // Updated to use viewModel
+            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                  color: CupertinoColors.label
+                      .resolveFrom(context)
+                      .withOpacity(0.6), // Corrected opacity usage
+                  letterSpacing: -0.62,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+
+          const SizedBox(height: 12),
+          _buildTagSection(context), // Updated to use viewModel
+          const SizedBox(height: 12),
+          InfoRow(
+            firstName: viewModel.firstName,
+            lastName: viewModel.lastName,
+            postTimestamp: viewModel.postTimestamp,
+            viewModel: viewModel, // Pass the viewModel to InfoRow
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTagSection(BuildContext context) {
+    const double horizontalSpacing = 7.0;
+    return Row(
+      children: List.generate(viewModel.tags.length, (index) {
+        return Row(
+          children: [
+            _buildTag(viewModel.tags[index], _generateTagColor(index), context),
+            SizedBox(width: horizontalSpacing),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildTag(String text, Color color, BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+          fontSize: 10,
+          letterSpacing: -0.40,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
+
+  Widget _buildInfoCards() {
+    return InfoCardsRow(
+      expirationDate: viewModel.expirationDate, // Updated to use viewModel
+      pickupTime: viewModel.pickupTime, // Updated to use viewModel
+      allergens: viewModel.allergens, // Updated to use viewModel
+    );
+  }
+
+  Widget _buildPickupInformation() {
+    LatLng? pickupCoordinates =
+        viewModel.pickupLatLng; // Updated to use viewModel
+    return PickupInformation(
+      pickupTime:
+          DateFormat('EEE, MMM d, ' 'h:mm a').format(viewModel.pickupTime),
+      pickupLocation: viewModel.pickupLocation,
+      meetingPoint: '330, 1130 Trello Way\nKelowna, BC\nV1V 5E0',
+      additionalInfo: 'Please reach out for any additional details!',
+      locationCoordinates: pickupCoordinates,
+      viewModel: viewModel, // Pass viewModel here
+    );
+  }
+
+  Widget _buildAllergensSection() {
+    List<String> allergenList =
+        viewModel.allergens.split(', '); // Updated to use viewModel
+    return AllergensSection(allergens: allergenList);
+  }
+
+  Widget _buildReserveButton() {
+    return ReserveButton(isReserved: false); // Placeholder, update as needed
+  }
 }
+
+// The remaining widget classes like `AvailabilityIndicator`, `InfoRow`, etc., would follow.
+// AvailabilityIndicator, InfoRow, and other supporting widgets
 
 class AvailabilityIndicator extends StatelessWidget {
   final bool isReserved;
-  AvailabilityIndicator({required this.isReserved});
+
+  const AvailabilityIndicator({Key? key, required this.isReserved})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     Color indicatorColor = isReserved
-        ? CupertinoColors.systemRed.withOpacity(0.2)
-        : CupertinoColors.activeGreen.withOpacity(0.2);
+        ? CupertinoColors.systemRed.withOpacity(0.15)
+        : CupertinoColors.activeGreen.withOpacity(0.15);
 
     Color circleColor =
         isReserved ? CupertinoColors.systemRed : CupertinoColors.activeGreen;
-
     String statusText = isReserved ? 'Reserved' : 'Available';
 
     return Container(
@@ -193,27 +262,83 @@ class AvailabilityIndicator extends StatelessWidget {
         color: indicatorColor,
         borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 12,
-            height: 26,
+            height: 12,
             decoration: BoxDecoration(
               color: circleColor,
               shape: BoxShape.circle,
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Text(
             statusText,
             style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                color: CupertinoColors.label,
-                fontSize: 14,
-                fontWeight: FontWeight.w500),
+                  color: CupertinoColors.label.resolveFrom(context),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class InfoRow extends StatelessWidget {
+  final String firstName;
+  final String lastName;
+  final DateTime postTimestamp;
+  final PostDetailViewModel viewModel;
+
+  const InfoRow({
+    Key? key,
+    required this.firstName,
+    required this.lastName,
+    required this.postTimestamp,
+    required this.viewModel,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        children: [
+          IconPlaceholder(imageUrl: 'assets/images/sampleProfile.png'),
+          const SizedBox(width: 8),
+          Expanded(
+            child: CombinedTexts(
+                firstName: firstName,
+                lastName: lastName,
+                postTimestamp: postTimestamp,
+                viewModel: viewModel),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class IconPlaceholder extends StatelessWidget {
+  final String imageUrl; // Add a parameter for the image URL
+
+  IconPlaceholder({Key? key, required this.imageUrl}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: AssetImage(imageUrl), // Replace with your image provider
+        ),
       ),
     );
   }
@@ -222,67 +347,30 @@ class AvailabilityIndicator extends StatelessWidget {
 class CombinedTexts extends StatelessWidget {
   final String firstName;
   final String lastName;
-  final DateTime post_timestamp;
+  final DateTime postTimestamp;
+  final PostDetailViewModel viewModel; // Add the viewModel here
 
-  CombinedTexts(
-      {required this.firstName,
-      required this.lastName,
-      required this.post_timestamp});
+  const CombinedTexts({
+    Key? key,
+    required this.firstName,
+    required this.lastName,
+    required this.postTimestamp,
+    required this.viewModel, // Include viewModel in the constructor
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         InfoText(
-            firstName: firstName,
-            lastName: lastName,
-            post_timestamp: timeAgoSinceDate(post_timestamp)),
-        SizedBox(width: 8),
-        RatingText(),
+          firstName: firstName,
+          lastName: lastName,
+          postTimestamp: postTimestamp,
+          viewModel: viewModel, // Pass the viewModel to InfoText
+        ),
+        const SizedBox(width: 8),
+        RatingText(), // Placeholder, update as needed
       ],
-    );
-  }
-}
-
-class InfoRow extends StatelessWidget {
-  final String firstName;
-  final String lastName;
-  final DateTime post_timestamp;
-
-  InfoRow(
-      {required this.firstName,
-      required this.lastName,
-      required this.post_timestamp});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14.0),
-      child: Row(
-        children: [
-          IconPlaceholder(),
-          const SizedBox(width: 8),
-          Expanded(
-              child: CombinedTexts(
-            firstName: firstName,
-            lastName: lastName,
-            post_timestamp: post_timestamp,
-          )),
-        ],
-      ),
-    );
-  }
-}
-
-class IconPlaceholder extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: const BoxDecoration(
-        color: CupertinoColors.systemGrey2,
-        shape: BoxShape.circle,
-      ),
     );
   }
 }
@@ -290,27 +378,35 @@ class IconPlaceholder extends StatelessWidget {
 class InfoText extends StatelessWidget {
   final String firstName;
   final String lastName;
-  final String post_timestamp;
+  final DateTime postTimestamp;
+  final PostDetailViewModel viewModel; // Add viewModel here
 
-  InfoText(
-      {required this.firstName,
-      required this.lastName,
-      required this.post_timestamp});
+  const InfoText({
+    Key? key,
+    required this.firstName,
+    required this.lastName,
+    required this.postTimestamp,
+    required this.viewModel, // Include viewModel in the constructor
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
         style: TextStyle(
-          color: CupertinoColors.black.withOpacity(0.6),
+          color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
           fontSize: 12,
-          fontFamily: 'Inter',
           fontWeight: FontWeight.w500,
+          letterSpacing: -0.48,
         ),
         children: <TextSpan>[
-          TextSpan(text: 'Cooked by $firstName $lastName'),
+          TextSpan(text: 'Prepared by $firstName $lastName'),
+          TextSpan(text: '   '),
           TextSpan(
-              text: '   Posted $post_timestamp',
-              style: TextStyle(letterSpacing: -0.48)),
+            text:
+                'Posted ${viewModel.timeAgoSinceDate(postTimestamp)}', // Use viewModel here
+            style: TextStyle(letterSpacing: -0.48),
+          ),
         ],
       ),
     );
@@ -318,23 +414,23 @@ class InfoText extends StatelessWidget {
 }
 
 class RatingText extends StatelessWidget {
+  // Placeholder widget for rating, update as needed
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
-          FeatherIcons.star,
-          color: CupertinoColors.systemYellow,
-          size: 16,
+          Icons.star,
+          color: secondaryColor,
+          size: 14,
         ),
-        const SizedBox(width: 2),
+        const SizedBox(width: 3),
         Text(
-          '5.0',
+          '5.0 Rating', // Placeholder rating
           style: TextStyle(
-            color: CupertinoColors.black.withOpacity(0.6),
+            color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
             fontSize: 12,
-            fontFamily: 'Inter',
             fontWeight: FontWeight.w500,
             letterSpacing: -0.48,
           ),
@@ -349,46 +445,46 @@ class InfoCardsRow extends StatelessWidget {
   final DateTime pickupTime;
   final String allergens;
 
-  InfoCardsRow({
-    required this.expirationDate,
-    required this.pickupTime,
-    required this.allergens,
-  });
+  const InfoCardsRow(
+      {Key? key,
+      required this.expirationDate,
+      required this.pickupTime,
+      required this.allergens})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     String formattedExp = DateFormat('d MMM yyyy').format(expirationDate);
     String formattedPick = DateFormat('h:mm a').format(pickupTime);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      scrollDirection: Axis.horizontal,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Expanded(
-            child: buildInfoCard(
-              icon: FeatherIcons.clock,
-              title: 'Expiration Date',
-              subtitle: formattedExp,
-              context: context,
-            ),
+          buildInfoCard(
+            icon: FeatherIcons.meh,
+            title: 'Expiration Date',
+            subtitle: formattedExp,
+            context: context,
+            color: CupertinoColors.systemRed,
           ),
-          SizedBox(width: 16),
-          Expanded(
-            child: buildInfoCard(
-              icon: FeatherIcons.mapPin,
-              title: 'Pickup Time',
-              subtitle: formattedPick,
-              context: context,
-            ),
+          const SizedBox(width: 16),
+          buildInfoCard(
+            icon: FeatherIcons.shoppingBag,
+            title: 'Pickup Time',
+            subtitle: formattedPick,
+            context: context,
+            color: blue, // Placeholder color, update as needed
           ),
-          SizedBox(width: 16),
-          Expanded(
-            child: buildInfoCard(
-              icon: FeatherIcons.alertCircle,
-              title: 'Allergens',
-              subtitle: 'See below',
-              context: context,
-            ),
+          const SizedBox(width: 16),
+          buildInfoCard(
+            icon: FeatherIcons.alertCircle,
+            title: 'Allergens',
+            subtitle: allergens.isEmpty ? 'None' : allergens,
+            context: context,
+            color: yellow, // Placeholder color, update as needed
           ),
         ],
       ),
@@ -400,166 +496,499 @@ class InfoCardsRow extends StatelessWidget {
     required String title,
     required String subtitle,
     required BuildContext context,
+    required Color color,
   }) {
-    return ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: 100,
-          maxWidth: 150,
-          minHeight: 100,
-          maxHeight: 150,
-        ),
-        child: CupertinoCard(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(icon, color: CupertinoColors.systemGrey),
-              SizedBox(height: 8.0),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-              ),
-              SizedBox(height: 4.0),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 8,
-                  color: CupertinoColors.systemGrey.resolveFrom(context),
-                ),
-              ),
-            ],
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x19000000),
+            blurRadius: 20,
+            offset: Offset(0, 0),
           ),
-        ));
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(icon, color: color, size: 26),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: CupertinoColors.label.resolveFrom(context),
+                letterSpacing: -0.84,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 14,
+                color: CupertinoColors.systemGrey.resolveFrom(context),
+                letterSpacing: -0.84,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
+// Continue with the remaining widget classes like PickupInformation, CustomInfoTile, etc.
 class PickupInformation extends StatelessWidget {
-  final String pickup_instructions;
-  final String pickup_location;
-  PickupInformation(
-      {required this.pickup_instructions, required this.pickup_location});
+  final String pickupTime;
+  final String pickupLocation;
+  final String meetingPoint;
+  final String additionalInfo;
+  final LatLng? locationCoordinates; // Make nullable
+  final PostDetailViewModel viewModel;
+
+  const PickupInformation({
+    Key? key,
+    required this.pickupTime,
+    required this.pickupLocation,
+    required this.meetingPoint,
+    required this.additionalInfo,
+    this.locationCoordinates, // Nullable
+    required this.viewModel,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pickup Information',
-              style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-            ),
-            const SizedBox(height: 8),
-            Text(pickup_instructions),
-            const SizedBox(height: 16),
-            Text(
-              'Meeting Point',
-              style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-            ),
-            const SizedBox(height: 8),
-            Text(pickup_location),
-          ],
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _buildHeader(context),
+          _buildInfoCard(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(bottom: 22),
+      child: Text(
+        'Pickup Information',
+        style: TextStyle(
+          color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.70,
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(BuildContext context) {
+    return Container(
+      decoration: _cardDecoration(context),
+      child: Column(
+        children: [
+          _buildMap(context),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Column(
+              children: [
+                _buildDetails(context),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  BoxDecoration _cardDecoration(BuildContext context) {
+    return BoxDecoration(
+      color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: const Color(0x19000000),
+          blurRadius: 20,
+          offset: const Offset(0, 0),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMap(BuildContext context) {
+    // Check if locationCoordinates are available from the viewModel
+    final LatLng? locationCoordinates = viewModel.pickupLatLng;
+
+    // If coordinates are available, display GoogleMap
+    if (locationCoordinates != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+        child: SizedBox(
+          width: double.infinity,
+          height: 188.0, // Assign a finite height to the map container
+          child: GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: locationCoordinates,
+              zoom: 16.0,
+            ),
+            markers: Set.from([
+              Marker(
+                markerId: MarkerId('pickupLocation'),
+                position: locationCoordinates,
+              ),
+            ]),
+            zoomControlsEnabled: false,
+            scrollGesturesEnabled: false,
+            rotateGesturesEnabled: false,
+            tiltGesturesEnabled: false,
+            zoomGesturesEnabled: false,
+            myLocationEnabled: false,
+            mapType: MapType.normal,
+            myLocationButtonEnabled: false,
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: double.infinity,
+        height: 200.0, 
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          color: CupertinoColors.systemGrey4,
+        ),
+        alignment: Alignment.center,
+        child: Text('Map Placeholder'), // Placeholder text
+      );
+    }
+  }
+
+  Widget _buildDetails(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomInfoTile(title: 'Pickup Time', subtitle: pickupTime),
+        CustomInfoTile(title: 'Meeting Point', subtitle: meetingPoint),
+        const SizedBox(height: 12),
+        _buildAdditionalInfo(context),
+        const SizedBox(height: 12),
+        _buildButtonBar(context),
+      ],
+    );
+  }
+
+  Widget _buildAdditionalInfo(BuildContext context) {
+    return Row(
+      children: [
+        // Leading Circular Cropped Image
+        Padding(
+          padding: EdgeInsets.only(right: 8.0), // Adjust spacing as needed
+          child: Container(
+            width: 30.0, // Image diameter
+            height: 30.0, // Image diameter
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: AssetImage('assets/images/sampleProfile.png'),
+              ),
+            ),
+          ),
+        ),
+        // MessageBox for Additional Info
+        Expanded(
+          child: MessageBox(context: context, text: additionalInfo),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildButtonBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          InfoButton(
+            context: context,
+            text: 'Ask for more info',
+            icon: FeatherIcons.messageCircle,
+            iconColor: CupertinoColors.label.resolveFrom(context), 
+            onPressed: () {
+              // Implement action for "Ask for more info"
+            },
+          ),
+          SizedBox(width: 10), // Spacing between buttons
+          InfoButton(
+            context: context,
+            text: 'Navigate to this Place',
+            icon: FeatherIcons.arrowUpRight,
+            iconColor: CupertinoColors.label.resolveFrom(context),
+            onPressed: () {
+              // Implement action for "Navigate to this Place"
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomInfoTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const CustomInfoTile({
+    Key? key,
+    required this.title,
+    required this.subtitle,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: CupertinoColors.label.resolveFrom(context),
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.55,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 14,
+                color:
+                    CupertinoColors.label.resolveFrom(context).withOpacity(0.6),
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.55,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Continue with MessageBox, InfoButton, AllergensSection, and other widget classes.
+class MessageBox extends StatelessWidget {
+  final BuildContext context;
+  final String text;
+
+  const MessageBox({Key? key, required this.context, required this.text})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.start, // Align text to the leading edge
+        overflow: TextOverflow.ellipsis,
+        maxLines: 2,
+        style: TextStyle(
+          color: CupertinoColors.label.resolveFrom(context),
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          letterSpacing: -0.48,
+        ),
+      ),
+    );
+  }
+}
+
+class InfoButton extends StatelessWidget {
+  final BuildContext context;
+  final String text;
+  final IconData icon;
+  final Color iconColor; // New color parameter for the icon
+  final VoidCallback onPressed;
+
+  const InfoButton({
+    Key? key,
+    required this.context,
+    required this.text,
+    required this.icon,
+    required this.iconColor, // Include icon color in the constructor
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoButton(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+      borderRadius: BorderRadius.circular(100),
+      onPressed: onPressed,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: iconColor), // Use the iconColor here
+          SizedBox(width: 8), // Space between icon and text
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
+            style: TextStyle(
+              color: CupertinoColors.label.resolveFrom(context),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              letterSpacing: -0.48,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class AllergensSection extends StatelessWidget {
-  final String allergens;
-  AllergensSection({
-    required this.allergens,
-  });
+  final List<String> allergens;
+
+  const AllergensSection({Key? key, required this.allergens}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return CupertinoCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Allergens',
-              style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Allergens',
+            style: TextStyle(
+              fontSize: 20,
+              color: CupertinoColors.label.resolveFrom(context),
+              letterSpacing: -0.70,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 8),
-            Text(allergens),
-          ],
+          ),
         ),
-      ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color:
+                  CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+              borderRadius: BorderRadius.circular(12.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x19000000),
+                  blurRadius: 20,
+                  offset: Offset(0, 0),
+                ),
+              ],
+            ),
+            child: Wrap(
+              alignment: WrapAlignment.start,
+              spacing: 8.0, // Space between the allergens
+              runSpacing: 8.0, // Space between the lines
+              children: allergens
+                  .map((allergen) => _buildAllergenRow(allergen, context))
+                  .toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAllergenRow(String allergen, BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('• ',
+            style: TextStyle(
+                color: CupertinoColors.label.resolveFrom(context),
+                fontSize: 14,
+                fontWeight: FontWeight.w600)),
+        Expanded(
+            child: Text(
+          allergen,
+          style: TextStyle(
+            fontSize: 14,
+            color: CupertinoColors.label.resolveFrom(context),
+            letterSpacing: -0.55,
+            fontWeight: FontWeight.w500,
+          ),
+        )),
+      ],
     );
   }
 }
 
 class ReserveButton extends StatelessWidget {
   final bool isReserved;
-  ReserveButton({required this.isReserved});
-  @override
-  Widget build(BuildContext context) {
-    Color indicatorColor =
-        isReserved ? CupertinoColors.systemGrey : CupertinoColors.activeBlue;
-    Color textColor =
-        isReserved ? CupertinoColors.white : CupertinoColors.white;
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: CupertinoButton(
-        color: indicatorColor,
-        child: Text('Reserve', style: TextStyle(color: textColor)),
-        onPressed: isReserved
-            ? null
-            : () {
-                // Add the reserving logic here once you get the method thing
-              },
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-    );
-  }
-}
-
-class CupertinoCard extends StatelessWidget {
-  final Widget child;
-
-  const CupertinoCard({super.key, required this.child});
+  const ReserveButton({Key? key, required this.isReserved}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
+      height: 48, // Set the height of the button
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        borderRadius: BorderRadius.circular(12.0),
+        color: isReserved
+            ? CupertinoColors.systemGrey
+            : CupertinoDynamicColor.resolve(accentColor, context),
+        borderRadius: BorderRadius.circular(100), // Rounded corners
         boxShadow: [
           BoxShadow(
-            color: CupertinoColors.systemGrey.withOpacity(0.5),
-            blurRadius: 5.0,
-            offset: Offset(0, 2),
+            color: Color(0x19000000),
+            blurRadius: 20,
+            offset: Offset(0, 0),
           ),
         ],
       ),
-      child: child,
+      child: CupertinoButton(
+        padding: EdgeInsets
+            .zero, // Remove padding since we are using a Container for styling
+        child: Text(
+          isReserved
+              ? 'Reserved'
+              : 'Reserve', // Change button text based on state
+          style: TextStyle(
+            color: CupertinoColors.white, // Text color
+            fontSize: 18, // Text size
+            letterSpacing: -0.45, // Text spacing
+            fontWeight: FontWeight.w600, // Text weight
+          ),
+        ),
+        onPressed: isReserved
+            ? null
+            : () {
+                // TODO: Add reservation logic here
+              },
+      ),
     );
   }
 }
-
-String timeAgoSinceDate(DateTime dateTime) {
-  final duration = DateTime.now().difference(dateTime);
-  if (duration.inDays > 8) {
-    return '${dateTime.month}/${dateTime.day}/${dateTime.year}';
-  } else if (duration.inDays >= 1) {
-    return '${duration.inDays} day(s) ago';
-  } else if (duration.inHours >= 1) {
-    return '${duration.inHours} hours ago';
-  } else if (duration.inMinutes >= 1) {
-    return '${duration.inMinutes} min ago';
-  } else {
-    return 'Just now';
-  }
-}
-
-//backend beginning

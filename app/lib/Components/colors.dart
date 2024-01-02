@@ -15,6 +15,11 @@ const Color backgroundColor = CupertinoDynamicColor.withBrightness(
   darkColor: Color(0xFF000000), // Black for dark mode
 );
 
+const Color detailsBackgroundColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0xFFFFFFFF), // White for light mode
+  darkColor: Color(0xFF222222), // Black for dark mode
+);
+
 /* 
   Theme Colours
   Use accentColor for any primary action buttons or links.
