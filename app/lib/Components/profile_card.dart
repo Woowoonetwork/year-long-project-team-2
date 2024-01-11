@@ -65,7 +65,8 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   void updateProfileData(Map<String, dynamic> documentData) {
-    if (mounted) { // Check if the widget is still in the widget tree
+    if (mounted) {
+      // Check if the widget is still in the widget tree
       setState(() {
         firstName = documentData['firstName'] ?? 'No first name';
         lastName = documentData['lastName'] ?? 'No last name';
@@ -100,8 +101,8 @@ class _ProfileCardState extends State<ProfileCard> {
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: CupertinoColors.black.withAlpha(20),
-              blurRadius: 20,
+              color: Color(0x19000000),
+              blurRadius: 10,
               offset: Offset(0, 0),
             ),
           ],

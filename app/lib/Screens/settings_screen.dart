@@ -1,9 +1,23 @@
-// settings_screen.dart
-// A page that allows a user to modify their app's settings.
-
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/components.dart';
 import 'package:flutter/cupertino.dart';
-import '../Components/profile_card.dart';
+import '../components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:feather_icons/feather_icons.dart';
+import 'package:flutter_switch/flutter_switch.dart';
+
+// Constants for styling
+const double _defaultPadding = 20.0;
+const double _defaultMargin = 16.0;
+const double _defaultFontSize = 16.0;
+const double _iconSize = 22.0;
+const double _spacing = 15.0;
+const double _buttonBorderRadius = 16.0;
+const double _switchHeight = 29.0;
+const double _switchWidth = 52.0;
+const double _switchPadding = 4.0;
+const double _switchToggleSize = 22.0;
+const double _switchBorderRadius = 100.0;
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -16,218 +30,164 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.systemGroupedBackground,
-        middle: const Text(
-          'Settings',
-          style: TextStyle(
-            letterSpacing: -1.36,
-            fontSize: 24.0,
+      backgroundColor: groupedBackgroundColor,
+      child: CustomScrollView(
+        slivers: [
+          CupertinoSliverNavigationBar(
+            largeTitle: Text('Settings', style: TextStyle(letterSpacing: -1.34)),
+            border: Border(bottom: BorderSide.none),
+            backgroundColor: groupedBackgroundColor,
+            leading: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Icon(FeatherIcons.chevronLeft,
+                  size: _iconSize, color: CupertinoColors.label.resolveFrom(context)),
+            ),
           ),
-        ),
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.arrow_left, color: CupertinoColors.black),
-          onPressed: () async {
-            // add onPressed functionality
-            Navigator.of(context).pop();
-          },
-        ),
-        border: const Border(bottom: BorderSide.none),
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                SizedBox(height: 10),
+                ProfileCard(),
+                SizedBox(height: 10),
+                _buildSettingOption('Push Notifications', _buildSwitch()),
+                SizedBox(height: 16),
+                _buildSettingButton('Accessibility', FeatherIcons.eye, () {}),
+                SizedBox(height: 14),
+                _buildSettingButton('Help', FeatherIcons.helpCircle, () {}),
+                SizedBox(height: 14),
+                _buildSettingButton('Sign out', FeatherIcons.logOut, () {
+                  showSignOutConfirmationSheet(context);
+                }),
+              ],
+            ),
+          ),
+        ],
       ),
-      
-      child: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 15.0),
-        child: Column(
+    );
+  }
+
+  ObstructingPreferredSizeWidget _buildNavigationBar(BuildContext context) {
+    return CupertinoNavigationBar(
+      transitionBetweenRoutes: false,
+      backgroundColor: groupedBackgroundColor,
+      middle: Text('Settings'),
+      leading: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Icon(FeatherIcons.arrowLeft,
+            size: _iconSize, color: CupertinoColors.label.resolveFrom(context)),
+      ),
+      border: const Border(bottom: BorderSide.none),
+    );
+  }
+
+  Widget _buildSettingOption(String title, Widget trailing) {
+    return Padding(
+      padding:
+          EdgeInsets.symmetric(horizontal: _defaultPadding, vertical: 10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title,
+              style: TextStyle(
+                  fontSize: _defaultFontSize,
+                  letterSpacing: -0.8,
+                  fontWeight: FontWeight.w600)),
+          trailing
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwitch() {
+    return FlutterSwitch(
+      height: _switchHeight,
+      width: _switchWidth,
+      padding: _switchPadding,
+      toggleSize: _switchToggleSize,
+      borderRadius: _switchBorderRadius,
+      activeColor: accentColor,
+      value: pushNotificationsEnabled,
+      onToggle: (value) => setState(() => pushNotificationsEnabled = value),
+    );
+  }
+
+  Widget _buildSettingButton(
+      String title, IconData icon, VoidCallback onPressed) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: _defaultMargin),
+      child: CupertinoButton(
+        onPressed: onPressed,
+        color: CupertinoColors.tertiarySystemBackground,
+        borderRadius: BorderRadius.circular(_buttonBorderRadius),
+        padding: EdgeInsets.symmetric(
+            horizontal: _defaultPadding, vertical: _defaultPadding / 1.25),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            //Display the profile
-            ProfileCard(),
-
-            SizedBox(height: 50),
-
-            //Push Notifications
-            Padding(
-              padding: EdgeInsets.only(left: 20.0, right:17.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Push Notifications',
-                    style: TextStyle(fontSize: 18.0),
-                  ),
-                  CupertinoSwitch(
-                    activeColor: Color.fromRGBO(51, 117, 134, 1.0),
-                    value: pushNotificationsEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        pushNotificationsEnabled = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
+            Row(
+              children: [
+                Icon(icon,
+                    size: _iconSize,
+                    color: CupertinoColors.label.resolveFrom(context)),
+                SizedBox(width: _spacing),
+                Text(title,
+                    style: TextStyle(
+                        fontSize: _defaultFontSize,
+                        fontWeight: FontWeight.w500,
+                        color: CupertinoColors.label.resolveFrom(context))),
+              ],
             ),
-
-            //Accessibility Button
-            Padding(
-              padding: EdgeInsets.all(17.0),
-              child: AccessibilityButton(),
-            ),
-            
-            //Help Button
-            Padding(
-              padding: EdgeInsets.only(left:17.0, right: 17.0),
-              child: HelpButton(),
-            ),
-
-            //Sign out Button
-            Padding(
-              padding: EdgeInsets.all(17.0),
-              child: SignOutButton(),
-            ),
-
+            Icon(FeatherIcons.chevronRight,
+                color: CupertinoColors.label.resolveFrom(context)),
           ],
         ),
       ),
     );
   }
-}
 
-class AccessibilityButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoButton(
-      onPressed: () {
-        // Add the button functionality here
-      },
-      color: CupertinoColors.secondarySystemGroupedBackground,
-      borderRadius: BorderRadius.circular(23),
-      padding: EdgeInsets.all(16.0),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(CupertinoIcons.eye, color: CupertinoColors.black),
-              SizedBox(width: 15.0), // Adjust the spacing between icon and text
-              Text(
-                'Accessibility',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: CupertinoColors.black,
-                ),
-              ),
-            ],
-          ),
-          Icon(
-            CupertinoIcons.forward,
-            color: CupertinoColors.black,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-class HelpButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoButton(
-      onPressed: () {
-        // Add the button functionality here
-      },
-      color: CupertinoColors.secondarySystemGroupedBackground,
-      borderRadius: BorderRadius.circular(23),
-      padding: EdgeInsets.all(16.0),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(CupertinoIcons.question_circle, color: CupertinoColors.black),
-              SizedBox(width: 15.0), // Adjust the spacing between icon and text
-              Text(
-                'Help',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: CupertinoColors.black,
-                ),
-              ),
-            ],
-          ),
-          Icon(
-            CupertinoIcons.forward,
-            color: CupertinoColors.black,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class SignOutButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoButton(
-      onPressed: () async {
-        showSignOutConfirmationDialog(context);
-      },
-      color: CupertinoColors.secondarySystemGroupedBackground,
-      borderRadius: BorderRadius.circular(23),
-      padding: EdgeInsets.all(16.0),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(CupertinoIcons.square_arrow_right, color: CupertinoColors.black),
-              SizedBox(width: 15.0), // Adjust the spacing between icon and text
-              Text(
-                'Sign out',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: CupertinoColors.black,
-                ),
-              ),
-            ],
-          ),
-          Icon(
-            CupertinoIcons.forward,
-            color: CupertinoColors.black,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Function to show the confirmation dialog
-  void showSignOutConfirmationDialog(BuildContext context) {
-    showCupertinoDialog(
+  void showSignOutConfirmationSheet(BuildContext context) {
+    showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text('Confirm Sign Out'),
-          content: Text('Are you sure you want to sign out?'),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Cancel'),
+        return CupertinoActionSheet(
+          title: Text(
+            'Are you sure you want to Sign out?',
+            style: TextStyle(
+              fontSize: 13,
+              letterSpacing: -0.6,
+              fontWeight: FontWeight.w600,
             ),
-            CupertinoDialogAction(
-              onPressed: () async {
-                // Sign out
-                await FirebaseAuth.instance.signOut();
-                // Navigate to the welcome screen
-                Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-              },
+          ),
+          actions: <Widget>[
+            CupertinoActionSheetAction(
+              child: Text(
+                'Sign Out',
+                style: TextStyle(
+                    letterSpacing: -0.6,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 18),
+              ),
               isDestructiveAction: true,
-              child: Text('Sign Out'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the action sheet
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/', (route) => false);
+              },
             ),
           ],
+          cancelButton: CupertinoActionSheetAction(
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.6,
+                  fontSize: 18),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the action sheet
+            },
+          ),
         );
       },
     );

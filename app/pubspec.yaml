@@ -54,6 +54,8 @@ dependencies:
   uuid: ^4.0.0
   firebase_storage: ^11.5.3
   google_fonts: ^6.1.0
+  flutter_switch: ^0.3.2
+  flutter_local_notifications: ^16.3.0
 
 dev_dependencies:
   flutter_test:
