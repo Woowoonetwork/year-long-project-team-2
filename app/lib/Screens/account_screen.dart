@@ -135,8 +135,9 @@ class _AccountScreenState extends State<AccountScreen> {
 
   CupertinoSliverNavigationBar _buildNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
-      backgroundColor: groupedBackgroundColor,
-      largeTitle: Text('Account', style: TextStyle(letterSpacing: -1.34)),
+      backgroundColor: CupertinoDynamicColor.resolve(
+        groupedBackgroundColor, context).withOpacity(0.8),
+      largeTitle: Text('Account'),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
         child: Text('Settings',

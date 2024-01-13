@@ -1,9 +1,10 @@
+import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 //import 'package:FoodHood/Screens/browse_screen.dart';
 import 'package:FoodHood/Screens/account_screen.dart';
-import 'package:FoodHood/Screens/create_post.dart';
+import 'package:FoodHood/Screens/browse_screen.dart';
 
 class NavigationScreen extends StatelessWidget {
   final int selectedIndex;
@@ -23,8 +24,10 @@ class NavigationScreen extends StatelessWidget {
         onTap: onItemTapped,
         iconSize: 24,
         height: 60,
+        backgroundColor: CupertinoDynamicColor.resolve(
+            groupedBackgroundColor, context).withOpacity(0.8),
         border: Border(top: BorderSide.none),
-        activeColor: Color(0xFF337586), // active tab color
+        activeColor: accentColor.color, // active tab color
         inactiveColor: CupertinoColors.secondaryLabel, // inactive tab color
         items: [
           BottomNavigationBarItem(
@@ -53,8 +56,8 @@ class NavigationScreen extends StatelessWidget {
         switch (index) {
           case 0:
             return HomeScreen();
-          // case 1:
-          //   return BrowseScreen();
+          case 1:
+            return BrowseScreen();
           // case 2:
           //   return CreatePostScreen();
           // case 3:

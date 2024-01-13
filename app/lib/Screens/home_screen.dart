@@ -188,49 +188,58 @@ class _HomeScreenState extends State<HomeScreen> {
     return fetchedPostCards;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: groupedBackgroundColor,
-      child: Stack(
-        children: [
-          CustomScrollView(
-            slivers: <Widget>[
-              buildMainNavigationBar(context, 'Discover'),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: <Widget>[
-                    _buildSearchBar(context),
-                    SizedBox(height: 16),
-                    _buildCategoryButtons(),
-                    SizedBox(height: 16),
-                    if (isLoading)
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            CupertinoActivityIndicator(),
-                            SizedBox(height: 10),
-                            Text('Loading',
-                                style: TextStyle(
-                                    color: CupertinoColors.secondaryLabel
-                                        .resolveFrom(context))),
-                          ],
-                        ),
-                      )
-                    else
-                      for (Widget postCard in postCards) postCard,
-                    SizedBox(height: 100),
-                  ],
+ @override
+Widget build(BuildContext context) {
+  return CupertinoPageScaffold(
+    backgroundColor: groupedBackgroundColor,
+    child: Stack(
+      children: [
+        CustomScrollView(
+          slivers: <Widget>[
+            buildMainNavigationBar(context, 'Discover'),
+            SliverToBoxAdapter(
+              child: Column(
+                children: <Widget>[
+                  _buildSearchBar(context),
+                  SizedBox(height: 16),
+                  _buildCategoryButtons(),
+                  SizedBox(height: 16),
+                ],
+              ),
+            ),
+            if (isLoading)
+              SliverFillRemaining(
+                hasScrollBody: false, // This is important to prevent unnecessary scrolling
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CupertinoActivityIndicator(),
+                      SizedBox(height: 10),
+                      Text('Loading',
+                          style: TextStyle(
+                              color: CupertinoColors.secondaryLabel
+                                  .resolveFrom(context))),
+                    ],
+                  ),
+                ),
+              )
+            else
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    return postCards[index];
+                  },
+                  childCount: postCards.length,
                 ),
               ),
-            ],
-          ),
-          _buildAddButton(context),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+        _buildAddButton(context),
+      ],
+    ),
+  );
+}
 
   Widget _buildSearchBar(BuildContext context) {
     bool isFocused = _focusNode.hasFocus;
@@ -364,10 +373,9 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: CupertinoColors.systemGrey3,
-              spreadRadius: 2, // Spread radius
-              blurRadius: 10, // Blur radius
-              offset: Offset(0, 0), // changes position of shadow
+              color: Color(0x19000000),
+              blurRadius: 20,
+              offset: Offset(0, 0),
             ),
           ],
           shape:
