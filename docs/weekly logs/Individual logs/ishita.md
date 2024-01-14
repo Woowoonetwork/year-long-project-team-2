@@ -311,3 +311,41 @@ N/A.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Term 2 Week 1: Monday 8th Jan 2023 - Sunday 14th Dec 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W1.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Worked on the front-end of the forgot password page.
+- Completed the UI test for the forgot password page.
+- Researched integration tests for Firebase and Flutter.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Front-end of forgot password page.
+- Test for forgot password page.
+- Plan features for the upcoming milestone.
+- Complete Week 13 team log.
+- Complete Week 13 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
