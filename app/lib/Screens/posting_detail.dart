@@ -680,7 +680,7 @@ class PickupInformation extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomInfoTile(title: 'Pickup Time', subtitle: pickupTime),
-        CustomInfoTile(title: 'Meeting Point', subtitle: meetingPoint),
+        CustomInfoTile(title: 'Pickup Location', subtitle: viewModel.pickupLocation), // Use viewModel for dynamic meeting point
         const SizedBox(height: 12),
         _buildAdditionalInfo(context),
         const SizedBox(height: 12),
