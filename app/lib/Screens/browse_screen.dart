@@ -1,4 +1,3 @@
-import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -7,14 +6,7 @@ import 'package:flutter/services.dart';
 import 'dart:ui'; // Needed for ImageFilter
 import 'package:FoodHood/Components/cupertinoSearchNavigationBar.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'package:popover/popover.dart';
 import 'dart:math' as math;
-
-class Dimens {
-  static const double headerMinDimension = 50.0;
-  // Define other dimensions here
-  // e.g., static const double paddingSmall = 8.0;
-}
 
 class SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double minHeight;
@@ -69,8 +61,6 @@ class _BrowseScreenState extends State<BrowseScreen>
   static const double circleFillOpacity = 0.1;
   static const Color circleStrokeColor = Colors.blue;
   static const int circleStrokeWidth = 2;
-  late AnimationController _animationController;
-  late Animation<double> _animation;
   final GlobalKey navBarKey = GlobalKey();
   bool _isZooming = false;
 
@@ -179,7 +169,6 @@ class _BrowseScreenState extends State<BrowseScreen>
     return renderBox?.size.height ?? 0;
   }
 
-  // Update _updateSearchAreaCircle to use _searchRadius instead of the constant
   void _updateSearchAreaCircle(LatLng location) {
     setState(() {
       searchAreaCircle = Circle(
@@ -221,7 +210,6 @@ class _BrowseScreenState extends State<BrowseScreen>
         children: [
           _buildFullScreenMap(),
           _buildOverlayUI(),
-          // ... other widgets like buttons ...
         ],
       ),
     );
@@ -333,7 +321,6 @@ class _BrowseScreenState extends State<BrowseScreen>
     return Stack(children: [
       CupertinoSearchNavigationBar(
         title: "Browse",
-        border: Border(bottom: BorderSide.none),
         textController: searchController,
         focusNode: FocusNode(),
         onSearchTextChanged: (text) {},
@@ -358,21 +345,7 @@ class _BrowseScreenState extends State<BrowseScreen>
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
             size: 20),
         onPressed: () {
-          showPopover(
-            context: context,
-            bodyBuilder: (context) => ListItems(
-              onItemSelected: (String value) {
-                print('You selected: $value');
-                // Handle the selection
-              },
-            ),
-            onPop: () => print('Popover was popped!'),
-            direction: PopoverDirection.top,
-            width: 200,
-            height: 400,
-            arrowHeight: 15,
-            arrowWidth: 30,
-          );
+          
         },
       ),
     );
@@ -394,42 +367,3 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 }
 
-class ListItems extends StatelessWidget {
-  final Function(String) onItemSelected;
-
-  ListItems({Key? key, required this.onItemSelected}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView(
-        padding: const EdgeInsets.all(8),
-        children: <Widget>[
-          _buildListItem(context, 'Filter by Date', onItemSelected),
-          Divider(),
-          _buildListItem(context, 'Filter by Popularity', onItemSelected),
-          Divider(),
-          _buildListItem(context, 'Filter by Rating', onItemSelected),
-          Divider(),
-          _buildListItem(context, 'Filter by Tags', onItemSelected),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildListItem(
-      BuildContext context, String title, Function(String) onItemSelected) {
-    return InkWell(
-      onTap: () {
-        onItemSelected(title);
-        Navigator.of(context).pop(); // Dismiss the popover
-      },
-      child: Container(
-        height: 50,
-        color: Colors.amber[100],
-        child: Center(child: Text(title)),
-      ),
-    );
-  }
-}

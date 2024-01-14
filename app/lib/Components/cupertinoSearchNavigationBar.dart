@@ -6,7 +6,6 @@ import 'dart:ui'; // Needed for ImageFilter
 
 class CupertinoSearchNavigationBar extends StatelessWidget {
   final String title;
-  final Border border;
   final Widget? trailing;
   final TextEditingController textController;
   final FocusNode _focusNode; // FocusNode for the search text field
@@ -17,7 +16,6 @@ class CupertinoSearchNavigationBar extends StatelessWidget {
   CupertinoSearchNavigationBar({
     Key? key,
     required this.title,
-    required this.border,
     this.trailing,
     required this.textController,
     required FocusNode focusNode,
