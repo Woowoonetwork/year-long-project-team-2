@@ -216,6 +216,7 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   Widget _buildFullScreenMap() {
+    double mapBottomPadding = 100;
     return FutureBuilder<LatLng?>(
       future: currentLocationFuture,
       builder: (context, snapshot) {
@@ -233,6 +234,7 @@ class _BrowseScreenState extends State<BrowseScreen>
           children: [
             GoogleMap(
               onMapCreated: (GoogleMapController controller) {
+                mapBottomPadding = 100;
                 mapController = controller;
               },
               onCameraMove: _onCameraMove,
@@ -244,8 +246,10 @@ class _BrowseScreenState extends State<BrowseScreen>
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
               zoomControlsEnabled: false,
+              compassEnabled: false,
               circles: searchAreaCircle != null ? {searchAreaCircle!} : {},
-              scrollGesturesEnabled: false,
+              padding: EdgeInsets.only(
+                  bottom: mapBottomPadding, top: mapBottomPadding, right: 0, left: 0),
             ),
             _buildSearchButton(),
           ],
@@ -344,9 +348,7 @@ class _BrowseScreenState extends State<BrowseScreen>
         child: Icon(FeatherIcons.filter,
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
             size: 20),
-        onPressed: () {
-          
-        },
+        onPressed: () {},
       ),
     );
   }
@@ -366,4 +368,3 @@ class _BrowseScreenState extends State<BrowseScreen>
     }
   }
 }
-
