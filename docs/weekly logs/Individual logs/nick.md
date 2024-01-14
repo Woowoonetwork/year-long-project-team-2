@@ -280,3 +280,41 @@ N/A
 ## Additional Information
 
 N/A
+
+
+
+## Term 2 Week 1: Monday 8th Jan 2023 - Sunday 14th Dec 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/nickT2W1.png)
+
+### Recap of personal goals
+
+- Reworked post detail page and introduced additional widgets to improve UI.
+- Implemented the Browse screen UI with Google Maps integration.
+- Improved code quality and consistency.
+- Reworked settings page to improved Dark Mode appearance.
+- Seperated out multiple pages into viewmodels and widgets.
+- Completed the weekly logs.
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+
+
+### Tasks completed (from Project Board)
+
+- Upgraded Post Detail page UI with new widgets.
+- Created Browse screen UI with Google Maps.
+- Enhanced code quality and consistency.
+- Improved Dark Mode on Settings page.
+- Refactored pages into viewmodels and widgets.
+- Compiled weekly logs.
+- Helped writing up team log for the week.
+- Helped in task assignment and prioritization for next milestone.
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
