@@ -257,4 +257,35 @@ Additional Information
 N/A.
 
 
+# Individual Log: Sunday 7th Jan 2024 - Sunday 14th Jan 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati9.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed.
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+
+* Reviewed changes for food postings UI
+* Continued fixing bugs for food postings page
+* Completed team log for the week
+* Completed individual log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+N/A
+
+
+
+Additional Information 
+
+N/A.
+
+
 
