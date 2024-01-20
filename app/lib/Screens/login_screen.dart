@@ -112,7 +112,7 @@ class LogInScreen extends StatelessWidget {
             builder: (context) {
               return CupertinoAlertDialog(
                 title: Text('Login Error'),
-                content: Text(errorMessage),
+                content: Text("Your email or password is incorrect."),
                 actions: <Widget>[
                   CupertinoDialogAction(
                     child: Text('OK'),

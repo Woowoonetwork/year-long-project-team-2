@@ -26,9 +26,13 @@ class SuccessScreen extends StatelessWidget {
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
-            Text(
-              'Your password has been reset successfully.',
-              style: TextStyle(fontSize: 16, color: Colors.black),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                "Your password reset link has been sent!\n Please follow the instructions in your email and we'll see you soon!",
+                style: TextStyle(fontSize: 16, color: Colors.black),
+                textAlign: TextAlign.center,
+              ),
             ),
             SizedBox(height: 30),
             CupertinoButton(
