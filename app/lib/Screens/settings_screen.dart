@@ -1,6 +1,7 @@
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/components.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:feather_icons/feather_icons.dart';
@@ -58,6 +59,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSettingButton('Sign out', FeatherIcons.logOut, () {
                   showSignOutConfirmationSheet(context);
                 }),
+                
+                SizedBox(height: 32.0,),
+
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.only(right: _spacing), 
+                        child: Text(
+                          "Account Settings",
+                          style: TextStyle(
+                            fontSize: _defaultFontSize,
+                            letterSpacing: -0.8,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 16, 0, 12),
+                  child: _buildActionButtons(
+                    'Reset Password',
+                    CupertinoColors.activeBlue,
+                    () => _showActionSheet(context, 'Reset Password'),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildActionButtons(
+                    'Delete Account',
+                    CupertinoColors.destructiveRed,
+                    () => _showActionSheet(context, 'Delete Account'),
+                  ),
+                ),
               ],
             ),
           ),
@@ -66,19 +106,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  ObstructingPreferredSizeWidget _buildNavigationBar(BuildContext context) {
-    return CupertinoNavigationBar(
-      transitionBetweenRoutes: false,
-      backgroundColor: groupedBackgroundColor,
-      middle: Text('Settings'),
-      leading: GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Icon(FeatherIcons.arrowLeft,
-            size: _iconSize, color: CupertinoColors.label.resolveFrom(context)),
-      ),
-      border: const Border(bottom: BorderSide.none),
-    );
-  }
+  // ObstructingPreferredSizeWidget _buildNavigationBar(BuildContext context) {
+  //   return CupertinoNavigationBar(
+  //     transitionBetweenRoutes: false,
+  //     backgroundColor: groupedBackgroundColor,
+  //     middle: Text('Settings'),
+  //     leading: GestureDetector(
+  //       onTap: () => Navigator.of(context).pop(),
+  //       child: Icon(FeatherIcons.arrowLeft,
+  //           size: _iconSize, color: CupertinoColors.label.resolveFrom(context)),
+  //     ),
+  //     border: const Border(bottom: BorderSide.none),
+  //   );
+  // }
 
   Widget _buildSettingOption(String title, Widget trailing) {
     return Padding(
@@ -190,6 +230,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildActionButtons(
+      String title, Color color, VoidCallback onPressed) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        height: 50,
+        width: double.infinity, // Makes the button take full width
+        child: CupertinoButton(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.tertiarySystemBackground, context),
+          borderRadius: BorderRadius.circular(12),
+          onPressed: onPressed,
+          child: Text(
+            title,
+            style: TextStyle(color: color, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showActionSheet(BuildContext context, String action) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(
+          '$action',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: CupertinoColors.secondaryLabel,
+            fontSize: 16,
+            letterSpacing: -0.80,
+          ),
+        ),
+        message: Text('Are you sure you want to $action?'),
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            child: Text(
+              'Confirm',
+              style: TextStyle(
+                color: CupertinoColors.destructiveRed,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.80,
+              ),
+            ),
+            onPressed: () {
+              // Handle the action
+              Navigator.pop(context);
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
     );
   }
 }
