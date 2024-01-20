@@ -7,6 +7,7 @@ import 'dart:ui'; // Needed for ImageFilter
 import 'package:FoodHood/Components/cupertinoSearchNavigationBar.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'dart:math' as math;
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double minHeight;
@@ -52,7 +53,8 @@ class _BrowseScreenState extends State<BrowseScreen>
   late TextEditingController searchController;
 
   static const double defaultZoomLevel = 14.0;
-  static const LatLng fallbackLocation = LatLng(1.3521, 103.8198);
+  //set fallback location to be the downtown vancouver
+  static const LatLng fallbackLocation = LatLng(49.2827, -123.1207);
   static const double baseSearchRadius =
       1000; // Base search radius at default zoom level
   double _searchRadius =
@@ -65,6 +67,12 @@ class _BrowseScreenState extends State<BrowseScreen>
   bool _isZooming = false;
 
   String? _mapStyle;
+
+  Set<Marker> _markers = {}; // This will hold the map markers
+  
+  bool _showPostCard = false; // New state to control the visibility of the post card
+  Map<String, dynamic> _selectedPostData = {}; // New state to hold the selected post data
+
 
   @override
   void initState() {
@@ -91,12 +99,14 @@ class _BrowseScreenState extends State<BrowseScreen>
     setState(() {
       _isZooming = true;
       _updateSearchRadius(newZoomLevel, location: position.target);
+      _updateSearchAreaCircle(position.target);
     });
   }
 
   void _onCameraIdle() {
     setState(() {
       _isZooming = false;
+      _updateMarkersBasedOnCircle(); // This will update markers based on the new circle position
     });
   }
 
@@ -106,6 +116,7 @@ class _BrowseScreenState extends State<BrowseScreen>
     setState(() {
       _searchRadius = baseSearchRadius * scale;
       _updateSearchAreaCircle(location ?? searchAreaCircle!.center);
+      _updateMarkersBasedOnCircle(); // This will update markers based on the new circle position
     });
   }
 
@@ -131,8 +142,54 @@ class _BrowseScreenState extends State<BrowseScreen>
       _updateSearchAreaCircle(currentLocation);
       return currentLocation;
     } catch (e) {
-      _showErrorDialog(context, e.toString());
+      _showErrorDialog(context, 'Location Error',
+          'Enable location services in System Settings and try again.');
       return fallbackLocation; // Default fallback location
+    }
+  }
+
+  // Fetch posts from Firestore and display markers within the search area
+  void _fetchPostsAndDisplayMarkers() async {
+    LatLng? currentLocation = await currentLocationFuture;
+    if (currentLocation != null) {
+      final querySnapshot =
+          await FirebaseFirestore.instance.collection('post_details').get();
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        final List<dynamic>? postLocationList = data['post_location'];
+        if (postLocationList != null && postLocationList.length == 2) {
+          final postLatLng = LatLng(
+            double.parse(postLocationList[0].toString()),
+            double.parse(postLocationList[1].toString()),
+          );
+
+          // Check if the post's location is within the search area circle
+          final double distance = Geolocator.distanceBetween(
+            currentLocation.latitude,
+            currentLocation.longitude,
+            postLatLng.latitude,
+            postLatLng.longitude,
+          );
+
+          if (distance <= _searchRadius) {
+            // If within the circle, add a marker to the map
+            final marker = Marker(
+              markerId: MarkerId(doc.id),
+              position: postLatLng,
+              infoWindow: InfoWindow(
+                title: data[
+                    'title'], // Assuming 'title' is a field in your document
+                snippet: data[
+                    'description'], // Assuming 'description' is a field in your document
+              ),
+            );
+
+            setState(() {
+              _markers.add(marker); // Add the marker to the set
+            });
+          }
+        }
+      }
     }
   }
 
@@ -182,11 +239,91 @@ class _BrowseScreenState extends State<BrowseScreen>
     });
   }
 
-  void _showErrorDialog(BuildContext context, String message) {
+  void _onMarkerTapped(String markerId) {
+    // Fetch post data from Firestore using the markerId
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .doc(markerId)
+        .get()
+        .then((document) {
+      if (document.exists) {
+        setState(() {
+          _showPostCard = true;
+          _selectedPostData = document.data() as Map<String, dynamic>;
+          _zoomToPostLocation(_selectedPostData['post_location']);
+        });
+      }
+    });
+  }
+
+  void _zoomToPostLocation(List<dynamic> postLocation) {
+    final postLatLng = LatLng(
+      double.parse(postLocation[0].toString()),
+      double.parse(postLocation[1].toString()),
+    );
+    mapController?.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(target: postLatLng, zoom: 18.0), // A closer zoom level
+    ));
+  }
+
+  void _resetUIState() {
+    setState(() {
+      _showPostCard = false;
+      _selectedPostData = {};
+      // Optionally, animate back to the user's location or previous zoom level
+    });
+  }
+
+
+  void _updateMarkersBasedOnCircle() {
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .get()
+        .then((querySnapshot) {
+      Set<Marker> newMarkers = {};
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        final List<dynamic>? postLocationList = data['post_location'];
+        if (postLocationList != null && postLocationList.length == 2) {
+          final postLatLng = LatLng(
+            double.parse(postLocationList[0].toString()),
+            double.parse(postLocationList[1].toString()),
+          );
+
+          // Check if the post's location is within the search area circle
+          final double distance = Geolocator.distanceBetween(
+            searchAreaCircle!.center.latitude,
+            searchAreaCircle!.center.longitude,
+            postLatLng.latitude,
+            postLatLng.longitude,
+          );
+
+          if (distance <= _searchRadius) {
+            // If within the circle, add a marker to the map
+            final marker = Marker(
+              markerId: MarkerId(doc.id),
+              position: postLatLng,
+              infoWindow: InfoWindow(
+                title: data['title'],
+                snippet: data['description'],
+              ),
+            );
+            newMarkers.add(marker);
+          }
+        }
+      }
+
+      setState(() {
+        _markers = newMarkers;
+      });
+    });
+  }
+
+  void _showErrorDialog(BuildContext context, String title, String message) {
     showCupertinoDialog(
       context: context,
       builder: (BuildContext context) => CupertinoAlertDialog(
-        title: Text('Location Error'),
+        title: Text(title),
         content: Text(message),
         actions: <Widget>[
           CupertinoDialogAction(
@@ -239,6 +376,7 @@ class _BrowseScreenState extends State<BrowseScreen>
               },
               onCameraMove: _onCameraMove,
               onCameraIdle: _onCameraIdle,
+              markers: _markers,
               initialCameraPosition: CameraPosition(
                 target: snapshot.data!,
                 zoom: defaultZoomLevel,
@@ -249,9 +387,13 @@ class _BrowseScreenState extends State<BrowseScreen>
               compassEnabled: false,
               circles: searchAreaCircle != null ? {searchAreaCircle!} : {},
               padding: EdgeInsets.only(
-                  bottom: mapBottomPadding, top: mapBottomPadding, right: 0, left: 0),
+                  bottom: mapBottomPadding,
+                  top: mapBottomPadding,
+                  right: 0,
+                  left: 0),
             ),
-            _buildSearchButton(),
+            if (_showPostCard) _buildPostCard(), // Conditionally render the post card
+          if (!_showPostCard) _buildSearchButton(), // Hide the search button when post card is shown
           ],
         );
       },
@@ -364,7 +506,8 @@ class _BrowseScreenState extends State<BrowseScreen>
           CameraPosition(target: latLng, zoom: defaultZoomLevel)));
       _updateSearchAreaCircle(latLng);
     } catch (e) {
-      _showErrorDialog(context, e.toString());
+      _showErrorDialog(context, 'Location Error',
+          'Enable location services in System Settings and try again.');
     }
   }
 }
