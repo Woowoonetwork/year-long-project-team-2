@@ -34,7 +34,6 @@ class PostCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -46,9 +45,11 @@ class PostCard extends StatelessWidget {
           Navigator.push(
             context,
             CupertinoPageRoute(
-                builder: (context) => PostDetailView(
-                      postId: postId,
-                    )),
+              builder: (context) => PostDetailView(
+                postId:
+                    postId, // Ensure 'postId' is defined and accessible here
+              ),
+            ),
           );
         },
         child: Center(
