@@ -2,7 +2,7 @@
 // a page that allows the user to log in to the app
 
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/forgot_pwd_screen.dart';
+import 'package:FoodHood/Screens/reset_pwd_screen.dart';
 import 'package:flutter/cupertino.dart';
 import '../components.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -141,27 +141,27 @@ class LogInScreen extends StatelessWidget {
   }
 
   // Update the buildTextButton method to include onPressed callback
-Widget buildTextButton(BuildContext context, String text, Alignment alignment, Color color, double fontSize, FontWeight fontWeight) {
-  return GestureDetector(
-    onTap: () {
-      // Add your logic for the "Forgot Password?" action here
-      // For example, you can navigate to a password reset screen
-      //Navigator.pushNamed(context, '/reset_password');
-      Navigator.of(context)
-        .push(CupertinoPageRoute(builder: (context) => ForgotPasswordScreen()));
-    },
-    child: Align(
-      alignment: alignment,
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: fontSize,
-          fontWeight: fontWeight,
+  Widget buildTextButton(BuildContext context, String text, Alignment alignment,
+      Color color, double fontSize, FontWeight fontWeight) {
+    return GestureDetector(
+      onTap: () {
+        // Add your logic for the "Forgot Password?" action here
+        // For example, you can navigate to a password reset screen
+        //Navigator.pushNamed(context, '/reset_password');
+        Navigator.of(context).push(
+            CupertinoPageRoute(builder: (context) => ForgotPasswordScreen()));
+      },
+      child: Align(
+        alignment: alignment,
+        child: Text(
+          text,
+          style: TextStyle(
+            color: color,
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+          ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }
