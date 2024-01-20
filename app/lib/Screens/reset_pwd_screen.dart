@@ -4,6 +4,7 @@
 import 'package:FoodHood/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:FoodHood/Screens/reset_sent_success.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   @override
@@ -16,8 +17,15 @@ class _ForgotPasswordState extends State<ForgotPasswordScreen> {
   Future<void> _resetPassword() async {
     final String email = _emailController.text.trim();
     final authService = AuthService(FirebaseAuth.instance);
+
     try {
       await authService.sendPasswordResetEmail(email);
+      Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => SuccessScreen(message: 'Email sent :)'),
+        ),
+      );
       print('Password reset email sent successfully.');
     } catch (e) {
       print('Error resetting password: $e');
