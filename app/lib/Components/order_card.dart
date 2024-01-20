@@ -27,7 +27,6 @@ class OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      height: 220,
       child: CupertinoContextMenu(
         actions: <Widget>[
           // Edit Order Action
@@ -54,7 +53,6 @@ class OrderCard extends StatelessWidget {
           padding: EdgeInsets.zero,
           onPressed: () {
             onTap(postId);
-            print("GestureDetector tapped");
             Navigator.push(
               context,
               CupertinoPageRoute(
@@ -68,7 +66,7 @@ class OrderCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(child: _buildImageSection(context)),
+                _buildImageSection(context),
                 _buildTitleSection(context),
                 _buildTagSection(context),
                 _buildOrderInfoSection(context),
@@ -101,7 +99,7 @@ class OrderCard extends StatelessWidget {
       child: Image.asset(
         imageLocation,
         width: MediaQuery.of(context).size.width,
-        height: 110,
+        height: 100,
         fit: BoxFit.cover,
       ),
     );
@@ -145,7 +143,7 @@ class OrderCard extends StatelessWidget {
 
   Widget _buildTag(String text, Color color, BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(20),
@@ -153,8 +151,9 @@ class OrderCard extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
           fontSize: 10,
+          letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
         ),
       ),

@@ -9,30 +9,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
 import 'package:FoodHood/Components/post_card.dart';
 
-class SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final double minHeight, maxHeight;
-  final Widget child;
-
-  SliverAppBarDelegate(
-      {required this.minHeight, required this.maxHeight, required this.child});
-
-  @override
-  double get minExtent => minHeight;
-  @override
-  double get maxExtent => maxHeight;
-
-  @override
-  Widget build(
-          BuildContext context, double shrinkOffset, bool overlapsContent) =>
-      SizedBox.expand(child: child);
-
-  @override
-  bool shouldRebuild(SliverAppBarDelegate oldDelegate) =>
-      maxHeight != oldDelegate.maxHeight ||
-      minHeight != oldDelegate.minHeight ||
-      child != oldDelegate.child;
-}
-
 class BrowseScreen extends StatefulWidget {
   @override
   _BrowseScreenState createState() => _BrowseScreenState();
@@ -60,6 +36,8 @@ class _BrowseScreenState extends State<BrowseScreen>
   Set<Marker> _markers = {};
   bool _showPostCard = false;
   Map<String, dynamic> _selectedPostData = {};
+
+  
 
   @override
   void initState() {
@@ -137,10 +115,6 @@ class _BrowseScreenState extends State<BrowseScreen>
     }
   }
 
-  // Function to fetch posts from Firestore and display markers within the search area is here
-  // Fetch current location function is here
-  // Function to determine device's current position is here
-
   double getNavBarHeight() {
     final RenderBox? renderBox =
         navBarKey.currentContext?.findRenderObject() as RenderBox?;
@@ -167,10 +141,21 @@ class _BrowseScreenState extends State<BrowseScreen>
         .get()
         .then((document) {
       if (document.exists) {
+        Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+        
+        // Ensure you are fetching and storing all necessary fields
         setState(() {
           _showPostCard = true;
-          _selectedPostData = document.data() as Map<String, dynamic>;
-          _zoomToPostLocation(_selectedPostData['post_location']);
+          _selectedPostData = {
+            'image_url': data['image_url'],
+            'title': data['title'],
+            'tags': data['tags'],
+            'firstname': data['firstname'], // Replace with actual field names
+            'lastname': data['lastname'],   // Replace with actual field names
+            'timeAgo': data['timeAgo'],     // Replace with actual field names
+            'postId': document.id
+          };
+          _zoomToPostLocation(data['post_location']);
           searchAreaCircle = null;
         });
       }
@@ -335,6 +320,15 @@ class _BrowseScreenState extends State<BrowseScreen>
       return SizedBox.shrink();
     }
 
+    // Extract the details from the selected post data
+    String imageLocation = _selectedPostData['image_url'] ?? 'assets/images/sampleFoodPic.png';
+    String title = _selectedPostData['title'] ?? 'Title Not Found';
+    List<String> tags = List<String>.from(_selectedPostData['tags'] ?? []);
+    String firstname = _selectedPostData['firstname'] ?? 'Unknown';
+    String lastname = _selectedPostData['lastname'] ?? 'Unknown';
+    String timeAgo = _selectedPostData['timeAgo'] ?? 'Unknown';
+    String postId = _selectedPostData['postId'] ?? '0';
+
     return Positioned(
       bottom: 110,
       left: 0,
@@ -342,20 +336,20 @@ class _BrowseScreenState extends State<BrowseScreen>
       child: GestureDetector(
         onTap: () => _resetUIState(),
         child: PostCard(
-          imageLocation: _selectedPostData['imageLocation'] ??
-              'assets/images/sampleFoodPic.png',
-          title: _selectedPostData['title'] ?? 'Title Not Found',
-          tags: List<String>.from(_selectedPostData['tags'] ?? []),
-          tagColors: _generateTagColors(_selectedPostData['tags']?.length ?? 0),
-          firstname: _selectedPostData['firstname'] ?? 'Null',
-          lastname: _selectedPostData['lastname'] ?? 'Null',
-          timeAgo: _selectedPostData['timeAgo'] ?? 'Null',
+          imageLocation: imageLocation,
+          title: title,
+          tags: tags,
+          tagColors: _generateTagColors(tags.length),
+          firstname: firstname,
+          lastname: lastname,
+          timeAgo: timeAgo,
           onTap: (postId) => print('PostCard with ID $postId was tapped'),
-          postId: _selectedPostData['postId'] ?? '0',
+          postId: postId,
         ),
       ),
     );
   }
+
 
   List<Color> _generateTagColors(int numberOfTags) {
     List<Color> tagColors = [];

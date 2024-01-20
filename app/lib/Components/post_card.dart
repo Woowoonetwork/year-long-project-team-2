@@ -43,33 +43,39 @@ class PostCard extends StatelessWidget {
         padding: EdgeInsets.zero,
         onPressed: () {
           onTap(postId);
-          print("GestureDetector tapped");
           Navigator.push(
             context,
             CupertinoPageRoute(
-              builder: (context) => PostDetailView(
-                postId:
-                    postId, // Ensure 'postId' is defined and accessible here
-              ),
+              builder: (context) => PostDetailView(postId: postId),
             ),
           );
         },
         child: Center(
           child: Container(
-            width: 382,
-            height: 220,
             decoration: _buildBoxDecoration(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Spacer(),
+                _buildImageSection(context),
                 _buildTitleSection(context),
                 _buildTagSection(context),
-                _buildOrderInfoSection(context),
+                _buildOrderInfoSection(context, ''),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildImageSection(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+      child: Image.asset(
+        imageLocation,
+        width: MediaQuery.of(context).size.width,
+        height: 100,
+        fit: BoxFit.cover,
       ),
     );
   }
@@ -122,7 +128,7 @@ class PostCard extends StatelessWidget {
 
   Widget _buildTag(String text, Color color, BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(20),
@@ -130,8 +136,9 @@ class PostCard extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
           fontSize: 10,
+          letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -143,18 +150,19 @@ class PostCard extends StatelessWidget {
     return availableColors[index % availableColors.length];
   }
 
-  Widget _buildOrderInfoSection(BuildContext context) {
+  Widget _buildOrderInfoSection(BuildContext context, String avatarUrl) {
+    // Use a default image if avatarUrl is empty or null
+    String effectiveAvatarUrl =
+        avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
-          Container(
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.grey,
-            ),
+          CircleAvatar(
+            backgroundImage:
+                AssetImage(effectiveAvatarUrl), // Load the image from assets
+            radius: 9, // Optional: Adjust the radius to fit your design
           ),
           SizedBox(width: 8),
           Text(
