@@ -33,10 +33,9 @@ class SuccessScreen extends StatelessWidget {
             SizedBox(height: 30),
             CupertinoButton(
               onPressed: () {
-                Navigator.pushAndRemoveUntil(
+                Navigator.push(
                   context,
                   CupertinoPageRoute(builder: (context) => LogInScreen()),
-                  (_) => false,
                 );
               },
               child: Container(
