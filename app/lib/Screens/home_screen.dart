@@ -89,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // Create a PostCard with fetched data
         var postCard = PostCard(
+          imageLocation: documentData['image_url'] ?? 'assets/images/sampleFoodPic.png',
           title: title,
           tags: tags,
           tagColors: assignedColors,
@@ -168,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Create a PostCard with fetched data
           var postCard = PostCard(
+            imageLocation: documentData['image_url'] ?? 'assets/images/sampleFoodPic.png',
             title: title,
             tags: tags,
             tagColors: assignedColors,
@@ -188,58 +190,59 @@ class _HomeScreenState extends State<HomeScreen> {
     return fetchedPostCards;
   }
 
- @override
-Widget build(BuildContext context) {
-  return CupertinoPageScaffold(
-    backgroundColor: groupedBackgroundColor,
-    child: Stack(
-      children: [
-        CustomScrollView(
-          slivers: <Widget>[
-            buildMainNavigationBar(context, 'Discover'),
-            SliverToBoxAdapter(
-              child: Column(
-                children: <Widget>[
-                  _buildSearchBar(context),
-                  SizedBox(height: 16),
-                  _buildCategoryButtons(),
-                  SizedBox(height: 16),
-                ],
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: groupedBackgroundColor,
+      child: Stack(
+        children: [
+          CustomScrollView(
+            slivers: <Widget>[
+              buildMainNavigationBar(context, 'Discover'),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: <Widget>[
+                    _buildSearchBar(context),
+                    SizedBox(height: 16),
+                    _buildCategoryButtons(),
+                    SizedBox(height: 16),
+                  ],
+                ),
               ),
-            ),
-            if (isLoading)
-              SliverFillRemaining(
-                hasScrollBody: false, // This is important to prevent unnecessary scrolling
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      CupertinoActivityIndicator(),
-                      SizedBox(height: 10),
-                      Text('Loading',
-                          style: TextStyle(
-                              color: CupertinoColors.secondaryLabel
-                                  .resolveFrom(context))),
-                    ],
+              if (isLoading)
+                SliverFillRemaining(
+                  hasScrollBody:
+                      false, // This is important to prevent unnecessary scrolling
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        CupertinoActivityIndicator(),
+                        SizedBox(height: 10),
+                        Text('Loading',
+                            style: TextStyle(
+                                color: CupertinoColors.secondaryLabel
+                                    .resolveFrom(context))),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return postCards[index];
+                    },
+                    childCount: postCards.length,
                   ),
                 ),
-              )
-            else
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                    return postCards[index];
-                  },
-                  childCount: postCards.length,
-                ),
-              ),
-          ],
-        ),
-        _buildAddButton(context),
-      ],
-    ),
-  );
-}
+            ],
+          ),
+          _buildAddButton(context),
+        ],
+      ),
+    );
+  }
 
   Widget _buildSearchBar(BuildContext context) {
     bool isFocused = _focusNode.hasFocus;

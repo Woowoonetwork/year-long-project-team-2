@@ -4,6 +4,7 @@ import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
 import 'package:FoodHood/Components/colors.dart';
 
 class PostCard extends StatelessWidget {
+  final String imageLocation;
   final String firstname;
   final String lastname;
   final String title;
@@ -23,6 +24,7 @@ class PostCard extends StatelessWidget {
 
   PostCard({
     Key? key,
+    required this.imageLocation,
     required this.title,
     required this.tags,
     required this.tagColors,

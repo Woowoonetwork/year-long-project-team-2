@@ -3,41 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
-import 'dart:ui'; // Needed for ImageFilter
 import 'package:FoodHood/Components/cupertinoSearchNavigationBar.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
-import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math' as math;
+import 'package:FoodHood/Components/post_card.dart';
 
 class SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final double minHeight;
-  final double maxHeight;
+  final double minHeight, maxHeight;
   final Widget child;
 
-  SliverAppBarDelegate({
-    required this.minHeight,
-    required this.maxHeight,
-    required this.child,
-  });
+  SliverAppBarDelegate(
+      {required this.minHeight, required this.maxHeight, required this.child});
 
   @override
   double get minExtent => minHeight;
-
   @override
   double get maxExtent => maxHeight;
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(child: child);
-  }
+          BuildContext context, double shrinkOffset, bool overlapsContent) =>
+      SizedBox.expand(child: child);
 
   @override
-  bool shouldRebuild(SliverAppBarDelegate oldDelegate) {
-    return maxHeight != oldDelegate.maxHeight ||
-        minHeight != oldDelegate.minHeight ||
-        child != oldDelegate.child;
-  }
+  bool shouldRebuild(SliverAppBarDelegate oldDelegate) =>
+      maxHeight != oldDelegate.maxHeight ||
+      minHeight != oldDelegate.minHeight ||
+      child != oldDelegate.child;
 }
 
 class BrowseScreen extends StatefulWidget {
@@ -50,15 +43,12 @@ class _BrowseScreenState extends State<BrowseScreen>
   GoogleMapController? mapController;
   Future<LatLng?>? currentLocationFuture;
   Circle? searchAreaCircle;
-  late TextEditingController searchController;
+  TextEditingController searchController = TextEditingController();
 
   static const double defaultZoomLevel = 14.0;
-  //set fallback location to be the downtown vancouver
   static const LatLng fallbackLocation = LatLng(49.2827, -123.1207);
-  static const double baseSearchRadius =
-      1000; // Base search radius at default zoom level
-  double _searchRadius =
-      baseSearchRadius; // Current search radius, starts at base
+  static const double baseSearchRadius = 1000;
+  double _searchRadius = baseSearchRadius;
   static const Color circleFillColor = Colors.blue;
   static const double circleFillOpacity = 0.1;
   static const Color circleStrokeColor = Colors.blue;
@@ -67,24 +57,22 @@ class _BrowseScreenState extends State<BrowseScreen>
   bool _isZooming = false;
 
   String? _mapStyle;
-
-  Set<Marker> _markers = {}; // This will hold the map markers
-  
-  bool _showPostCard = false; // New state to control the visibility of the post card
-  Map<String, dynamic> _selectedPostData = {}; // New state to hold the selected post data
-
+  Set<Marker> _markers = {};
+  bool _showPostCard = false;
+  Map<String, dynamic> _selectedPostData = {};
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    searchController = TextEditingController();
     currentLocationFuture = _determineCurrentLocation();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    searchController.dispose();
+    mapController?.dispose();
     super.dispose();
   }
 
@@ -98,41 +86,42 @@ class _BrowseScreenState extends State<BrowseScreen>
     double newZoomLevel = position.zoom;
     setState(() {
       _isZooming = true;
-      _updateSearchRadius(newZoomLevel, location: position.target);
+      _searchRadius = _calculateSearchRadius(newZoomLevel);
       _updateSearchAreaCircle(position.target);
+      _updateMarkersBasedOnCircle();
     });
   }
 
-  void _onCameraIdle() {
-    setState(() {
-      _isZooming = false;
-      _updateMarkersBasedOnCircle(); // This will update markers based on the new circle position
-    });
-  }
+  void _onCameraIdle() => setState(() => _isZooming = false);
 
-  void _updateSearchRadius(double newZoomLevel, {LatLng? location}) {
-    // Define a scaling factor based on zoom level. You might need to adjust the formula.
+  double _calculateSearchRadius(double newZoomLevel) {
     double scale = math.pow(2, defaultZoomLevel - newZoomLevel).toDouble();
-    setState(() {
-      _searchRadius = baseSearchRadius * scale;
-      _updateSearchAreaCircle(location ?? searchAreaCircle!.center);
-      _updateMarkersBasedOnCircle(); // This will update markers based on the new circle position
-    });
+    return baseSearchRadius * scale;
   }
 
   void _checkAndUpdateMapStyle() async {
-    bool isDarkMode =
-        MediaQuery.of(context).platformBrightness == Brightness.dark;
-    String stylePath = isDarkMode
-        ? 'assets/map_style_dark.json'
-        : 'assets/map_style_light.json';
+    String stylePath =
+        MediaQuery.of(context).platformBrightness == Brightness.dark
+            ? 'assets/map_style_dark.json'
+            : 'assets/map_style_light.json';
 
     String style = await rootBundle.loadString(stylePath);
     if (_mapStyle != style) {
-      setState(() {
-        _mapStyle = style;
-      });
+      setState(() => _mapStyle = style);
       mapController?.setMapStyle(_mapStyle);
+    }
+  }
+
+  Future<LatLng> _fetchCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
+      return currentLatLng;
+    } catch (e) {
+      // Handle location service errors or user permission issues here
+      print("Error fetching location: $e");
+      return fallbackLocation; // Return a default location in case of an error
     }
   }
 
@@ -144,81 +133,13 @@ class _BrowseScreenState extends State<BrowseScreen>
     } catch (e) {
       _showErrorDialog(context, 'Location Error',
           'Enable location services in System Settings and try again.');
-      return fallbackLocation; // Default fallback location
+      return fallbackLocation;
     }
   }
 
-  // Fetch posts from Firestore and display markers within the search area
-  void _fetchPostsAndDisplayMarkers() async {
-    LatLng? currentLocation = await currentLocationFuture;
-    if (currentLocation != null) {
-      final querySnapshot =
-          await FirebaseFirestore.instance.collection('post_details').get();
-      for (var doc in querySnapshot.docs) {
-        final data = doc.data();
-        final List<dynamic>? postLocationList = data['post_location'];
-        if (postLocationList != null && postLocationList.length == 2) {
-          final postLatLng = LatLng(
-            double.parse(postLocationList[0].toString()),
-            double.parse(postLocationList[1].toString()),
-          );
-
-          // Check if the post's location is within the search area circle
-          final double distance = Geolocator.distanceBetween(
-            currentLocation.latitude,
-            currentLocation.longitude,
-            postLatLng.latitude,
-            postLatLng.longitude,
-          );
-
-          if (distance <= _searchRadius) {
-            // If within the circle, add a marker to the map
-            final marker = Marker(
-              markerId: MarkerId(doc.id),
-              position: postLatLng,
-              infoWindow: InfoWindow(
-                title: data[
-                    'title'], // Assuming 'title' is a field in your document
-                snippet: data[
-                    'description'], // Assuming 'description' is a field in your document
-              ),
-            );
-
-            setState(() {
-              _markers.add(marker); // Add the marker to the set
-            });
-          }
-        }
-      }
-    }
-  }
-
-  Future<LatLng> _fetchCurrentLocation() async {
-    Position position = await _determinePosition();
-    return LatLng(position.latitude, position.longitude);
-  }
-
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      throw 'Location services are disabled.';
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) {
-        throw 'Location permissions are denied';
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      throw 'Location permissions are permanently denied';
-    }
-
-    return await Geolocator.getCurrentPosition();
-  }
+  // Function to fetch posts from Firestore and display markers within the search area is here
+  // Fetch current location function is here
+  // Function to determine device's current position is here
 
   double getNavBarHeight() {
     final RenderBox? renderBox =
@@ -240,7 +161,6 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   void _onMarkerTapped(String markerId) {
-    // Fetch post data from Firestore using the markerId
     FirebaseFirestore.instance
         .collection('post_details')
         .doc(markerId)
@@ -251,6 +171,7 @@ class _BrowseScreenState extends State<BrowseScreen>
           _showPostCard = true;
           _selectedPostData = document.data() as Map<String, dynamic>;
           _zoomToPostLocation(_selectedPostData['post_location']);
+          searchAreaCircle = null;
         });
       }
     });
@@ -262,18 +183,15 @@ class _BrowseScreenState extends State<BrowseScreen>
       double.parse(postLocation[1].toString()),
     );
     mapController?.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(target: postLatLng, zoom: 18.0), // A closer zoom level
-    ));
+        CameraPosition(target: postLatLng, zoom: 18.0)));
   }
 
   void _resetUIState() {
     setState(() {
       _showPostCard = false;
       _selectedPostData = {};
-      // Optionally, animate back to the user's location or previous zoom level
     });
   }
-
 
   void _updateMarkersBasedOnCircle() {
     FirebaseFirestore.instance
@@ -290,7 +208,6 @@ class _BrowseScreenState extends State<BrowseScreen>
             double.parse(postLocationList[1].toString()),
           );
 
-          // Check if the post's location is within the search area circle
           final double distance = Geolocator.distanceBetween(
             searchAreaCircle!.center.latitude,
             searchAreaCircle!.center.longitude,
@@ -299,23 +216,16 @@ class _BrowseScreenState extends State<BrowseScreen>
           );
 
           if (distance <= _searchRadius) {
-            // If within the circle, add a marker to the map
             final marker = Marker(
               markerId: MarkerId(doc.id),
               position: postLatLng,
-              infoWindow: InfoWindow(
-                title: data['title'],
-                snippet: data['description'],
-              ),
+              onTap: () => _onMarkerTapped(doc.id),
             );
             newMarkers.add(marker);
           }
         }
       }
-
-      setState(() {
-        _markers = newMarkers;
-      });
+      setState(() => _markers = newMarkers);
     });
   }
 
@@ -328,9 +238,7 @@ class _BrowseScreenState extends State<BrowseScreen>
         actions: <Widget>[
           CupertinoDialogAction(
             child: Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),
@@ -339,9 +247,7 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Check and load the map style based on the theme
     _checkAndUpdateMapStyle();
-
     return CupertinoPageScaffold(
       child: Stack(
         children: [
@@ -374,6 +280,7 @@ class _BrowseScreenState extends State<BrowseScreen>
                 mapBottomPadding = 100;
                 mapController = controller;
               },
+              onTap: _onMapTapped,
               onCameraMove: _onCameraMove,
               onCameraIdle: _onCameraIdle,
               markers: _markers,
@@ -392,22 +299,76 @@ class _BrowseScreenState extends State<BrowseScreen>
                   right: 0,
                   left: 0),
             ),
-            if (_showPostCard) _buildPostCard(), // Conditionally render the post card
-          if (!_showPostCard) _buildSearchButton(), // Hide the search button when post card is shown
+            if (_showPostCard) _buildPostCard(),
+            if (!_showPostCard) _buildSearchButton(),
           ],
         );
       },
     );
   }
 
-  String _formatSearchRadius(double radius) {
-    if (radius < 1) {
-      return '<1 m';
-    } else if (radius < 1000) {
-      return '${radius.toStringAsFixed(0)} m';
-    } else {
-      return '${(radius / 1000).toStringAsFixed(0)} km';
+  void _onMapTapped(LatLng tapLocation) {
+    if (_isOutsideSearchArea(tapLocation)) {
+      _resetUIState();
+      _zoomOutToDefault();
     }
+  }
+
+  bool _isOutsideSearchArea(LatLng tapLocation) {
+    final double distance = Geolocator.distanceBetween(
+      searchAreaCircle!.center.latitude,
+      searchAreaCircle!.center.longitude,
+      tapLocation.latitude,
+      tapLocation.longitude,
+    );
+    return distance > _searchRadius;
+  }
+
+  void _zoomOutToDefault() {
+    mapController?.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(target: searchAreaCircle!.center, zoom: defaultZoomLevel),
+    ));
+  }
+
+  Widget _buildPostCard() {
+    if (_selectedPostData.isEmpty) {
+      return SizedBox.shrink();
+    }
+
+    return Positioned(
+      bottom: 110,
+      left: 0,
+      right: 0,
+      child: GestureDetector(
+        onTap: () => _resetUIState(),
+        child: PostCard(
+          imageLocation: _selectedPostData['imageLocation'] ??
+              'assets/images/sampleFoodPic.png',
+          title: _selectedPostData['title'] ?? 'Title Not Found',
+          tags: List<String>.from(_selectedPostData['tags'] ?? []),
+          tagColors: _generateTagColors(_selectedPostData['tags']?.length ?? 0),
+          firstname: _selectedPostData['firstname'] ?? 'Null',
+          lastname: _selectedPostData['lastname'] ?? 'Null',
+          timeAgo: _selectedPostData['timeAgo'] ?? 'Null',
+          onTap: (postId) => print('PostCard with ID $postId was tapped'),
+          postId: _selectedPostData['postId'] ?? '0',
+        ),
+      ),
+    );
+  }
+
+  List<Color> _generateTagColors(int numberOfTags) {
+    List<Color> tagColors = [];
+    List<Color> availableColors = [
+      Colors.lightGreenAccent,
+      Colors.lightBlueAccent,
+      Colors.pinkAccent[100]!,
+      Colors.yellowAccent[100]!,
+    ];
+    for (int i = 0; i < numberOfTags; i++) {
+      tagColors.add(availableColors[i % availableColors.length]);
+    }
+    return tagColors;
   }
 
   Widget _buildSearchButton() {
@@ -421,60 +382,65 @@ class _BrowseScreenState extends State<BrowseScreen>
           color: CupertinoColors.tertiarySystemBackground,
           borderRadius: BorderRadius.circular(100.0),
           padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
-          child: _isZooming
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(FeatherIcons.maximize2,
-                        size: 18, color: CupertinoColors.activeOrange),
-                    SizedBox(width: 8.0),
-                    Text(
-                      _formatSearchRadius(_searchRadius * 2),
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: -0.8,
-                        color: CupertinoColors.label.resolveFrom(context),
-                      ),
-                    )
-                  ],
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(CupertinoIcons.location_fill,
-                        size: 18, color: CupertinoColors.activeBlue),
-                    SizedBox(width: 8.0),
-                    Text(
-                      'Search Here',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: -0.8,
-                        color: CupertinoColors.label.resolveFrom(context),
-                      ),
-                    ),
-                  ],
-                ),
+          child: _isZooming ? _zoomButtonContent() : _locationButtonContent(),
         ),
       ),
     );
   }
 
+  Row _zoomButtonContent() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(FeatherIcons.maximize2,
+            size: 18, color: CupertinoColors.activeOrange),
+        SizedBox(width: 8.0),
+        Text(
+          _formatSearchRadius(_searchRadius * 2),
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.8,
+            color: CupertinoColors.label.resolveFrom(context),
+          ),
+        )
+      ],
+    );
+  }
+
+  Row _locationButtonContent() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(CupertinoIcons.location_fill,
+            size: 18, color: CupertinoColors.activeBlue),
+        SizedBox(width: 8.0),
+        Text(
+          'Current Location',
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.8,
+            color: CupertinoColors.label.resolveFrom(context),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildOverlayUI() {
-    return Stack(children: [
-      CupertinoSearchNavigationBar(
-        title: "Browse",
-        textController: searchController,
-        focusNode: FocusNode(),
-        onSearchTextChanged: (text) {},
-        buildFilterButton: () {
-          return _buildFilterButton();
-        },
-      ),
-    ]);
+    return Stack(
+      children: [
+        CupertinoSearchNavigationBar(
+          title: "Browse",
+          textController: searchController,
+          onSearchTextChanged: (text) {},
+          buildFilterButton: () => _buildFilterButton(),
+        ),
+      ],
+    );
   }
 
   Widget _buildFilterButton() {
@@ -485,13 +451,8 @@ class _BrowseScreenState extends State<BrowseScreen>
         color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        child: Icon(FeatherIcons.filter,
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            size: 20),
-        onPressed: () {},
-      ),
+      child: Icon(FeatherIcons.filter,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context), size: 20),
     );
   }
 
@@ -508,6 +469,14 @@ class _BrowseScreenState extends State<BrowseScreen>
     } catch (e) {
       _showErrorDialog(context, 'Location Error',
           'Enable location services in System Settings and try again.');
+    }
+  }
+
+  String _formatSearchRadius(double radius) {
+    if (radius < 1000) {
+      return '${radius.toStringAsFixed(0)} m';
+    } else {
+      return '${(radius / 1000).toStringAsFixed(1)} km';
     }
   }
 }

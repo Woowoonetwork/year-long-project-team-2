@@ -32,23 +32,16 @@ class NavigationScreen extends StatelessWidget {
         items: [
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.home),
-            label: '', // label is now empty
           ),
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.map),
-            label: '', // label is now empty
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(FeatherIcons.plusSquare),
-          //   label: '', // label is now empty
-          // ),
+          
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.archive),
-            label: '', // label is now empty
           ),
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.user),
-            label: '', // label is now empty
           ),
         ],
       ),

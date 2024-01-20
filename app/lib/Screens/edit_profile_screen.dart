@@ -1,11 +1,3 @@
-/* 
-
-Edit Profile Screen
-
-- This screen allows the user to edit their profile information, including their name, email, bio, and profile picture.
-
-*/
-
 
 import 'dart:io';
 import 'package:FoodHood/Components/colors.dart';
