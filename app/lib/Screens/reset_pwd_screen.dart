@@ -1,6 +1,8 @@
 // forgot_pwd_screen.dart
 // A page that allows a user to reset their password if they forgot it.
 
+import 'package:FoodHood/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -9,12 +11,17 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordState extends State<ForgotPasswordScreen> {
+  final TextEditingController _emailController = TextEditingController();
 
-  // Placeholder function for password reset logic
   Future<void> _resetPassword() async {
-    // Implement your password reset logic here
-    // For example, you can send a password reset email to the user
-    print('Password reset logic goes here');
+    final String email = _emailController.text.trim();
+    final authService = AuthService(FirebaseAuth.instance);
+    try {
+      await authService.sendPasswordResetEmail(email);
+      print('Password reset email sent successfully.');
+    } catch (e) {
+      print('Error resetting password: $e');
+    }
   }
 
   @override
@@ -31,40 +38,37 @@ class _ForgotPasswordState extends State<ForgotPasswordScreen> {
                 letterSpacing: -1.36,
               ),
             ),
-
             leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.arrow_left_circle_fill, color: Color.fromRGBO(51, 117, 134, 1.0), size: 30.0,),
-              onPressed: () async{
-                Navigator.of(context).pop();
-              }
-            ),
-
+                padding: EdgeInsets.zero,
+                child: const Icon(
+                  CupertinoIcons.arrow_left_circle_fill,
+                  color: Color.fromRGBO(51, 117, 134, 1.0),
+                  size: 30.0,
+                ),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                }),
             border: const Border(bottom: BorderSide.none),
             stretch: true,
           ),
-          
           SliverToBoxAdapter(
             child: SizedBox(height: 16.0),
           ),
-
           SliverToBoxAdapter(
             child: Container(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'Please enter the email address associated with your account.', // Add your content here
+                "Don't worry! It happens. Please enter the email address associated with your account.", // Add your content here
                 style: TextStyle(fontSize: 16.0),
               ),
             ),
           ),
-
           SliverToBoxAdapter(
             child: SizedBox(height: 16.0),
           ),
-
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0), // Adjust outer padding as needed
+              padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0),
               child: CupertinoTextField(
                 padding: EdgeInsets.all(16.0),
                 placeholder: "Email Address",
@@ -76,14 +80,13 @@ class _ForgotPasswordState extends State<ForgotPasswordScreen> {
                   borderRadius: BorderRadius.circular(10.0),
                   color: CupertinoColors.secondarySystemGroupedBackground,
                 ),
+                controller: _emailController,
               ),
             ),
           ),
-
           SliverToBoxAdapter(
             child: SizedBox(height: 64.0),
           ),
-
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -107,6 +110,6 @@ class _ForgotPasswordState extends State<ForgotPasswordScreen> {
           ),
         ],
       ),
-    );       
+    );
   }
 }
