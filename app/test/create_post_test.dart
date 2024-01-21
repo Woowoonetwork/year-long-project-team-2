@@ -7,20 +7,15 @@ import 'package:flutter/cupertino.dart';
 
 void main() {
 
-  // This ensures the following firebase setup and initialization code runs only once.
   setUpAll(() async {
-
-    // Ensure the test environment is set up correctly  
     TestWidgetsFlutterBinding.ensureInitialized();
-
-    // Mock Firebase Analytics
-    setupFirebaseAnalyticsMocks(); 
-
-    // Initialize Firebase only if it hasn't been initialized yet
+    setupFirebaseAnalyticsMocks();
+    
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp();
     }
   });
+
 
   group('Create Post Tests', () {
 
