@@ -57,10 +57,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSettingButton('Help', FeatherIcons.helpCircle, () {}),
                 SizedBox(height: 14),
                 _buildSettingButton('Sign out', FeatherIcons.logOut, () {
-                  showSignOutConfirmationSheet(context);
+                  //showSignOutConfirmationSheet(context);
+                  _showActionSheet(
+                    context,
+                    'Sign Out',
+                    'Are you sure you want to sign out?',
+                    () async {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                    },
+                  );
                 }),
                 
-                SizedBox(height: 32.0,),
+                SizedBox(height: 36.0,),
 
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 20.0),
@@ -87,7 +96,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: _buildActionButtons(
                     'Reset Password',
                     CupertinoColors.activeBlue,
-                    () => _showActionSheet(context, 'Reset Password'),
+                    () => _showActionSheet(
+                      context,
+                      'Reset Password',
+                      'Are you sure you want to reset your password?',
+                      () {
+                        // Add logic for resetting password
+                        Navigator.pop(context);
+                      },
+                    ),
                   ),
                 ),
                 Padding(
@@ -95,9 +112,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: _buildActionButtons(
                     'Delete Account',
                     CupertinoColors.destructiveRed,
-                    () => _showActionSheet(context, 'Delete Account'),
+                    () => _showActionSheet(
+                      context,
+                      'Delete Account',
+                      'Are you sure you want to delete your account?',
+                      () {
+                        // Add logic for deleting account
+                        Navigator.pop(context);
+                      },
+                    ),
                   ),
                 ),
+
               ],
             ),
           ),
@@ -185,53 +211,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void showSignOutConfirmationSheet(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoActionSheet(
-          title: Text(
-            'Are you sure you want to Sign out?',
-            style: TextStyle(
-              fontSize: 13,
-              letterSpacing: -0.6,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          actions: <Widget>[
-            CupertinoActionSheetAction(
-              child: Text(
-                'Sign Out',
-                style: TextStyle(
-                    letterSpacing: -0.6,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 18),
-              ),
-              isDestructiveAction: true,
-              onPressed: () async {
-                Navigator.of(context).pop(); // Close the action sheet
-                await FirebaseAuth.instance.signOut();
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/', (route) => false);
-              },
-            ),
-          ],
-          cancelButton: CupertinoActionSheetAction(
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.6,
-                  fontSize: 18),
-            ),
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the action sheet
-            },
-          ),
-        );
-      },
-    );
-  }
+  // void showSignOutConfirmationSheet(BuildContext context) {
+  //   showCupertinoModalPopup(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return CupertinoActionSheet(
+  //         title: Text(
+  //           'Are you sure you want to Sign out?',
+  //           style: TextStyle(
+  //             fontSize: 13,
+  //             letterSpacing: -0.6,
+  //             fontWeight: FontWeight.w600,
+  //           ),
+  //         ),
+  //         actions: <Widget>[
+  //           CupertinoActionSheetAction(
+  //             child: Text(
+  //               'Sign Out',
+  //               style: TextStyle(
+  //                   letterSpacing: -0.6,
+  //                   fontWeight: FontWeight.w500,
+  //                   fontSize: 18),
+  //             ),
+  //             isDestructiveAction: true,
+  //             onPressed: () async {
+  //               Navigator.of(context).pop(); // Close the action sheet
+  //               await FirebaseAuth.instance.signOut();
+  //               Navigator.of(context)
+  //                   .pushNamedAndRemoveUntil('/', (route) => false);
+  //             },
+  //           ),
+  //         ],
+  //         cancelButton: CupertinoActionSheetAction(
+  //           child: Text(
+  //             'Cancel',
+  //             style: TextStyle(
+  //                 fontWeight: FontWeight.w500,
+  //                 letterSpacing: -0.6,
+  //                 fontSize: 18),
+  //           ),
+  //           onPressed: () {
+  //             Navigator.of(context).pop(); // Close the action sheet
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _buildActionButtons(
       String title, Color color, VoidCallback onPressed) {
@@ -254,12 +280,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showActionSheet(BuildContext context, String action) {
+  // void _showActionSheet(BuildContext context, String action) {
+  //   showCupertinoModalPopup(
+  //     context: context,
+  //     builder: (BuildContext context) => CupertinoActionSheet(
+  //       title: Text(
+  //         '$action',
+  //         style: TextStyle(
+  //           fontWeight: FontWeight.w500,
+  //           color: CupertinoColors.secondaryLabel,
+  //           fontSize: 16,
+  //           letterSpacing: -0.80,
+  //         ),
+  //       ),
+  //       message: Text('Are you sure you want to $action?'),
+  //       actions: <Widget>[
+  //         CupertinoActionSheetAction(
+  //           child: Text(
+  //             'Confirm',
+  //             style: TextStyle(
+  //               color: CupertinoColors.destructiveRed,
+  //               fontWeight: FontWeight.w500,
+  //               letterSpacing: -0.80,
+  //             ),
+  //           ),
+  //           onPressed: () {
+  //             // Handle the action
+  //             Navigator.pop(context);
+  //           },
+  //         ),
+  //       ],
+  //       cancelButton: CupertinoActionSheetAction(
+  //         child: Text('Cancel'),
+  //         onPressed: () {
+  //           Navigator.pop(context);
+  //         },
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  void _showActionSheet(BuildContext context, String title, String message, VoidCallback onConfirm) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          '$action',
+          title,
           style: TextStyle(
             fontWeight: FontWeight.w500,
             color: CupertinoColors.secondaryLabel,
@@ -267,7 +333,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             letterSpacing: -0.80,
           ),
         ),
-        message: Text('Are you sure you want to $action?'),
+        message: Text(message),
         actions: <Widget>[
           CupertinoActionSheetAction(
             child: Text(
@@ -279,7 +345,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             onPressed: () {
-              // Handle the action
+              onConfirm();
               Navigator.pop(context);
             },
           ),
