@@ -1,5 +1,5 @@
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/home_screen.dart';
+import 'package:FoodHood/Screens/edit_profile_screen.dart';
 import 'package:FoodHood/components.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +7,6 @@ import '../components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:FoodHood/Screens/forgot_password_screen.dart';
 
 // Constants for styling
 const double _defaultPadding = 20.0;
@@ -54,7 +53,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(height: 10),
                 _buildSettingOption('Push Notifications', _buildSwitch()),
                 SizedBox(height: 16),
-                _buildSettingButton('Accessibility', FeatherIcons.eye, () {}),
+                _buildSettingButton('Accessibility', FeatherIcons.eye, () {
+                  Navigator.of(context).push(
+                    CupertinoPageRoute(
+                      builder: (context) => EditProfilePage(),
+                    ),
+                  );
+                }),
                 SizedBox(height: 14),
                 _buildSettingButton('Help', FeatherIcons.helpCircle, () {}),
                 SizedBox(height: 14),
@@ -103,32 +108,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       'Reset Password',
                       'Are you sure you want to reset your password?',
                       () async {
-                        // Add logic for resetting password
-                        
-                        print("called");
-                        // Navigator.of(context).push(
-                        //   CupertinoPageRoute(
-                        //     builder: (context) => CreatePostScreen(),
-                        //   ),
-                        // );
                         Navigator.pop(context);
-                        //await Future.delayed(Duration(milliseconds: 500));
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   CupertinoPageRoute(
-                        //     builder: (context) => ForgotPasswordScreen(),
-                        //   ),
-                        // );
-                        //Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
-                        print("called again");
-                        //Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                        // Navigator.pushAndRemoveUntil(
-                        //   context,
-                        //   CupertinoPageRoute(
-                        //     builder: (context) => ForgotPasswordScreen(),
-                        //   ),
-                        //   (route) => false,
-                        // );
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (context) => EditProfilePage(),
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -337,7 +322,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onPressed: () {
               onConfirm();
-              Navigator.pop(context);
             },
           ),
         ],
