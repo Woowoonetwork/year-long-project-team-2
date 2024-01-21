@@ -5,6 +5,7 @@ import 'package:feather_icons/feather_icons.dart';
 //import 'package:FoodHood/Screens/browse_screen.dart';
 import 'package:FoodHood/Screens/account_screen.dart';
 import 'package:FoodHood/Screens/browse_screen.dart';
+import 'package:FoodHood/Screens/saved_screen.dart';
 
 class NavigationScreen extends StatelessWidget {
   final int selectedIndex;
@@ -51,10 +52,8 @@ class NavigationScreen extends StatelessWidget {
             return HomeScreen();
           case 1:
             return BrowseScreen();
-          // case 2:
-          //   return CreatePostScreen();
-          // case 3:
-          //   return SavedScreen();  
+          case 2:
+            return SavedScreen();  
           case 3:
             return AccountScreen();
           default:
