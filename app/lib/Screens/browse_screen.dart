@@ -1,3 +1,4 @@
+import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -7,7 +8,11 @@ import 'package:FoodHood/Components/cupertinoSearchNavigationBar.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math' as math;
+import 'package:FoodHood/firestore_service.dart';
 import 'package:FoodHood/Components/post_card.dart';
+import 'package:intl/intl.dart';
+
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class BrowseScreen extends StatefulWidget {
   @override
@@ -36,7 +41,6 @@ class _BrowseScreenState extends State<BrowseScreen>
   Set<Marker> _markers = {};
   bool _showPostCard = false;
   Map<String, dynamic> _selectedPostData = {};
-
   
 
   @override
@@ -60,17 +64,40 @@ class _BrowseScreenState extends State<BrowseScreen>
     _checkAndUpdateMapStyle();
   }
 
+  static const double zoomThreshold = 16.0; // Define a threshold for zoom level
+  CameraPosition?
+      _lastKnownCameraPosition; // Variable to store last camera position
+
   void _onCameraMove(CameraPosition position) {
+    _lastKnownCameraPosition = position; // Store the last known camera position
+
     double newZoomLevel = position.zoom;
     setState(() {
       _isZooming = true;
       _searchRadius = _calculateSearchRadius(newZoomLevel);
-      _updateSearchAreaCircle(position.target);
+      if (newZoomLevel > zoomThreshold) {
+        // Hide the circle if zoomed in past the threshold
+        searchAreaCircle = null;
+      } else {
+        // Show the circle otherwise
+        _updateSearchAreaCircle(position.target);
+      }
       _updateMarkersBasedOnCircle();
     });
   }
 
-  void _onCameraIdle() => setState(() => _isZooming = false);
+  void _onCameraIdle() {
+    setState(() {
+      _isZooming = false;
+      if (_lastKnownCameraPosition != null) {
+        double currentZoomLevel = _lastKnownCameraPosition!.zoom;
+        if (currentZoomLevel <= zoomThreshold && searchAreaCircle == null) {
+          // Show the circle again when zooming out past the threshold
+          _updateSearchAreaCircle(_lastKnownCameraPosition!.target);
+        }
+      }
+    });
+  }
 
   double _calculateSearchRadius(double newZoomLevel) {
     double scale = math.pow(2, defaultZoomLevel - newZoomLevel).toDouble();
@@ -139,30 +166,63 @@ class _BrowseScreenState extends State<BrowseScreen>
         .collection('post_details')
         .doc(markerId)
         .get()
-        .then((document) {
-      if (document.exists) {
-        Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-        
-        // Ensure you are fetching and storing all necessary fields
+        .then((postDocument) async {
+      if (postDocument.exists) {
+        Map<String, dynamic> postData =
+            postDocument.data() as Map<String, dynamic>;
+
+        String title = postData['title'] ?? 'No Title';
+
+        DateTime createdAt;
+        createdAt = (postData['post_timestamp'] as Timestamp).toDate();
+
+        // Fetch user details (assuming 'UserId' is in documentData)
+        String userId = postData['user_id'] ?? 'Unknown';
+        Map<String, dynamic>? userData = await readDocument(
+          collectionName: 'user',
+          docName: userId,
+        );
+
         setState(() {
           _showPostCard = true;
           _selectedPostData = {
-            'image_url': data['image_url'],
-            'title': data['title'],
-            'tags': data['tags'],
-            'firstname': data['firstname'], // Replace with actual field names
-            'lastname': data['lastname'],   // Replace with actual field names
-            'timeAgo': data['timeAgo'],     // Replace with actual field names
-            'postId': document.id
+            'image_url':
+                postData['image_url'] ?? 'assets/images/sampleFoodPic.png',
+            'title': title,
+            'tags': List<String>.from(postData['tags'] ?? []),
+            'firstname': userData?['firstName'] ?? 'null',
+            'lastname': userData?['lastName'] ?? 'null',
+            'timeAgo': timeAgoSinceDate(createdAt),
+            'postId': postDocument.id
           };
-          _zoomToPostLocation(data['post_location']);
-          searchAreaCircle = null;
+          _zoomToPostLocation(postData['post_location']);
         });
       }
+    }).catchError((error) {
+      // Handle error
+      print("Error fetching post details: $error");
     });
   }
 
+  String timeAgoSinceDate(DateTime dateTime) {
+    final duration = DateTime.now().difference(dateTime);
+
+    if (duration.inDays > 8) {
+      return 'on ${DateFormat('MMMM dd, yyyy').format(dateTime)}'; // Format the date
+    } else if (duration.inDays >= 1) {
+      return '${duration.inDays} days ago';
+    } else if (duration.inHours >= 1) {
+      return '${duration.inHours} hours ago';
+    } else if (duration.inMinutes >= 1) {
+      return '${duration.inMinutes} minutes ago';
+    } else {
+      return 'Just now';
+    }
+  }
+
   void _zoomToPostLocation(List<dynamic> postLocation) {
+    if (postLocation.length != 2) return; // Add this check
+
     final postLatLng = LatLng(
       double.parse(postLocation[0].toString()),
       double.parse(postLocation[1].toString()),
@@ -179,6 +239,8 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   void _updateMarkersBasedOnCircle() {
+    if (searchAreaCircle == null) return; // Prevents null check exception
+
     FirebaseFirestore.instance
         .collection('post_details')
         .get()
@@ -211,6 +273,8 @@ class _BrowseScreenState extends State<BrowseScreen>
         }
       }
       setState(() => _markers = newMarkers);
+    }).catchError((error) {
+      print("Error fetching post details: $error");
     });
   }
 
@@ -293,13 +357,24 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   void _onMapTapped(LatLng tapLocation) {
-    if (_isOutsideSearchArea(tapLocation)) {
+    if (_lastKnownCameraPosition == null)
+      return; // Ensure we have a camera position
+
+    double currentZoomLevel = _lastKnownCameraPosition!.zoom;
+    if (currentZoomLevel > zoomThreshold) {
+      // Check if tap is outside the search area
+      bool isOutside = _isOutsideSearchArea(tapLocation);
+      // If zoomed in, zoom out to the default level
+      _zoomOutToDefault(isOutside ? tapLocation : null);
+       _resetUIState();
+    } else {
+      // Reset the UI state regardless of where the user taps on the map
       _resetUIState();
-      _zoomOutToDefault();
     }
   }
 
   bool _isOutsideSearchArea(LatLng tapLocation) {
+    if (searchAreaCircle == null) return true;
     final double distance = Geolocator.distanceBetween(
       searchAreaCircle!.center.latitude,
       searchAreaCircle!.center.longitude,
@@ -309,11 +384,14 @@ class _BrowseScreenState extends State<BrowseScreen>
     return distance > _searchRadius;
   }
 
-  void _zoomOutToDefault() {
-    mapController?.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(target: searchAreaCircle!.center, zoom: defaultZoomLevel),
-    ));
-  }
+  void _zoomOutToDefault([LatLng? customTarget]) {
+    LatLng target = customTarget ?? searchAreaCircle!.center;
+    mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+            CameraPosition(target: target, zoom: defaultZoomLevel),
+        ),
+    );
+}
 
   Widget _buildPostCard() {
     if (_selectedPostData.isEmpty) {
@@ -321,7 +399,8 @@ class _BrowseScreenState extends State<BrowseScreen>
     }
 
     // Extract the details from the selected post data
-    String imageLocation = _selectedPostData['image_url'] ?? 'assets/images/sampleFoodPic.png';
+    String imageLocation =
+        _selectedPostData['image_url'] ?? 'assets/images/sampleFoodPic.png';
     String title = _selectedPostData['title'] ?? 'Title Not Found';
     List<String> tags = List<String>.from(_selectedPostData['tags'] ?? []);
     String firstname = _selectedPostData['firstname'] ?? 'Unknown';
@@ -334,6 +413,12 @@ class _BrowseScreenState extends State<BrowseScreen>
       left: 0,
       right: 0,
       child: GestureDetector(
+        onVerticalDragUpdate: (details) {
+          if (details.primaryDelta! > 10) { // Threshold for swipe down gesture
+            _zoomOutToDefault(null);
+            _resetUIState();
+          }
+        },
         onTap: () => _resetUIState(),
         child: PostCard(
           imageLocation: imageLocation,
@@ -345,11 +430,11 @@ class _BrowseScreenState extends State<BrowseScreen>
           timeAgo: timeAgo,
           onTap: (postId) => print('PostCard with ID $postId was tapped'),
           postId: postId,
+          showTags: false, // Hide tags
         ),
       ),
     );
   }
-
 
   List<Color> _generateTagColors(int numberOfTags) {
     List<Color> tagColors = [];
@@ -438,15 +523,19 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   Widget _buildFilterButton() {
-    return Container(
-      height: 37,
-      width: 37,
-      decoration: BoxDecoration(
-        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-        borderRadius: BorderRadius.circular(10),
+    return GestureDetector(
+      onTap: _showFilterSheet,
+      child: Container(
+        height: 37,
+        width: 37,
+        decoration: BoxDecoration(
+          color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(FeatherIcons.filter,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            size: 20),
       ),
-      child: Icon(FeatherIcons.filter,
-          color: CupertinoColors.secondaryLabel.resolveFrom(context), size: 20),
     );
   }
 
@@ -466,11 +555,249 @@ class _BrowseScreenState extends State<BrowseScreen>
     }
   }
 
+  void _showFilterSheet() {
+    showCupertinoModalBottomSheet(
+      context: context,
+      backgroundColor:
+          CupertinoDynamicColor.resolve(groupedBackgroundColor, context),
+      builder: (context) => SafeArea(
+        child: FilterSheet(),
+      ),
+    );
+  }
+
   String _formatSearchRadius(double radius) {
     if (radius < 1000) {
       return '${radius.toStringAsFixed(0)} m';
     } else {
       return '${(radius / 1000).toStringAsFixed(1)} km';
     }
+  }
+}
+
+class FilterSheet extends StatefulWidget {
+  @override
+  _FilterSheetState createState() => _FilterSheetState();
+}
+
+class _FilterSheetState extends State<FilterSheet> {
+  String collectionDay = 'Today';
+  List<String> selectedFoodTypes = [];
+  List<String> selectedDietPreferences = [];
+  RangeValues collectionTime = RangeValues(0, 24);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _buildDragHandle(),
+        _buildCustomNavigationBar(context),
+        _buildFilterOptions(context),
+        _buildBottomButtons(context),
+      ],
+    );
+  }
+
+  Widget _buildDragHandle() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+      child: Center(
+        child: Container(
+          width: 40,
+          height: 5,
+          decoration: BoxDecoration(
+            color: CupertinoColors.systemGrey,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomNavigationBar(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('Filter',
+              style: TextStyle(
+                  fontSize: 28,
+                  letterSpacing: -1.3,
+                  fontWeight: FontWeight.bold)),
+          GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Icon(FeatherIcons.x,
+                  size: 24,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterOptions(BuildContext context) {
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.stretch, // Stretch to full width
+          children: [
+            _buildTitle('Collection day'),
+            _buildSegmentedControl(),
+            _buildTitle('Collection time'),
+            _buildSlider(context),
+            _buildTitle('Food types'),
+            _buildCupertinoChoiceButtons(
+                ['Meals', 'Bread & pastries', 'Groceries', 'Other'],
+                selectedFoodTypes),
+            _buildTitle('Diet preferences'),
+            _buildCupertinoChoiceButtons(
+                ['Vegetarian', 'Vegan'], selectedDietPreferences),
+            SizedBox(height: 32.0),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Text(title,
+          style: TextStyle(
+              fontSize: 18,
+              letterSpacing: -0.5,
+              color: CupertinoColors.label.resolveFrom(context),
+              fontWeight: FontWeight.w600)),
+    );
+  }
+
+  Widget _buildSegmentedControl() {
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 16.0), // Ensure full width
+      child: CupertinoSlidingSegmentedControl<String>(
+        children: {
+          'Today': Text('Today'),
+          'Tomorrow': Text('Tomorrow'),
+        },
+        onValueChanged: (String? value) {
+          if (value != null) {
+            setState(() {
+              collectionDay = value;
+            });
+          }
+        },
+        groupValue: collectionDay,
+      ),
+    );
+  }
+
+  Widget _buildSlider(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.zero,
+      child: Material(
+        color: Colors.transparent,
+        child: SliderTheme(
+          data: SliderThemeData(
+            thumbColor: accentColor,
+            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 15.0),
+          ),
+          child: RangeSlider(
+            values: collectionTime,
+            activeColor: accentColor,
+            inactiveColor: accentColor.withOpacity(0.3),
+            min: 0,
+            max: 24,
+            divisions: 24,
+            onChanged: (RangeValues newRange) {
+              setState(() {
+                collectionTime = newRange;
+              });
+            },
+            labels: RangeLabels(
+              _formatTime(collectionTime.start),
+              _formatTime(collectionTime.end),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method to format the time
+  String _formatTime(double time) {
+    final hours = time.toInt();
+    final minutes = ((time - hours) * 60).toInt();
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildCupertinoChoiceButtons(
+      List<String> options, List<String> selectedOptions) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Wrap(
+        spacing: 8.0,
+        runSpacing: 8.0,
+        children: options
+            .map((option) => CupertinoButton(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  borderRadius: BorderRadius.circular(100),
+                  color: selectedOptions.contains(option)
+                      ? accentColor.resolveFrom(context)
+                      : CupertinoColors.tertiarySystemBackground
+                          .resolveFrom(context),
+                  child: Text(option,
+                      style: TextStyle(
+                          color: selectedOptions.contains(option)
+                              ? CupertinoColors.white
+                              : CupertinoColors.label.resolveFrom(context))),
+                  onPressed: () {
+                    setState(() {
+                      if (selectedOptions.contains(option)) {
+                        selectedOptions.remove(option);
+                      } else {
+                        selectedOptions.add(option);
+                      }
+                    });
+                  },
+                ))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildBottomButtons(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CupertinoButton(
+            child: Text('Clear All',
+                style: TextStyle(
+                    color:
+                        CupertinoColors.secondaryLabel.resolveFrom(context))),
+            onPressed: () {
+              setState(() {
+                // Clear filter logic
+              });
+            },
+          ),
+          CupertinoButton(
+            padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            color: accentColor,
+            borderRadius: BorderRadius.circular(100),
+            child: Text('Apply',
+                style: TextStyle(
+                    fontWeight: FontWeight.w600, color: CupertinoColors.white)),
+            onPressed: () {
+              // Apply filter logic
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

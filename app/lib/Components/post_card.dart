@@ -13,6 +13,7 @@ class PostCard extends StatelessWidget {
   final String timeAgo;
   final Function(String) onTap; // New callback parameter
   final String postId;
+  final bool showTags; // New parameter to indicate whether to show tags or not
 
   // Define your colors here
   final List<Color> colors = [
@@ -33,6 +34,7 @@ class PostCard extends StatelessWidget {
     required this.timeAgo,
     required this.onTap,
     required this.postId,
+    this.showTags = true, // Default value to show tags
   }) : super(key: key);
 
   @override
@@ -58,7 +60,11 @@ class PostCard extends StatelessWidget {
               children: [
                 _buildImageSection(context),
                 _buildTitleSection(context),
-                _buildTagSection(context),
+                if (showTags) ...[
+                  _buildTagSection(context),
+                ] else ...[
+                  SizedBox(height: 10),
+                ],
                 _buildOrderInfoSection(context, ''),
               ],
             ),

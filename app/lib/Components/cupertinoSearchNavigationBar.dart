@@ -1,3 +1,4 @@
+import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
@@ -58,11 +59,11 @@ class _CupertinoSearchNavigationBarState
       child: Container(
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.systemGroupedBackground, context)
+                  groupedBackgroundColor, context)
               .withOpacity(0.4),
         ),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+          filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
           child: SafeArea(
             bottom: false,
             child: Padding(
