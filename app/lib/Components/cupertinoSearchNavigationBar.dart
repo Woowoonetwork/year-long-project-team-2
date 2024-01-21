@@ -58,8 +58,7 @@ class _CupertinoSearchNavigationBarState
     return ClipRect(
       child: Container(
         decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(
-                  groupedBackgroundColor, context)
+          color: CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
               .withOpacity(0.4),
         ),
         child: BackdropFilter(
@@ -162,6 +161,7 @@ class _CupertinoSearchNavigationBarState
           widget.textController.clear();
           widget.onSearchTextChanged(
               ''); // Clear the text and pass an empty string to the callback
+          _focusNode.unfocus(); // Add this line to hide the keyboard
           _updateCancelButtonVisibility();
         },
         child: Text(

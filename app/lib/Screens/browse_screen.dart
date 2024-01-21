@@ -36,12 +36,12 @@ class _BrowseScreenState extends State<BrowseScreen>
   static const int circleStrokeWidth = 2;
   final GlobalKey navBarKey = GlobalKey();
   bool _isZooming = false;
+  double mapBottomPadding = 100; // Default padding
 
   String? _mapStyle;
   Set<Marker> _markers = {};
   bool _showPostCard = false;
   Map<String, dynamic> _selectedPostData = {};
-  
 
   @override
   void initState() {
@@ -296,19 +296,22 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Listen for MediaQuery changes
+    double bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    double updatedMapBottomPadding = bottomInset > 0 ? 0 : mapBottomPadding;
+
     _checkAndUpdateMapStyle();
     return CupertinoPageScaffold(
       child: Stack(
         children: [
-          _buildFullScreenMap(),
+          _buildFullScreenMap(updatedMapBottomPadding),
           _buildOverlayUI(),
         ],
       ),
     );
   }
 
-  Widget _buildFullScreenMap() {
-    double mapBottomPadding = 100;
+  Widget _buildFullScreenMap(double bottomPadding) {
     return FutureBuilder<LatLng?>(
       future: currentLocationFuture,
       builder: (context, snapshot) {
@@ -343,10 +346,11 @@ class _BrowseScreenState extends State<BrowseScreen>
               compassEnabled: false,
               circles: searchAreaCircle != null ? {searchAreaCircle!} : {},
               padding: EdgeInsets.only(
-                  bottom: mapBottomPadding,
-                  top: mapBottomPadding,
-                  right: 0,
-                  left: 0),
+              bottom: mapBottomPadding,
+              top: mapBottomPadding,
+              right: 0,
+              left: 0,
+            ),
             ),
             if (_showPostCard) _buildPostCard(),
             if (!_showPostCard) _buildSearchButton(),
@@ -366,7 +370,7 @@ class _BrowseScreenState extends State<BrowseScreen>
       bool isOutside = _isOutsideSearchArea(tapLocation);
       // If zoomed in, zoom out to the default level
       _zoomOutToDefault(isOutside ? tapLocation : null);
-       _resetUIState();
+      _resetUIState();
     } else {
       // Reset the UI state regardless of where the user taps on the map
       _resetUIState();
@@ -387,11 +391,11 @@ class _BrowseScreenState extends State<BrowseScreen>
   void _zoomOutToDefault([LatLng? customTarget]) {
     LatLng target = customTarget ?? searchAreaCircle!.center;
     mapController!.animateCamera(
-        CameraUpdate.newCameraPosition(
-            CameraPosition(target: target, zoom: defaultZoomLevel),
-        ),
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: target, zoom: defaultZoomLevel),
+      ),
     );
-}
+  }
 
   Widget _buildPostCard() {
     if (_selectedPostData.isEmpty) {
@@ -414,7 +418,8 @@ class _BrowseScreenState extends State<BrowseScreen>
       right: 0,
       child: GestureDetector(
         onVerticalDragUpdate: (details) {
-          if (details.primaryDelta! > 10) { // Threshold for swipe down gesture
+          if (details.primaryDelta! > 10) {
+            // Threshold for swipe down gesture
             _zoomOutToDefault(null);
             _resetUIState();
           }
