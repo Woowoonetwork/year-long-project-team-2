@@ -217,3 +217,31 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
+
+---
+
+## Term 2 Week 1: Monday 8th Jan 2023 - Sunday 14th Dec 2023
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w1manjot.png)
+### Recap of personal goals
+- Planning the team meeting to start the project again 
+- Helped prioritise the task
+- Worked through my previous code to get a catchup 
+- Looked into accessibility (particularly screenreader use, including alt text and labels)
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- Tested accessibility of pages and
+- Reviewed code of others
+- Complete Week 13 team log.
+- Complete Week 13 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
