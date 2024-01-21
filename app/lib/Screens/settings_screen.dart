@@ -1,4 +1,5 @@
 import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/components.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import '../components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:FoodHood/Screens/forgot_password_screen.dart';
 
 // Constants for styling
 const double _defaultPadding = 20.0;
@@ -100,9 +102,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       context,
                       'Reset Password',
                       'Are you sure you want to reset your password?',
-                      () {
+                      () async {
                         // Add logic for resetting password
+                        
+                        print("called");
+                        // Navigator.of(context).push(
+                        //   CupertinoPageRoute(
+                        //     builder: (context) => CreatePostScreen(),
+                        //   ),
+                        // );
                         Navigator.pop(context);
+                        //await Future.delayed(Duration(milliseconds: 500));
+                        // Navigator.pushReplacement(
+                        //   context,
+                        //   CupertinoPageRoute(
+                        //     builder: (context) => ForgotPasswordScreen(),
+                        //   ),
+                        // );
+                        //Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+                        print("called again");
+                        //Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                        // Navigator.pushAndRemoveUntil(
+                        //   context,
+                        //   CupertinoPageRoute(
+                        //     builder: (context) => ForgotPasswordScreen(),
+                        //   ),
+                        //   (route) => false,
+                        // );
                       },
                     ),
                   ),
@@ -116,9 +142,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       context,
                       'Delete Account',
                       'Are you sure you want to delete your account?',
-                      () {
-                        // Add logic for deleting account
-                        Navigator.pop(context);
+                      () async {
+                        try {
+                          User user = FirebaseAuth.instance.currentUser!;
+                          await user.delete();
+                          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+                        } catch (e) {
+                          print('Error deleting account: $e');
+                        }
                       },
                     ),
                   ),
@@ -279,46 +310,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-
-  // void _showActionSheet(BuildContext context, String action) {
-  //   showCupertinoModalPopup(
-  //     context: context,
-  //     builder: (BuildContext context) => CupertinoActionSheet(
-  //       title: Text(
-  //         '$action',
-  //         style: TextStyle(
-  //           fontWeight: FontWeight.w500,
-  //           color: CupertinoColors.secondaryLabel,
-  //           fontSize: 16,
-  //           letterSpacing: -0.80,
-  //         ),
-  //       ),
-  //       message: Text('Are you sure you want to $action?'),
-  //       actions: <Widget>[
-  //         CupertinoActionSheetAction(
-  //           child: Text(
-  //             'Confirm',
-  //             style: TextStyle(
-  //               color: CupertinoColors.destructiveRed,
-  //               fontWeight: FontWeight.w500,
-  //               letterSpacing: -0.80,
-  //             ),
-  //           ),
-  //           onPressed: () {
-  //             // Handle the action
-  //             Navigator.pop(context);
-  //           },
-  //         ),
-  //       ],
-  //       cancelButton: CupertinoActionSheetAction(
-  //         child: Text('Cancel'),
-  //         onPressed: () {
-  //           Navigator.pop(context);
-  //         },
-  //       ),
-  //     ),
-  //   );
-  // }
 
   void _showActionSheet(BuildContext context, String title, String message, VoidCallback onConfirm) {
     showCupertinoModalPopup(
