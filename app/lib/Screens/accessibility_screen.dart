@@ -79,17 +79,17 @@ class _AccessibilityScreenState extends State<AccessibilityScreen> {
                     ),
                     
                     SizedBox(height: 16.0),
-                    Padding(
-                      padding: EdgeInsets.all(_defaultPadding),
-                      child: Text(
-                        "Contrast Mode",
-                        style: TextStyle(
-                          fontSize: _defaultFontSize * provider.textScaleFactor,
-                          letterSpacing: -0.8,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    // Padding(
+                    //   padding: EdgeInsets.all(_defaultPadding),
+                    //   child: Text(
+                    //     "Contrast Mode",
+                    //     style: TextStyle(
+                    //       fontSize: _defaultFontSize * provider.textScaleFactor,
+                    //       letterSpacing: -0.8,
+                    //       fontWeight: FontWeight.w600,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 );
               },
