@@ -49,7 +49,7 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
     ),
     leading: CupertinoButton(
       padding: EdgeInsets.zero,
-      child: Icon(CupertinoIcons.back, color: Color(0xFF337586)),
+      child: Icon(CupertinoIcons.back, color: accentColor),
       onPressed: () => Navigator.pop(context),
     ),
   );
@@ -58,15 +58,13 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
 CupertinoSliverNavigationBar buildMainNavigationBar(
     BuildContext context, String title) {
   return CupertinoSliverNavigationBar(
-    backgroundColor: groupedBackgroundColor,
+    backgroundColor: CupertinoDynamicColor.resolve(
+        groupedBackgroundColor, context).withOpacity(0.8),
     border: const Border(
       bottom: BorderSide.none,
     ),
     largeTitle: Text(
       title,
-      style: TextStyle(
-        letterSpacing: -1.1,
-      ),
     ),
     stretch: true, // Enable stretch behavior
   );
