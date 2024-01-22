@@ -45,22 +45,39 @@ class PostDetailViewModel extends ChangeNotifier {
     tags = ['null'];
   }
 
-  Future<void> fetchData(String postId) async {
-    try {
-      var documentSnapshot =
-          await firestore.collection('post_details').doc(postId).get();
+Future<void> fetchData(String postId) async {
+  try {
+    var documentSnapshot =
+        await firestore.collection('post_details').doc(postId).get();
 
-      if (documentSnapshot.exists) {
-        var documentData = documentSnapshot.data() as Map<String, dynamic>;
-        _updatePostDetails(documentData);
-        await checkIfFavorite(postId); // Check if the post is a favorite
-      } else {
-        print('Document with postId $postId does not exist.');
-      }
-    } catch (e) {
-      print('Error fetching post details: $e');
+    if (documentSnapshot.exists) {
+      var documentData = documentSnapshot.data() as Map<String, dynamic>;
+      _updatePostDetails(documentData);
+      await _fetchAndUpdateUserDetails(documentData['user_id']); // Fetch user details
+      await checkIfFavorite(postId); // Check if the post is a favorite
+    } else {
+      print('Document with postId $postId does not exist.');
     }
+  } catch (e) {
+    print('Error fetching post details: $e');
   }
+}
+
+Future<void> _fetchAndUpdateUserDetails(String userId) async {
+  try {
+    var userDocumentSnapshot =
+        await firestore.collection('user').doc(userId).get();
+
+    if (userDocumentSnapshot.exists) {
+      var userDocumentData = userDocumentSnapshot.data() as Map<String, dynamic>;
+      _updateUserDetails(userDocumentData);
+    } else {
+      print('User document with userId $userId does not exist.');
+    }
+  } catch (e) {
+    print('Error fetching user details: $e');
+  }
+}
 
   Future<void> checkIfFavorite(String postId) async {
     String userId = getCurrentUserUID();
