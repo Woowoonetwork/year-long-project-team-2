@@ -38,7 +38,16 @@ class _SavedScreenState extends State<SavedScreen> {
     );
   }
 
-  
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData(userId);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   StreamBuilder<DocumentSnapshot> _buildSavedPostsStream() {
   return StreamBuilder<DocumentSnapshot>(
