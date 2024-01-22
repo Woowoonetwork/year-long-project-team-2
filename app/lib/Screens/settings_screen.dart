@@ -1,12 +1,13 @@
 import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Screens/accessibility_screen.dart';
 import 'package:FoodHood/Screens/edit_profile_screen.dart';
-import 'package:FoodHood/components.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import '../components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
 
 // Constants for styling
 const double _defaultPadding = 20.0;
@@ -28,9 +29,26 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool pushNotificationsEnabled = false;
+  late double _textScaleFactor;
+  late double adjustedFontSize;
+
+  @override
+  void initState() {
+    super.initState();
+    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _updateAdjustedFontSize();
+  }
+
+  void _updateAdjustedFontSize() {
+    adjustedFontSize = _defaultFontSize * _textScaleFactor;
+  }
 
   @override
   Widget build(BuildContext context) {
+    _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
+    //double adjustedFontSize = _defaultFontSize * _textScaleFactor;
+    _updateAdjustedFontSize();
+
     return CupertinoPageScaffold(
       backgroundColor: groupedBackgroundColor,
       child: CustomScrollView(
@@ -56,7 +74,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSettingButton('Accessibility', FeatherIcons.eye, () {
                   Navigator.of(context).push(
                     CupertinoPageRoute(
-                      builder: (context) => EditProfilePage(),
+                      builder: (context) => AccessibilityScreen(),
                     ),
                   );
                 }),
@@ -78,6 +96,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 
                 SizedBox(height: 36.0,),
 
+                // Account settings text
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 20.0),
                   child: Row(
@@ -88,7 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: Text(
                           "Account Settings",
                           style: TextStyle(
-                            fontSize: _defaultFontSize,
+                            fontSize: adjustedFontSize,
                             letterSpacing: -0.8,
                             fontWeight: FontWeight.w600,
                           ),
@@ -103,21 +122,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: _buildActionButtons(
                     'Reset Password',
                     CupertinoColors.activeBlue,
-                    () => _showActionSheet(
-                      context,
-                      'Reset Password',
-                      'Are you sure you want to reset your password?',
-                      () async {
-                        Navigator.pop(context);
-                        Navigator.of(context).push(
-                          CupertinoPageRoute(
-                            builder: (context) => EditProfilePage(),
-                          ),
-                        );
-                      },
+                    () => Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (context) => EditProfilePage(),
+                      ),
                     ),
                   ),
                 ),
+
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: _buildActionButtons(
@@ -171,7 +183,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(title,
               style: TextStyle(
-                  fontSize: _defaultFontSize,
+                  fontSize: adjustedFontSize,
                   letterSpacing: -0.8,
                   fontWeight: FontWeight.w600)),
           trailing
@@ -214,7 +226,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(width: _spacing),
                 Text(title,
                     style: TextStyle(
-                        fontSize: _defaultFontSize,
+                        fontSize: adjustedFontSize,
                         fontWeight: FontWeight.w500,
                         color: CupertinoColors.label.resolveFrom(context))),
               ],
@@ -289,7 +301,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onPressed: onPressed,
           child: Text(
             title,
-            style: TextStyle(color: color, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontSize: adjustedFontSize,
+              color: color, 
+              fontWeight: FontWeight.w500
+            ),
           ),
         ),
       ),
