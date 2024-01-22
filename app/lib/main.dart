@@ -15,6 +15,8 @@ import 'auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:FoodHood/firestore_service.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   // Initialize Firebase
@@ -30,7 +32,22 @@ void main() async {
     DeviceOrientation.portraitDown
   ]) // Restrict orientation to portrait
       .then((_) {
-    runApp(FoodHoodApp());
+    //runApp(FoodHoodApp());
+    runApp(
+      // ChangeNotifierProvider(
+      //   create: (context) => TextScaleProvider(),
+      //   child: FoodHoodApp(),
+      // ),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<TextScaleProvider>(
+            create: (context) => TextScaleProvider(),
+          ),
+          // Add other providers if needed
+        ],
+        child: FoodHoodApp(),
+      ),
+    );
   });
 }
 

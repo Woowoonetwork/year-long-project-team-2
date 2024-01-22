@@ -143,7 +143,6 @@ class _AccountScreenState extends State<AccountScreen> {
             style: TextStyle(fontWeight: FontWeight.w500, color: accentColor)),
         onPressed: () => _navigateToSettings(context),
       ),
-      border: Border(bottom: BorderSide.none),
       stretch: true, // Enable stretch behavior
     );
   }

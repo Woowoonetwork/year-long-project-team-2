@@ -1,7 +1,9 @@
 // forgot_pwd_screen.dart
 // A page that allows a user to reset their password if they forgot it.
 
+import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/auth_service.dart';
+import 'package:feather_icons/feather_icons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Screens/reset_sent_success.dart';
@@ -35,27 +37,22 @@ class _ForgotPasswordState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: groupedBackgroundColor,
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
-            backgroundColor: CupertinoColors.systemGroupedBackground,
+            backgroundColor: groupedBackgroundColor,
             largeTitle: const Text(
               'Reset Password',
               style: TextStyle(
                 letterSpacing: -1.36,
               ),
             ),
-            leading: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(
-                  CupertinoIcons.arrow_left_circle_fill,
-                  color: Color.fromRGBO(51, 117, 134, 1.0),
-                  size: 30.0,
-                ),
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                }),
+            leading: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Icon(FeatherIcons.chevronLeft,
+                  size: 22, color: CupertinoColors.label.resolveFrom(context)),
+            ),
             border: const Border(bottom: BorderSide.none),
             stretch: true,
           ),
@@ -81,12 +78,8 @@ class _ForgotPasswordState extends State<ForgotPasswordScreen> {
                 padding: EdgeInsets.all(16.0),
                 placeholder: "Email Address",
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: CupertinoColors.secondarySystemGroupedBackground,
-                    width: 1.0,
-                  ),
                   borderRadius: BorderRadius.circular(10.0),
-                  color: CupertinoColors.secondarySystemGroupedBackground,
+                  color: CupertinoColors.tertiarySystemBackground,
                 ),
                 controller: _emailController,
               ),
@@ -99,7 +92,7 @@ class _ForgotPasswordState extends State<ForgotPasswordScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: CupertinoButton(
-                color: Color.fromRGBO(51, 117, 134, 1.0),
+                color: accentColor,
                 borderRadius: BorderRadius.circular(10),
                 minSize: 44,
                 padding: const EdgeInsets.symmetric(vertical: 16),
