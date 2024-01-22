@@ -1,7 +1,7 @@
-import 'package:FoodHood/Screens/login_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SuccessScreen extends StatelessWidget {
   final String message;
@@ -11,6 +11,7 @@ class SuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      backgroundColor: groupedBackgroundColor,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -18,7 +19,7 @@ class SuccessScreen extends StatelessWidget {
             Icon(
               CupertinoIcons.check_mark_circled_solid,
               size: 120,
-              color: Color.fromARGB(255, 51, 117, 134),
+              color: accentColor,
             ),
             SizedBox(height: 30),
             Text(
@@ -27,24 +28,25 @@ class SuccessScreen extends StatelessWidget {
             ),
             SizedBox(height: 8),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Text(
                 "Your password reset link has been sent!\n Please follow the instructions in your email and we'll see you soon!",
-                style: TextStyle(fontSize: 16, color: Colors.black),
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context)),
                 textAlign: TextAlign.center,
               ),
             ),
-            SizedBox(height: 30),
             CupertinoButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(builder: (context) => LogInScreen()),
-                );
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/', (route) => false);
               },
               child: Container(
                 decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 51, 117, 134),
+                  color: accentColor,
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 padding: EdgeInsets.symmetric(vertical: 16),
