@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:FoodHood/ViewModels/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
+import 'package:FoodHood/Components/cupertinosnackbar.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -68,7 +69,12 @@ class _PostDetailViewState extends State<PostDetailView> {
                   child: CustomScrollView(
                     physics: BouncingScrollPhysics(),
                     slivers: [
-                      FoodAppBar(),
+                      FoodAppBar(
+                        postId: widget.postId, // Pass postId to the FoodAppBar
+                        isFavorite: viewModel.isFavorite,
+                        onFavoritePressed:
+                            _handleFavoritePressed, // Pass the callback function
+                      ),
                       SliverList(
                         delegate: SliverChildListDelegate(
                           [
@@ -108,6 +114,54 @@ class _PostDetailViewState extends State<PostDetailView> {
         );
       },
     );
+  }
+
+  void _handleFavoritePressed() async {
+    setState(() {
+      viewModel.isFavorite = !viewModel.isFavorite;
+    });
+
+    if (viewModel.isFavorite) {
+      await viewModel.savePost(widget.postId);
+
+      // Show a snackbar with a message indicating that the post has been saved
+      showCupertinoSnackbar(
+        context,
+        'Saved "${viewModel.title}" to the list',
+        accentColor,
+        Icon(FeatherIcons.check, color: Colors.white),
+      );
+    } else {
+      await viewModel.unsavePost(widget.postId);
+      showCupertinoSnackbar(
+        context,
+        'Removed "${viewModel.title}" from the list',
+        yellow,
+        Icon(FeatherIcons.x, color: Colors.white),
+      );
+    }
+  }
+
+  void showCupertinoSnackbar(BuildContext context, String message,
+      Color backgroundColor, Icon trailingIcon) {
+    var overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 60, // Changed from bottom to top
+        left: 0,
+        right: 0,
+        child: CupertinoSnackbar(
+          message: message,
+          backgroundColor: backgroundColor,
+          trailingIcon: trailingIcon,
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
   }
 
   Widget _buildPostTitleSection() {
@@ -664,7 +718,7 @@ class PickupInformation extends StatelessWidget {
     } else {
       return Container(
         width: double.infinity,
-        height: 200.0, 
+        height: 200.0,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
           color: CupertinoColors.systemGrey4,
@@ -680,7 +734,10 @@ class PickupInformation extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomInfoTile(title: 'Pickup Time', subtitle: pickupTime),
-        CustomInfoTile(title: 'Pickup Location', subtitle: viewModel.pickupLocation), // Use viewModel for dynamic meeting point
+        CustomInfoTile(
+            title: 'Pickup Location',
+            subtitle: viewModel
+                .pickupLocation), // Use viewModel for dynamic meeting point
         const SizedBox(height: 12),
         _buildAdditionalInfo(context),
         const SizedBox(height: 12),
@@ -725,7 +782,7 @@ class PickupInformation extends StatelessWidget {
             context: context,
             text: 'Ask for more info',
             icon: FeatherIcons.messageCircle,
-            iconColor: CupertinoColors.label.resolveFrom(context), 
+            iconColor: CupertinoColors.label.resolveFrom(context),
             onPressed: () {
               // Implement action for "Ask for more info"
             },

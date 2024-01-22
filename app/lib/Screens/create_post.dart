@@ -13,10 +13,9 @@ class CreatePostScreen extends StatefulWidget {
 
   @override
   _CreatePostPageState createState() => _CreatePostPageState();
-} 
+}
 
 class _CreatePostPageState extends State<CreatePostScreen> {
-  
   List<String> allergensList = [];
   List<String> categoriesList = [];
   List<String> pickupLocationsList = [];
@@ -33,7 +32,7 @@ class _CreatePostPageState extends State<CreatePostScreen> {
     super.dispose();
   }
 
-Future<void> fetchData() async {
+  Future<void> fetchData() async {
     try {
       // Fetch allergens data
       Map<String, dynamic>? allergensData = await readDocument(
@@ -71,19 +70,20 @@ Future<void> fetchData() async {
         docName: 'Pickup Locations',
       );
 
-      if (pickupLocationsData != null && pickupLocationsData.containsKey('items')) {
+      if (pickupLocationsData != null &&
+          pickupLocationsData.containsKey('items')) {
         List<dynamic> pickupLocationsListData = pickupLocationsData['items'];
         setState(() {
-          pickupLocationsList = List<String>.from(pickupLocationsListData.cast<String>());
+          pickupLocationsList =
+              List<String>.from(pickupLocationsListData.cast<String>());
         });
       } else {
         print('Pickup locations document or items field not found.');
       }
     } catch (e) {
       print('Error fetching data: $e');
-    }    
+    }
   }
-
 
   DateTime selectedDate = DateTime.now();
   DateTime selectedTime = DateTime.now();
@@ -104,24 +104,24 @@ Future<void> fetchData() async {
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
             backgroundColor: CupertinoColors.systemGroupedBackground,
-            largeTitle: const Text(
+            largeTitle: Text(
               'New Post',
-              style: TextStyle(
-                letterSpacing: -1.36,
-              ),
             ),
             leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.clear, color: CupertinoColors.black, size: 24.0,),
-              onPressed: () async{
-                // Show a confirmation dialog
-                bool shouldPop = await showConfirmationDialog(context);
-                // Pop the screen only if the user confirms to do so
-                if (shouldPop) {
-                  Navigator.of(context).pop();
-                }
-              }      
-            ),
+                padding: EdgeInsets.zero,
+                child: const Icon(
+                  CupertinoIcons.clear,
+                  color: CupertinoColors.black,
+                  size: 24.0,
+                ),
+                onPressed: () async {
+                  // Show a confirmation dialog
+                  bool shouldPop = await showConfirmationDialog(context);
+                  // Pop the screen only if the user confirms to do so
+                  if (shouldPop) {
+                    Navigator.of(context).pop();
+                  }
+                }),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
               child: const Text(
@@ -130,9 +130,14 @@ Future<void> fetchData() async {
                   color: Color(0xFF337586), // Your custom color
                 ),
               ),
-              onPressed: () async{
+              onPressed: () async {
                 // Check if the fields are empty and if they are display a confirmation dialogue
-                if (title_controller.text.isEmpty || desc_controller.text.isEmpty || selectedAllergens.isEmpty || selectedCategories.isEmpty || selectedPickupLocation.isEmpty || pickup_instr_controller.text.isEmpty) {
+                if (title_controller.text.isEmpty ||
+                    desc_controller.text.isEmpty ||
+                    selectedAllergens.isEmpty ||
+                    selectedCategories.isEmpty ||
+                    selectedPickupLocation.isEmpty ||
+                    pickup_instr_controller.text.isEmpty) {
                   // Show an alert or return to prevent saving
                   showEmptyFieldsAlert(context);
                   return;
@@ -151,19 +156,19 @@ Future<void> fetchData() async {
                   fieldNames: [
                     'title',
                     'description',
-                    'allergens',  
+                    'allergens',
                     'categories',
                     'expiration_date',
                     'pickup_location',
                     'pickup_instructions',
                     'pickup_time',
-                    'user_id', 
+                    'user_id',
                     'post_timestamp'
                   ],
                   fieldValues: [
                     title_controller.text,
                     desc_controller.text,
-                    selectedAllergens.join(', '),  
+                    selectedAllergens.join(', '),
                     selectedCategories.join(', '),
                     Timestamp.fromDate(selectedDate),
                     selectedPickupLocation.join(', '),
@@ -180,29 +185,27 @@ Future<void> fetchData() async {
             border: const Border(bottom: BorderSide.none),
             stretch: true,
           ),
-          
+
           // Title text
           __buildTextField(text: "Title"),
 
           // Title input field
           _buildTextInputField(
-            controller: title_controller, 
-            placeholder: "Enter a title", 
-            padding: EdgeInsets.all(10.0)
-          ), 
+              controller: title_controller,
+              placeholder: "Enter a title",
+              padding: EdgeInsets.all(10.0)),
 
           // Description text
           __buildTextField(text: "Description"),
 
           // Description input field
           _buildTextInputField(
-            controller: desc_controller, 
-            placeholder: "No description entered", 
-            padding: EdgeInsets.symmetric(vertical: 40.0, horizontal: 10.0)
-          ),
+              controller: desc_controller,
+              placeholder: "No description entered",
+              padding: EdgeInsets.symmetric(vertical: 40.0, horizontal: 10.0)),
 
           //Add photo picker and alt text field
-          
+
           // Allergens text
           __buildTextField(text: "Allergens"),
 
@@ -250,9 +253,9 @@ Future<void> fetchData() async {
                       selectedDate = newDate;
                     });
                   },
-                ), 
-              ), 
-            ) ,
+                ),
+              ),
+            ),
           ),
 
           // Pickup location text
@@ -270,7 +273,7 @@ Future<void> fetchData() async {
             ),
           ),
 
-          //Map displaying location 
+          //Map displaying location
           // SliverToBoxAdapter(
           //   child: Container(
           //     height: 200.0, // Set the desired height for the map
@@ -281,8 +284,8 @@ Future<void> fetchData() async {
           //           target: LatLng(37.7749, -122.4194), // Default location (San Francisco)
           //           zoom: 12.0,
           //       ),
-                
-          //       mapType: MapType.normal,  
+
+          //       mapType: MapType.normal,
           //     ),
           //   ),
           // ),
@@ -292,55 +295,50 @@ Future<void> fetchData() async {
 
           // Pickup instructions text input
           _buildTextInputField(
-            controller: pickup_instr_controller, 
-            placeholder: "No pickup instructions entered", 
-            padding: EdgeInsets.all(10.0)
-          ),
+              controller: pickup_instr_controller,
+              placeholder: "No pickup instructions entered",
+              padding: EdgeInsets.all(10.0)),
 
           //Pickup Time
           SliverToBoxAdapter(
-            child: Container( 
-              height: 80,
-              child: Padding(
-                padding: EdgeInsets.only(left: 17.0, right: 12.0, top: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    
-                    // First widget (Pickup time text)
-                    const Text(
-                      'Pickup Time',
-                    ),
-                    
-                    SizedBox(width: 5.0), // Adjust spacing between the widgets
+              child: Container(
+            height: 80,
+            child: Padding(
+              padding: EdgeInsets.only(left: 17.0, right: 12.0, top: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // First widget (Pickup time text)
+                  const Text(
+                    'Pickup Time',
+                  ),
 
-                    // Second widget (Time picker for pickup time)
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.0),
-                        child: CupertinoDatePicker(
-                          mode: CupertinoDatePickerMode.time,
-                          initialDateTime: selectedTime,
-                          onDateTimeChanged: (DateTime newTime) {
-                            setState(() {
-                              selectedTime = newTime;
-                            });
-                          },
-                        ),
+                  SizedBox(width: 5.0), // Adjust spacing between the widgets
+
+                  // Second widget (Time picker for pickup time)
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      child: CupertinoDatePicker(
+                        mode: CupertinoDatePickerMode.time,
+                        initialDateTime: selectedTime,
+                        onDateTimeChanged: (DateTime newTime) {
+                          setState(() {
+                            selectedTime = newTime;
+                          });
+                        },
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            )
-          ),
+            ),
+          )),
 
           //Add space after all widgets
           const SliverToBoxAdapter(
             child: SizedBox(height: 100.0),
           ),
-
-
         ],
       ),
     );
@@ -349,7 +347,7 @@ Future<void> fetchData() async {
   // Reusable widget to build the text fields
   Widget __buildTextField({
     required String text,
-  }){
+  }) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.only(left: 17.0, top: 10.0),
@@ -359,7 +357,7 @@ Future<void> fetchData() async {
       ),
     );
   }
-  
+
   // Reusable widget to build the input text fields
   Widget _buildTextInputField({
     required TextEditingController controller,
@@ -368,7 +366,10 @@ Future<void> fetchData() async {
   }) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0), // Adjust outer padding as needed
+        padding: EdgeInsets.only(
+            left: 17.0,
+            top: 5.0,
+            right: 17.0), // Adjust outer padding as needed
         child: CupertinoTextField(
           controller: controller,
           padding: padding,
@@ -393,7 +394,8 @@ Future<void> fetchData() async {
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
           title: const Text('Missing Information'),
-          content: const Text('Please enter all the information before saving.'),
+          content:
+              const Text('Please enter all the information before saving.'),
           actions: <Widget>[
             CupertinoDialogAction(
               onPressed: () {

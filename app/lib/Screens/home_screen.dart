@@ -7,6 +7,7 @@ import 'package:FoodHood/firestore_service.dart';
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import '../components.dart';
+import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // feather icon
 import 'package:feather_icons/feather_icons.dart';
@@ -62,7 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<List<Widget>> _processSnapshot(QuerySnapshot snapshot) async {
     List<Widget> fetchedPostCards = [];
     try {
-      for (var document in snapshot.docs) {
+      for (var i = 0; i < snapshot.docs.length; i++) {
+        var document = snapshot.docs[i];
         Map<String, dynamic> documentData =
             document.data() as Map<String, dynamic>;
 
@@ -89,21 +91,30 @@ class _HomeScreenState extends State<HomeScreen> {
           docName: userId,
         );
 
-        // Create a PostCard with fetched data
-        var postCard = PostCard(
-          title: title,
-          tags: tags,
-          tagColors: assignedColors,
-          firstname: userData?['firstName'] ?? 'Unknown',
-          lastname: userData?['lastName'] ?? 'Unknown',
-          timeAgo: timeAgoSinceDate(createdAt),
-          onTap: _onPostCardTap,
-          postId: document.id,
+        // Apply padding conditionally
+        EdgeInsets padding = i == 0
+            ? EdgeInsets.only(top: 12, bottom: 16)
+            : EdgeInsets.symmetric(vertical: 16);
+
+        var postCardWithPadding = Padding(
+          padding: padding,
+          child: PostCard(
+            imageLocation:
+                documentData['image_url'] ?? 'assets/images/sampleFoodPic.png',
+            title: title,
+            tags: tags,
+            tagColors: assignedColors,
+            firstname: userData?['firstName'] ?? 'null',
+            lastname: userData?['lastName'] ?? 'null',
+            timeAgo: timeAgoSinceDate(createdAt),
+            onTap: _onPostCardTap,
+            postId: document.id,
+          ),
         );
 
-        fetchedPostCards.add(postCard);
-        fetchedPostCards.add(SizedBox(height: 16)); // For spacing between cards
+        fetchedPostCards.add(postCardWithPadding);
       }
+      fetchedPostCards.add(SizedBox(height: 100));
     } catch (e) {
       print('Error processing snapshot: $e');
     }
@@ -133,13 +144,14 @@ class _HomeScreenState extends State<HomeScreen> {
           .orderBy('post_timestamp', descending: true)
           .get(); //query to display the post cards in a descending order by time
 
-      for (var document in querySnapshot.docs) {
+      for (var i = 0; i < querySnapshot.docs.length; i++) {
+        var document = querySnapshot.docs[i];
         Map<String, dynamic> documentData =
             document.data() as Map<String, dynamic>;
 
         String title = documentData['title'] ?? 'No Title'; //retrieving title
         List<String> tags =
-            documentData['categories'].split(','); //retrieveing tags
+            documentData['categories'].split(','); //retrieving tags
         bool matchesSearchString = title.toLowerCase().contains(searchString) ||
             tags.any((tag) => tag
                 .toLowerCase()
@@ -157,7 +169,6 @@ class _HomeScreenState extends State<HomeScreen> {
           }).toList();
 
           DateTime createdAt;
-
           createdAt = (documentData['post_timestamp'] as Timestamp)
               .toDate(); //retrieving the time when the post is created
 
@@ -168,22 +179,31 @@ class _HomeScreenState extends State<HomeScreen> {
             docName: userId,
           );
 
+// Apply padding conditionally
+          EdgeInsets padding = i == 0
+              ? EdgeInsets.only(top: 12, bottom: 16)
+              : EdgeInsets.symmetric(vertical: 16);
           // Create a PostCard with fetched data
-          var postCard = PostCard(
-            title: title,
-            tags: tags,
-            tagColors: assignedColors,
-            firstname: userData?['firstName'] ?? 'Unknown',
-            lastname: userData?['lastName'] ?? 'Unknown',
-            timeAgo: timeAgoSinceDate(createdAt),
-            onTap: _onPostCardTap,
-            postId: document.id,
+          var postCardWithPadding = Padding(
+            padding: padding,
+            child: PostCard(
+              imageLocation: documentData['image_url'] ??
+                  'assets/images/sampleFoodPic.png',
+              title: title,
+              tags: tags,
+              tagColors: assignedColors,
+              firstname: userData?['firstName'] ?? 'Unknown',
+              lastname: userData?['lastName'] ?? 'Unknown',
+              timeAgo: timeAgoSinceDate(createdAt),
+              onTap: _onPostCardTap,
+              postId: document.id,
+            ),
           );
 
-          fetchedPostCards.add(postCard);
-          fetchedPostCards.add(SizedBox(height: 16));
+          fetchedPostCards.add(postCardWithPadding);
         }
       }
+      fetchedPostCards.add(SizedBox(height: 100));
     } catch (e) {
       print('Error fetching data: $e');
     }
@@ -206,26 +226,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(height: 16),
                     _buildCategoryButtons(),
                     SizedBox(height: 16),
-                    if (isLoading)
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            CupertinoActivityIndicator(),
-                            SizedBox(height: 10),
-                            Text('Loading',
-                                style: TextStyle(
-                                    color: CupertinoColors.secondaryLabel
-                                        .resolveFrom(context))),
-                          ],
-                        ),
-                      )
-                    else
-                      for (Widget postCard in postCards) postCard,
-                    SizedBox(height: 100),
                   ],
                 ),
               ),
+              if (isLoading)
+                SliverFillRemaining(
+                  hasScrollBody:
+                      false, // This is important to prevent unnecessary scrolling
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        CupertinoActivityIndicator(),
+                        SizedBox(height: 10),
+                        Text('Loading',
+                            style: TextStyle(
+                                color: CupertinoColors.secondaryLabel
+                                    .resolveFrom(context))),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return postCards[index];
+                    },
+                    childCount: postCards.length,
+                  ),
+                ),
             ],
           ),
           _buildAddButton(context),
@@ -366,10 +396,9 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: CupertinoColors.systemGrey3,
-              spreadRadius: 2, // Spread radius
-              blurRadius: 10, // Blur radius
-              offset: Offset(0, 0), // changes position of shadow
+              color: Color(0x19000000),
+              blurRadius: 20,
+              offset: Offset(0, 0),
             ),
           ],
           shape:
@@ -390,17 +419,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-//Method for getting when the post was created
   String timeAgoSinceDate(DateTime dateTime) {
     final duration = DateTime.now().difference(dateTime);
+
     if (duration.inDays > 8) {
-      return '${dateTime.month}/${dateTime.day}/${dateTime.year}'; // Return the date
+      return 'on ${DateFormat('MMMM dd, yyyy').format(dateTime)}'; // Format the date
     } else if (duration.inDays >= 1) {
       return '${duration.inDays} days ago';
     } else if (duration.inHours >= 1) {
       return '${duration.inHours} hours ago';
     } else if (duration.inMinutes >= 1) {
-      return '${duration.inMinutes} mins ago';
+      return '${duration.inMinutes} minutes ago';
     } else {
       return 'Just now';
     }

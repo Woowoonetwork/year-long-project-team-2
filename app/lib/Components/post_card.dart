@@ -4,6 +4,7 @@ import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
 import 'package:FoodHood/Components/colors.dart';
 
 class PostCard extends StatelessWidget {
+  final String imageLocation;
   final String firstname;
   final String lastname;
   final String title;
@@ -12,6 +13,7 @@ class PostCard extends StatelessWidget {
   final String timeAgo;
   final Function(String) onTap; // New callback parameter
   final String postId;
+  final bool showTags; // New parameter to indicate whether to show tags or not
 
   // Define your colors here
   final List<Color> colors = [
@@ -23,6 +25,7 @@ class PostCard extends StatelessWidget {
 
   PostCard({
     Key? key,
+    required this.imageLocation,
     required this.title,
     required this.tags,
     required this.tagColors,
@@ -31,6 +34,7 @@ class PostCard extends StatelessWidget {
     required this.timeAgo,
     required this.onTap,
     required this.postId,
+    this.showTags = true, // Default value to show tags
   }) : super(key: key);
 
   @override
@@ -41,33 +45,43 @@ class PostCard extends StatelessWidget {
         padding: EdgeInsets.zero,
         onPressed: () {
           onTap(postId);
-          print("GestureDetector tapped");
           Navigator.push(
             context,
             CupertinoPageRoute(
-              builder: (context) => PostDetailView(
-                postId:
-                    postId, // Ensure 'postId' is defined and accessible here
-              ),
+              builder: (context) => PostDetailView(postId: postId),
             ),
           );
         },
         child: Center(
           child: Container(
-            width: 382,
-            height: 220,
             decoration: _buildBoxDecoration(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Spacer(),
+                _buildImageSection(context),
                 _buildTitleSection(context),
-                _buildTagSection(context),
-                _buildOrderInfoSection(context),
+                if (showTags) ...[
+                  _buildTagSection(context),
+                ] else ...[
+                  SizedBox(height: 10),
+                ],
+                _buildOrderInfoSection(context, ''),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildImageSection(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+      child: Image.asset(
+        imageLocation,
+        width: MediaQuery.of(context).size.width,
+        height: 100,
+        fit: BoxFit.cover,
       ),
     );
   }
@@ -95,6 +109,7 @@ class PostCard extends StatelessWidget {
         style: TextStyle(
           color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
           fontSize: 18,
+          letterSpacing: -0.8,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -120,7 +135,7 @@ class PostCard extends StatelessWidget {
 
   Widget _buildTag(String text, Color color, BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(20),
@@ -128,8 +143,9 @@ class PostCard extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
           fontSize: 10,
+          letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -141,18 +157,19 @@ class PostCard extends StatelessWidget {
     return availableColors[index % availableColors.length];
   }
 
-  Widget _buildOrderInfoSection(BuildContext context) {
+  Widget _buildOrderInfoSection(BuildContext context, String avatarUrl) {
+    // Use a default image if avatarUrl is empty or null
+    String effectiveAvatarUrl =
+        avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
-          Container(
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.grey,
-            ),
+          CircleAvatar(
+            backgroundImage:
+                AssetImage(effectiveAvatarUrl), // Load the image from assets
+            radius: 9, // Optional: Adjust the radius to fit your design
           ),
           SizedBox(width: 8),
           Text(

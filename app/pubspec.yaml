@@ -59,6 +59,10 @@ dependencies:
   flutter_local_notifications: ^16.3.0
   like_button: ^2.0.5
   share_plus: ^7.2.1
+  super_cupertino_navigation_bar: ^2.0.5
+  popover: ^0.2.9
+  pull_down_button: ^0.9.3
+  provider: ^6.1.1
 
 dev_dependencies:
   flutter_test:
@@ -82,12 +86,15 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
+    - assets/map_style_dark.json
+    - assets/map_style_light.json
     - assets/images/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  generate: true
 
   # fonts:
   #   - family: Inter

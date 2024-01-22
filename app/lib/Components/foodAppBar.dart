@@ -66,7 +66,16 @@ class _BouncingState extends State<Bouncing>
 
 // FoodAppBar
 class FoodAppBar extends StatefulWidget {
-  const FoodAppBar({Key? key}) : super(key: key);
+  final String postId;
+  final VoidCallback onFavoritePressed;
+  final bool isFavorite;
+
+  const FoodAppBar({
+    Key? key,
+    required this.postId,
+    required this.onFavoritePressed,
+    required this.isFavorite,
+  }) : super(key: key);
 
   @override
   _FoodAppBarState createState() => _FoodAppBarState();
@@ -74,6 +83,12 @@ class FoodAppBar extends StatefulWidget {
 
 class _FoodAppBarState extends State<FoodAppBar> {
   bool isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    isFavorite = widget.isFavorite; // Initialize isFavorite from the widget prop
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,13 +127,11 @@ class _FoodAppBarState extends State<FoodAppBar> {
   Widget _buildFavoriteButton(BuildContext context) {
     return _blurEffect(
       Bouncing(
-        onPress: () {
-          setState(() => isFavorite = !isFavorite);
-        },
+        onPress: widget.onFavoritePressed,
         child: Icon(
-          isFavorite ? Icons.favorite : Icons.favorite_border,
+          widget.isFavorite ? Icons.favorite : Icons.favorite_border, // Use widget.isFavorite
           size: 18,
-          color: isFavorite
+          color: widget.isFavorite
               ? CupertinoColors.systemRed
               : CupertinoColors.label.resolveFrom(context),
         ),
@@ -142,6 +155,8 @@ class _FoodAppBarState extends State<FoodAppBar> {
       ),
     );
   }
+
+  
 
   Widget _blurEffect(Widget child) {
     return Padding(

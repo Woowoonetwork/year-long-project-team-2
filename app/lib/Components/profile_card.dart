@@ -139,7 +139,7 @@ class _ProfileCardState extends State<ProfileCard> {
                                 CupertinoColors.label, context),
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: -1.2,
+                            letterSpacing: -1.3,
                           ),
                         ),
                         SizedBox(height: 2),
