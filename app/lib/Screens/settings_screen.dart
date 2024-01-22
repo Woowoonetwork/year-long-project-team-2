@@ -41,12 +41,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 15.0),
         child: Column(
           children: [
-            //Display the profile
-            ProfileCard(),
+            // Display the profile
+            ProfileCard(userid: FirebaseAuth.instance.currentUser?.uid ?? ''), // Pass userid here
 
             SizedBox(height: 50),
 
-            //Push Notifications
+            // Push Notifications
             Padding(
               padding: EdgeInsets.only(left: 20.0, right:17.0),
               child: Row(
@@ -69,24 +69,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
 
-            //Accessibility Button
+            // Accessibility Button
             Padding(
               padding: EdgeInsets.all(17.0),
               child: AccessibilityButton(),
             ),
             
-            //Help Button
+            // Help Button
             Padding(
               padding: EdgeInsets.only(left:17.0, right: 17.0),
               child: HelpButton(),
             ),
 
-            //Sign out Button
+            // Sign out Button
             Padding(
               padding: EdgeInsets.all(17.0),
               child: SignOutButton(),
             ),
-
           ],
         ),
       ),
@@ -129,7 +128,6 @@ class AccessibilityButton extends StatelessWidget {
     );
   }
 }
-
 
 class HelpButton extends StatelessWidget {
   @override

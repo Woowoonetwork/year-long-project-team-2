@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
@@ -8,13 +9,12 @@ class AuthService {
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
   Future<void> signUp({required String email, required String password}) async {
-    await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email, password: password);
+    await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
 //send email verification email
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null && !user.emailVerified) {
-      await user.sendEmailVerification();
-    }
+final user = FirebaseAuth.instance.currentUser;
+if (user != null && !user.emailVerified) {
+  await user.sendEmailVerification();
+}
   }
 
   Future<String?> getUserId() async {
@@ -23,15 +23,6 @@ class AuthService {
       return user?.uid;
     } catch (e) {
       print('Error getting user ID: $e');
-      return null;
-    }
-  }
-
-  Future<void> sendPasswordResetEmail(String email) async {
-    try {
-      await _firebaseAuth.sendPasswordResetEmail(email: email);
-    } catch (e) {
-      print(e);
       return null;
     }
   }

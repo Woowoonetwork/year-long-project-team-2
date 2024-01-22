@@ -1,11 +1,3 @@
-/* 
-
-Account Screen
-
-- The account screen is the screen that displays the user's profile information and orders.
-
-*/
-
 import 'package:FoodHood/Screens/settings_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
@@ -118,7 +110,7 @@ class _AccountScreenState extends State<AccountScreen> {
       child: CustomScrollView(
         slivers: <Widget>[
           _buildNavigationBar(context),
-          SliverToBoxAdapter(child: ProfileCard()), // Display the profile card
+          SliverToBoxAdapter(child: ProfileCard(userid: getCurrentUserUID())), // Pass userid here
 
           _buildEditProfileButton(), // New method to create the Edit Profile button
 
@@ -238,7 +230,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-// Method to build the placeholder text when there are no orders
+  // Method to build the placeholder text when there are no orders
   SliverFillRemaining _buildPlaceholderText() {
     return SliverFillRemaining(
       hasScrollBody: false, // Prevents the sliver from being scrollable

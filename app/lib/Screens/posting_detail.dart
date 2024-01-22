@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:FoodHood/ViewModels/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
+import 'public_page.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -97,8 +98,8 @@ class _PostDetailViewState extends State<PostDetailView> {
             Container(
               padding: EdgeInsets.fromLTRB(16, 12, 16, 24),
               child: Row(
-                children: [
-                  Expanded(
+                children: [      
+Expanded(
                     child: ReserveButton(isReserved: false),
                   ),
                 ],
@@ -117,6 +118,17 @@ class _PostDetailViewState extends State<PostDetailView> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          CupertinoButton(
+            child: Text('View Profile'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => PublicPage(userid: viewModel.userid),
+                ),
+              );
+            },
+          ),           
           Expanded(
             child: Text(
               viewModel.title, // Updated to use viewModel
@@ -134,7 +146,7 @@ class _PostDetailViewState extends State<PostDetailView> {
       ),
     );
   }
-
+//```
   Color _generateTagColor(int index) {
     List<Color> availableColors = [yellow, orange, blue, babyPink, Cyan];
     return availableColors[index % availableColors.length];
@@ -969,25 +981,29 @@ class ReserveButton extends StatelessWidget {
           ),
         ],
       ),
-      child: CupertinoButton(
-        padding: EdgeInsets
-            .zero, // Remove padding since we are using a Container for styling
-        child: Text(
-          isReserved
-              ? 'Reserved'
-              : 'Reserve', // Change button text based on state
-          style: TextStyle(
-            color: CupertinoColors.white, // Text color
-            fontSize: 18, // Text size
-            letterSpacing: -0.45, // Text spacing
-            fontWeight: FontWeight.w600, // Text weight
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            child: Text(
+              isReserved
+                  ? 'Reserved'
+                  : 'Reserve', // Change button text based on state
+              style: TextStyle(
+                color: CupertinoColors.white, // Text color
+                fontSize: 18, // Text size
+                letterSpacing: -0.45, // Text spacing
+                fontWeight: FontWeight.w600, // Text weight
+              ),
+            ),
+            onPressed: isReserved
+                ? null
+                : () {
+                    // TODO: Add reservation logic here
+                  },
           ),
-        ),
-        onPressed: isReserved
-            ? null
-            : () {
-                // TODO: Add reservation logic here
-              },
+        ],
       ),
     );
   }

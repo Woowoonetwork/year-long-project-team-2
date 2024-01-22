@@ -1,10 +1,12 @@
 import 'package:FoodHood/Screens/public_page.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Cloud Firestore
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileCard extends StatefulWidget {
-  ProfileCard({Key? key}) : super(key: key);
+  final String userid; // Add userid as a parameter
+
+  const ProfileCard({Key? key, required this.userid}) : super(key: key);
 
   @override
   _ProfileCardState createState() => _ProfileCardState();
@@ -65,7 +67,8 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   void updateProfileData(Map<String, dynamic> documentData) {
-    if (mounted) { // Check if the widget is still in the widget tree
+    if (mounted) {
+      // Check if the widget is still in the widget tree
       setState(() {
         firstName = documentData['firstName'] ?? 'No first name';
         lastName = documentData['lastName'] ?? 'No last name';
@@ -88,7 +91,7 @@ class _ProfileCardState extends State<ProfileCard> {
       onTap: () {
         Navigator.push(
           context,
-          CupertinoPageRoute(builder: (context) => PublicPage()),
+          CupertinoPageRoute(builder: (context) => PublicPage(userid: widget.userid)),
         );
       },
       child: Container(

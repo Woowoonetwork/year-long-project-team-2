@@ -2,7 +2,6 @@
 // a page that allows the user to log in to the app
 
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/reset_pwd_screen.dart';
 import 'package:flutter/cupertino.dart';
 import '../components.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -68,7 +67,6 @@ class LogInScreen extends StatelessWidget {
             context), // Password text field
         const SizedBox(height: 20),
         buildTextButton(
-            context,
             'Forgot Password?',
             Alignment.centerRight,
             const Color(0xFF337586),
@@ -112,7 +110,7 @@ class LogInScreen extends StatelessWidget {
             builder: (context) {
               return CupertinoAlertDialog(
                 title: Text('Login Error'),
-                content: Text("Your email or password is incorrect."),
+                content: Text(errorMessage),
                 actions: <Widget>[
                   CupertinoDialogAction(
                     child: Text('OK'),
@@ -135,31 +133,6 @@ class LogInScreen extends StatelessWidget {
           color: textColor,
           fontSize: 16,
           fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  // Update the buildTextButton method to include onPressed callback
-  Widget buildTextButton(BuildContext context, String text, Alignment alignment,
-      Color color, double fontSize, FontWeight fontWeight) {
-    return GestureDetector(
-      onTap: () {
-        // Add your logic for the "Forgot Password?" action here
-        // For example, you can navigate to a password reset screen
-        //Navigator.pushNamed(context, '/reset_password');
-        Navigator.of(context).push(
-            CupertinoPageRoute(builder: (context) => ForgotPasswordScreen()));
-      },
-      child: Align(
-        alignment: alignment,
-        child: Text(
-          text,
-          style: TextStyle(
-            color: color,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-          ),
         ),
       ),
     );

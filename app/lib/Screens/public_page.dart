@@ -3,6 +3,10 @@ import 'package:flutter/cupertino.dart';
 import '../firestore_service.dart'; // Adjust the path based on your project structure
 
 class PublicPage extends StatefulWidget {
+  final String userid; // Add a parameter for userId
+
+  PublicPage({required this.userid});
+
   @override
   _PublicPageState createState() => _PublicPageState();
 }
@@ -13,7 +17,7 @@ class _PublicPageState extends State<PublicPage> {
   late String city;
   late String province;
   double rating = 5.0;
-  int itemsSold = 0;
+  late int itemsSold = 0;
   List<String> reviews = [];
 
   @override
@@ -23,9 +27,10 @@ class _PublicPageState extends State<PublicPage> {
   }
 
   Future<void> fetchData() async {
+    // Use widget.userid as the docName
     Map<String, dynamic>? documentData = await readDocument(
       collectionName: 'user',
-      docName: 'afkwlDWxekVhdgV1YPZFK7E34UH3',
+      docName: widget.userid,
     );
 
     if (documentData != null) {
@@ -36,7 +41,7 @@ class _PublicPageState extends State<PublicPage> {
         province = documentData['province'];
         rating = 5.0;
         reviews = documentData['reviews'] ?? [];
-        itemsSold = reviews.length;
+        itemsSold = documentData['itemsSold'];
       });
     }
   }
