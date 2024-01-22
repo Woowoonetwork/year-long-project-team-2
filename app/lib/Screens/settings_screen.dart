@@ -338,6 +338,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             onPressed: () {
               onConfirm();
+              Navigator.pop(context);
             },
           ),
         ],
