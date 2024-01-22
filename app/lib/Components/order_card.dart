@@ -113,6 +113,7 @@ class OrderCard extends StatelessWidget {
         style: TextStyle(
           color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
           fontSize: 18,
+          letterSpacing: -0.8,
           fontWeight: FontWeight.w600,
         ),
       ),

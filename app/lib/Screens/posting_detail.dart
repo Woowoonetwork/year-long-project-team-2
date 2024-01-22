@@ -123,37 +123,46 @@ class _PostDetailViewState extends State<PostDetailView> {
 
     if (viewModel.isFavorite) {
       await viewModel.savePost(widget.postId);
-      showCupertinoSnackbar(context, 'Post saved', accentColor,
-          Icon(FeatherIcons.check, color: Colors.white));
+
+      // Show a snackbar with a message indicating that the post has been saved
+      showCupertinoSnackbar(
+        context,
+        'Save "${viewModel.title}" to the list',
+        accentColor,
+        Icon(FeatherIcons.check, color: Colors.white),
+      );
     } else {
       await viewModel.unsavePost(widget.postId);
-      showCupertinoSnackbar(context, 'Post unsaved', yellow,
-          Icon(FeatherIcons.x, color: Colors.white));
+      showCupertinoSnackbar(
+        context,
+        'Remove "${viewModel.title}" from the list',
+        yellow,
+        Icon(FeatherIcons.x, color: Colors.white),
+      );
     }
   }
 
-  void showCupertinoSnackbar(BuildContext context, String message, Color backgroundColor,
-  Icon trailingIcon) {
-  var overlayEntry = OverlayEntry(
-    builder: (context) => Positioned(
-      top: 60, // Changed from bottom to top
-      left: 0,
-      right: 0,
-      child: CupertinoSnackbar(
-        message: message,
-        backgroundColor: backgroundColor,
-        trailingIcon: trailingIcon,
+  void showCupertinoSnackbar(BuildContext context, String message,
+      Color backgroundColor, Icon trailingIcon) {
+    var overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        top: 60, // Changed from bottom to top
+        left: 0,
+        right: 0,
+        child: CupertinoSnackbar(
+          message: message,
+          backgroundColor: backgroundColor,
+          trailingIcon: trailingIcon,
+        ),
       ),
-    ),
-  );
+    );
 
-  Overlay.of(context).insert(overlayEntry);
+    Overlay.of(context).insert(overlayEntry);
 
-  Future.delayed(Duration(seconds: 2), () {
-    overlayEntry.remove();
-  });
-}
-
+    Future.delayed(Duration(seconds: 2), () {
+      overlayEntry.remove();
+    });
+  }
 
   Widget _buildPostTitleSection() {
     return Padding(
