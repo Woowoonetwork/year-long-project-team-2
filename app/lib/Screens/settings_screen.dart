@@ -1,6 +1,6 @@
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/accessibility_screen.dart';
-import 'package:FoodHood/Screens/edit_profile_screen.dart';
+import 'package:FoodHood/Screens/reset_pwd_screen.dart';
 import 'package:flutter/cupertino.dart';
 import '../components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -124,7 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     CupertinoColors.activeBlue,
                     () => Navigator.of(context).push(
                       CupertinoPageRoute(
-                        builder: (context) => EditProfilePage(),
+                        builder: (context) => ForgotPasswordScreen(),
                       ),
                     ),
                   ),

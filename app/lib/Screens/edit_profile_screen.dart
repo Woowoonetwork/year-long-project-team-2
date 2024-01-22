@@ -273,22 +273,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(0, 16, 0, 12),
-          child: _buildActionButtons(
-            'Reset Password',
-            CupertinoColors.activeBlue,
-            () => _showActionSheet(context, 'Reset Password'),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: _buildActionButtons(
-            'Delete Account',
-            CupertinoColors.destructiveRed,
-            () => _showActionSheet(context, 'Delete Account'),
-          ),
-        ),
       ],
     );
   }
@@ -440,27 +424,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(
-      String title, Color color, VoidCallback onPressed) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        height: 50,
-        width: double.infinity, // Makes the button take full width
-        child: CupertinoButton(
-          color: CupertinoDynamicColor.resolve(
-              CupertinoColors.tertiarySystemBackground, context),
-          borderRadius: BorderRadius.circular(12),
-          onPressed: onPressed,
-          child: Text(
-            title,
-            style: TextStyle(color: color, fontWeight: FontWeight.w500),
-          ),
-        ),
       ),
     );
   }
