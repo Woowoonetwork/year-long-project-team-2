@@ -127,7 +127,7 @@ class _PostDetailViewState extends State<PostDetailView> {
       // Show a snackbar with a message indicating that the post has been saved
       showCupertinoSnackbar(
         context,
-        'Save "${viewModel.title}" to the list',
+        'Saved "${viewModel.title}" to the list',
         accentColor,
         Icon(FeatherIcons.check, color: Colors.white),
       );
@@ -135,7 +135,7 @@ class _PostDetailViewState extends State<PostDetailView> {
       await viewModel.unsavePost(widget.postId);
       showCupertinoSnackbar(
         context,
-        'Remove "${viewModel.title}" from the list',
+        'Removed "${viewModel.title}" from the list',
         yellow,
         Icon(FeatherIcons.x, color: Colors.white),
       );

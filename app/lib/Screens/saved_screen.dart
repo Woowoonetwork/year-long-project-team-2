@@ -144,11 +144,12 @@ class _SavedScreenState extends State<SavedScreen> {
             },
           );
         } else {
+         String postCountText = '${savedPostIds.length} Saved ' + (savedPostIds.length > 1 ? 'Posts' : 'Post');
           // This will execute when index is equal to the length of savedPostIds
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Center(
-              child: Text('${savedPostIds.length} Saved Posts',
+              child: Text(postCountText,
                   style: TextStyle(
                     color: CupertinoColors.secondaryLabel.resolveFrom(context),
                     fontSize: 14.0,
