@@ -245,3 +245,27 @@ N/A.
 ### Additional Information
 
 N/A.
+
+## Term 2 Week 2
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w2manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- Modified code in public_page, account_page, settings_page, postViewModel, profile_card and posting_page files
+- connected posting_page to public_page
+- debugging code
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+-completed the linking of posts with public profiles
+-made alterations to previous code in several files
+- Complete Week 14 individual log.
+
+### Tasks in progress (from Project Board)
+
+- debugging the linking code, works sometimes and glitches out other times (the screen hangs)
+
+### Additional Information
+
+N/A.

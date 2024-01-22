@@ -318,3 +318,46 @@ N/A
 ### Additional Information
 
 N/A.
+
+
+
+## Term 2 Week 2: Monday 15th Jan 2023 - Sunday 21th Dec 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/nickT2W2.png)
+
+### Recap of personal goals
+
+- Updated Google Maps to display nearby posts, enhancing user interaction.
+- Integrated zoom animations for map pins to improve map usability.
+- Developed a filter control sheet for post selection based on date range, categories, and time.
+- Implemented a range indicator for map view.
+- Added gesture controls for the map view.
+- Supported Dark Mode in both the browse screen and saved screen.
+- Implemented backend logic for saving posts.
+- Added snackbar notifications for post save/unsaved actions.
+- Conducted widget tests to ensure reliability and performance.
+- Completed the weekly logs.
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+
+### Tasks completed (from Project Board)
+
+- Google Maps update with nearby post display and zoom animations.
+- Filter control sheet for post selection.
+- Range indicator and gesture controls in map view.
+- Post card component modifications for browse screen.
+- Cancel button for textfield and Dark Mode support in new features.
+- Backend logic for saving posts.
+- Snackbar notifications for post actions.
+- Saved page account association.
+- UI state management for different post scenarios.
+- Widgets testing and Dark Mode enhancements.
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.

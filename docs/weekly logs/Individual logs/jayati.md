@@ -288,4 +288,42 @@ Additional Information
 N/A.
 
 
+# Individual Log: Monday 15th Jan 2024 - Sunday 21st Jan 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati10.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed
+* Implement reset password functionality
+* Create UI frontend and tests for reset password and save screen
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+
+* Reviewed changes from postings page
+* Reviewed save screen and settings page
+* Created the success screen page after reset password
+* Created working backend and functionality for reset password through Firebase
+* Customized email for reset password
+* Created UI tests for both pages
+* Completed team log for the week
+* Completed individual log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+N/A
+
+
+
+Additional Information 
+
+Ishita created the 'reset password' PR with some initial code but I took over both that branch and PR.
+
+
+
 
