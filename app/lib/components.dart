@@ -49,7 +49,7 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
     ),
     leading: CupertinoButton(
       padding: EdgeInsets.zero,
-      child: Icon(CupertinoIcons.back, color: Color(0xFF337586)),
+      child: Icon(CupertinoIcons.back, color: accentColor),
       onPressed: () => Navigator.pop(context),
     ),
   );

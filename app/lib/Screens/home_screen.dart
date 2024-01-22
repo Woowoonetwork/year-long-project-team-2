@@ -12,6 +12,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // feather icon
 import 'package:feather_icons/feather_icons.dart';
 import 'dart:async';
+import 'dart:ui'; // Required for ImageFilter
+import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
