@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ import 'dart:math' as math;
 import 'package:FoodHood/firestore_service.dart';
 import 'package:FoodHood/Components/post_card.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -36,23 +39,33 @@ class _BrowseScreenState extends State<BrowseScreen>
   static const int circleStrokeWidth = 2;
   final GlobalKey navBarKey = GlobalKey();
   bool _isZooming = false;
-  double mapBottomPadding = 100; // Default padding
+  double mapBottomPadding = 80; // Default padding
 
   String? _mapStyle;
   Set<Marker> _markers = {};
   bool _showPostCard = false;
   Map<String, dynamic> _selectedPostData = {};
 
+  late StreamSubscription<bool> keyboardVisibilitySubscription;
+  bool isKeyboardVisible = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     currentLocationFuture = _determineCurrentLocation();
+    var keyboardVisibilityController = KeyboardVisibilityController();
+    // Subscribe
+    keyboardVisibilitySubscription =
+        keyboardVisibilityController.onChange.listen((bool visible) {
+      setState(() => isKeyboardVisible = visible);
+    });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    keyboardVisibilitySubscription.cancel();
     searchController.dispose();
     mapController?.dispose();
     super.dispose();
@@ -329,7 +342,7 @@ class _BrowseScreenState extends State<BrowseScreen>
           children: [
             GoogleMap(
               onMapCreated: (GoogleMapController controller) {
-                mapBottomPadding = 100;
+                mapBottomPadding = mapBottomPadding;
                 mapController = controller;
               },
               onTap: _onMapTapped,
@@ -346,11 +359,11 @@ class _BrowseScreenState extends State<BrowseScreen>
               compassEnabled: false,
               circles: searchAreaCircle != null ? {searchAreaCircle!} : {},
               padding: EdgeInsets.only(
-              bottom: mapBottomPadding,
-              top: mapBottomPadding,
-              right: 0,
-              left: 0,
-            ),
+                bottom: mapBottomPadding,
+                top: mapBottomPadding,
+                right: 0,
+                left: 0,
+              ),
             ),
             if (_showPostCard) _buildPostCard(),
             if (!_showPostCard) _buildSearchButton(),
@@ -522,9 +535,23 @@ class _BrowseScreenState extends State<BrowseScreen>
           textController: searchController,
           onSearchTextChanged: (text) {},
           buildFilterButton: () => _buildFilterButton(),
+          onSearchBarTapped: _handleSearchBarTapped,
         ),
       ],
     );
+  }
+
+  void _handleSearchBarTapped() {
+    _resetUIState();
+    _updateMapPadding(false); // You need to implement this method
+  }
+
+  void _updateMapPadding(bool isKeyboardVisible) {
+    setState(() {
+      mapBottomPadding = isKeyboardVisible
+          ? 0
+          : 100; // Update padding based on keyboard visibility
+    });
   }
 
   Widget _buildFilterButton() {

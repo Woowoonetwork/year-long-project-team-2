@@ -1,6 +1,7 @@
 // component.dart
 // Themeing components
 
+import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 
@@ -29,14 +30,14 @@ class Styles {
   static TextStyle signUpTextStyle = TextStyle(
     color: accentColor,
     fontSize: 12,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     letterSpacing: -0.20,
   );
 
   static TextStyle signUpLinkStyle = TextStyle(
     color: secondaryColor,
     fontSize: 12,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     letterSpacing: -0.20,
   );
 }
@@ -47,10 +48,11 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
     border: Border(
       bottom: BorderSide.none,
     ),
-    leading: CupertinoButton(
-      padding: EdgeInsets.zero,
-      child: Icon(CupertinoIcons.back, color: accentColor),
-      onPressed: () => Navigator.pop(context),
+    leading: 
+    GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Icon(FeatherIcons.chevronLeft,
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)),
     ),
   );
 }
@@ -131,7 +133,7 @@ Widget buildCupertinoTextField(String placeholder,
     placeholder: placeholder,
     padding: EdgeInsets.all(16.0),
     placeholderStyle: TextStyle(
-      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+      color: CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context),
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),

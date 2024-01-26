@@ -24,7 +24,6 @@ class NavigationScreen extends StatelessWidget {
         currentIndex: selectedIndex,
         onTap: onItemTapped,
         iconSize: 24,
-        height: 60,
         backgroundColor: CupertinoDynamicColor.resolve(
             groupedBackgroundColor, context).withOpacity(0.8),
         border: Border(top: BorderSide.none),

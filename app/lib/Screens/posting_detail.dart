@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/foodAppBar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:FoodHood/ViewModels/PostDetailViewModel.dart';
+import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:FoodHood/Components/cupertinosnackbar.dart';
