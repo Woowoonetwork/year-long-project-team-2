@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:FoodHood/firestore_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PostDetailViewModel extends ChangeNotifier {
   late String firstName;
@@ -21,6 +20,8 @@ class PostDetailViewModel extends ChangeNotifier {
   late DateTime postTimestamp;
   late LatLng pickupLatLng;
   late List<String> tags;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  bool isFavorite = false; // Add isFavorite property
 
   PostDetailViewModel(String postId) {
     _initializeFields();
@@ -44,28 +45,51 @@ class PostDetailViewModel extends ChangeNotifier {
     tags = ['null'];
   }
 
-  Future<void> fetchData(String postId) async {
-    try {
-      var documentData = await readDocument(
-        collectionName: 'post_details',
-        docName: postId,
-      );
-      if (documentData != null) {
-        _updatePostDetails(documentData);
-      }
+Future<void> fetchData(String postId) async {
+  try {
+    var documentSnapshot =
+        await firestore.collection('post_details').doc(postId).get();
 
-      // Assuming userid is set after _updatePostDetails
-      var userDocument = await readDocument(
-        collectionName: 'user',
-        docName: userid,
-      );
-      if (userDocument != null) {
-        _updateUserDetails(userDocument);
-      }
-    } catch (e) {
-      print('Error fetching post details: $e');
+    if (documentSnapshot.exists) {
+      var documentData = documentSnapshot.data() as Map<String, dynamic>;
+      _updatePostDetails(documentData);
+      await _fetchAndUpdateUserDetails(documentData['user_id']); // Fetch user details
+      await checkIfFavorite(postId); // Check if the post is a favorite
+    } else {
+      print('Document with postId $postId does not exist.');
     }
-    notifyListeners();
+  } catch (e) {
+    print('Error fetching post details: $e');
+  }
+}
+
+Future<void> _fetchAndUpdateUserDetails(String userId) async {
+  try {
+    var userDocumentSnapshot =
+        await firestore.collection('user').doc(userId).get();
+
+    if (userDocumentSnapshot.exists) {
+      var userDocumentData = userDocumentSnapshot.data() as Map<String, dynamic>;
+      _updateUserDetails(userDocumentData);
+    } else {
+      print('User document with userId $userId does not exist.');
+    }
+  } catch (e) {
+    print('Error fetching user details: $e');
+  }
+}
+
+  Future<void> checkIfFavorite(String postId) async {
+    String userId = getCurrentUserUID();
+    if (userId.isNotEmpty) {
+      var userDoc = await firestore.collection('user').doc(userId).get();
+      if (userDoc.exists) {
+        var userData = userDoc.data() as Map<String, dynamic>;
+        List<dynamic> savedPosts = userData['saved_posts'] ?? [];
+        isFavorite = savedPosts.contains(postId);
+        notifyListeners();
+      }
+    }
   }
 
   void _updatePostDetails(Map<String, dynamic> documentData) {
@@ -87,6 +111,48 @@ class PostDetailViewModel extends ChangeNotifier {
     firstName = userDocument['firstName'] ?? '';
     lastName = userDocument['lastName'] ?? '';
     notifyListeners();
+  }
+
+  Future<void> savePost(String postId) async {
+    try {
+      String userId = getCurrentUserUID();
+      if (userId.isNotEmpty) {
+        // Add postId to the saved_posts array
+        await firestore.collection('user').doc(userId).set({
+          'saved_posts': FieldValue.arrayUnion([postId]),
+        }, SetOptions(merge: true));
+
+        isFavorite = true;
+        notifyListeners();
+      } else {
+        print('User ID is not available. User might not be logged in.');
+      }
+    } catch (e) {
+      print('Error saving post: $e');
+    }
+  }
+
+  Future<void> unsavePost(String postId) async {
+    try {
+      String userId = getCurrentUserUID();
+      if (userId.isNotEmpty) {
+        // Remove postId from the saved_posts array
+        await firestore.collection('user').doc(userId).update({
+          'saved_posts': FieldValue.arrayRemove([postId]),
+        });
+
+        isFavorite = false;
+        notifyListeners();
+      } else {
+        print("User ID is not available. User might not be logged in.");
+      }
+    } catch (e) {
+      print('Error unsaving post: $e');
+    }
+  }
+
+  String getCurrentUserUID() {
+    return FirebaseAuth.instance.currentUser?.uid ?? '';
   }
 
   String timeAgoSinceDate(DateTime dateTime) {

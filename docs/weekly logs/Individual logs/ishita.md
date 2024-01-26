@@ -315,7 +315,7 @@ N/A.
 ---
 ---
 
-## Term 2 Week 1: Monday 8th Jan 2023 - Sunday 14th Dec 2023
+## Term 2 Week 1: Monday 8th Jan 2024 - Sunday 14th Jan 2024
 
 ### Tasks Worked On During the Week
 
@@ -339,6 +339,55 @@ N/A.
 - Plan features for the upcoming milestone.
 - Complete Week 13 team log.
 - Complete Week 13 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Term 2 Week 2: Monday 15th Jan 2024 - Sunday 21st Jan 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W2.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Updated the settings page with new links for the buttons.
+- Added delete account functionality.
+- Added widget tests for the settings screen.
+- Added the accessibility screen.
+- Added a slider for users to choose their preferred font size.
+- Added a text_scale_provider.dart that notifies other screens of font size changes.
+- Added widget tests for the accessibility screen.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Update the settings page to add account settings + test
+    - Added new buttons for account settings to the settings screen.
+    - Added delete account functionality.
+    - Fixed bug with navigation issues on clicking the "reset password" button.
+    - Added link to the accessibility settings screen on this page.
+    - Completely changed the previous widget test for this new settings page.
+- Add the accessibility screen to allow users to control font size + test
+    - Added a slider to allow users to set their preferred font size.
+    - Implemented a TextScaleProvider class that listens to the change in font size (as set by the user) and notifies other screens of the changes in real time via main.dart.
+    - Developed a widget test for the accessibility screen.
+- Complete the T2 W2 team log.
+- Complete the T2 W2 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
 
 
