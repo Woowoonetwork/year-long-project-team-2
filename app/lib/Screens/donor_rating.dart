@@ -10,6 +10,15 @@ class DonorRatingPage extends StatefulWidget {
 
 class _DonorRatingPageState extends State<DonorRatingPage> {
   int _rating = 0; // State variable to keep track of the rating
+  TextEditingController _commentController =
+      TextEditingController(); // Initialize the text controller
+
+  @override
+  void dispose() {
+    _commentController
+        .dispose(); // Dispose the controller when the widget is disposed
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +51,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
             child: Column(
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  padding: EdgeInsets.symmetric(vertical: 30, horizontal: 16),
                   child: Text(
                     "How was your experience with Harry?",
                     textAlign: TextAlign.center,
@@ -53,6 +62,22 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                     ),
                   ),
                 ),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: CupertinoColors.systemGrey4,
+                    border:
+                        Border.all(color: CupertinoColors.systemGrey, width: 2),
+                  ),
+                  child: Icon(
+                    Icons.photo_camera,
+                    size: 40,
+                    color: CupertinoColors.systemGrey,
+                  ),
+                ),
+                SizedBox(height: 20),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: List.generate(5, (index) {
@@ -70,6 +95,50 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                     );
                   }),
                 ),
+                SizedBox(height: 20),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 16), // Padding for the text field
+                  child: CupertinoTextField(
+                    controller: _commentController,
+                    maxLines:
+                        3, // Increased maxLines to make the text field taller
+                    placeholder: 'Write your comments here',
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      border: Border.all(
+                        color: CupertinoColors.systemGrey3,
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    padding:
+                        EdgeInsets.all(12), // Internal padding for text content
+                  ),
+                ),
+                SizedBox(height: 40),
+
+                Center(
+                  child: CupertinoButton(
+                    onPressed: () {
+                      // Add your action for the publish button here
+                      print("Publish button pressed");
+                    },
+                    color: CupertinoColors.activeBlue,
+                    child: Row(
+                      mainAxisSize:
+                          MainAxisSize.min, // To center the icon and text
+                      children: [
+                        Icon(Icons.publish,
+                            size: 20), // Icon for the publish button
+                        SizedBox(width: 4), // Spacing between icon and text
+                        Text("Publish"),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                // ... [Any other widgets you might want to add] ...
               ],
             ),
           ),
