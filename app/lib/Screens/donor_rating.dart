@@ -20,6 +20,10 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
     super.dispose();
   }
 
+  bool get _isPublishButtonEnabled {
+    return _rating > 0 && _commentController.text.isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -101,6 +105,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                       horizontal: 16), // Padding for the text field
                   child: CupertinoTextField(
                     controller: _commentController,
+                    onChanged: (_) => setState(() {}),
                     maxLines:
                         3, // Increased maxLines to make the text field taller
                     placeholder: 'Write your comments here',
@@ -118,27 +123,27 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                 ),
                 SizedBox(height: 40),
 
-                Center(
-                  child: CupertinoButton(
-                    onPressed: () {
-                      // Add your action for the publish button here
-                      print("Publish button pressed");
-                    },
-                    color: CupertinoColors.activeBlue,
-                    child: Row(
-                      mainAxisSize:
-                          MainAxisSize.min, // To center the icon and text
-                      children: [
-                        Icon(Icons.publish,
-                            size: 20), // Icon for the publish button
-                        SizedBox(width: 4), // Spacing between icon and text
-                        Text("Publish"),
-                      ],
-                    ),
+                CupertinoButton(
+                  onPressed: _isPublishButtonEnabled
+                      ? () {
+                          // Add your action for the publish button here
+                          print("Publish button pressed");
+                        }
+                      : null,
+                  color: _isPublishButtonEnabled
+                      ? CupertinoColors.activeBlue
+                      : CupertinoColors.quaternarySystemFill,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.publish, size: 20),
+                      SizedBox(width: 4),
+                      Text("Publish"),
+                    ],
                   ),
                 ),
                 SizedBox(height: 20),
-                // ... [Any other widgets you might want to add] ...
+                // ... [Any other widgets] ...
               ],
             ),
           ),
