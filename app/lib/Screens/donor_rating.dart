@@ -28,6 +28,19 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                   size: _iconSize,
                   color: CupertinoColors.label.resolveFrom(context)),
             ),
+            trailing: GestureDetector(
+              onTap: () {
+                // Add your action for the message here
+                print("Message Harry Tapped");
+              },
+              child: Text(
+                'Message Harry',
+                style: TextStyle(
+                  color: CupertinoColors.activeBlue,
+                  fontSize: 17,
+                ),
+              ),
+            ),
           ),
           SliverToBoxAdapter(
             child: Center(
