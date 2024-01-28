@@ -7,10 +7,10 @@ import 'package:FoodHood/ViewModels/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:FoodHood/Components/cupertinosnackbar.dart';
+import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
-
   const PostDetailView({Key? key, required this.postId}) : super(key: key);
 
   @override
@@ -1006,8 +1006,13 @@ class AllergensSection extends StatelessWidget {
 
 class ReserveButton extends StatelessWidget {
   final bool isReserved;
+  final VoidCallback? onPressed;
 
-  const ReserveButton({Key? key, required this.isReserved}) : super(key: key);
+  const ReserveButton({
+    Key? key,
+    required this.isReserved,
+    this.onPressed,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1043,7 +1048,10 @@ class ReserveButton extends StatelessWidget {
         onPressed: isReserved
             ? null
             : () {
-                // TODO: Add reservation logic here
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(builder: (context) => ReservationScreen()),
+                );
               },
       ),
     );
