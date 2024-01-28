@@ -1049,7 +1049,7 @@ class ReserveButton extends StatelessWidget {
             : () {
                 Navigator.push(
                   context,
-                  CupertinoPageRoute(builder: (context) => ReservationScreen()),
+                  CupertinoPageRoute(builder: (context) => DoneePath()),
                 );
               },
       ),

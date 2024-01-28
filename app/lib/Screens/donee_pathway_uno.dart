@@ -12,13 +12,15 @@ class _DoneePathState extends State<DoneePath> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         leading: CupertinoNavigationBarBackButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
         middle: Text('Reservation'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () {},
-          child: Text('Message Harry'),
+          child: Text('Message'),
         ),
       ),
       child: SafeArea(
@@ -27,7 +29,7 @@ class _DoneePathState extends State<DoneePath> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'You have reserved the Chicken and Rice from Harry',
+                'You have reserved the from ',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
@@ -56,7 +58,7 @@ class _DoneePathState extends State<DoneePath> {
                     CupertinoIcons.star_fill,
                     color: Colors.amber,
                   ),
-                  Text('5.0 Rating')
+                  Text('')
                 ],
               ),
             ),
