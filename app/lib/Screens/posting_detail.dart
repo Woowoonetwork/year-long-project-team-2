@@ -19,6 +19,7 @@ class PostDetailView extends StatefulWidget {
 
 class _PostDetailViewState extends State<PostDetailView> {
   late PostDetailViewModel viewModel;
+  AnimationController? _animationController;
   bool isLoading = true; // Added to track loading status
 
   @override
@@ -123,13 +124,12 @@ class _PostDetailViewState extends State<PostDetailView> {
 
     if (viewModel.isFavorite) {
       await viewModel.savePost(widget.postId);
-
-      // Show a snackbar with a message indicating that the post has been saved
       showCupertinoSnackbar(
         context,
         'Saved "${viewModel.title}" to the list',
         accentColor,
         Icon(FeatherIcons.check, color: Colors.white),
+        _reverseAnimation, // Pass _reverseAnimation as the callback
       );
     } else {
       await viewModel.unsavePost(widget.postId);
@@ -138,15 +138,21 @@ class _PostDetailViewState extends State<PostDetailView> {
         'Removed "${viewModel.title}" from the list',
         yellow,
         Icon(FeatherIcons.x, color: Colors.white),
+        _reverseAnimation, // Pass _reverseAnimation as the callback
       );
     }
   }
 
+  void _reverseAnimation() {
+    // Reverse your animation here
+    _animationController?.reverse();
+  }
+
   void showCupertinoSnackbar(BuildContext context, String message,
-      Color backgroundColor, Icon trailingIcon) {
+      Color backgroundColor, Icon trailingIcon, VoidCallback onSnackbarClosed) {
     var overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: 60, // Changed from bottom to top
+        top: 60,
         left: 0,
         right: 0,
         child: CupertinoSnackbar(
@@ -157,10 +163,12 @@ class _PostDetailViewState extends State<PostDetailView> {
       ),
     );
 
-    Overlay.of(context).insert(overlayEntry);
+    Overlay.of(context)?.insert(overlayEntry);
 
+    // Use Future.delayed to wait for the duration of the snackbar display
     Future.delayed(Duration(seconds: 2), () {
       overlayEntry.remove();
+      onSnackbarClosed(); // Call the provided callback function
     });
   }
 
@@ -365,11 +373,13 @@ class InfoRow extends StatelessWidget {
           IconPlaceholder(imageUrl: 'assets/images/sampleProfile.png'),
           const SizedBox(width: 8),
           Expanded(
+            // Wrap with Expanded to prevent overflow
             child: CombinedTexts(
-                firstName: firstName,
-                lastName: lastName,
-                postTimestamp: postTimestamp,
-                viewModel: viewModel),
+              firstName: firstName,
+              lastName: lastName,
+              postTimestamp: postTimestamp,
+              viewModel: viewModel,
+            ),
           ),
         ],
       ),
@@ -416,14 +426,17 @@ class CombinedTexts extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        InfoText(
-          firstName: firstName,
-          lastName: lastName,
-          postTimestamp: postTimestamp,
-          viewModel: viewModel, // Pass the viewModel to InfoText
+        Text(
+          'Made by $firstName $lastName  Posted ${viewModel.timeAgoSinceDate(postTimestamp)}',
+          style: TextStyle(
+            color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.48,
+          ),
         ),
-        const SizedBox(width: 8),
-        RatingText(), // Placeholder, update as needed
+        Text("  "),
+        RatingText(), // Placeholder widget for rating, update as needed
       ],
     );
   }
@@ -446,6 +459,7 @@ class InfoText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RichText(
+      overflow: TextOverflow.fade,
       text: TextSpan(
         style: TextStyle(
           color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
@@ -483,6 +497,7 @@ class RatingText extends StatelessWidget {
         Text(
           '5.0 Rating', // Placeholder rating
           style: TextStyle(
+            overflow: TextOverflow.fade,
             color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
             fontSize: 12,
             fontWeight: FontWeight.w500,

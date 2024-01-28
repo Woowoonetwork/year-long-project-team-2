@@ -160,11 +160,11 @@ Future<void> _fetchAndUpdateUserDetails(String userId) async {
     if (duration.inDays > 8) {
       return "on " + DateFormat('MMM d').format(dateTime);
     } else if (duration.inDays >= 1) {
-      return '${duration.inDays} day${duration.inDays > 1 ? 'days' : ''} ago';
+      return '${duration.inDays} day${duration.inDays > 1 ? 's' : ''} ago';
     } else if (duration.inHours >= 1) {
-      return '${duration.inHours} hour${duration.inHours > 1 ? 'hrs' : ''} ago';
+      return '${duration.inHours} hour${duration.inHours > 1 ? 's' : ''} ago';
     } else if (duration.inMinutes >= 1) {
-      return '${duration.inMinutes} minute${duration.inMinutes > 1 ? 'mins' : ''} ago';
+      return '${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''} ago';
     } else {
       return 'Just now';
     }

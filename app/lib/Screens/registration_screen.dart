@@ -8,7 +8,6 @@ import '../auth_service.dart';
 import '../firestore_service.dart';
 import 'package:feather_icons/feather_icons.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:FoodHood/Screens/home_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final AuthService auth;

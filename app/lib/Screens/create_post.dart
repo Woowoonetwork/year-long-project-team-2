@@ -1,8 +1,10 @@
 // create_post.dart
 // a page that allows users to create a new post
+import 'package:FoodHood/Components/colors.dart';
+import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
-//import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../firestore_service.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
@@ -20,10 +22,53 @@ class _CreatePostPageState extends State<CreatePostScreen> {
   List<String> categoriesList = [];
   List<String> pickupLocationsList = [];
 
+  // Add method to show date picker in a modal popup
+  void showDatePickerModal(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 200,
+          color: CupertinoColors.white,
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.date,
+            initialDateTime: selectedDate,
+            onDateTimeChanged: (DateTime newDate) {
+              setState(() {
+                selectedDate = newDate;
+              });
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  // Add method to show time picker in a modal popup
+  void showTimePickerModal(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 200,
+          color: CupertinoColors.white,
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.time,
+            initialDateTime: selectedTime,
+            onDateTimeChanged: (DateTime newTime) {
+              setState(() {
+                selectedTime = newTime;
+              });
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    // Fetch search bar data when the widget is inserted into the tree
     fetchData();
   }
 
@@ -34,7 +79,6 @@ class _CreatePostPageState extends State<CreatePostScreen> {
 
   Future<void> fetchData() async {
     try {
-      // Fetch allergens data
       Map<String, dynamic>? allergensData = await readDocument(
         collectionName: 'Data',
         docName: 'Allergens',
@@ -99,22 +143,20 @@ class _CreatePostPageState extends State<CreatePostScreen> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
+      backgroundColor: groupedBackgroundColor,
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
-            backgroundColor: CupertinoColors.systemGroupedBackground,
-            largeTitle: Text(
-              'New Post',
-            ),
-            leading: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(
-                  CupertinoIcons.clear,
-                  color: CupertinoColors.black,
+            transitionBetweenRoutes: false,
+            backgroundColor: groupedBackgroundColor,
+            largeTitle: Text('New Post'),
+            leading: GestureDetector(
+                child: Icon(
+                  FeatherIcons.x,
+                  color: CupertinoColors.label.resolveFrom(context),
                   size: 24.0,
                 ),
-                onPressed: () async {
+                onTap: () async {
                   // Show a confirmation dialog
                   bool shouldPop = await showConfirmationDialog(context);
                   // Pop the screen only if the user confirms to do so
@@ -124,10 +166,11 @@ class _CreatePostPageState extends State<CreatePostScreen> {
                 }),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
-              child: const Text(
+              child: Text(
                 'Save',
                 style: TextStyle(
-                  color: Color(0xFF337586), // Your custom color
+                  color: accentColor,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               onPressed: () async {
@@ -183,31 +226,30 @@ class _CreatePostPageState extends State<CreatePostScreen> {
               },
             ),
             border: const Border(bottom: BorderSide.none),
-            stretch: true,
           ),
 
           // Title text
-          __buildTextField(text: "Title"),
+          buildTextField(text: "Title"),
 
           // Title input field
-          _buildTextInputField(
+          buildTextInputField(
               controller: title_controller,
-              placeholder: "Enter a title",
+              placeholder: "",
               padding: EdgeInsets.all(10.0)),
 
           // Description text
-          __buildTextField(text: "Description"),
+          buildTextField(text: "Description"),
 
           // Description input field
-          _buildTextInputField(
+          buildTextInputField(
               controller: desc_controller,
-              placeholder: "No description entered",
+              placeholder: "",
               padding: EdgeInsets.symmetric(vertical: 40.0, horizontal: 10.0)),
 
           //Add photo picker and alt text field
 
           // Allergens text
-          __buildTextField(text: "Allergens"),
+          buildTextField(text: "Allergens"),
 
           // Allergens search bar
           SliverToBoxAdapter(
@@ -222,7 +264,7 @@ class _CreatePostPageState extends State<CreatePostScreen> {
           ),
 
           // Category text
-          __buildTextField(text: "Category"),
+          buildTextField(text: "Category"),
 
           // Category search bar
           SliverToBoxAdapter(
@@ -237,29 +279,18 @@ class _CreatePostPageState extends State<CreatePostScreen> {
           ),
 
           // Expiration Date Text
-          __buildTextField(text: "Expiration Date"),
+          buildTextField(text: "Expiration Date"),
 
-          // Expiration date picker
           SliverToBoxAdapter(
-            child: Container(
-              width: screenWidth,
-              child: SizedBox(
-                height: 80,
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: selectedDate,
-                  onDateTimeChanged: (DateTime newDate) {
-                    setState(() {
-                      selectedDate = newDate;
-                    });
-                  },
-                ),
+            child: CupertinoButton(
+              onPressed: () => showDatePickerModal(context),
+              child: Text(
+                'Expiration Date: ${selectedDate.toLocal()}',
               ),
             ),
           ),
-
           // Pickup location text
-          __buildTextField(text: "Pickup Location"),
+          buildTextField(text: "Pickup Location"),
 
           // Pickup Location search bar
           SliverToBoxAdapter(
@@ -273,71 +304,64 @@ class _CreatePostPageState extends State<CreatePostScreen> {
             ),
           ),
 
-          //Map displaying location
-          // SliverToBoxAdapter(
-          //   child: Container(
-          //     height: 200.0, // Set the desired height for the map
-          //     width: double.infinity, // Take the full available width
-          //     margin: EdgeInsets.all(16.0), // Adjust margins as needed
-          //     child: GoogleMap(
-          //       initialCameraPosition: CameraPosition(
-          //           target: LatLng(37.7749, -122.4194), // Default location (San Francisco)
-          //           zoom: 12.0,
-          //       ),
-
-          //       mapType: MapType.normal,
-          //     ),
-          //   ),
-          // ),
+          // Map displaying location
+          SliverToBoxAdapter(
+            child: Container(
+              height: 200.0, // Set the desired height for the map
+              width: double.infinity, // Take the full available width
+              margin: EdgeInsets.all(16.0), // Adjust margins as needed
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(
+                      37.7749, -122.4194), // Default location (San Francisco)
+                  zoom: 12.0,
+                ),
+                mapType: MapType.normal,
+              ),
+            ),
+          ),
 
           // Pickup instructions text
-          __buildTextField(text: "Pickup Instructions"),
+          buildTextField(text: "Pickup Instructions"),
 
           // Pickup instructions text input
-          _buildTextInputField(
+          buildTextInputField(
               controller: pickup_instr_controller,
-              placeholder: "No pickup instructions entered",
-              padding: EdgeInsets.all(10.0)),
+              placeholder: "",
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 30.0)),
 
-          //Pickup Time
+          // Pickup Time Section
           SliverToBoxAdapter(
-              child: Container(
-            height: 80,
-            child: Padding(
+            child: Container(
+              height: 80,
               padding: EdgeInsets.only(left: 17.0, right: 12.0, top: 10.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // First widget (Pickup time text)
-                  const Text(
+                  Text(
                     'Pickup Time',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
 
-                  SizedBox(width: 5.0), // Adjust spacing between the widgets
-
-                  // Second widget (Time picker for pickup time)
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
-                      child: CupertinoDatePicker(
-                        mode: CupertinoDatePickerMode.time,
-                        initialDateTime: selectedTime,
-                        onDateTimeChanged: (DateTime newTime) {
-                          setState(() {
-                            selectedTime = newTime;
-                          });
-                        },
-                      ),
+                  // Second widget (Button for time picker)
+                  CupertinoButton(
+                    onPressed: () => showTimePickerModal(context),
+                    child: Text(
+                      '${selectedTime.toLocal().hour}:${selectedTime.toLocal().minute}',
                     ),
                   ),
                 ],
               ),
             ),
-          )),
+          ),
 
           //Add space after all widgets
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 100.0),
+          SliverToBoxAdapter(
+            child: SizedBox(height: 40.0),
           ),
         ],
       ),
@@ -345,7 +369,7 @@ class _CreatePostPageState extends State<CreatePostScreen> {
   }
 
   // Reusable widget to build the text fields
-  Widget __buildTextField({
+  Widget buildTextField({
     required String text,
   }) {
     return SliverToBoxAdapter(
@@ -353,13 +377,17 @@ class _CreatePostPageState extends State<CreatePostScreen> {
         padding: EdgeInsets.only(left: 17.0, top: 10.0),
         child: Text(
           text,
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
   }
 
   // Reusable widget to build the input text fields
-  Widget _buildTextInputField({
+  Widget buildTextInputField({
     required TextEditingController controller,
     required String placeholder,
     required EdgeInsetsGeometry padding,
@@ -374,13 +402,14 @@ class _CreatePostPageState extends State<CreatePostScreen> {
           controller: controller,
           padding: padding,
           placeholder: placeholder,
+          placeholderStyle: TextStyle(
+            fontSize: 16.0,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          ),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: CupertinoColors.secondarySystemGroupedBackground,
-              width: 1.0,
-            ),
             borderRadius: BorderRadius.circular(10.0),
-            color: CupertinoColors.secondarySystemGroupedBackground,
+            color: CupertinoColors.tertiarySystemBackground
+                .resolveFrom(context), // Us
           ),
         ),
       ),

@@ -177,7 +177,7 @@ class _CupertinoSearchNavigationBarState
         child: Text(
           'Cancel',
           style: TextStyle(
-            color: CupertinoColors.activeBlue.resolveFrom(context),
+            color: CupertinoColors.label.resolveFrom(context),
             fontSize: 18,
             fontWeight: FontWeight.w500,
           ),
