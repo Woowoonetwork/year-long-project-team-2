@@ -1,6 +1,9 @@
 import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Screens/donor_pathway_1.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:flutter/cupertino.dart';
+
+const double _defaultFontSize = 16.0;
 
 class OrderCard extends StatelessWidget {
   final String imageLocation;
@@ -11,6 +14,7 @@ class OrderCard extends StatelessWidget {
   final VoidCallback? onCancel;
   final Function(String) onTap; // New callback parameter
   final String postId;
+  final VoidCallback? onStatusPressed;
 
   OrderCard({
     required this.imageLocation,
@@ -21,6 +25,7 @@ class OrderCard extends StatelessWidget {
     required this.postId,
     this.onEdit, // Optional callback for editing
     this.onCancel, // Optional callback for canceling
+    this.onStatusPressed, // Optional callback for status button press
   });
 
   @override
@@ -70,6 +75,14 @@ class OrderCard extends StatelessWidget {
                 _buildTitleSection(context),
                 _buildTagSection(context),
                 _buildOrderInfoSection(context),
+                //SizedBox(height: 10), // Add spacing between order info and buttons
+                
+                _buildButton(context, 'Status', onPressed: () {
+                  // Check if onStatusPressed callback is provided and call it
+                  onStatusPressed?.call();
+                  // Navigate to the donor screen
+                  Navigator.push(context, CupertinoPageRoute(builder: (context) => DonorScreen()));
+                }),
               ],
             ),
           ),
@@ -175,4 +188,64 @@ class OrderCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildButton(BuildContext context, String buttonText, {VoidCallback? onPressed}) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 10.0),
+      child: CupertinoButton(
+        onPressed: onPressed,
+        child: Text(
+          buttonText,
+          style: TextStyle(
+            color: CupertinoColors.label,
+            //fontWeight: FontWeight.bold,
+            fontSize: _defaultFontSize,
+          ),
+        ),
+        //padding: const EdgeInsets.all(16.0),
+        borderRadius: BorderRadius.circular(16),
+        color: groupedBackgroundColor,
+      )
+    );   
+  }
+
+  // Widget _buildButton(BuildContext context, String buttonText, {VoidCallback? onPressed}) {
+  //   return CupertinoButton(
+  //     onPressed: onPressed,
+  //     child: Text(
+  //       buttonText,
+  //       style: TextStyle(
+  //         color: CupertinoColors.label,
+  //         //fontWeight: FontWeight.bold,
+  //         fontSize: _defaultFontSize,
+  //       ),
+  //     ),
+  //     padding: const EdgeInsets.all(16.0),
+  //     borderRadius: BorderRadius.circular(16),
+  //     color: groupedBackgroundColor,
+  //   );
+  // }
+//  Widget _buildButton(BuildContext context, String buttonText, {VoidCallback? onPressed}) {
+//   return SizedBox(
+//     width: double.infinity, // Set width to match screen width
+//     child: Center(
+//       child: CupertinoButton(
+//         onPressed: onPressed,
+//         child: Text(
+//           buttonText,
+//           style: TextStyle(
+//             color: CupertinoColors.label,
+//             //fontWeight: FontWeight.bold,
+//             fontSize: _defaultFontSize,
+//           ),
+//         ),
+//         padding: const EdgeInsets.all(16.0),
+//         borderRadius: BorderRadius.circular(16),
+//         color: groupedBackgroundColor,
+//       ),
+//     ),
+//   );
+// }
+
+
 }
