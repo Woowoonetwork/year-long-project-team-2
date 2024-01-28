@@ -3,22 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:feather_icons/feather_icons.dart';
 
-const double _iconSize = 22.0;
-const double _defaultPadding = 16.0;
-const double _defaultFontSize = 16.0;
-
 class DonorRatingPage extends StatefulWidget {
   @override
   _DonorRatingPageState createState() => _DonorRatingPageState();
 }
 
 class _DonorRatingPageState extends State<DonorRatingPage> {
+  int _rating = 0; // State variable to keep track of the rating
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: groupedBackgroundColor,
       child: CustomScrollView(
-        slivers: [
+        slivers: <Widget>[
           CupertinoSliverNavigationBar(
             largeTitle: Text('', style: TextStyle(letterSpacing: -1.34)),
             border: Border(bottom: BorderSide.none),
@@ -26,8 +24,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
             leading: GestureDetector(
               onTap: () => Navigator.of(context).pop(),
               child: Icon(FeatherIcons.chevronLeft,
-                  size: _iconSize,
-                  color: CupertinoColors.label.resolveFrom(context)),
+                  size: 22, color: CupertinoColors.label.resolveFrom(context)),
             ),
             trailing: GestureDetector(
               onTap: () {
@@ -40,22 +37,38 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
               ),
             ),
           ),
+          // ... [Your existing code for the navigation bar] ...
           SliverToBoxAdapter(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 100), // Adjust the height as needed
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: _defaultPadding),
+                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
                   child: Text(
                     "How was your experience with Harry?",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w600,
+                      color: CupertinoColors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(5, (index) {
+                    return IconButton(
+                      icon: Icon(
+                        _rating > index ? Icons.star : Icons.star_border,
+                        color: Colors.amber,
+                      ),
+                      iconSize: 40,
+                      onPressed: () {
+                        setState(() {
+                          _rating = index + 1;
+                        });
+                      },
+                    );
+                  }),
                 ),
               ],
             ),
