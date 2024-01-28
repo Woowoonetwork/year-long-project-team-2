@@ -19,14 +19,13 @@ class PostDetailView extends StatefulWidget {
 
 class _PostDetailViewState extends State<PostDetailView> {
   late PostDetailViewModel viewModel;
-  bool isLoading = true; // Added to track loading status
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     viewModel = PostDetailViewModel(widget.postId);
 
-    // Await the completion of fetchData
     viewModel.fetchData(widget.postId).then((_) {
       setState(() {
         isLoading = false;

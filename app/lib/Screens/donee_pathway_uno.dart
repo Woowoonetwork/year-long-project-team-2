@@ -1,31 +1,23 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class doneePath extends StatefulWidget {
+class DoneePath extends StatefulWidget {
   @override
-
-
-  _doneePath createState() => _doneePath{
-
-  }
+  _DoneePathState createState() => _DoneePathState();
 }
 
-class ReservationScreen extends StatelessWidget {
+class _DoneePathState extends State<DoneePath> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         leading: CupertinoNavigationBarBackButton(
-          onPressed: () {
-            // Handle back action
-          },
+          onPressed: () {},
         ),
         middle: Text('Reservation'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () {
-            // Handle message Harry action
-          },
+          onPressed: () {},
           child: Text('Message Harry'),
         ),
       ),
@@ -47,7 +39,7 @@ class ReservationScreen extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: Image.asset(
-                  'path/to/your/image.jpg', // Replace with your image asset or network image.
+                  'path/to/your/image.jpg',
                 ),
               ),
             ),
@@ -75,9 +67,7 @@ class ReservationScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 50.0),
                   child: CupertinoButton.filled(
                     child: Text('Cancel Reservation'),
-                    onPressed: () {
-                      // Handle cancel reservation action
-                    },
+                    onPressed: () {},
                   ),
                 ),
               ),
