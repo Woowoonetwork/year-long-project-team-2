@@ -4,6 +4,8 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:feather_icons/feather_icons.dart';
 
 const double _iconSize = 22.0;
+const double _defaultPadding = 16.0;
+const double _defaultFontSize = 16.0;
 
 class DonorRatingPage extends StatefulWidget {
   @override
@@ -18,8 +20,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
       child: CustomScrollView(
         slivers: [
           CupertinoSliverNavigationBar(
-            largeTitle:
-                Text('Donor Rating', style: TextStyle(letterSpacing: -1.34)),
+            largeTitle: Text('', style: TextStyle(letterSpacing: -1.34)),
             border: Border(bottom: BorderSide.none),
             backgroundColor: groupedBackgroundColor,
             leading: GestureDetector(
@@ -30,31 +31,33 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
             ),
             trailing: GestureDetector(
               onTap: () {
-                // Add your action for the message here
                 print("Message Harry Tapped");
               },
               child: Text(
                 'Message Harry',
-                style: TextStyle(
-                  color: CupertinoColors.activeBlue,
-                  fontSize: 17,
-                ),
+                style:
+                    TextStyle(color: CupertinoColors.activeBlue, fontSize: 17),
               ),
             ),
           ),
           SliverToBoxAdapter(
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: CupertinoButton(
-                  child: Text('Rate Donor'),
-                  color: accentColor,
-                  onPressed: () {
-                    // Add action for the button here
-                    print("Rate Donor button pressed");
-                  },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(height: 100), // Adjust the height as needed
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: _defaultPadding),
+                  child: Text(
+                    "How was your experience with Harry?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ],
