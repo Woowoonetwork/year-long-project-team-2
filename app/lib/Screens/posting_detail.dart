@@ -7,6 +7,8 @@ import 'package:FoodHood/ViewModels/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:FoodHood/Components/cupertinosnackbar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -20,10 +22,21 @@ class PostDetailView extends StatefulWidget {
 class _PostDetailViewState extends State<PostDetailView> {
   late PostDetailViewModel viewModel;
   bool isLoading = true; // Added to track loading status
+  late String userID;
+
+  // Method to initialize userID
+  void initializeUserId() {
+    final user = FirebaseAuth.instance.currentUser;
+    userID = user?.uid ?? 'default uid'; // Initialize userId here
+
+  }
 
   @override
   void initState() {
     super.initState();
+    
+    initializeUserId();
+
     viewModel = PostDetailViewModel(widget.postId);
 
     // Await the completion of fetchData
@@ -31,7 +44,7 @@ class _PostDetailViewState extends State<PostDetailView> {
       setState(() {
         isLoading = false;
       });
-    });
+    }); 
   }
 
 // Define your colors here
@@ -105,7 +118,7 @@ class _PostDetailViewState extends State<PostDetailView> {
               child: Row(
                 children: [
                   Expanded(
-                    child: ReserveButton(isReserved: false),
+                    child: ReserveButton(isReserved: false, postId: widget.postId, userId: userID,),
                   ),
                 ],
               ),
@@ -287,9 +300,9 @@ class _PostDetailViewState extends State<PostDetailView> {
     return AllergensSection(allergens: allergenList);
   }
 
-  Widget _buildReserveButton() {
-    return ReserveButton(isReserved: false); // Placeholder, update as needed
-  }
+  // Widget _buildReserveButton() {
+  //   return ReserveButton(isReserved: false); // Placeholder, update as needed
+  // }
 }
 
 // The remaining widget classes like `AvailabilityIndicator`, `InfoRow`, etc., would follow.
@@ -1004,19 +1017,108 @@ class AllergensSection extends StatelessWidget {
   }
 }
 
-class ReserveButton extends StatelessWidget {
-  final bool isReserved;
+// class ReserveButton extends StatelessWidget {
+//   final bool isReserved;
 
-  const ReserveButton({Key? key, required this.isReserved}) : super(key: key);
+//   const ReserveButton({Key? key, required this.isReserved}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 48, // Set the height of the button
+//       decoration: BoxDecoration(
+//         color: isReserved
+//             ? CupertinoColors.systemGrey
+//             : CupertinoDynamicColor.resolve(accentColor, context),
+//         borderRadius: BorderRadius.circular(100), // Rounded corners
+//         boxShadow: [
+//           BoxShadow(
+//             color: Color(0x19000000),
+//             blurRadius: 20,
+//             offset: Offset(0, 0),
+//           ),
+//         ],
+//       ),
+//       child: CupertinoButton(
+//         padding: EdgeInsets
+//             .zero, // Remove padding since we are using a Container for styling
+//         child: Text(
+//           isReserved
+//               ? 'Reserved'
+//               : 'Reserve', // Change button text based on state
+//           style: TextStyle(
+//             color: CupertinoColors.white, // Text color
+//             fontSize: 18, // Text size
+//             letterSpacing: -0.45, // Text spacing
+//             fontWeight: FontWeight.w600, // Text weight
+//           ),
+//         ),
+//         onPressed: isReserved
+//             ? null
+//             : () {
+//                 // TODO: Add reservation logic here
+//               },
+//       ),
+//     );
+//   }
+// }
+
+class ReserveButton extends StatefulWidget {
+  final bool isReserved;
+  final String postId;
+  final String userId;
+
+  const ReserveButton({
+    Key? key,
+    required this.isReserved,
+    required this.postId,
+    required this.userId,
+  }) : super(key: key);
+
+  @override
+  _ReserveButtonState createState() => _ReserveButtonState();
+}
+
+class _ReserveButtonState extends State<ReserveButton> {
+  bool _isReserved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isReserved = widget.isReserved;
+  }
+
+  void _handleReservation() async {
+    if (!_isReserved) {
+      // Update Firestore document
+      try {
+        await FirebaseFirestore.instance
+            .collection('post_details')
+            .doc(widget.postId)
+            .update({'reserved_by': widget.userId});
+        setState(() {
+          _isReserved = true;
+        });
+      } catch (error) {
+        print('Error reserving post: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to reserve post. Please try again.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 48, // Set the height of the button
       decoration: BoxDecoration(
-        color: isReserved
-            ? CupertinoColors.systemGrey
-            : CupertinoDynamicColor.resolve(accentColor, context),
+        color: _isReserved 
+              ? CupertinoColors.systemGrey 
+              : CupertinoDynamicColor.resolve(accentColor, context),
         borderRadius: BorderRadius.circular(100), // Rounded corners
         boxShadow: [
           BoxShadow(
@@ -1027,24 +1129,17 @@ class ReserveButton extends StatelessWidget {
         ],
       ),
       child: CupertinoButton(
-        padding: EdgeInsets
-            .zero, // Remove padding since we are using a Container for styling
+        padding: EdgeInsets.zero,
         child: Text(
-          isReserved
-              ? 'Reserved'
-              : 'Reserve', // Change button text based on state
+          _isReserved ? 'Reserved' : 'Reserve',
           style: TextStyle(
-            color: CupertinoColors.white, // Text color
-            fontSize: 18, // Text size
-            letterSpacing: -0.45, // Text spacing
-            fontWeight: FontWeight.w600, // Text weight
+            color: Colors.white,
+            fontSize: 18,
+            letterSpacing: -0.45,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        onPressed: isReserved
-            ? null
-            : () {
-                // TODO: Add reservation logic here
-              },
+        onPressed: _isReserved ? null : _handleReservation,
       ),
     );
   }
