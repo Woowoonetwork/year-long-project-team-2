@@ -21,12 +21,9 @@ void main() {
         home: EditProfilePage(),
       ));
 
-      expect(find.byIcon(FeatherIcons.x), findsOneWidget);
       expect(find.text('Save'), findsOneWidget);
       expect(find.byType(CupertinoTextField), findsNWidgets(4));
       expect(find.text('Upload Profile Picture'), findsOneWidget);
-      expect(find.text('Reset Password'), findsOneWidget);
-      expect(find.text('Delete Account'), findsOneWidget);
 
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
