@@ -27,43 +27,34 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
 
   Future<void> _storeCommentInDatabase() async {
     String comment = _commentController.text;
+    int starRating = _rating; // Number of stars clicked
 
-    // Reference to the post details document
     DocumentReference postDocRef = FirebaseFirestore.instance
         .collection('post_details')
         .doc(widget.postId);
 
     try {
-      // Fetch the post details document
       DocumentSnapshot postDoc = await postDocRef.get();
 
       if (postDoc.exists && postDoc.data() is Map<String, dynamic>) {
-        // Cast the data to Map<String, dynamic> to safely use the '[]' operator
         Map<String, dynamic> postData = postDoc.data() as Map<String, dynamic>;
-
-        // Extract the user_id from the post details
         String userId = postData['user_id'];
 
-        // Reference to the user document using the extracted user ID
         DocumentReference userDocRef =
             FirebaseFirestore.instance.collection('user').doc(userId);
 
-        // Fetch the user document
         DocumentSnapshot userDoc = await userDocRef.get();
 
         if (userDoc.exists && userDoc.data() is Map<String, dynamic>) {
-          // Cast the data to Map<String, dynamic>
           Map<String, dynamic> userData =
               userDoc.data() as Map<String, dynamic>;
-
-          // Check if the 'comments' field exists, if not, create an empty list
           List<dynamic> comments = List.from(userData['comments'] ?? []);
+          List<dynamic> ratings = List.from(userData['ratings'] ?? []);
 
-          // Add the new comment to the list
           comments.add(comment);
+          ratings.add(starRating);
 
-          // Update the 'comments' field in the user document
-          await userDocRef.update({'comments': comments});
+          await userDocRef.update({'comments': comments, 'ratings': ratings});
           print("Stored in database");
         } else {
           print("User document not found for ID: $userId");
