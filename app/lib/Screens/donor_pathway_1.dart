@@ -5,10 +5,14 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:FoodHood/Screens/accessibility_screen.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 34.0;
 const double _defaultFontSize = 16.0;
+
+// Define enum to represent different states
+enum OrderState { reserved, confirmed, delivering, readyToPickUp }
 
 class DonorScreen extends StatefulWidget {
   final String postId;
@@ -24,12 +28,13 @@ class _DonorScreenState extends State<DonorScreen> {
   String? reservedByName; // Variable to store the reserved by user name
   String? reservedByLastName;
   String pickupLocation = '';
+  bool isConfirmed = false;
+  OrderState orderState = OrderState.reserved;
 
   @override
   void initState() {
     super.initState();
     fetchReservedByName(); // Fetch reserved by user name when the widget initializes
-    //fetchPickupLocation();
   }
 
   Future<void> fetchReservedByName() async {
@@ -73,8 +78,6 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     // double screenWidth = MediaQuery.of(context).size.width;
@@ -107,11 +110,14 @@ class _DonorScreenState extends State<DonorScreen> {
       ),
       child: CustomScrollView(
         slivers: <Widget>[
-          // Your sliver widgets go here
-          __buildHeadingTextField(text: "Your order has been reserved by ${reservedByName ?? 'Unknown User'}"),
+          __buildHeadingTextField(
+            text: _buildHeadingText(),
+          ),
+          
           SliverToBoxAdapter(
             child: SizedBox(height: 16.0),
           ),
+          
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal:20.0),
@@ -124,8 +130,14 @@ class _DonorScreenState extends State<DonorScreen> {
               )
             )        
           ),
+          
           __buildTextField(text: "Pickup at $pickupLocation"),
-          __buildButton(text: "Confirm"),
+          //__buildButton(text: "Confirm"),
+
+          // __buildButton(
+          //   text: isConfirmed ? "Delivering" : "Confirm",
+          // ),
+          __buildButton(),
         ],
       ),
     );
@@ -148,6 +160,20 @@ class _DonorScreenState extends State<DonorScreen> {
         ),
       ),
     );
+  }
+
+  // Method to build heading text based on order state
+  String _buildHeadingText() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return "Your order has been reserved by ${reservedByName ?? 'Unknown User'}";
+      case OrderState.confirmed:
+        return "Your order has been confirmed for ${reservedByName ?? 'Unknown User'}";
+      case OrderState.delivering:
+        return "Your order is out for delivery for ${reservedByName ?? 'Unknown User'}";
+      case OrderState.readyToPickUp:
+        return "Your order for ${reservedByName ?? 'Unknown User'} is ready to pick up";
+    }
   }
 
   Widget __buildTextField({
@@ -178,47 +204,125 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  Widget __buildButton({
-  required String text,
-}) {
-  return SliverToBoxAdapter(
-    child: Padding(
-      padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: CupertinoColors.quaternarySystemFill.resolveFrom(context), 
-            width: 2.0, 
-          ),
-          borderRadius: BorderRadius.circular(16.0),
-          boxShadow: [
-            BoxShadow(
-              color: CupertinoColors.black.withOpacity(0.1), // Shadow color and opacity
-              spreadRadius: 1, // Spread radius
-              blurRadius: 2, // Blur radius
-              offset: Offset(0, 2), // Shadow offset
+Widget __buildButton() {
+  if (orderState == OrderState.readyToPickUp) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color:
+                  CupertinoColors.quaternarySystemFill.resolveFrom(context),
+              width: 2.0,
             ),
-          ],
-        ),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: _defaultFontSize,
-              color: CupertinoColors.label, 
-            ),
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: [
+              BoxShadow(
+                color: CupertinoColors.black.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
-          color: CupertinoColors.tertiarySystemBackground,
-          borderRadius: BorderRadius.circular(16.0),
-          onPressed: () {
-            // Do something
-          },
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            child: Text(
+              "Leave a Review",
+              style: TextStyle(
+                fontSize: _defaultFontSize,
+                color: CupertinoColors.label,
+              ),
+            ),
+            color: CupertinoColors.tertiarySystemBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            onPressed: () {
+              // setState(() {
+              //   orderState = _getNextOrderState();
+              // });
+              Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (context) => AccessibilityScreen(),
+                ),
+              );
+            },
+          ),
         ),
       ),
-    ),
-  );
+    );
+  } 
+  else {
+    String buttonText = _buildButtonText();
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color:
+                  CupertinoColors.quaternarySystemFill.resolveFrom(context),
+              width: 2.0,
+            ),
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: [
+              BoxShadow(
+                color: CupertinoColors.black.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            child: Text(
+              buttonText,
+              style: TextStyle(
+                fontSize: _defaultFontSize,
+                color: CupertinoColors.label,
+              ),
+            ),
+            color: CupertinoColors.tertiarySystemBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            onPressed: () {
+              setState(() {
+                orderState = _getNextOrderState();
+              });
+            },
+          ),
+        ),
+      ),
+    );
+  }
 }
+
+
+  String _buildButtonText() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return "Confirm";
+      case OrderState.confirmed:
+        return "Delivering";
+      case OrderState.delivering:
+        return "Ready to Pick Up";
+      case OrderState.readyToPickUp:
+        return "Confirm";
+    }
+  }
+
+  OrderState _getNextOrderState() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return OrderState.confirmed;
+      case OrderState.confirmed:
+        return OrderState.delivering;
+      case OrderState.delivering:
+        return OrderState.readyToPickUp;
+      case OrderState.readyToPickUp:
+        return OrderState.reserved;
+    }
+  }
 
 }
 
