@@ -20,7 +20,7 @@ class _DoneePathState extends State<DoneePath> {
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () {},
-          child: Text('Message'),
+          child: Text('Message first name of donor'),
         ),
       ),
       child: SafeArea(
@@ -29,7 +29,7 @@ class _DoneePathState extends State<DoneePath> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'You have reserved the from ',
+                'You have reserved the from first name of donor',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
@@ -51,7 +51,7 @@ class _DoneePathState extends State<DoneePath> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Posted by Harry Styles 2 mins ago',
+                    'Posted by  2 mins ago',
                     style: TextStyle(color: Colors.grey),
                   ),
                   Icon(
