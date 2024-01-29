@@ -54,7 +54,19 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
           comments.add(comment);
           ratings.add(starRating);
 
-          await userDocRef.update({'comments': comments, 'ratings': ratings});
+          // Calculate the average rating
+          double avgRating = 0;
+          if (ratings.isNotEmpty) {
+            avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
+            // Format the average to two decimal places
+            avgRating = double.parse(avgRating.toStringAsFixed(2));
+          }
+
+          await userDocRef.update({
+            'comments': comments,
+            'ratings': ratings,
+            'avgRating': avgRating
+          });
           print("Stored in database");
         } else {
           print("User document not found for ID: $userId");
