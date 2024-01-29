@@ -269,3 +269,33 @@ N/A.
 ### Additional Information
 
 N/A.
+
+-------------------
+
+## Term 2 Week 3
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w3manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- modified code in edit_profile page, android manifest, pubspec among other files
+- created storage system on firebase
+- Defined rules for storage
+- modified rules for authentication and datastorage
+- debugging code
+- Helped others with back end structure and organization
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- Completed image handling and uploading to storage (on android)
+-rewrote rules for storage, authentication and database on firebase
+-made alterations to previous code in several files
+- Completed Week 15 individual log.
+
+### Tasks in progress (from Project Board)
+
+N/A, all is complete
+
+### Additional Information
+
+N/A.

@@ -398,3 +398,48 @@ N/A.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Term 2 Week 3: Monday 22nd Jan 2024 - Sunday 28th Jan 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W3.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Updated the order card with a new status button for donors only.
+- Added a new and updated reserve button class in posting_details.dart to save the donee id.
+- Added the front-end of the first donor status screen.
+- Implemented functionality to update the state of the donor screen everytime there is an update on the order.
+- Ensured dark mode readability.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Update the order card with the new status button for donors + backend
+    - Ensured that the status button on the order card is for donors only.
+    - Added a new and updated reserve button class in posting_details.dart to save the donee id.
+    - Fixed many bugs related to the reserve button working as intended from the donor's point of view.
+- Complete all the screens/updates of the donor pathway
+    - Added the front-end of the first donor status screen.
+    - Implemented functionality to update the state of the donor screen everytime there is an update on the order.
+    - Developed a widget test for the donor state screen.
+- Complete the T2 W3 team log.
+- Complete the T2 W3 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.

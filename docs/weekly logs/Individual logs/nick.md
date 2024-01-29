@@ -361,3 +361,44 @@ N/A.
 ### Additional Information
 
 N/A.
+
+
+## Term 2 Week 3: Monday 22th Jan 2023 - Sunday 28th Dec 2023
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/nickT2W3.png)
+
+### Recap of personal goals
+
+- Continued to work on the browse screen and other performace improvements.
+- Added backend logic when posting a new post and display the pickup location correctly on the map.
+- Worked on fixing overflow issues that appeared on the detail screen.
+- Troubleshot and fixed the issue with the map not displaying when launching the app on an android device.
+- Fixed the bug related to gesture controls where one map cannot pan when embedded in a scrolled view.
+- Added many dark mode support throughout the app.
+- updated widgets tests for both new post and browse screens.
+
+### Tasks completed (from Project Board)
+
+- updated new post screen with a location picker allowing user to select the pick up location
+- updated Google Maps version and Podfiles, the map should works fluidly with the latest version of iOS
+- introduced limits on map, the user can only zoom with a predefined range
+- fixed permission & blanked screen on Android
+- revamped several ui components on the new post screen
+- pickers in the new post screen should now appears in a modal sheet, eliminating the overflow errors
+- maps should now defaults to current location
+- cards in the browse screen are now compact sized
+- fixed the gesture controls where one map cannot pan when embedded in a scrolled view
+- new post screen should now adapts to dark mode
+- updated marker styles
+- several ui hotfixes and added overflow control on the card views
+- updated widgets tests for both new post and browse screens
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.

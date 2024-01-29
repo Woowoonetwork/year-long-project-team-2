@@ -7,6 +7,8 @@ import 'package:FoodHood/ViewModels/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:FoodHood/Components/cupertinosnackbar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 
 class PostDetailView extends StatefulWidget {
@@ -19,11 +21,12 @@ class PostDetailView extends StatefulWidget {
 
 class _PostDetailViewState extends State<PostDetailView> {
   late PostDetailViewModel viewModel;
-  bool isLoading = true;
+  bool isLoading = true; // Added to track loading status
 
   @override
   void initState() {
     super.initState();
+
     viewModel = PostDetailViewModel(widget.postId);
 
     viewModel.fetchData(widget.postId).then((_) {
@@ -286,9 +289,9 @@ class _PostDetailViewState extends State<PostDetailView> {
     return AllergensSection(allergens: allergenList);
   }
 
-  Widget _buildReserveButton() {
-    return ReserveButton(isReserved: false); // Placeholder, update as needed
-  }
+  // Widget _buildReserveButton() {
+  //   return ReserveButton(isReserved: false); // Placeholder, update as needed
+  // }
 }
 
 // The remaining widget classes like `AvailabilityIndicator`, `InfoRow`, etc., would follow.
@@ -1003,7 +1006,53 @@ class AllergensSection extends StatelessWidget {
   }
 }
 
-class ReserveButton extends StatelessWidget {
+// class ReserveButton extends StatelessWidget {
+//   final bool isReserved;
+
+//   const ReserveButton({Key? key, required this.isReserved}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 48, // Set the height of the button
+//       decoration: BoxDecoration(
+//         color: isReserved
+//             ? CupertinoColors.systemGrey
+//             : CupertinoDynamicColor.resolve(accentColor, context),
+//         borderRadius: BorderRadius.circular(100), // Rounded corners
+//         boxShadow: [
+//           BoxShadow(
+//             color: Color(0x19000000),
+//             blurRadius: 20,
+//             offset: Offset(0, 0),
+//           ),
+//         ],
+//       ),
+//       child: CupertinoButton(
+//         padding: EdgeInsets
+//             .zero, // Remove padding since we are using a Container for styling
+//         child: Text(
+//           isReserved
+//               ? 'Reserved'
+//               : 'Reserve', // Change button text based on state
+//           style: TextStyle(
+//             color: CupertinoColors.white, // Text color
+//             fontSize: 18, // Text size
+//             letterSpacing: -0.45, // Text spacing
+//             fontWeight: FontWeight.w600, // Text weight
+//           ),
+//         ),
+//         onPressed: isReserved
+//             ? null
+//             : () {
+//                 // TODO: Add reservation logic here
+//               },
+//       ),
+//     );
+//   }
+// }
+
+class ReserveButton extends StatefulWidget {
   final bool isReserved;
   final VoidCallback? onPressed;
 
@@ -1031,17 +1080,14 @@ class ReserveButton extends StatelessWidget {
         ],
       ),
       child: CupertinoButton(
-        padding: EdgeInsets
-            .zero, // Remove padding since we are using a Container for styling
+        padding: EdgeInsets.zero,
         child: Text(
-          isReserved
-              ? 'Reserved'
-              : 'Reserve', // Change button text based on state
+          isReserved ? 'Reserved' : 'Reserve',
           style: TextStyle(
-            color: CupertinoColors.white, // Text color
-            fontSize: 18, // Text size
-            letterSpacing: -0.45, // Text spacing
-            fontWeight: FontWeight.w600, // Text weight
+            color: Colors.white,
+            fontSize: 18,
+            letterSpacing: -0.45,
+            fontWeight: FontWeight.w600,
           ),
         ),
         onPressed: isReserved
@@ -1054,5 +1100,11 @@ class ReserveButton extends StatelessWidget {
               },
       ),
     );
+  }
+
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    throw UnimplementedError();
   }
 }

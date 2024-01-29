@@ -271,3 +271,39 @@ N/A.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Term 2 Week 3: Monday 22nd Jan 2024 - Sunday 28th jan 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week3.png)
+### Recap of personal goals
+- Met with the team to discuss the goals of this week 
+- Made the task priority list 
+- Create the front end for donor rating page
+- Created the front end for donee rating page
+- Created the back end for donor rating page
+- Created back end for donee rating page
+- Storing the comments , rating and average rating into the firebase from both the donor and donee pages 
+- Created front end and back end tests for both donor and donee rating pages
+- Completed logs for this week 
+
+### Tasks completed (from Project Board)
+- Complete the donor rating system (front-end + back-end)
+- Complete the donee rating system (front-end + back-end)
+- Complete test for donor and donee rating system
+- Complete Term 2 Week 3 Team Log
+- Complete Term 2 Week 3 Individual logs
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
