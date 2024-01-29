@@ -152,7 +152,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               .pop('updated'); // Pop with a result if needed
 
           // Call _updateUserProfile and pass onComplete
-          _updateUserProfile(null, onComplete);
+          _updateUserProfile(profileImagePath, onComplete);
         },
       ),
       backgroundColor: groupedBackgroundColor,
@@ -161,6 +161,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _updateUserProfile([String? imageUrl, VoidCallback? onComplete]) async {
+print("dadada $imageUrl");
     try {
       // Get the current user's ID
       String userId = FirebaseAuth.instance.currentUser!.uid;
@@ -175,8 +176,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'city': selectedCity,
       };
 
+String stringImageUrl = imageUrl ?? '';
+print("babababa $stringImageUrl");
+
       // Only update the profile image if a new image was selected
-      if (imageUrl != null) {
+      if (stringImageUrl != '') {
+        imageUrl = await _uploadImageToFirebase(File(stringImageUrl));
         updateData['profileImagePath'] = imageUrl;
       }
 
@@ -209,6 +214,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       UploadTask uploadTask = storageRef.putFile(imageFile);
       await uploadTask.whenComplete(() => null);
       String downloadUrl = await storageRef.getDownloadURL();
+      print(downloadUrl);
       return downloadUrl;
     } catch (e) {
       print("Error uploading image: $e");
@@ -325,16 +331,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
                 onPressed: () async {
                   // Use ImagePicker to let the user select an image
-                  final ImagePicker _picker = ImagePicker();
-                  final XFile? image =
-                      await _picker.pickImage(source: ImageSource.gallery);
-
-                  if (image != null) {
-                    // Update the UI or do something with the selected image
-                    setState(() {
-                     
-                    });
-                  }
+                      await _uploadImage();
                 },
               ),
             ),
@@ -575,14 +572,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  void _uploadImage() async {
+  Future <void> _uploadImage() async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
       setState(() {
         profileImagePath = image.path;
+print("cacacaca $profileImagePath");
       });
     }
+else{print("image selection canceled");}
   }
 }
