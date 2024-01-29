@@ -7,9 +7,9 @@ import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:FoodHood/Components/cupertinosnackbar.dart';
+import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -23,10 +23,19 @@ class _PostDetailViewState extends State<PostDetailView> {
   late PostDetailViewModel viewModel;
   AnimationController? _animationController;
   bool isLoading = true; // Added to track loading status
+  late String userID;
+
+  // Method to initialize userID
+  void initializeUserId() {
+    final user = FirebaseAuth.instance.currentUser;
+    userID = user?.uid ?? 'default uid'; // Initialize userId here
+  }
 
   @override
   void initState() {
     super.initState();
+
+    initializeUserId();
 
     viewModel = PostDetailViewModel(widget.postId);
 
@@ -108,7 +117,11 @@ class _PostDetailViewState extends State<PostDetailView> {
               child: Row(
                 children: [
                   Expanded(
-                    child: ReserveButton(isReserved: false),
+                    child: ReserveButton(
+                      isReserved: false,
+                      postId: widget.postId,
+                      userId: userID,
+                    ),
                   ),
                 ],
               ),
@@ -165,7 +178,7 @@ class _PostDetailViewState extends State<PostDetailView> {
       ),
     );
 
-    Overlay.of(context)?.insert(overlayEntry);
+    Overlay.of(context).insert(overlayEntry);
 
     // Use Future.delayed to wait for the duration of the snackbar display
     Future.delayed(Duration(seconds: 2), () {
@@ -421,7 +434,7 @@ class CombinedTexts extends StatelessWidget {
     required this.firstName,
     required this.lastName,
     required this.postTimestamp,
-    required this.viewModel, // Include viewModel in the constructor
+    required this.viewModel,
   }) : super(key: key);
 
   @override
@@ -438,7 +451,7 @@ class CombinedTexts extends StatelessWidget {
           ),
         ),
         Text("  "),
-        RatingText(), // Placeholder widget for rating, update as needed
+        RatingText(),
       ],
     );
   }
@@ -448,14 +461,14 @@ class InfoText extends StatelessWidget {
   final String firstName;
   final String lastName;
   final DateTime postTimestamp;
-  final PostDetailViewModel viewModel; // Add viewModel here
+  final PostDetailViewModel viewModel;
 
   const InfoText({
     Key? key,
     required this.firstName,
     required this.lastName,
     required this.postTimestamp,
-    required this.viewModel, // Include viewModel in the constructor
+    required this.viewModel,
   }) : super(key: key);
 
   @override
@@ -473,8 +486,7 @@ class InfoText extends StatelessWidget {
           TextSpan(text: 'Prepared by $firstName $lastName'),
           TextSpan(text: '   '),
           TextSpan(
-            text:
-                'Posted ${viewModel.timeAgoSinceDate(postTimestamp)}', // Use viewModel here
+            text: 'Posted ${viewModel.timeAgoSinceDate(postTimestamp)}',
             style: TextStyle(letterSpacing: -0.48),
           ),
         ],
@@ -484,7 +496,6 @@ class InfoText extends StatelessWidget {
 }
 
 class RatingText extends StatelessWidget {
-  // Placeholder widget for rating, update as needed
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -497,7 +508,7 @@ class RatingText extends StatelessWidget {
         ),
         const SizedBox(width: 3),
         Text(
-          '5.0 Rating', // Placeholder rating
+          '5.0 Rating',
           style: TextStyle(
             overflow: TextOverflow.fade,
             color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
@@ -547,7 +558,7 @@ class InfoCardsRow extends StatelessWidget {
             title: 'Pickup Time',
             subtitle: formattedPick,
             context: context,
-            color: blue, // Placeholder color, update as needed
+            color: blue,
           ),
           const SizedBox(width: 16),
           buildInfoCard(
@@ -555,7 +566,7 @@ class InfoCardsRow extends StatelessWidget {
             title: 'Allergens',
             subtitle: allergens.isEmpty ? 'None' : allergens,
             context: context,
-            color: yellow, // Placeholder color, update as needed
+            color: yellow,
           ),
         ],
       ),
@@ -617,13 +628,12 @@ class InfoCardsRow extends StatelessWidget {
   }
 }
 
-// Continue with the remaining widget classes like PickupInformation, CustomInfoTile, etc.
 class PickupInformation extends StatelessWidget {
   final String pickupTime;
   final String pickupLocation;
   final String meetingPoint;
   final String additionalInfo;
-  final LatLng? locationCoordinates; // Make nullable
+  final LatLng? locationCoordinates;
   final PostDetailViewModel viewModel;
 
   const PickupInformation({
@@ -632,7 +642,7 @@ class PickupInformation extends StatelessWidget {
     required this.pickupLocation,
     required this.meetingPoint,
     required this.additionalInfo,
-    this.locationCoordinates, // Nullable
+    this.locationCoordinates,
     required this.viewModel,
   }) : super(key: key);
 
@@ -700,16 +710,14 @@ class PickupInformation extends StatelessWidget {
   }
 
   Widget _buildMap(BuildContext context) {
-    // Check if locationCoordinates are available from the viewModel
     final LatLng? locationCoordinates = viewModel.pickupLatLng;
 
-    // If coordinates are available, display GoogleMap
     if (locationCoordinates != null) {
       return ClipRRect(
         borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
         child: SizedBox(
           width: double.infinity,
-          height: 188.0, // Assign a finite height to the map container
+          height: 188.0,
           child: GoogleMap(
             initialCameraPosition: CameraPosition(
               target: locationCoordinates,
@@ -741,7 +749,7 @@ class PickupInformation extends StatelessWidget {
           color: CupertinoColors.systemGrey4,
         ),
         alignment: Alignment.center,
-        child: Text('Map Placeholder'), // Placeholder text
+        child: Text('Map Placeholder'),
       );
     }
   }
@@ -752,9 +760,7 @@ class PickupInformation extends StatelessWidget {
       children: [
         CustomInfoTile(title: 'Pickup Time', subtitle: pickupTime),
         CustomInfoTile(
-            title: 'Pickup Location',
-            subtitle: viewModel
-                .pickupLocation), // Use viewModel for dynamic meeting point
+            title: 'Pickup Location', subtitle: viewModel.pickupLocation),
         const SizedBox(height: 12),
         _buildAdditionalInfo(context),
         const SizedBox(height: 12),
@@ -766,12 +772,11 @@ class PickupInformation extends StatelessWidget {
   Widget _buildAdditionalInfo(BuildContext context) {
     return Row(
       children: [
-        // Leading Circular Cropped Image
         Padding(
-          padding: EdgeInsets.only(right: 8.0), // Adjust spacing as needed
+          padding: EdgeInsets.only(right: 8.0),
           child: Container(
-            width: 30.0, // Image diameter
-            height: 30.0, // Image diameter
+            width: 30.0,
+            height: 30.0,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               image: DecorationImage(
@@ -800,19 +805,15 @@ class PickupInformation extends StatelessWidget {
             text: 'Ask for more info',
             icon: FeatherIcons.messageCircle,
             iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {
-              // Implement action for "Ask for more info"
-            },
+            onPressed: () {},
           ),
-          SizedBox(width: 10), // Spacing between buttons
+          SizedBox(width: 10),
           InfoButton(
             context: context,
             text: 'Navigate to this Place',
             icon: FeatherIcons.arrowUpRight,
             iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {
-              // Implement action for "Navigate to this Place"
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -866,7 +867,6 @@ class CustomInfoTile extends StatelessWidget {
   }
 }
 
-// Continue with MessageBox, InfoButton, AllergensSection, and other widget classes.
 class MessageBox extends StatelessWidget {
   final BuildContext context;
   final String text;
@@ -884,7 +884,7 @@ class MessageBox extends StatelessWidget {
       ),
       child: Text(
         text,
-        textAlign: TextAlign.start, // Align text to the leading edge
+        textAlign: TextAlign.start,
         overflow: TextOverflow.ellipsis,
         maxLines: 2,
         style: TextStyle(
@@ -902,7 +902,7 @@ class InfoButton extends StatelessWidget {
   final BuildContext context;
   final String text;
   final IconData icon;
-  final Color iconColor; // New color parameter for the icon
+  final Color iconColor;
   final VoidCallback onPressed;
 
   const InfoButton({
@@ -910,7 +910,7 @@ class InfoButton extends StatelessWidget {
     required this.context,
     required this.text,
     required this.icon,
-    required this.iconColor, // Include icon color in the constructor
+    required this.iconColor,
     required this.onPressed,
   }) : super(key: key);
 
@@ -924,8 +924,8 @@ class InfoButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: iconColor), // Use the iconColor here
-          SizedBox(width: 8), // Space between icon and text
+          Icon(icon, size: 16, color: iconColor),
+          SizedBox(width: 8),
           Text(
             text,
             textAlign: TextAlign.center,
@@ -1021,68 +1021,60 @@ class AllergensSection extends StatelessWidget {
   }
 }
 
-// class ReserveButton extends StatelessWidget {
-//   final bool isReserved;
-
-//   const ReserveButton({Key? key, required this.isReserved}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: 48, // Set the height of the button
-//       decoration: BoxDecoration(
-//         color: isReserved
-//             ? CupertinoColors.systemGrey
-//             : CupertinoDynamicColor.resolve(accentColor, context),
-//         borderRadius: BorderRadius.circular(100), // Rounded corners
-//         boxShadow: [
-//           BoxShadow(
-//             color: Color(0x19000000),
-//             blurRadius: 20,
-//             offset: Offset(0, 0),
-//           ),
-//         ],
-//       ),
-//       child: CupertinoButton(
-//         padding: EdgeInsets
-//             .zero, // Remove padding since we are using a Container for styling
-//         child: Text(
-//           isReserved
-//               ? 'Reserved'
-//               : 'Reserve', // Change button text based on state
-//           style: TextStyle(
-//             color: CupertinoColors.white, // Text color
-//             fontSize: 18, // Text size
-//             letterSpacing: -0.45, // Text spacing
-//             fontWeight: FontWeight.w600, // Text weight
-//           ),
-//         ),
-//         onPressed: isReserved
-//             ? null
-//             : () {
-//                 // TODO: Add reservation logic here
-//               },
-//       ),
-//     );
-//   }
-// }
-
 class ReserveButton extends StatefulWidget {
   final bool isReserved;
-  final VoidCallback? onPressed;
+  final String postId;
+  final String userId;
 
   const ReserveButton({
     Key? key,
     required this.isReserved,
-    this.onPressed,
+    required this.postId,
+    required this.userId,
   }) : super(key: key);
+
+  @override
+  _ReserveButtonState createState() => _ReserveButtonState();
+}
+
+class _ReserveButtonState extends State<ReserveButton> {
+  bool _isReserved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isReserved = widget.isReserved;
+  }
+
+  void _handleReservation() async {
+    if (!_isReserved) {
+      // Update Firestore document
+      try {
+        await FirebaseFirestore.instance
+            .collection('post_details')
+            .doc(widget.postId)
+            .update({'reserved_by': widget.userId});
+        setState(() {
+          _isReserved = true;
+        });
+      } catch (error) {
+        print('Error reserving post: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to reserve post. Please try again.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 48, // Set the height of the button
       decoration: BoxDecoration(
-        color: isReserved
+        color: _isReserved
             ? CupertinoColors.systemGrey
             : CupertinoDynamicColor.resolve(accentColor, context),
         borderRadius: BorderRadius.circular(100), // Rounded corners
@@ -1097,7 +1089,7 @@ class ReserveButton extends StatefulWidget {
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         child: Text(
-          isReserved ? 'Reserved' : 'Reserve',
+          _isReserved ? 'Reserved' : 'Reserve',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -1105,7 +1097,7 @@ class ReserveButton extends StatefulWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        onPressed: isReserved
+        onPressed: _isReserved
             ? null
             : () {
                 Navigator.push(
@@ -1115,11 +1107,5 @@ class ReserveButton extends StatefulWidget {
               },
       ),
     );
-  }
-
-  @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    throw UnimplementedError();
   }
 }
