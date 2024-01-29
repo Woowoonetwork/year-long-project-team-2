@@ -25,6 +25,57 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
     // Fetch reserved by user name when the widget initializes
   }
 
+  Future<void> _storeCommentInDatabase() async {
+    String comment = _commentController.text;
+
+    // Reference to the post details document
+    DocumentReference postDocRef = FirebaseFirestore.instance
+        .collection('post_details')
+        .doc(widget.postId);
+
+    try {
+      // Fetch the post details document
+      DocumentSnapshot postDoc = await postDocRef.get();
+
+      if (postDoc.exists && postDoc.data() is Map<String, dynamic>) {
+        // Cast the data to Map<String, dynamic> to safely use the '[]' operator
+        Map<String, dynamic> postData = postDoc.data() as Map<String, dynamic>;
+
+        // Extract the user_id from the post details
+        String userId = postData['user_id'];
+
+        // Reference to the user document using the extracted user ID
+        DocumentReference userDocRef =
+            FirebaseFirestore.instance.collection('user').doc(userId);
+
+        // Fetch the user document
+        DocumentSnapshot userDoc = await userDocRef.get();
+
+        if (userDoc.exists && userDoc.data() is Map<String, dynamic>) {
+          // Cast the data to Map<String, dynamic>
+          Map<String, dynamic> userData =
+              userDoc.data() as Map<String, dynamic>;
+
+          // Check if the 'comments' field exists, if not, create an empty list
+          List<dynamic> comments = List.from(userData['comments'] ?? []);
+
+          // Add the new comment to the list
+          comments.add(comment);
+
+          // Update the 'comments' field in the user document
+          await userDocRef.update({'comments': comments});
+          print("Stored in database");
+        } else {
+          print("User document not found for ID: $userId");
+        }
+      } else {
+        print("Post details document not found for ID: ${widget.postId}");
+      }
+    } catch (e) {
+      print("Error updating document: $e");
+    }
+  }
+
   Future<void> fetchCreatedByName() async {
     final CollectionReference postDetailsCollection =
         FirebaseFirestore.instance.collection('post_details');
@@ -177,9 +228,8 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
 
                 CupertinoButton(
                   onPressed: _isPublishButtonEnabled
-                      ? () {
-                          // Add your action for the publish button here
-                          print("Publish button pressed");
+                      ? () async {
+                          await _storeCommentInDatabase();
                         }
                       : null,
                   color: _isPublishButtonEnabled
