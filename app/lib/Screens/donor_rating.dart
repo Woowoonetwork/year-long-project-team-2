@@ -177,20 +177,12 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                     ),
                   ),
                 ),
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: CupertinoColors.systemGrey4,
-                    border:
-                        Border.all(color: CupertinoColors.systemGrey, width: 2),
-                  ),
-                  child: Icon(
-                    Icons.photo_camera,
-                    size: 40,
-                    color: CupertinoColors.systemGrey,
-                  ),
+                CircleAvatar(
+                  backgroundImage: AssetImage(
+                      'assets/images/sampleProfile.png'), // Replace with your image asset or network image
+                  radius: 40, // Adjust the radius as needed
+                  backgroundColor: CupertinoColors.systemGrey4,
+                  // If you want to add a border
                 ),
                 SizedBox(height: 20),
                 Row(
