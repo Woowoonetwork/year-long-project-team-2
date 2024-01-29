@@ -39,7 +39,7 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
 
       if (postDoc.exists && postDoc.data() is Map<String, dynamic>) {
         Map<String, dynamic> postData = postDoc.data() as Map<String, dynamic>;
-        String userId = postData['user_id'];
+        String userId = postData['reserved_by'];
 
         DocumentReference userDocRef =
             FirebaseFirestore.instance.collection('user').doc(userId);
@@ -177,20 +177,12 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                     ),
                   ),
                 ),
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: CupertinoColors.systemGrey4,
-                    border:
-                        Border.all(color: CupertinoColors.systemGrey, width: 2),
-                  ),
-                  child: Icon(
-                    Icons.photo_camera,
-                    size: 40,
-                    color: CupertinoColors.systemGrey,
-                  ),
+                CircleAvatar(
+                  backgroundImage: AssetImage(
+                      'assets/images/sampleProfile.png'), // Replace with your image asset or network image
+                  radius: 40, // Adjust the radius as needed
+                  backgroundColor: CupertinoColors.systemGrey4,
+                  // If you want to add a border
                 ),
                 SizedBox(height: 20),
                 Row(
