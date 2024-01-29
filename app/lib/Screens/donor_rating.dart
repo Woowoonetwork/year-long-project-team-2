@@ -2,18 +2,70 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:feather_icons/feather_icons.dart';
+import 'package:FoodHood/firestore_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DonorRatingPage extends StatefulWidget {
+  final String postId;
+  const DonorRatingPage({Key? key, required this.postId}) : super(key: key);
   @override
   _DonorRatingPageState createState() => _DonorRatingPageState();
 }
 
 class _DonorRatingPageState extends State<DonorRatingPage> {
+  String? CreatedByName;
   int _rating = 0; // State variable to keep track of the rating
   TextEditingController _commentController =
       TextEditingController(); // Initialize the text controller
 
   @override
+  void initState() {
+    super.initState();
+    fetchCreatedByName();
+    // Fetch reserved by user name when the widget initializes
+  }
+
+  Future<void> fetchCreatedByName() async {
+    final CollectionReference postDetailsCollection =
+        FirebaseFirestore.instance.collection('post_details');
+
+    // Retrieve the reserved_by user ID from your current data
+    final String postId = widget.postId;
+    try {
+      // Fetch the post details document
+      final DocumentSnapshot postSnapshot =
+          await postDetailsCollection.doc(postId).get();
+
+      if (postSnapshot.exists) {
+        // Extract the reserved_by user ID from the post details
+        final String CreatedByUserId = postSnapshot['user_id'];
+
+        // Fetch the user document using reserved_by user ID
+        final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(CreatedByUserId)
+            .get();
+
+        if (userSnapshot.exists) {
+          // Extract the user name from the user document
+          final userName = userSnapshot[
+              'firstName']; // Assuming 'name' is the field storing the user's name
+          setState(() {
+            CreatedByName =
+                userName; // Update the reserved by user name in the UI
+          });
+        } else {
+          print(
+              'User document does not exist for reserved by user ID: $CreatedByUserId');
+        }
+      } else {
+        print('Post details document does not exist for ID: $postId');
+      }
+    } catch (error) {
+      print('Error fetching reserved by user name: $error');
+    }
+  }
+
   void dispose() {
     _commentController
         .dispose(); // Dispose the controller when the widget is disposed
@@ -44,7 +96,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                 print("Message Harry Tapped");
               },
               child: Text(
-                'Message Harry',
+                'Message ${CreatedByName ?? 'Unknown User'}',
                 style:
                     TextStyle(color: CupertinoColors.activeBlue, fontSize: 17),
               ),
@@ -57,7 +109,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 30, horizontal: 16),
                   child: Text(
-                    "How was your experience with Harry?",
+                    "How was your experience with ${CreatedByName ?? 'Unknown User'}?",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: CupertinoColors.black,
