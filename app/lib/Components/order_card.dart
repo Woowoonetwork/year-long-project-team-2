@@ -81,7 +81,7 @@ class OrderCard extends StatelessWidget {
                   // Check if onStatusPressed callback is provided and call it
                   onStatusPressed?.call();
                   // Navigate to the donor screen
-                  Navigator.push(context, CupertinoPageRoute(builder: (context) => DonorScreen()));
+                  Navigator.push(context, CupertinoPageRoute(builder: (context) => DonorScreen(postId: postId,)));
                 }),
               ],
             ),
