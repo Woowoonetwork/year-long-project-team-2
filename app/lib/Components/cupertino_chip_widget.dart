@@ -1,5 +1,6 @@
 // This file creates a custom cupertino chip widget
 
+import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
 
 class CupertinoChipWidget extends StatelessWidget {
@@ -15,19 +16,22 @@ class CupertinoChipWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.0),
+      margin: EdgeInsets.only(left: 4.0),
       decoration: BoxDecoration(
-        color: Color.fromRGBO(51, 117, 134, 0.8),
-        borderRadius: BorderRadius.circular(20.0),
+        color: accentColor,
+        borderRadius: BorderRadius.circular(100.0),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
             child: Text(
               label,
-              style: TextStyle(color: CupertinoColors.white),
+              style: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                color: CupertinoColors.white),
             ),
           ),
           
@@ -36,7 +40,7 @@ class CupertinoChipWidget extends StatelessWidget {
             GestureDetector(
               onTap: onDeleted,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.only(right: 8.0),
                 child: Icon(
                   CupertinoIcons.clear_circled_solid,
                   size: 20.0,

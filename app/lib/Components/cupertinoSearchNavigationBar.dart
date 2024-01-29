@@ -10,6 +10,7 @@ class CupertinoSearchNavigationBar extends StatefulWidget {
   final TextEditingController textController;
   final Function(String) onSearchTextChanged;
   final Widget Function() buildFilterButton;
+  final VoidCallback onSearchBarTapped;
 
   const CupertinoSearchNavigationBar({
     Key? key,
@@ -18,6 +19,7 @@ class CupertinoSearchNavigationBar extends StatefulWidget {
     required this.textController,
     required this.onSearchTextChanged,
     required this.buildFilterButton,
+    required this.onSearchBarTapped,
   }) : super(key: key);
 
   @override
@@ -34,7 +36,14 @@ class _CupertinoSearchNavigationBarState
   void initState() {
     super.initState();
     _focusNode = FocusNode();
+    _focusNode.addListener(_onSearchBarFocusChange);
     widget.textController.addListener(_updateCancelButtonVisibility);
+  }
+
+  void _onSearchBarFocusChange() {
+    if (_focusNode.hasFocus) {
+      widget.onSearchBarTapped();
+    }
   }
 
   void _updateCancelButtonVisibility() {
@@ -48,6 +57,7 @@ class _CupertinoSearchNavigationBarState
 
   @override
   void dispose() {
+    _focusNode.removeListener(_onSearchBarFocusChange);
     _focusNode.dispose();
     widget.textController.removeListener(_updateCancelButtonVisibility);
     super.dispose();
@@ -167,7 +177,7 @@ class _CupertinoSearchNavigationBarState
         child: Text(
           'Cancel',
           style: TextStyle(
-            color: CupertinoColors.activeBlue.resolveFrom(context),
+            color: CupertinoColors.label.resolveFrom(context),
             fontSize: 18,
             fontWeight: FontWeight.w500,
           ),

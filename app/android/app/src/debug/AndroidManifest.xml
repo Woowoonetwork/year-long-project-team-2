@@ -4,10 +4,10 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Always include this permission -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- Include only if your app benefits from precise location access. -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
+    <meta-data android:name="com.google.android.geo.API_KEY"
+    android:value="AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A"/>
+    
 </manifest>

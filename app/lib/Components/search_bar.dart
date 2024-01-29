@@ -5,11 +5,9 @@ class SearchBar extends StatefulWidget {
   final List<String> itemList;
   final Function(List<String>) onItemsSelected;
 
-  const SearchBar({
-    required this.itemList, 
-    required this.onItemsSelected,
-    Key? key
-    }) : super(key: key);
+  const SearchBar(
+      {required this.itemList, required this.onItemsSelected, Key? key})
+      : super(key: key);
 
   @override
   createState() => _SearchBarState();
@@ -50,7 +48,8 @@ class _SearchBarState extends State<SearchBar> {
     setState(() {
       selectedItems.add(item);
       filteredList = [];
-      widget.onItemsSelected(selectedItems); // Callback to notify parent about selected items
+      widget.onItemsSelected(
+          selectedItems); // Callback to notify parent about selected items
     });
   }
 
@@ -65,7 +64,7 @@ class _SearchBarState extends State<SearchBar> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 17.0, top: 10.0, right: 17.0, bottom: 10.0),
+          padding: EdgeInsets.only(left: 17.0, top: 10.0, right: 17.0),
           child: CupertinoSearchTextField(
             onChanged: (value) {
               filterList(value);
@@ -74,35 +73,57 @@ class _SearchBarState extends State<SearchBar> {
               // Handle submission if needed
             },
             placeholder: 'Search',
-            backgroundColor: CupertinoColors.secondarySystemGroupedBackground,
+            backgroundColor: CupertinoColors.tertiarySystemBackground,
             focusNode: searchFocusNode,
           ),
         ),
-        
-        // Conditionally show the list based on search bar interaction
         if (isSearchBarClicked && filteredList.isNotEmpty)
-          Column(
-            children: filteredList.map((item) {
-              return GestureDetector(
-                onTap: () => _onItemClicked(item),
-                child: CupertinoListTile(
-                  title: Text(item),
-                  // Add more customization as needed
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 17.0, vertical: 10.0),
+            decoration: BoxDecoration(
+              color:
+                  CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+              borderRadius: BorderRadius.circular(10.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x19000000),
+                  blurRadius: 20,
+                  offset: Offset(0, 0),
                 ),
-              );
-            }).toList(),
+              ],
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: filteredList.map((item) {
+                  return GestureDetector(
+                    onTap: () => _onItemClicked(item),
+                    child: CupertinoListTile(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
+                      title: Text(
+                        item,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
-
-        // Horizontal list of selected items
         if (selectedItems.isNotEmpty)
           Container(
-            height: 50.0, // Adjust the height as needed
+            margin: EdgeInsets.only(top: 10.0),
+            height: 34.0, // Adjust the height as needed
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: selectedItems.length,
               itemBuilder: (context, index) {
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                return Container(
+                  margin: EdgeInsets.only(
+                      left: index == 0 ? 17 : 4), // Conditional left margin
                   child: CupertinoChipWidget(
                     label: selectedItems[index],
                     onDeleted: () {
@@ -116,6 +137,7 @@ class _SearchBarState extends State<SearchBar> {
               },
             ),
           ),
+        SizedBox(height: 4.0)
       ],
     );
   }
