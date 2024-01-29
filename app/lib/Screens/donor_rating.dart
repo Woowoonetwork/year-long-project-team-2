@@ -1,3 +1,4 @@
+import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -68,6 +69,10 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
             'avgRating': avgRating
           });
           print("Stored in database");
+          Navigator.of(context).pushAndRemoveUntil(
+            CupertinoPageRoute(builder: (context) => HomeScreen()),
+            (Route<dynamic> route) => false,
+          );
         } else {
           print("User document not found for ID: $userId");
         }
