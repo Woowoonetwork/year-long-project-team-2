@@ -88,7 +88,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
     final CollectionReference postDetailsCollection =
         FirebaseFirestore.instance.collection('post_details');
 
-    // Retrieve the reserved_by user ID from your current data
+    // Retrieve the created_by user ID from your current data
     final String postId = widget.postId;
     try {
       // Fetch the post details document
@@ -96,10 +96,10 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
           await postDetailsCollection.doc(postId).get();
 
       if (postSnapshot.exists) {
-        // Extract the reserved_by user ID from the post details
+        // Extract the created_by user ID from the post details
         final String CreatedByUserId = postSnapshot['user_id'];
 
-        // Fetch the user document using reserved_by user ID
+        // Fetch the user document using user_id user ID
         final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
             .collection('user')
             .doc(CreatedByUserId)
@@ -107,11 +107,9 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
 
         if (userSnapshot.exists) {
           // Extract the user name from the user document
-          final userName = userSnapshot[
-              'firstName']; // Assuming 'name' is the field storing the user's name
+          final userName = userSnapshot['firstName'];
           setState(() {
-            CreatedByName =
-                userName; // Update the reserved by user name in the UI
+            CreatedByName = userName;
           });
         } else {
           print(
@@ -161,7 +159,6 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
               ),
             ),
           ),
-          // ... [Your existing code for the navigation bar] ...
           SliverToBoxAdapter(
             child: Column(
               children: [
@@ -178,11 +175,10 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                   ),
                 ),
                 CircleAvatar(
-                  backgroundImage: AssetImage(
-                      'assets/images/sampleProfile.png'), // Replace with your image asset or network image
-                  radius: 40, // Adjust the radius as needed
+                  backgroundImage:
+                      AssetImage('assets/images/sampleProfile.png'),
+                  radius: 40,
                   backgroundColor: CupertinoColors.systemGrey4,
-                  // If you want to add a border
                 ),
                 SizedBox(height: 20),
                 Row(
@@ -225,7 +221,6 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                   ),
                 ),
                 SizedBox(height: 40),
-
                 CupertinoButton(
                   onPressed: _isPublishButtonEnabled
                       ? () async {
@@ -245,7 +240,6 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                   ),
                 ),
                 SizedBox(height: 20),
-                // ... [Any other widgets] ...
               ],
             ),
           ),

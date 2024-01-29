@@ -107,8 +107,7 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
 
         if (userSnapshot.exists) {
           // Extract the user name from the user document
-          final userName = userSnapshot[
-              'firstName']; // Assuming 'name' is the field storing the user's name
+          final userName = userSnapshot['firstName'];
           setState(() {
             reservedByName =
                 userName; // Update the reserved by user name in the UI
@@ -161,7 +160,6 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
               ),
             ),
           ),
-          // ... [Your existing code for the navigation bar] ...
           SliverToBoxAdapter(
             child: Column(
               children: [
@@ -178,11 +176,10 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                   ),
                 ),
                 CircleAvatar(
-                  backgroundImage: AssetImage(
-                      'assets/images/sampleProfile.png'), // Replace with your image asset or network image
-                  radius: 40, // Adjust the radius as needed
+                  backgroundImage:
+                      AssetImage('assets/images/sampleProfile.png'),
+                  radius: 40,
                   backgroundColor: CupertinoColors.systemGrey4,
-                  // If you want to add a border
                 ),
                 SizedBox(height: 20),
                 Row(
@@ -225,7 +222,6 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                   ),
                 ),
                 SizedBox(height: 40),
-
                 CupertinoButton(
                   onPressed: _isPublishButtonEnabled
                       ? () async {
@@ -245,7 +241,6 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                   ),
                 ),
                 SizedBox(height: 20),
-                // ... [Any other widgets] ...
               ],
             ),
           ),
