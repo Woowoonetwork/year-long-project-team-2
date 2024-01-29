@@ -21,7 +21,7 @@ class PostDetailViewModel extends ChangeNotifier {
   late LatLng pickupLatLng;
   late List<String> tags;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  bool isFavorite = false; // Add isFavorite property
+  bool isFavorite = false;
 
   PostDetailViewModel(String postId) {
     _initializeFields();
@@ -53,9 +53,8 @@ class PostDetailViewModel extends ChangeNotifier {
       if (documentSnapshot.exists) {
         var documentData = documentSnapshot.data() as Map<String, dynamic>;
         _updatePostDetails(documentData);
-        await _fetchAndUpdateUserDetails(
-            documentData['user_id']); // Fetch user details
-        await checkIfFavorite(postId); // Check if the post is a favorite
+        await _fetchAndUpdateUserDetails(documentData['user_id']);
+        await checkIfFavorite(postId);
       } else {
         print('Document with postId $postId does not exist.');
       }

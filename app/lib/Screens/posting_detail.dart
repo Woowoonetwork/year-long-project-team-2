@@ -153,13 +153,12 @@ class _PostDetailViewState extends State<PostDetailView> {
         'Removed "${viewModel.title}" from the list',
         yellow,
         Icon(FeatherIcons.x, color: Colors.white),
-        _reverseAnimation, // Pass _reverseAnimation as the callback
+        _reverseAnimation,
       );
     }
   }
 
   void _reverseAnimation() {
-    // Reverse your animation here
     _animationController?.reverse();
   }
 
@@ -180,10 +179,9 @@ class _PostDetailViewState extends State<PostDetailView> {
 
     Overlay.of(context).insert(overlayEntry);
 
-    // Use Future.delayed to wait for the duration of the snackbar display
     Future.delayed(Duration(seconds: 2), () {
       overlayEntry.remove();
-      onSnackbarClosed(); // Call the provided callback function
+      onSnackbarClosed();
     });
   }
 
@@ -284,15 +282,14 @@ class _PostDetailViewState extends State<PostDetailView> {
 
   Widget _buildInfoCards() {
     return InfoCardsRow(
-      expirationDate: viewModel.expirationDate, // Updated to use viewModel
-      pickupTime: viewModel.pickupTime, // Updated to use viewModel
-      allergens: viewModel.allergens, // Updated to use viewModel
+      expirationDate: viewModel.expirationDate,
+      pickupTime: viewModel.pickupTime,
+      allergens: viewModel.allergens,
     );
   }
 
   Widget _buildPickupInformation() {
-    LatLng? pickupCoordinates =
-        viewModel.pickupLatLng; // Updated to use viewModel
+    LatLng? pickupCoordinates = viewModel.pickupLatLng;
     return PickupInformation(
       pickupTime:
           DateFormat('EEE, MMM d, ' 'h:mm a').format(viewModel.pickupTime),
@@ -300,13 +297,12 @@ class _PostDetailViewState extends State<PostDetailView> {
       meetingPoint: '330, 1130 Trello Way\nKelowna, BC\nV1V 5E0',
       additionalInfo: 'Please reach out for any additional details!',
       locationCoordinates: pickupCoordinates,
-      viewModel: viewModel, // Pass viewModel here
+      viewModel: viewModel,
     );
   }
 
   Widget _buildAllergensSection() {
-    List<String> allergenList =
-        viewModel.allergens.split(', '); // Updated to use viewModel
+    List<String> allergenList = viewModel.allergens.split(', ');
     return AllergensSection(allergens: allergenList);
   }
 
