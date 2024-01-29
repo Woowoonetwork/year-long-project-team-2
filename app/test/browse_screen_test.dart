@@ -1,12 +1,29 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:FoodHood/Screens/browse_screen.dart'; // Update the import path as necessary
+import 'package:firebase_core/firebase_core.dart';
+import 'mock.dart';
+
 
 void main() {
+
+  setUpAll(() async {
+
+    // Ensure the test environment is set up correctly  
+    TestWidgetsFlutterBinding.ensureInitialized();
+
+    // Mock Firebase Analytics
+    setupFirebaseAnalyticsMocks(); 
+
+    // Initialize Firebase only if it hasn't been initialized yet
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp();
+    }
+  });
   group('BrowseScreen Tests', () {
     testWidgets('BrowseScreen should display a search bar',
         (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: BrowseScreen()));
+      await tester.pumpWidget(CupertinoApp(home: BrowseScreen()));
       expect(true, isTrue);
     });
 

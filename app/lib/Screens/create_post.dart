@@ -157,7 +157,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
         body: CustomScrollView(
           slivers: <Widget>[
             buildTextField('Title'),
-            buildTextInputField(titleController, '', EdgeInsets.all(10.0)),
+            buildTextInputField(titleController, '', EdgeInsets.all(14.0)),
             buildTextField('Description'),
             buildTextInputField(descController, '',
                 EdgeInsets.symmetric(vertical: 40.0, horizontal: 10.0)),
@@ -312,7 +312,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
   SliverToBoxAdapter buildExpireDateSection() {
     return SliverToBoxAdapter(
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 18.0, vertical: 16.0),
+        padding: EdgeInsets.only(left: 17.0, right: 17.0, top: 16.0, bottom: 5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -533,7 +533,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
   SliverToBoxAdapter buildMapSection() {
     return SliverToBoxAdapter(
       child: Container(
-        height: 200.0, // Adjust the height as needed
+        height: 250.0, // Adjust the height as needed
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.0), // Set corner radius
           boxShadow: [
@@ -616,7 +616,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     LatLng myLocation = LatLng(position.latitude, position.longitude);
-    mapController?.animateCamera(CameraUpdate.newLatLngZoom(myLocation, 12));
+    mapController?.animateCamera(CameraUpdate.newLatLngZoom(myLocation, 14));
     setState(() {
       selectedLocation = myLocation;
     });
