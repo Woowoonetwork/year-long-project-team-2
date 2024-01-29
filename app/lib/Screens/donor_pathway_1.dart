@@ -5,7 +5,7 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:FoodHood/Screens/accessibility_screen.dart';
+import 'package:FoodHood/Screens/donee_rating.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 34.0;
@@ -17,7 +17,6 @@ enum OrderState { reserved, confirmed, delivering, readyToPickUp }
 class DonorScreen extends StatefulWidget {
   final String postId;
   const DonorScreen({Key? key, required this.postId}) : super(key: key);
-  //const DonorScreen({Key? key}) : super(key: key);
 
   @override
   _DonorScreenState createState() => _DonorScreenState();
@@ -132,11 +131,7 @@ class _DonorScreenState extends State<DonorScreen> {
           ),
           
           __buildTextField(text: "Pickup at $pickupLocation"),
-          //__buildButton(text: "Confirm"),
 
-          // __buildButton(
-          //   text: isConfirmed ? "Delivering" : "Confirm",
-          // ),
           __buildButton(),
         ],
       ),
@@ -243,7 +238,7 @@ Widget __buildButton() {
               // });
               Navigator.of(context).push(
                 CupertinoPageRoute(
-                  builder: (context) => AccessibilityScreen(),
+                  builder: (context) => DoneeRatingPage(postId: widget.postId,),
                 ),
               );
             },
@@ -351,7 +346,7 @@ class OrderInfoSection extends StatelessWidget {
           CircleAvatar(
             backgroundImage:
                 AssetImage(effectiveAvatarUrl), // Load the image from assets
-            radius: 9, // Optional: Adjust the radius to fit your design
+            radius: 9, 
           ),
           SizedBox(width: 8),
           Text(
