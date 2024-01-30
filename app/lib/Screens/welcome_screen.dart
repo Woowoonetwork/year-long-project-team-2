@@ -24,7 +24,7 @@ class WelcomeScreen extends StatelessWidget {
   // welcome screen image
   Widget _buildImageSection() {
     return AspectRatio(
-      aspectRatio: 430 / 359,
+      aspectRatio: 6 / 5,
       child: Image.asset(
         "assets/images/smilelyface.png",
         fit: BoxFit.cover,
