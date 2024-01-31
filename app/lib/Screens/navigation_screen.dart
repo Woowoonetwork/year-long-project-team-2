@@ -38,7 +38,7 @@ class NavigationScreen extends StatelessWidget {
           ),
           
           BottomNavigationBarItem(
-            icon: Icon(FeatherIcons.archive),
+            icon: Icon(FeatherIcons.bookmark),
           ),
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.user),

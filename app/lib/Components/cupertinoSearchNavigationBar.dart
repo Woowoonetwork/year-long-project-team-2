@@ -76,7 +76,7 @@ class _CupertinoSearchNavigationBarState
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.all(16).copyWith(top: 48),
+              padding: const EdgeInsets.all(16).copyWith(top: 44),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -94,18 +94,32 @@ class _CupertinoSearchNavigationBarState
 
   Widget _buildTitle(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
             widget.title,
             style: TextStyle(
-              fontSize: 34,
+              fontSize: 36,
               letterSpacing: -1.3,
               fontWeight: FontWeight.bold,
               color: CupertinoColors.label.resolveFrom(context),
               overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            // Implement your action for "I'm Feeling Lucky"
+          },
+          child: Text(
+            "Feeling Lucky?",
+            style: TextStyle(
+              color: accentColor,
+              fontWeight: FontWeight.w500,
+              letterSpacing: -0.8,
+              fontSize: 16,
             ),
           ),
         ),

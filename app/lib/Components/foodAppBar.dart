@@ -156,11 +156,11 @@ class _FoodAppBarState extends State<FoodAppBar> {
         onPress: widget.onFavoritePressed,
         child: Icon(
           widget.isFavorite
-              ? Icons.favorite
-              : Icons.favorite_border, // Use widget.isFavorite
+              ? Icons.bookmark
+              : Icons.bookmark_add_outlined, // Use widget.isFavorite
           size: 18,
           color: widget.isFavorite
-              ? CupertinoColors.systemRed
+              ? CupertinoColors.systemOrange
               : CupertinoColors.label.resolveFrom(context),
         ),
       ),

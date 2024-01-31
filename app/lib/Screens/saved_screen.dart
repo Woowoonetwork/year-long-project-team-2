@@ -88,7 +88,7 @@ class _SavedScreenState extends State<SavedScreen> {
   CupertinoSliverNavigationBar _buildNavigationBar() {
     return CupertinoSliverNavigationBar(
       backgroundColor: groupedBackgroundColor,
-      largeTitle: Text('Saved'),
+      largeTitle: Text('Bookmarks'),
       border: Border(bottom: BorderSide.none),
       stretch: true,
     );
@@ -171,12 +171,12 @@ class _SavedScreenState extends State<SavedScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(FeatherIcons.inbox,
+            Icon(FeatherIcons.bookmark,
                 size: 80,
                 color: CupertinoColors.secondaryLabel.resolveFrom(context)),
             SizedBox(height: 20),
             Text(
-              'No Saved Posts',
+              'No Bookmarks',
               style: TextStyle(
                   fontSize: 24,
                   letterSpacing: -0.6,
@@ -185,8 +185,8 @@ class _SavedScreenState extends State<SavedScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              'Posts you save will appear here.',
-              style: TextStyle(fontSize: 16, color: CupertinoColors.secondaryLabel),
+              'Save your favorite posts to view them here',
+              style: TextStyle(fontSize: 16, color: CupertinoColors.secondaryLabel.resolveFrom(context)),
               textAlign: TextAlign.center,
             ),
           ],

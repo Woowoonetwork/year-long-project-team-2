@@ -249,14 +249,19 @@ class _AccountScreenState extends State<AccountScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Icon(
-                FeatherIcons.box,
+                FeatherIcons.shoppingBag,
                 size: 40,
                 color: CupertinoColors.systemGrey,
               ),
               SizedBox(height: 20),
               Text(
                 'No orders available',
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.6,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
                 textAlign: TextAlign.center,
               ),
             ],

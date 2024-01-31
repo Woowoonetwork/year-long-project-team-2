@@ -383,7 +383,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
-        height: 250,
+        height: 320,
         color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
         child: Column(
           children: [

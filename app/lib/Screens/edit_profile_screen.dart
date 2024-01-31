@@ -537,7 +537,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
-        height: 250,
+        height: 320,
         color: CupertinoDynamicColor.resolve(
             CupertinoColors.tertiarySystemBackground, context),
         child: Column(
