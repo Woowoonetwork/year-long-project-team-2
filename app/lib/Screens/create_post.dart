@@ -493,14 +493,14 @@ void showPostSavedConfirmation(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return CupertinoAlertDialog(
-        title: Text('Post Saved'),
-        content: Text('Your post has been saved successfully.'),
+        title: Text('Post Published'),
+        content: Text('Your post has been published successfully.'),
         actions: <Widget>[
           CupertinoDialogAction(
             onPressed: () {
               Navigator.pop(context); // Close the dialog
             },
-            child: Text('OK'),
+            child: Text('Hooraay!'),
           ),
         ],
       );
