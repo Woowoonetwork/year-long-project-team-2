@@ -32,7 +32,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     _fetchUserDetails();
-    _fetchProvincesAndCities();
   }
 
   void _fetchProvincesAndCities() async {
@@ -56,8 +55,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
           setState(() {
             _provinces = fetchedCities.keys.toList();
             _cities = fetchedCities;
-            _selectedProvince = _provinces.first;
-            _selectedCity = _cities[_selectedProvince]?.first ?? '';
+            // Set the selected province and city firebase record,
+            // if none, set to the first available options
+            _selectedProvince = _selectedProvince.isNotEmpty
+                ? _selectedProvince
+                : _provinces.first;
+            _selectedCity = _selectedCity.isNotEmpty
+                ? _selectedCity
+                : _cities[_selectedProvince]!.first;
           });
         }
       }
@@ -67,8 +72,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _fetchUserDetails() async {
-    setState(() => _isLoading = true);
-
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
@@ -77,26 +80,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
             .doc(user.uid)
             .get();
 
-        if (userDoc.exists) {
+        if (userDoc.exists && mounted) {
+          // Check mounted before calling setState
           Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
 
-          _firstNameController.text = data['firstName'] ?? '';
-          _lastNameController.text = data['lastName'] ?? '';
-          _aboutMeController.text = data['aboutMe'] ?? '';
-          _emailController.text = user.email ?? data['email'] ?? '';
-
           setState(() {
+            _firstNameController.text = data['firstName'] ?? '';
+            _lastNameController.text = data['lastName'] ?? '';
+            _aboutMeController.text = data['aboutMe'] ?? '';
+            _emailController.text = user.email ?? data['email'] ?? '';
             _selectedProvince = data['province'] ?? _selectedProvince;
             _selectedCity = data['city'] ?? _selectedCity;
             _profileImagePath = data['profileImagePath'] ?? _profileImagePath;
+            _isLoading = false;
+            _fetchProvincesAndCities();
           });
         }
       } catch (e) {
         print("Error fetching user details: $e");
       }
     }
-
-    setState(() => _isLoading = false);
   }
 
   @override
@@ -166,12 +169,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'lastName': _lastNameController.text,
         'aboutMe': _aboutMeController.text,
         'email': _emailController.text,
-        'province': selectedProvince,
-        'city': selectedCity,
+        'province': _selectedProvince,
+        'city': _selectedCity,
       };
 
-String stringImageUrl = imageUrl ?? '';
-print("babababa $stringImageUrl");
+      String stringImageUrl = imageUrl ?? '';
+      print("babababa $stringImageUrl");
 
       // Only update the profile image if a new image was selected
       if (stringImageUrl != '') {
@@ -266,7 +269,7 @@ print("babababa $stringImageUrl");
 
   Widget _buildProfileImageUploader(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -275,11 +278,21 @@ print("babababa $stringImageUrl");
               width: 85,
               height: 85,
               decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: _getProfileImage(),
-                  fit: BoxFit.cover,
-                ),
+                color: CupertinoColors
+                    .tertiarySystemFill, // Background color for loading state
+                image: _isLoading
+                    ? null
+                    : DecorationImage(
+                        // Conditional image loading
+                        image: _getProfileImage(),
+                        fit: BoxFit.cover,
+                      ),
               ),
+              child: _isLoading
+                  ? Center(
+                      child:
+                          CupertinoActivityIndicator()) // Show loading indicator if loading
+                  : null, // No additional content if not loading
             ),
           ),
           SizedBox(width: 16),
@@ -311,8 +324,7 @@ print("babababa $stringImageUrl");
                   ),
                 ),
                 onPressed: () async {
-                  // Use ImagePicker to let the user select an image
-                      await _uploadImage();
+                  await _uploadImage();
                 },
               ),
             ),
@@ -324,10 +336,16 @@ print("babababa $stringImageUrl");
 
   ImageProvider _getProfileImage() {
     if (_profileImagePath.isNotEmpty) {
-      // Assuming _profileImagePath is a URL to a network image
-      return NetworkImage(_profileImagePath);
+      // Check if the path is a local file path
+      if (Uri.parse(_profileImagePath).scheme == 'file') {
+        // Use FileImage for local file paths
+        return FileImage(File(_profileImagePath));
+      } else {
+        // Assuming _profileImagePath is a URL to a network image
+        return NetworkImage(_profileImagePath);
+      }
     }
-    // Fallback to a local asset image if the network image URL is empty
+    // Fallback to a local asset image if the network image URL or local file path is empty
     return AssetImage("assets/images/sampleProfile.png");
   }
 
@@ -496,9 +514,7 @@ print("babababa $stringImageUrl");
                             CupertinoColors.label, context),
                       )),
                   onPressed: () {
-                    if (onSelectedItemChanged != null) {
-                      onSelectedItemChanged(options[initialItem]);
-                    }
+                    onSelectedItemChanged(options[initialItem]);
                     Navigator.of(context).pop();
                   },
                 ),
@@ -524,56 +540,26 @@ print("babababa $stringImageUrl");
     );
   }
 
-  void _showActionSheet(BuildContext context, String action) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text(
-          '$action',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: CupertinoColors.secondaryLabel,
-            fontSize: 16,
-            letterSpacing: -0.80,
-          ),
-        ),
-        message: Text('Are you sure you want to $action?'),
-        actions: <Widget>[
-          CupertinoActionSheetAction(
-            child: Text(
-              'Confirm',
-              style: TextStyle(
-                color: CupertinoColors.destructiveRed,
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.80,
-              ),
-            ),
-            onPressed: () {
-              // Handle the action
-              Navigator.pop(context);
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text('Cancel'),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-    );
-  }
-
-  Future <void> _uploadImage() async {
+  Future<void> _uploadImage() async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
+      if (!mounted) return; // Add this check before calling setState
       setState(() {
-        profileImagePath = image.path;
-print("cacacaca $profileImagePath");
+        _isLoading = true; // Show loading indicator while uploading
       });
+
+      // Call _uploadImageToFirebase and pass the selected image file
+      String? imageUrl = await _uploadImageToFirebase(File(image.path));
+
+      if (!mounted) return; // Add this check again before calling setState
+      setState(() {
+        _profileImagePath = imageUrl ?? _profileImagePath;
+        _isLoading = false; // Hide loading indicator after uploading
+      });
+    } else {
+      print("Image selection canceled");
     }
-else{print("image selection canceled");}
   }
 }

@@ -119,9 +119,7 @@ class _AccountScreenState extends State<AccountScreen> {
         slivers: <Widget>[
           _buildNavigationBar(context),
           SliverToBoxAdapter(child: ProfileCard()), // Display the profile card
-
           _buildEditProfileButton(), // New method to create the Edit Profile button
-
           _buildOrdersSectionTitle(),
           _buildSegmentControl(myTabs),
           SliverPadding(

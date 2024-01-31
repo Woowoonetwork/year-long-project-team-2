@@ -60,7 +60,7 @@ class _ProfileCardState extends State<ProfileCard> {
         city = documentData['city'];
         province = documentData['province'];
         email = documentData['email'];
-        photo = documentData['photo'] ?? 'assets/images/sampleProfile.png';
+        photo = documentData['profileImagePath'];
         rating = documentData['rating']?.toDouble();
         reviews = List<String>.from(documentData['reviews'] ?? []);
         isLoading = false;
@@ -87,7 +87,7 @@ class _ProfileCardState extends State<ProfileCard> {
           boxShadow: [
             BoxShadow(
               color: Color(0x19000000),
-              blurRadius: 10,
+              blurRadius: 20,
               offset: Offset(0, 0),
             ),
           ],
@@ -116,9 +116,18 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   Widget profileImage() {
-    return photo.startsWith('http')
-        ? Image.network(photo, width: 70, height: 70, fit: BoxFit.cover)
-        : Image.asset(photo, width: 70, height: 70, fit: BoxFit.cover);
+    if (photo.isNotEmpty) {
+      // Check if the photo string is a URL (starts with 'http' or 'https')
+      if (Uri.parse(photo).isAbsolute) {
+        return Image.network(photo, width: 70, height: 70, fit: BoxFit.cover);
+      } else {
+        // Assuming the photo is a local asset if not a URL
+        return Image.asset(photo, width: 70, height: 70, fit: BoxFit.cover);
+      }
+    }
+    // Fallback to a default asset image if the photo string is empty
+    return Image.asset('assets/images/sampleProfile.png',
+        width: 70, height: 70, fit: BoxFit.cover);
   }
 
   List<Widget> profileDetails(BuildContext context) {
@@ -163,11 +172,13 @@ class _ProfileCardState extends State<ProfileCard> {
     );
   }
 
-  Widget buildDescriptiveText(String text, double fontSize, FontWeight fontWeight) {
+  Widget buildDescriptiveText(
+      String text, double fontSize, FontWeight fontWeight) {
     return Text(
       text,
       style: TextStyle(
-        color: CupertinoDynamicColor.resolve(CupertinoColors.secondaryLabel, context),
+        color: CupertinoDynamicColor.resolve(
+            CupertinoColors.secondaryLabel, context),
         fontSize: fontSize,
         fontWeight: fontWeight,
       ),
