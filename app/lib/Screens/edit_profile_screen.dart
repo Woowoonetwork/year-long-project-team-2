@@ -123,7 +123,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   children: [
                   CupertinoActivityIndicator(),
                   SizedBox(height: 8),
-                  Text('Updating profile ...',
+                  Text('Uploading Profile Image...',
                       style: TextStyle(color: CupertinoColors.label)),
                 ]))
           : SafeArea(
@@ -147,7 +147,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             style: TextStyle(color: accentColor, fontWeight: FontWeight.w500)),
         onPressed: () async {
           VoidCallback onComplete = () => Navigator.of(context).pop('updated');
-          await _updateUserProfile(null, onComplete);
+          await _updateUserProfile(onComplete);
         },
       ),
       backgroundColor: groupedBackgroundColor,
@@ -156,8 +156,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Future<void> _updateUserProfile(
-      [String? imageUrl, VoidCallback? onComplete]) async {
+  Future<void> _updateUserProfile([VoidCallback? onComplete]) async {
     // Validation for required fields
     if (_firstNameController.text.isEmpty ||
         _lastNameController.text.isEmpty ||
@@ -182,13 +181,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'email': _emailController.text,
         'province': _selectedProvince,
         'city': _selectedCity,
+        'profileImagePath': _profileImagePath,
       };
-
-      if (imageUrl != null && imageUrl.isNotEmpty) {
-        // Only update the profile image if a new image was selected
-        imageUrl = await _uploadImageToFirebase(File(imageUrl));
-        updateData['profileImagePath'] = imageUrl;
-      }
 
       // Update the user's profile in Firestore
       await FirebaseFirestore.instance
