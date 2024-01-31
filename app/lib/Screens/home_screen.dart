@@ -236,30 +236,36 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   CupertinoSearchTextField _buildSearchTextField(BuildContext context) {
-    return CupertinoSearchTextField(
-      prefixIcon: Container(
-        margin: EdgeInsets.only(left: 6.0, top: 2.0),
-        child: Icon(
-          FeatherIcons.search,
-          size: 18.0,
-        ),
+  return CupertinoSearchTextField(
+    prefixIcon: Container(
+      margin: EdgeInsets.only(left: 6.0, top: 2.0),
+      child: Icon(
+        FeatherIcons.search,
+        size: 18.0,
       ),
-      placeholderStyle: TextStyle(
-        fontSize: 16.0,
-        fontWeight: FontWeight.w400,
-        color: CupertinoColors.secondaryLabel.resolveFrom(context),
-      ),
-      suffixIcon: Icon(FeatherIcons.x,
-          color: CupertinoColors.secondaryLabel.resolveFrom(context), size: 20),
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      style: TextStyle(
-          fontSize: 18, color: CupertinoColors.label.resolveFrom(context)),
-      backgroundColor: CupertinoColors.tertiarySystemBackground,
-      controller: textController,
-      placeholder: 'Search',
-      onChanged: (value) => _onSearchTextChanged(),
-    );
-  }
+    ),
+    placeholderStyle: TextStyle(
+      fontSize: 16.0,
+      fontWeight: FontWeight.w400,
+      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+    ),
+    suffixIcon: Icon(
+      FeatherIcons.x,
+      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+      size: 20,
+    ),
+    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+    style: TextStyle(
+      fontSize: 18,
+      color: CupertinoColors.label.resolveFrom(context),
+    ),
+    backgroundColor: CupertinoColors.tertiarySystemBackground,
+    controller: textController,
+    placeholder: 'Search',
+    onChanged: (value) => _onSearchTextChanged(),
+  );
+}
+
 
   Widget _buildFilterButton() {
     return Container(

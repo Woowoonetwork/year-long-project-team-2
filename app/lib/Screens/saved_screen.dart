@@ -172,23 +172,20 @@ class _SavedScreenState extends State<SavedScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Icon(FeatherIcons.bookmark,
-                size: 80,
+                size: 42,
                 color: CupertinoColors.secondaryLabel.resolveFrom(context)),
-            SizedBox(height: 20),
-            Text(
-              'No Bookmarks',
-              style: TextStyle(
-                  fontSize: 24,
-                  letterSpacing: -0.6,
-                  fontWeight: FontWeight.w600),
-              textAlign: TextAlign.center,
-            ),
             SizedBox(height: 10),
             Text(
-              'Save your favorite posts to view them here',
-              style: TextStyle(fontSize: 16, color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+              'No Bookmarks found',
+              style: TextStyle(
+                  fontSize: 16,
+                  letterSpacing: -0.6,
+                  fontWeight: FontWeight.w500,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
               textAlign: TextAlign.center,
             ),
+            
           ],
         ),
       ),
