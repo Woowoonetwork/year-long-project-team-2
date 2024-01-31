@@ -91,12 +91,12 @@ class _AccountScreenState extends State<AccountScreen> {
     DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
 
     return OrderCard(
-      imageLocation: 'assets/images/sampleFoodPic.png',
       title: title,
       tags: tags,
       orderInfo: 'Ordered on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
       postId: postId,
       onTap: _onOrderCardTap,
+      imageLocation: documentData['image_url'] ?? '',
     );
   }
 
@@ -119,9 +119,7 @@ class _AccountScreenState extends State<AccountScreen> {
         slivers: <Widget>[
           _buildNavigationBar(context),
           SliverToBoxAdapter(child: ProfileCard()), // Display the profile card
-
           _buildEditProfileButton(), // New method to create the Edit Profile button
-
           _buildOrdersSectionTitle(),
           _buildSegmentControl(myTabs),
           SliverPadding(
@@ -135,8 +133,9 @@ class _AccountScreenState extends State<AccountScreen> {
 
   CupertinoSliverNavigationBar _buildNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
-      backgroundColor: CupertinoDynamicColor.resolve(
-        groupedBackgroundColor, context).withOpacity(0.8),
+      backgroundColor:
+          CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
+              .withOpacity(0.8),
       largeTitle: Text('Account'),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
@@ -172,8 +171,8 @@ class _AccountScreenState extends State<AccountScreen> {
         child: Text('Orders',
             style: TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -1.36)),
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.6)),
       ),
     );
   }
@@ -250,14 +249,19 @@ class _AccountScreenState extends State<AccountScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Icon(
-                FeatherIcons.box,
+                FeatherIcons.shoppingBag,
                 size: 40,
                 color: CupertinoColors.systemGrey,
               ),
               SizedBox(height: 20),
               Text(
                 'No orders available',
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.6,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
                 textAlign: TextAlign.center,
               ),
             ],

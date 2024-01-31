@@ -13,15 +13,8 @@ class PostCard extends StatelessWidget {
   final String timeAgo;
   final Function(String) onTap; // New callback parameter
   final String postId;
+  final String profileURL; // New parameter to store the profile image URL
   final bool showTags; // New parameter to indicate whether to show tags or not
-
-  // Define your colors here
-  final List<Color> colors = [
-    Colors.lightGreenAccent, // Light Green
-    Colors.lightBlueAccent, // Light Blue
-    Colors.pinkAccent[100]!, // Light Pink
-    Colors.yellowAccent[100]! // Light Yellow
-  ];
 
   PostCard({
     Key? key,
@@ -34,6 +27,7 @@ class PostCard extends StatelessWidget {
     required this.timeAgo,
     required this.onTap,
     required this.postId,
+    required this.profileURL,
     this.showTags = true, // Default value to show tags
   }) : super(key: key);
 
@@ -65,7 +59,7 @@ class PostCard extends StatelessWidget {
                 ] else ...[
                   SizedBox(height: 10),
                 ],
-                _buildOrderInfoSection(context, ''),
+                _buildOrderInfoSection(context, profileURL),
               ],
             ),
           ),
@@ -75,14 +69,34 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildImageSection(BuildContext context) {
+    // Check if imageLocation is a valid URL, if not, use default image
+    bool isImageLocationValid =
+        imageLocation.isNotEmpty; // Add your own validation logic if needed
+
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      child: Image.asset(
-        imageLocation,
-        width: MediaQuery.of(context).size.width,
-        height: 100,
-        fit: BoxFit.cover,
-      ),
+      child: isImageLocationValid
+          ? Image.network(
+              imageLocation,
+              width: MediaQuery.of(context).size.width,
+              height: 100,
+              fit: BoxFit.cover,
+            )
+          : Image.asset(
+              'assets/images/sampleFoodPic.png', // Replace with your default image path
+              width: MediaQuery.of(context).size.width,
+              height: 100,
+              fit: BoxFit.cover,
+            ),
+    );
+  }
+
+  Widget _defaultImage(BuildContext context) {
+    return Image.asset(
+      'assets/images/sampleFoodPic.png', // Replace with your default image path
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      fit: BoxFit.cover,
     );
   }
 
@@ -159,21 +173,21 @@ class PostCard extends StatelessWidget {
 
   Widget _buildOrderInfoSection(BuildContext context, String avatarUrl) {
     // Use a default image if avatarUrl is empty or null
-    String effectiveAvatarUrl =
-        avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
+    String effectiveAvatarUrl = avatarUrl.isEmpty
+        ? 'assets/images/sampleProfile.png' // Default image
+        : avatarUrl;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
           CircleAvatar(
-            backgroundImage:
-                AssetImage(effectiveAvatarUrl), // Load the image from assets
-            radius: 9, // Optional: Adjust the radius to fit your design
+            backgroundImage: _buildProfileImageProvider(effectiveAvatarUrl),
+            radius: 9, // Adjust the radius to fit your design
           ),
           SizedBox(width: 8),
           Text(
-            'Posted by $firstname $lastname $timeAgo',
+            'Posted by $firstname $lastname  $timeAgo',
             style: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.secondaryLabel, context),
@@ -184,5 +198,14 @@ class PostCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  ImageProvider _buildProfileImageProvider(String imageUrl) {
+    if (imageUrl.startsWith('http') || imageUrl.startsWith('https')) {
+      return NetworkImage(
+          imageUrl); // Load image from network if it's a valid URL
+    } else {
+      return AssetImage(imageUrl); // Load image from assets
+    }
   }
 }

@@ -46,7 +46,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
-    //double adjustedFontSize = _defaultFontSize * _textScaleFactor;
     _updateAdjustedFontSize();
 
     return CupertinoPageScaffold(
@@ -54,7 +53,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: CustomScrollView(
         slivers: [
           CupertinoSliverNavigationBar(
-            largeTitle: Text('Settings', style: TextStyle(letterSpacing: -1.34)),
+            transitionBetweenRoutes: false,
+            largeTitle: Text('Settings'),
             border: Border(bottom: BorderSide.none),
             backgroundColor: groupedBackgroundColor,
             leading: GestureDetector(

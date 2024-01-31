@@ -201,10 +201,12 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   void _onCameraMove(CameraPosition position) {
-    _lastKnownCameraPosition = position;
     double newZoomLevel = position.zoom;
+    _lastKnownCameraPosition = position;
 
-    if (newZoomLevel < maxZoomOutLevel) {
+    // Check if new zoom level is trying to zoom out beyond max zoom out level
+    if (newZoomLevel < maxZoomOutLevel && !_isZoomingIn(newZoomLevel)) {
+      // Prevent zooming out further by setting camera position back to maxZoomOutLevel
       mapController?.moveCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -213,18 +215,24 @@ class _BrowseScreenState extends State<BrowseScreen>
           ),
         ),
       );
-      return;
+    } else {
+      // Allow zooming in or normal movement by updating search radius and circle
+      setState(() {
+        currentZoomLevel = newZoomLevel; // Update current zoom level
+        _searchRadius = _calculateSearchRadius(newZoomLevel);
+        if (newZoomLevel > zoomThreshold) {
+          searchAreaCircle = null;
+        } else {
+          _updateSearchAreaCircle(position.target);
+        }
+        _updateMarkersBasedOnCircle();
+      });
     }
-    setState(() {
-      _isZooming = true; // Set _isZooming to true when the camera is moving
-      _searchRadius = _calculateSearchRadius(newZoomLevel);
-      if (newZoomLevel > zoomThreshold) {
-        searchAreaCircle = null;
-      } else {
-        _updateSearchAreaCircle(position.target);
-      }
-      _updateMarkersBasedOnCircle();
-    });
+  }
+
+  bool _isZoomingIn(double newZoomLevel) {
+    // Determine if the user is zooming in by comparing new zoom level with the last known zoom level
+    return newZoomLevel > currentZoomLevel;
   }
 
   void _onCameraIdle() {

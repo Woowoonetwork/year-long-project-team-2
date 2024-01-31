@@ -76,7 +76,7 @@ class _CupertinoSearchNavigationBarState
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.all(16).copyWith(top: 48),
+              padding: const EdgeInsets.all(16).copyWith(top: 44),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -94,18 +94,32 @@ class _CupertinoSearchNavigationBarState
 
   Widget _buildTitle(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
             widget.title,
             style: TextStyle(
-              fontSize: 34,
+              fontSize: 36,
               letterSpacing: -1.3,
               fontWeight: FontWeight.bold,
               color: CupertinoColors.label.resolveFrom(context),
               overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            // Implement your action for "I'm Feeling Lucky"
+          },
+          child: Text(
+            "Feeling Lucky?",
+            style: TextStyle(
+              color: accentColor,
+              fontWeight: FontWeight.w500,
+              letterSpacing: -0.8,
+              fontSize: 16,
             ),
           ),
         ),
@@ -123,7 +137,17 @@ class _CupertinoSearchNavigationBarState
               FeatherIcons.x,
               size: 20,
             ),
+            prefixIcon: Container(
+              margin: EdgeInsets.only(left: 6.0, top: 2.0),
+              child: Icon(
+                FeatherIcons.search,
+                size: 18.0,
+              ),
+            ),
+            placeholder: 'Search Nearby',
             placeholderStyle: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.w400,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -133,7 +157,6 @@ class _CupertinoSearchNavigationBarState
             ),
             backgroundColor: CupertinoColors.tertiarySystemBackground,
             controller: widget.textController,
-            placeholder: 'Search',
             onChanged: (text) {
               widget.onSearchTextChanged(text);
               _updateCancelButtonVisibility();

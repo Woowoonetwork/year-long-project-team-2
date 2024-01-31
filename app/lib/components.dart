@@ -5,6 +5,7 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 
+
 class Styles {
   static TextStyle titleStyle = TextStyle(
     color: CupertinoColors.label,
@@ -80,7 +81,7 @@ CupertinoNavigationBar buildBackNavigationBar(BuildContext context) {
     ),
     leading: CupertinoButton(
       padding: EdgeInsets.zero,
-      child: Icon(CupertinoIcons.back,
+      child: Icon(FeatherIcons.chevronLeft,
           color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)),
       onPressed: () => Navigator.pop(context),
     ),
@@ -126,17 +127,24 @@ Widget buildGoogleSignInButton(BuildContext context) {
 }
 
 Widget buildCupertinoTextField(String placeholder,
-    TextEditingController controller, bool obscureText, BuildContext context) {
+    TextEditingController controller, bool obscureText, BuildContext context, List<String> autofillHints) {
   return CupertinoTextField(
     controller: controller,
     obscureText: obscureText,
     placeholder: placeholder,
     padding: EdgeInsets.all(16.0),
+    textAlign: TextAlign.left,
+    style: TextStyle(
+      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+    ),
     placeholderStyle: TextStyle(
       color: CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context),
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
+    autofillHints: autofillHints,
     decoration: BoxDecoration(
       color: CupertinoDynamicColor.resolve(
           CupertinoColors.tertiarySystemBackground, context),
@@ -151,6 +159,7 @@ Widget buildText(String text, double fontSize, FontWeight fontWeight) {
     style: TextStyle(
       fontSize: fontSize,
       fontWeight: fontWeight,
+      letterSpacing: -1.40,
     ),
   );
 }
@@ -183,6 +192,7 @@ Widget buildSignUpText(
             color: accentColor,
             fontSize: 12,
             fontWeight: FontWeight.w500,
+            letterSpacing: -0.20,
           ),
           children: <TextSpan>[
             TextSpan(
@@ -190,6 +200,7 @@ Widget buildSignUpText(
               style: TextStyle(
                 color: secondaryColor,
                 fontWeight: FontWeight.w500,
+                letterSpacing: -0.20,
               ),
             ),
           ],
@@ -201,6 +212,13 @@ Widget buildSignUpText(
 
 Widget buildCenteredText(String text, double fontSize, FontWeight fontWeight) {
   return Center(
-    child: buildText(text, fontSize, fontWeight),
+    child: Text(
+      text.toUpperCase(), // Convert text to uppercase
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        letterSpacing: -0.4,
+      ),
+    ),
   );
 }

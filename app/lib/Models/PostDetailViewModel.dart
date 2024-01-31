@@ -20,6 +20,9 @@ class PostDetailViewModel extends ChangeNotifier {
   late DateTime postTimestamp;
   late LatLng pickupLatLng;
   late List<String> tags;
+  late String imageUrl; // Add a field for the image URL
+  late String profileURL;
+  late String postLocation;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   bool isFavorite = false;
 
@@ -40,6 +43,8 @@ class PostDetailViewModel extends ChangeNotifier {
     title = 'null';
     rating = 0.0;
     userid = 'null';
+    imageUrl = ''; // Set the image URL
+    profileURL = 'null';
     postTimestamp = DateTime.now();
     pickupLatLng = LatLng(37.7749, -122.4194);
     tags = ['null'];
@@ -100,7 +105,19 @@ class PostDetailViewModel extends ChangeNotifier {
     pickupInstructions = documentData['pickup_instructions'] ?? '';
     userid = documentData['user_id'] ?? '';
     rating = documentData['rating'] ?? 0.0;
+    imageUrl = documentData['image_url'] ?? ''; // Set the image URL
     pickupLocation = documentData['pickup_location'] ?? '';
+    // postLocation = documentData['post_location'] ?? '';
+    // like post_ location: |49.89090897212782° N, 119.49003484100103° W]
+
+    if (documentData['post_location'] is GeoPoint) {
+      GeoPoint geoPoint = documentData['post_location'] as GeoPoint;
+      pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+    } else {
+      // Provide a default location or handle the absence of location data
+      pickupLatLng = LatLng(0.0, 0.0); // Example default value
+    }
+    rating = documentData['rating'] ?? 0.0;
     pickupTime = (documentData['pickup_time'] as Timestamp).toDate();
     expirationDate = (documentData['expiration_date'] as Timestamp).toDate();
     postTimestamp = (documentData['post_timestamp'] as Timestamp).toDate();
@@ -111,6 +128,7 @@ class PostDetailViewModel extends ChangeNotifier {
   void _updateUserDetails(Map<String, dynamic> userDocument) {
     firstName = userDocument['firstName'] ?? '';
     lastName = userDocument['lastName'] ?? '';
+    profileURL = userDocument['profileImagePath'] ?? '';
     notifyListeners();
   }
 

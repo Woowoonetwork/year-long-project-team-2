@@ -6,6 +6,9 @@ import 'package:FoodHood/Screens/reset_pwd_screen.dart';
 import 'package:flutter/cupertino.dart';
 import '../components.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/material.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LogInScreen extends StatelessWidget {
   final TextEditingController emailController =
@@ -23,10 +26,19 @@ class LogInScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:
+                  MainAxisAlignment.center, // Center content vertically
               children: [
-                buildLoginForm(context),
-                buildBottomGroup(context), // New method for bottom group
+                Column(
+                  children: [
+                    buildLoginForm(context),
+                  ],
+                ),
+                Column(
+                  children: [
+                    buildBottomGroup(context),
+                  ],
+                ),
               ],
             ),
           ),
@@ -42,12 +54,13 @@ class LogInScreen extends StatelessWidget {
       children: [
         buildContinueButton(context, 'Continue', accentColor,
             CupertinoColors.white), // Continue button
-        const SizedBox(height: 20),
-
-        buildCenteredText('or', 14, FontWeight.w600),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+        buildCenteredText('or', 12, FontWeight.w600),
+        const SizedBox(height: 16),
         buildGoogleSignInButton(context),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+        buildAppleSignInButton(context),
+        const SizedBox(height: 26),
         buildSignUpText(
             context, "Don't have an account? ", 'Sign up', '/signup'),
       ],
@@ -62,10 +75,10 @@ class LogInScreen extends StatelessWidget {
         buildText('Log in', 34, FontWeight.w600), // Log in text
         const SizedBox(height: 50),
         buildCupertinoTextField('Email Address', emailController, false,
-            context), // Email text field
+            context, [AutofillHints.email]),// Email text field
         const SizedBox(height: 20),
         buildCupertinoTextField('Password', passwordController, true,
-            context), // Password text field
+            context, [AutofillHints.password]), // Password text field
         const SizedBox(height: 20),
         buildTextButton(
             context,
@@ -80,7 +93,7 @@ class LogInScreen extends StatelessWidget {
   }
 
   // Continue button
-  // Continue button with error handling and message formatting
+  // Continue button with loading indicator
   Widget buildContinueButton(BuildContext context, String text,
       Color backgroundColor, Color textColor) {
     final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -88,12 +101,14 @@ class LogInScreen extends StatelessWidget {
     return CupertinoButton(
       onPressed: () async {
         try {
+          showLoadingDialog(context); // Show loading dialog
           final UserCredential userCredential =
               await _auth.signInWithEmailAndPassword(
             email: emailController.text,
             password: passwordController.text,
           );
           print("logged in");
+          Navigator.of(context).pop(); // Dismiss loading dialog
 
           // Navigate to the home screen
           Navigator.of(context).pushNamedAndRemoveUntil(
@@ -102,8 +117,8 @@ class LogInScreen extends StatelessWidget {
             arguments: {'selectedIndex': 0},
           );
         } catch (e) {
+          Navigator.of(context).pop(); // Dismiss loading dialog on error
           String errorMessage = e.toString();
-          // Remove error code prefix
           errorMessage = errorMessage.replaceAll(RegExp(r'\[.*?\]\s'), '');
 
           // Display formatted error in Cupertino alert dialog
@@ -124,7 +139,7 @@ class LogInScreen extends StatelessWidget {
               );
             },
           );
-          print('Login error: $errorMessage'); //prints formatted error
+          print('Login error: $errorMessage');
         }
       },
       color: backgroundColor,
@@ -162,6 +177,174 @@ class LogInScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    if (googleUser == null) {
+      throw FirebaseAuthException(
+        code: 'ERROR_ABORTED_BY_USER',
+        message: 'Sign in aborted by user',
+      );
+    }
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  Future<UserCredential> signInWithApple() async {
+    final appleIdCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+
+    final oauthCredential = OAuthProvider("apple.com").credential(
+      idToken: appleIdCredential.identityToken,
+      accessToken: appleIdCredential.authorizationCode,
+    );
+
+    return await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+  }
+
+  Widget buildAppleSignInButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        color: CupertinoColors.black,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: CupertinoButton(
+        onPressed: () async {
+          try {
+            await signInWithApple();
+            // Navigate to home or desired screen
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/nav',
+              (route) => false,
+              arguments: {'selectedIndex': 0},
+            );
+          } catch (e) {
+            // Handle exceptions
+            print('Apple Sign-In error: $e');
+          }
+        },
+        color: CupertinoColors.black,
+        borderRadius: BorderRadius.circular(14),
+        padding: EdgeInsets.zero,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/apple.png', width: 16, height: 16),
+            const SizedBox(width: 8),
+            Text(
+              'Sign in with Apple',
+              style: TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildGoogleSignInButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.systemGrey2, context),
+          width: 0.6,
+        ),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: CupertinoButton(
+        onPressed: () async {
+          try {
+            await signInWithGoogle();
+            // Navigate to home or desired screen
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/nav',
+              (route) => false,
+              arguments: {'selectedIndex': 0},
+            );
+          } catch (e) {
+            // Handle exceptions like user cancellation or network issues
+            print('Google Sign-In error: $e');
+          }
+        },
+        color: CupertinoDynamicColor.resolve(
+            CupertinoColors.tertiarySystemBackground, context),
+        borderRadius: BorderRadius.circular(14),
+        padding: EdgeInsets.zero,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/google.png', width: 20, height: 20),
+            const SizedBox(width: 2),
+            Text(
+              'Sign in with Google',
+              style: TextStyle(
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Method to show a loading dialog
+  void showLoadingDialog(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: 
+            //indicator and the text below it
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CupertinoActivityIndicator(),
+                SizedBox(height: 24),
+                Text(
+                  'Logging in',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
