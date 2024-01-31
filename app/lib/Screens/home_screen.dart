@@ -337,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String timeAgoSinceDate(DateTime dateTime) {
     final duration = DateTime.now().difference(dateTime);
     if (duration.inDays > 7)
-      return DateFormat('on MMMM dd, yyyy').format(dateTime);
+      return DateFormat('MMMM dd, yyyy').format(dateTime);
     if (duration.inDays >= 1)
       return '${duration.inDays} day${duration.inDays > 1 ? "s" : ""} ago';
     if (duration.inHours >= 1)

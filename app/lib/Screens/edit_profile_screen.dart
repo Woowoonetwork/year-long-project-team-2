@@ -117,7 +117,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
       backgroundColor: groupedBackgroundColor,
       navigationBar: buildNavigationBar(context),
       child: _isLoading
-          ? Center(child: CupertinoActivityIndicator())
+          ? Center(
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                  CupertinoActivityIndicator(),
+                  SizedBox(height: 8),
+                  Text('Updating profile ...',
+                      style: TextStyle(color: CupertinoColors.label)),
+                ]))
           : SafeArea(
               child: SingleChildScrollView(
                   padding: EdgeInsets.all(8),
@@ -162,6 +170,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return;
     }
 
+    // Show loading dialog
+    showLoadingDialog(context, loadingMessage: 'Updating');
+
     try {
       String userId = FirebaseAuth.instance.currentUser!.uid;
       Map<String, dynamic> updateData = {
@@ -173,12 +184,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'city': _selectedCity,
       };
 
-      String stringImageUrl = imageUrl ?? '';
-      print("babababa $stringImageUrl");
-
-      // Only update the profile image if a new image was selected
-      if (stringImageUrl != '') {
-        imageUrl = await _uploadImageToFirebase(File(stringImageUrl));
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        // Only update the profile image if a new image was selected
+        imageUrl = await _uploadImageToFirebase(File(imageUrl));
         updateData['profileImagePath'] = imageUrl;
       }
 
@@ -191,9 +199,49 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       if (onComplete != null) onComplete();
       widget.onProfileUpdated?.call();
+
+      // Dismiss loading dialog
+      Navigator.of(context).pop(); // Close the loading dialog
     } catch (e) {
       print("Error updating profile: $e");
+      Navigator.of(context)
+          .pop(); // Ensure the loading dialog is closed on error
+      _showDialog(
+          context, "Error", "Failed to update profile. Please try again.");
     }
+  }
+
+  void showLoadingDialog(BuildContext context,
+      {String loadingMessage = 'Loading'}) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CupertinoActivityIndicator(),
+                SizedBox(height: 24),
+                Text(
+                  loadingMessage, // Customizable message
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showDialog(BuildContext context, String title, String content) {

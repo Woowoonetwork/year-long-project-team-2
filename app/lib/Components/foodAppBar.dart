@@ -115,7 +115,23 @@ class _FoodAppBarState extends State<FoodAppBar> {
                 fit: BoxFit.cover,
               )
             : SizedBox(
-                child: Center(child: Text('No image available')),
+                width: MediaQuery.of(context).size.width,
+                height: 300,
+                child: Center(
+                  // an icon and a description in a row
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      
+                      Icon(
+                        //face with a sad mouth
+                        FeatherIcons.frown,
+                        size: 60,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ],
+                  ),
+                ),
               ),
       ),
       leading: _buildLeading(context),
