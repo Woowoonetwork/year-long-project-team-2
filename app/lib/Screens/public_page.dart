@@ -7,13 +7,7 @@ class PublicPage extends StatefulWidget {
 }
 
 class _PublicPageState extends State<PublicPage> {
-  late String firstName;
-  late String lastName;
-  late String city;
-  late String province;
-  double rating = 5.0;
-  int itemsSold = 0;
-  List<String> reviews = [];
+  UserProfile userProfile = UserProfile.empty();
 
   @override
   void initState() {
@@ -22,50 +16,16 @@ class _PublicPageState extends State<PublicPage> {
   }
 
   Future<void> fetchData() async {
-  var documentData = await readDocument(
-    collectionName: 'user',
-    docName: 'afkwlDWxekVhdgV1YPZFK7E34UH3',
-  );
-
-  if (documentData != null) {
-    setState(() {
-      firstName = documentData['firstName'] ?? 'N/A';
-      lastName = documentData['lastName'] ?? 'N/A';
-      city = documentData['city'] ?? 'N/A';
-      province = documentData['province'] ?? 'N/A';
-      rating = documentData['rating']?.toDouble() ?? 5.0;
-
-      // Check if 'itemsSold' is an int and handle accordingly
-      var itemsSoldData = documentData['itemsSold'];
-      if (itemsSoldData is int) {
-        itemsSold = itemsSoldData;
-      } else {
-        itemsSold = 0; // Default or some other logic if not an int
-      }
-
-      // Ensure 'reviews' is a list of strings
-      if (documentData['reviews'] is List) {
-        reviews = List<String>.from(documentData['reviews']);
-      } else {
-        reviews = []; // Default to empty list if not a list
-      }
-    });
-  }
-}
-
-  Widget buildReviewCard(String review) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        review,
-        style: CupertinoTheme.of(context).textTheme.textStyle,
-      ),
+    var documentData = await readDocument(
+      collectionName: 'user',
+      docName: 'afkwlDWxekVhdgV1YPZFK7E34UH3',
     );
+
+    if (documentData != null) {
+      setState(() {
+        userProfile = UserProfile.fromMap(documentData);
+      });
+    }
   }
 
   @override
@@ -85,19 +45,72 @@ class _PublicPageState extends State<PublicPage> {
         child: ListView(
           children: [
             SizedBox(height: 16),
-            buildProfilePlaceholder('${firstName[0]}${lastName[0]}'),
+            ProfilePlaceholder(initials: userProfile.initials),
             SizedBox(height: 8),
-            buildNameAndLocation(),
-            buildRatingAndItemsSold(),
-            buildAboutSection(),
-            buildReviewsSection(),
+            NameAndLocation(userProfile: userProfile),
+            RatingAndItemsSold(userProfile: userProfile),
+            AboutSection(),
+            ReviewsSection(reviews: userProfile.reviews),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget buildProfilePlaceholder(String initials) {
+class UserProfile {
+  final String firstName;
+  final String lastName;
+  final String city;
+  final String province;
+  final double rating;
+  final int itemsSold;
+  final List<String> reviews;
+
+  UserProfile({
+    required this.firstName,
+    required this.lastName,
+    required this.city,
+    required this.province,
+    required this.rating,
+    required this.itemsSold,
+    required this.reviews,
+  });
+
+  String get initials => '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}';
+
+  factory UserProfile.fromMap(Map<String, dynamic> data) {
+    return UserProfile(
+      firstName: data['firstName'] ?? 'N/A',
+      lastName: data['lastName'] ?? 'N/A',
+      city: data['city'] ?? 'N/A',
+      province: data['province'] ?? 'N/A',
+      rating: data['rating']?.toDouble() ?? 5.0,
+      itemsSold: data['itemsSold'] is int ? data['itemsSold'] : 0,
+      reviews: data['reviews'] is List ? List<String>.from(data['reviews']) : [],
+    );
+  }
+
+  factory UserProfile.empty() {
+    return UserProfile(
+      firstName: 'N/A',
+      lastName: 'N/A',
+      city: 'N/A',
+      province: 'N/A',
+      rating: 5.0,
+      itemsSold: 0,
+      reviews: [],
+    );
+  }
+}
+
+class ProfilePlaceholder extends StatelessWidget {
+  final String initials;
+
+  const ProfilePlaceholder({Key? key, required this.initials}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: 72,
       height: 72,
@@ -115,33 +128,50 @@ class _PublicPageState extends State<PublicPage> {
       ),
     );
   }
+}
 
-  Widget buildNameAndLocation() {
+class NameAndLocation extends StatelessWidget {
+  final UserProfile userProfile;
+
+  const NameAndLocation({Key? key, required this.userProfile}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
-          '$firstName $lastName',
+          '${userProfile.firstName} ${userProfile.lastName}',
           textAlign: TextAlign.center,
           style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
         ),
         Text(
-          '$city, $province',
+          '${userProfile.city}, ${userProfile.province}',
           textAlign: TextAlign.center,
           style: CupertinoTheme.of(context).textTheme.tabLabelTextStyle,
         ),
       ],
     );
   }
+}
 
-  Widget buildRatingAndItemsSold() {
+class RatingAndItemsSold extends StatelessWidget {
+  final UserProfile userProfile;
+
+  const RatingAndItemsSold({Key? key, required this.userProfile}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Text(
-      '$rating Ratings  $itemsSold items sold',
+      '${userProfile.rating} Ratings  ${userProfile.itemsSold} items sold',
       textAlign: TextAlign.center,
       style: CupertinoTheme.of(context).textTheme.textStyle,
     );
   }
+}
 
-  Widget buildAboutSection() {
+class AboutSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       padding: EdgeInsets.all(10),
@@ -150,17 +180,48 @@ class _PublicPageState extends State<PublicPage> {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        'Strawberry sugar high!!! 🍓🍓🍓✨✨✨✨✨',
+        'About the user...',
         style: CupertinoTheme.of(context).textTheme.textStyle,
       ),
     );
   }
+}
 
-  Widget buildReviewsSection() {
-    return reviews.isEmpty
-        ? Text('No reviews', textAlign: TextAlign.center)
-        : Column(
-            children: reviews.map((review) => buildReviewCard(review)).toList(),
-          );
+class ReviewsSection extends StatelessWidget {
+  final List<String> reviews;
+
+  const ReviewsSection({Key? key, required this.reviews}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (reviews.isEmpty) {
+      return Center(child: Text('No reviews', textAlign: TextAlign.center));
+    } else {
+      return Column(
+        children: reviews.map((review) => ReviewCard(review: review)).toList(),
+      );
+    }
+  }
+}
+
+class ReviewCard extends StatelessWidget {
+  final String review;
+
+  const ReviewCard({Key? key, required this.review}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGrey6,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        review,
+        style: CupertinoTheme.of(context).textTheme.textStyle,
+      ),
+    );
   }
 }

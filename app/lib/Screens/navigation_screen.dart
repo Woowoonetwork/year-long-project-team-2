@@ -31,7 +31,7 @@ class NavigationScreen extends StatelessWidget {
         inactiveColor: CupertinoColors.secondaryLabel, // inactive tab color
         items: [
           BottomNavigationBarItem(
-            icon: Icon(FeatherIcons.home),
+            icon: Icon(FeatherIcons.compass),
           ),
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.map),
