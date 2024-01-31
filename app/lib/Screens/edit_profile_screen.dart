@@ -166,11 +166,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'lastName': _lastNameController.text,
         'aboutMe': _aboutMeController.text,
         'email': _emailController.text,
-        'province': _selectedProvince,
-        'city': _selectedCity,
-        if (imageUrl != null) 'profileImagePath': imageUrl,
+        'province': selectedProvince,
+        'city': selectedCity,
       };
 
+String stringImageUrl = imageUrl ?? '';
+print("babababa $stringImageUrl");
+
+      // Only update the profile image if a new image was selected
+      if (stringImageUrl != '') {
+        imageUrl = await _uploadImageToFirebase(File(stringImageUrl));
+        updateData['profileImagePath'] = imageUrl;
+      }
+
+      // Update the user's profile in Firestore
       await FirebaseFirestore.instance
           .collection('user')
           .doc(userId)
@@ -213,7 +222,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       UploadTask uploadTask = storageRef.putFile(imageFile);
       await uploadTask.whenComplete(() => null);
-      return await storageRef.getDownloadURL();
+      String downloadUrl = await storageRef.getDownloadURL();
+      return downloadUrl;
     } catch (e) {
       print("Error uploading image: $e");
       return null;
@@ -300,7 +310,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ],
                   ),
                 ),
-                onPressed: _uploadImage,
+                onPressed: () async {
+                  // Use ImagePicker to let the user select an image
+                      await _uploadImage();
+                },
               ),
             ),
           ),
@@ -463,57 +476,104 @@ class _EditProfilePageState extends State<EditProfilePage> {
             CupertinoColors.tertiarySystemBackground, context),
         child: Column(
           children: [
-            _buildPickerActions(
-                context, options, initialItem, onSelectedItemChanged),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CupertinoButton(
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: CupertinoDynamicColor.resolve(
+                          CupertinoColors.label, context),
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                CupertinoButton(
+                  child: Text('Done',
+                      style: TextStyle(
+                        color: CupertinoDynamicColor.resolve(
+                            CupertinoColors.label, context),
+                      )),
+                  onPressed: () {
+                    if (onSelectedItemChanged != null) {
+                      onSelectedItemChanged(options[initialItem]);
+                    }
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+            // Picker
             Expanded(
-                child: CupertinoPicker(
-              backgroundColor: CupertinoColors.tertiarySystemBackground,
-              itemExtent: 30,
-              scrollController:
-                  FixedExtentScrollController(initialItem: initialItem),
-              children: options.map((e) => Text(e)).toList(),
-              onSelectedItemChanged: (index) => initialItem = index,
-            )),
+              child: CupertinoPicker(
+                backgroundColor: CupertinoColors.tertiarySystemBackground,
+                itemExtent: 30,
+                scrollController: FixedExtentScrollController(
+                  initialItem: initialItem,
+                ),
+                children: options.map((e) => Text(e)).toList(),
+                onSelectedItemChanged: (index) {
+                  initialItem = index;
+                },
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPickerActions(BuildContext context, List<String> options,
-      int initialItem, ValueChanged<String>? onSelectedItemChanged) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        CupertinoButton(
-          child: Text('Cancel',
-              style: TextStyle(
-                  color: CupertinoDynamicColor.resolve(
-                      CupertinoColors.label, context))),
-          onPressed: () => Navigator.of(context).pop(),
+  void _showActionSheet(BuildContext context, String action) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(
+          '$action',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: CupertinoColors.secondaryLabel,
+            fontSize: 16,
+            letterSpacing: -0.80,
+          ),
         ),
-        CupertinoButton(
-          child: Text('Done',
+        message: Text('Are you sure you want to $action?'),
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            child: Text(
+              'Confirm',
               style: TextStyle(
-                  color: CupertinoDynamicColor.resolve(
-                      CupertinoColors.label, context))),
+                color: CupertinoColors.destructiveRed,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.80,
+              ),
+            ),
+            onPressed: () {
+              // Handle the action
+              Navigator.pop(context);
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text('Cancel'),
           onPressed: () {
-            if (onSelectedItemChanged != null) {
-              onSelectedItemChanged(options[initialItem]);
-            }
-            Navigator.of(context).pop();
+            Navigator.pop(context);
           },
         ),
-      ],
+      ),
     );
   }
 
-  void _uploadImage() async {
+  Future <void> _uploadImage() async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      setState(() => _profileImagePath = image.path);
+      setState(() {
+        profileImagePath = image.path;
+print("cacacaca $profileImagePath");
+      });
     }
+else{print("image selection canceled");}
   }
 }
