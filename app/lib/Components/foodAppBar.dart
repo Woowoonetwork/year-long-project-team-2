@@ -69,25 +69,29 @@ class FoodAppBar extends StatefulWidget {
   final String postId;
   final VoidCallback onFavoritePressed;
   final bool isFavorite;
+  final String imageUrl;
 
   const FoodAppBar({
     Key? key,
     required this.postId,
     required this.onFavoritePressed,
     required this.isFavorite,
+    required this.imageUrl, // Add this line
   }) : super(key: key);
-
   @override
   _FoodAppBarState createState() => _FoodAppBarState();
 }
 
 class _FoodAppBarState extends State<FoodAppBar> {
   bool isFavorite = false;
+  String? imageUrl = '';
 
   @override
   void initState() {
     super.initState();
-    isFavorite = widget.isFavorite; // Initialize isFavorite from the widget prop
+    imageUrl = widget.imageUrl; // Initialize imageUrl from the widget prop
+    isFavorite =
+        widget.isFavorite; // Initialize isFavorite from the widget prop
   }
 
   @override
@@ -105,8 +109,14 @@ class _FoodAppBarState extends State<FoodAppBar> {
           StretchMode.zoomBackground, // Allow the background to zoom
           StretchMode.blurBackground, // Apply blur effect for a nice transition
         ],
-        background:
-            Image.asset('assets/images/chickenrice.jpeg', fit: BoxFit.cover),
+        background: imageUrl != null && imageUrl!.isNotEmpty
+            ? Image.network(
+                imageUrl!,
+                fit: BoxFit.cover,
+              )
+            : SizedBox(
+                child: Center(child: Text('No image available')),
+              ),
       ),
       leading: _buildLeading(context),
       actions: [_buildFavoriteButton(context), _buildShareButton(context)],
@@ -129,7 +139,9 @@ class _FoodAppBarState extends State<FoodAppBar> {
       Bouncing(
         onPress: widget.onFavoritePressed,
         child: Icon(
-          widget.isFavorite ? Icons.favorite : Icons.favorite_border, // Use widget.isFavorite
+          widget.isFavorite
+              ? Icons.favorite
+              : Icons.favorite_border, // Use widget.isFavorite
           size: 18,
           color: widget.isFavorite
               ? CupertinoColors.systemRed
@@ -155,8 +167,6 @@ class _FoodAppBarState extends State<FoodAppBar> {
       ),
     );
   }
-
-  
 
   Widget _blurEffect(Widget child) {
     return Padding(

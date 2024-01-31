@@ -13,6 +13,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -37,6 +40,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
   LatLng? selectedLocation;
   String? _mapStyle;
   Set<Marker> _markers = {};
+  bool _isLoading = false;
+  String? _selectedImagePath;
 
   void _updateMarker(LatLng position) {
     setState(() {
@@ -49,8 +54,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
     });
   }
 
-   LatLng? initialLocation; // Start with null
-
+  LatLng? initialLocation; // Start with null
 
   GoogleMapController? mapController; // Controller for the map
 
@@ -80,7 +84,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
     fetchData();
   }
 
-
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -104,6 +107,183 @@ class _CreatePostPageState extends State<CreatePostScreen>
     }
 
     return await Geolocator.getCurrentPosition();
+  }
+
+  Future<String?> _uploadImageToFirebase(File imageFile) async {
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      String fileName =
+          'post_${Uuid().v4()}.jpg'; // Unique file name for the image
+      Reference storageRef =
+          FirebaseStorage.instance.ref().child('post_images/$fileName');
+
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      await uploadTask;
+      String downloadUrl = await storageRef.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
+  }
+
+  final TextEditingController _altTextController = TextEditingController();
+
+  Widget buildImageSection(BuildContext context, String? imagePath) {
+    return SliverToBoxAdapter(
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x01000000),
+                  blurRadius: 20,
+                  offset: Offset(0, 0),
+                ),
+              ],
+            ),
+            margin:
+                const EdgeInsets.symmetric(vertical: 18.0, horizontal: 17.0),
+            height: 200,
+            foregroundDecoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              image: imagePath != null
+                  ? DecorationImage(
+                      image: FileImage(File(imagePath)), fit: BoxFit.cover)
+                  : null, // You can put a placeholder image here if you want
+            ),
+            // If imagePath is null, you might want to show a placeholder or keep it empty
+            child: imagePath == null
+                ? // fill the container with a color if no image is selected
+                Container(
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.tertiarySystemBackground
+                          .resolveFrom(context),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: // an icon with text
+                        Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Click "+" to add photo',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: CupertinoColors.secondaryLabel
+                                    .resolveFrom(context))),
+                      ],
+                    ),
+                  )
+                : null, // No child needed if the image is displayed
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 17.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Photo',
+                        style: TextStyle(
+                          fontSize: 16,
+                          letterSpacing: -0.5,
+                          fontWeight: FontWeight.w500,
+                        )),
+                    const SizedBox(height: 5),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => pickImage(context),
+                      child: Container(
+                        width: 76,
+                        height: 74,
+                        decoration: BoxDecoration(
+                            color: tertiaryColor.resolveFrom(context),
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Icon(CupertinoIcons.add,
+                            size: 37, color: accentColor.resolveFrom(context)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                // Alt Text Title and Field
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Alt Text',
+                        style: TextStyle(
+                            fontSize: 16,
+                            letterSpacing: -0.5,
+                            fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 5),
+                      Container(
+                        height: 74,
+                        child: CupertinoTextField(
+                          controller: _altTextController,
+                          placeholder: 'No Alt Text Added',
+                          textAlignVertical: TextAlignVertical.center,
+                          textAlign: TextAlign.center,
+                          padding: EdgeInsets.all(16.0),
+                          style: TextStyle(
+                              color: CupertinoDynamicColor.resolve(
+                                  CupertinoColors.label, context),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),
+                          placeholderStyle: TextStyle(
+                              color: CupertinoDynamicColor.resolve(
+                                  CupertinoColors.placeholderText, context),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),
+                          decoration: BoxDecoration(
+                              color: CupertinoDynamicColor.resolve(
+                                  CupertinoColors.tertiarySystemBackground,
+                                  context),
+                              borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> pickImage(BuildContext context) async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _isLoading = true; // Show loading indicator
+        _selectedImagePath = image.path;
+      });
+
+      // Upload image and get URL
+      String? imageUrl =
+          await _uploadImageToFirebase(File(_selectedImagePath!));
+
+      if (imageUrl != null) {
+        // Do something with the uploaded image URL
+        print("Image uploaded: $imageUrl");
+      } else {
+        // Handle upload failure
+        print("Failed to upload image.");
+      }
+
+      setState(() {
+        _isLoading = false; // Hide loading indicator
+      });
+    }
   }
 
   @override
@@ -156,22 +336,32 @@ class _CreatePostPageState extends State<CreatePostScreen>
         },
         body: CustomScrollView(
           slivers: <Widget>[
+            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+            buildImageSection(context, _selectedImagePath),
+            SliverToBoxAdapter(child: SizedBox(height: 20.0)),
             buildTextField('Title'),
-            buildTextInputField(titleController, '', EdgeInsets.all(14.0)),
+            buildTextInputField(titleController, ''),
+            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             buildTextField('Description'),
-            buildTextInputField(descController, '',
-                EdgeInsets.symmetric(vertical: 40.0, horizontal: 10.0)),
+            buildLargeTextInputField(descController, ''),
+            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             buildTextField('Allergens'),
             buildSearchBar(allergensList, selectedAllergens),
+            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             buildExpireDateSection(),
+            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             buildTextField('Category'),
             buildSearchBar(categoriesList, selectedCategories),
+            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             buildTextField('Pickup Location'),
             buildSearchBar(pickupLocationsList, selectedPickupLocation),
             buildMapSection(),
+            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             buildTextField('Pickup Instructions'),
-            buildTextInputField(pickupInstrController, '',
-                EdgeInsets.symmetric(horizontal: 8, vertical: 30.0)),
+            buildLargeTextInputField(
+              pickupInstrController,
+              '',
+            ),
             buildTimeSection(),
             SliverToBoxAdapter(child: SizedBox(height: 40.0)),
           ],
@@ -180,11 +370,46 @@ class _CreatePostPageState extends State<CreatePostScreen>
     );
   }
 
+  // Add this method to your class
+  void showLoadingDialog(BuildContext context,
+      {String loadingMessage = 'Loading'}) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CupertinoActivityIndicator(),
+                SizedBox(height: 24),
+                Text(
+                  loadingMessage, // Customizable message
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   CupertinoSliverNavigationBar buildSliverNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
       transitionBetweenRoutes: false,
       backgroundColor: groupedBackgroundColor,
-      largeTitle: Text('New Post'),
+      largeTitle:
+          Text('New Post', style: TextStyle(fontWeight: FontWeight.w600)),
       leading: GestureDetector(
         child: Icon(FeatherIcons.x,
             color: CupertinoColors.label.resolveFrom(context), size: 24.0),
@@ -203,50 +428,86 @@ class _CreatePostPageState extends State<CreatePostScreen>
   }
 
   void savePost(BuildContext context) async {
-    if ([titleController, descController, pickupInstrController]
-            .any((c) => c.text.isEmpty) ||
-        [selectedAllergens, selectedCategories, selectedPickupLocation]
-            .any((l) => l.isEmpty)) {
-      showEmptyFieldsAlert(context);
+  if ([titleController.text, descController.text, pickupInstrController.text]
+          .any((element) => element.isEmpty) ||
+      [selectedAllergens, selectedCategories, selectedPickupLocation]
+          .any((list) => list.isEmpty)) {
+    showEmptyFieldsAlert(context);
+    return;
+  }
+
+  showLoadingDialog(context, loadingMessage: 'Saving Post...'); // Show loading indicator
+
+  String? imageUrl;
+  if (_selectedImagePath != null) {
+    imageUrl = await _uploadImageToFirebase(File(_selectedImagePath!));
+    if (imageUrl == null) {
+      print("Image upload failed");
+      Navigator.of(context).pop(); // Close the loading dialog
+      // Optionally show an error message to the user
       return;
     }
+  }
 
+  // Continue with saving the post details including imageUrl if available
+  try {
     final user = FirebaseAuth.instance.currentUser;
     String userId = user?.uid ?? 'default uid';
-    String documentName = Uuid().v4();
+    String documentId = Uuid().v4();
 
-    addDocument(
-      collectionName: 'post_details',
-      filename: documentName,
-      fieldNames: [
-        'title',
-        'description',
-        'allergens',
-        'categories',
-        'expiration_date',
-        'pickup_location',
-        'pickup_instructions',
-        'pickup_time',
-        'user_id',
-        'post_location',
-        'post_timestamp'
-      ],
-      fieldValues: [
-        titleController.text,
-        descController.text,
-        selectedAllergens.join(', '),
-        selectedCategories.join(', '),
-        Timestamp.fromDate(selectedDate),
-        selectedPickupLocation.join(', '),
-        pickupInstrController.text,
-        Timestamp.fromDate(selectedTime),
-        userId,
-        [selectedLocation!.latitude, selectedLocation!.longitude],
-        FieldValue.serverTimestamp()
-      ],
-    );
-    Navigator.of(context).pop();
+    await FirebaseFirestore.instance
+        .collection('post_details')
+        .doc(documentId)
+        .set({
+      'title': titleController.text,
+      'description': descController.text,
+      'allergens': selectedAllergens.join(', '),
+      'categories': selectedCategories.join(', '),
+      'expiration_date': Timestamp.fromDate(selectedDate),
+      'pickup_location': selectedPickupLocation.join(', '),
+      'pickup_instructions': pickupInstrController.text,
+      'pickup_time': Timestamp.fromDate(selectedTime),
+      'user_id': userId,
+      'post_location':
+          GeoPoint(selectedLocation!.latitude, selectedLocation!.longitude),
+      'post_timestamp': FieldValue.serverTimestamp(),
+      'image_url': imageUrl ?? '', // Add image URL to the document
+    });
+
+    Navigator.of(context).pop(); // Close the loading dialog
+
+    // Success callback or navigate the user away from the current screen
+    Navigator.of(context).pop(); // Pop the current screen to go back
+
+    // Show a confirmation dialog on the previous screen
+    showPostSavedConfirmation(context);
+  } catch (e) {
+    print("Error saving post: $e");
+    Navigator.of(context).pop(); // Close the loading dialog
+    // Optionally handle the error, e.g., by showing an error message to the user
   }
+}
+
+void showPostSavedConfirmation(BuildContext context) {
+  showCupertinoDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CupertinoAlertDialog(
+        title: Text('Post Saved'),
+        content: Text('Your post has been saved successfully.'),
+        actions: <Widget>[
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+            },
+            child: Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   SliverToBoxAdapter buildTextField(String text) {
     return SliverToBoxAdapter(
@@ -258,24 +519,63 @@ class _CreatePostPageState extends State<CreatePostScreen>
     );
   }
 
-  SliverToBoxAdapter buildTextInputField(TextEditingController controller,
-      String placeholder, EdgeInsetsGeometry padding) {
+  SliverToBoxAdapter buildTextInputField(
+      TextEditingController controller, String placeholder) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0),
         child: CupertinoTextField(
-            controller: controller,
-            padding: padding,
-            placeholder: placeholder,
-            placeholderStyle: TextStyle(
-                fontSize: 16.0,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context)),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.0),
-                color: CupertinoColors.tertiarySystemBackground
-                    .resolveFrom(context))),
+          controller: controller,
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+          placeholder: placeholder,
+          style: TextStyle(
+              color:
+                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+              fontSize: 16,
+              fontWeight: FontWeight.w500),
+          placeholderStyle: TextStyle(
+              color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.placeholderText, context),
+              fontSize: 16,
+              fontWeight: FontWeight.w500),
+          decoration: BoxDecoration(
+              color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.tertiarySystemBackground, context),
+              borderRadius: BorderRadius.circular(16)),
+        ),
       ),
     );
+  }
+
+  SliverToBoxAdapter buildLargeTextInputField(
+      TextEditingController controller, String placeholder) {
+    return SliverToBoxAdapter(
+        child: Padding(
+      padding: EdgeInsets.only(left: 17.0, top: 5.0, right: 17.0),
+      child: Container(
+        height: 180,
+        child: CupertinoTextField(
+          controller: controller,
+          textAlignVertical: TextAlignVertical.top,
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+          placeholder: placeholder,
+          style: TextStyle(
+              color:
+                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+              fontSize: 16,
+              fontWeight: FontWeight.w500),
+          placeholderStyle: TextStyle(
+              color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.placeholderText, context),
+              fontSize: 16,
+              fontWeight: FontWeight.w500),
+          decoration: BoxDecoration(
+              color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.tertiarySystemBackground, context),
+              borderRadius: BorderRadius.circular(16)),
+        ),
+      ),
+    ));
   }
 
   SliverToBoxAdapter buildSearchBar(
@@ -534,16 +834,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
     return SliverToBoxAdapter(
       child: Container(
         height: 250.0, // Adjust the height as needed
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15.0), // Set corner radius
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x19000000),
-              blurRadius: 20,
-              offset: Offset(0, 0),
-            ),
-          ],
-        ),
         margin: EdgeInsets.all(16.0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(15.0), // Apply corner radius

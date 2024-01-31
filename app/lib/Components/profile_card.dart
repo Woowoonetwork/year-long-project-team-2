@@ -37,7 +37,7 @@ class _ProfileCardState extends State<ProfileCard> {
           if (mounted && snapshot.exists) {
             updateProfileData(snapshot.data()!);
           } else {
-            setState(() => isLoading = false);
+            if (mounted) setState(() => isLoading = false);
           }
         },
         onError: (e) {
@@ -48,7 +48,7 @@ class _ProfileCardState extends State<ProfileCard> {
         },
       );
     } else {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
   }
 

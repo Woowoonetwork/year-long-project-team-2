@@ -1,3 +1,4 @@
+import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/cupertino_chip_widget.dart';
 
@@ -64,19 +65,34 @@ class _SearchBarState extends State<SearchBar> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 17.0, top: 10.0, right: 17.0),
-          child: CupertinoSearchTextField(
-            onChanged: (value) {
-              filterList(value);
-            },
-            onSubmitted: (value) {
-              // Handle submission if needed
-            },
-            placeholder: 'Search',
-            backgroundColor: CupertinoColors.tertiarySystemBackground,
-            focusNode: searchFocusNode,
-          ),
-        ),
+            padding: EdgeInsets.only(left: 17.0, top: 10.0, right: 17.0),
+            child: Container(
+              height: 40.0,
+              child: CupertinoSearchTextField(
+               
+                prefixIcon: Container(
+                  margin: EdgeInsets.only(left: 6.0),
+                  child: Icon(
+                    FeatherIcons.search,
+                    size: 16.0,
+                  ),
+                ),
+                onChanged: (value) {
+                  filterList(value);
+                },
+                onSubmitted: (value) {
+                  // Handle submission if needed
+                },
+                placeholder: 'Search',
+                placeholderStyle: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                backgroundColor: CupertinoColors.tertiarySystemBackground,
+                focusNode: searchFocusNode,
+              ),
+            )),
         if (isSearchBarClicked && filteredList.isNotEmpty)
           Container(
             margin: EdgeInsets.symmetric(horizontal: 17.0, vertical: 10.0),

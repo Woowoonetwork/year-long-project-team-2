@@ -170,8 +170,8 @@ class _AccountScreenState extends State<AccountScreen> {
         child: Text('Orders',
             style: TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -1.36)),
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.6)),
       ),
     );
   }

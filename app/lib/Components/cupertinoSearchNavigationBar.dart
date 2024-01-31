@@ -123,7 +123,17 @@ class _CupertinoSearchNavigationBarState
               FeatherIcons.x,
               size: 20,
             ),
+            prefixIcon: Container(
+              margin: EdgeInsets.only(left: 6.0, top: 2.0),
+              child: Icon(
+                FeatherIcons.search,
+                size: 18.0,
+              ),
+            ),
+            placeholder: 'Search Nearby',
             placeholderStyle: TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.w400,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -133,7 +143,6 @@ class _CupertinoSearchNavigationBarState
             ),
             backgroundColor: CupertinoColors.tertiarySystemBackground,
             controller: widget.textController,
-            placeholder: 'Search',
             onChanged: (text) {
               widget.onSearchTextChanged(text);
               _updateCancelButtonVisibility();

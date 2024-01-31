@@ -84,8 +84,9 @@ class _PostDetailViewState extends State<PostDetailView> {
                       FoodAppBar(
                         postId: widget.postId, // Pass postId to the FoodAppBar
                         isFavorite: viewModel.isFavorite,
-                        onFavoritePressed:
-                            _handleFavoritePressed, // Pass the callback function
+                        onFavoritePressed: _handleFavoritePressed,
+                        imageUrl: viewModel.imageUrl, // Pass the imageUrl here
+// Pass the callback function
                       ),
                       SliverList(
                         delegate: SliverChildListDelegate(
@@ -198,6 +199,7 @@ class _PostDetailViewState extends State<PostDetailView> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: CupertinoColors.label.resolveFrom(context),
+                height: 1.2,
                 letterSpacing: -1.45,
                 fontSize: 28,
               ),
@@ -295,7 +297,7 @@ class _PostDetailViewState extends State<PostDetailView> {
           DateFormat('EEE, MMM d, ' 'h:mm a').format(viewModel.pickupTime),
       pickupLocation: viewModel.pickupLocation,
       meetingPoint: '330, 1130 Trello Way\nKelowna, BC\nV1V 5E0',
-      additionalInfo: 'Please reach out for any additional details!',
+      additionalInfo: viewModel.pickupInstructions,
       locationCoordinates: pickupCoordinates,
       viewModel: viewModel,
     );
@@ -381,7 +383,7 @@ class InfoRow extends StatelessWidget {
     return Container(
       child: Row(
         children: [
-          IconPlaceholder(imageUrl: 'assets/images/sampleProfile.png'),
+          IconPlaceholder(imageUrl: viewModel.profileURL),
           const SizedBox(width: 8),
           Expanded(
             // Wrap with Expanded to prevent overflow
@@ -399,7 +401,7 @@ class InfoRow extends StatelessWidget {
 }
 
 class IconPlaceholder extends StatelessWidget {
-  final String imageUrl; // Add a parameter for the image URL
+  final String imageUrl; // Parameter for the image URL
 
   IconPlaceholder({Key? key, required this.imageUrl}) : super(key: key);
 
@@ -412,10 +414,22 @@ class IconPlaceholder extends StatelessWidget {
         shape: BoxShape.circle,
         image: DecorationImage(
           fit: BoxFit.cover,
-          image: AssetImage(imageUrl), // Replace with your image provider
+          // Dynamically load image from assets or network
+          image: _loadImage(imageUrl),
         ),
       ),
     );
+  }
+}
+
+// Determine the image type based on the imageUrl format
+ImageProvider _loadImage(String imageUrl) {
+  if (imageUrl.startsWith('http')) {
+    // If imageUrl starts with 'http', assume it's a network image
+    return NetworkImage(imageUrl);
+  } else {
+    // Otherwise, load it from assets
+    return AssetImage('assets/images/sampleProfile.png');
   }
 }
 
@@ -492,6 +506,8 @@ class InfoText extends StatelessWidget {
 }
 
 class RatingText extends StatelessWidget {
+  final PostDetailViewModel viewModel = PostDetailViewModel('default');
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -504,7 +520,9 @@ class RatingText extends StatelessWidget {
         ),
         const SizedBox(width: 3),
         Text(
-          '5.0 Rating',
+          // '5.0 Rating',
+          //use viewModel.rating instead of hardcoded value
+          '${viewModel.rating} Rating',
           style: TextStyle(
             overflow: TextOverflow.fade,
             color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
@@ -777,7 +795,7 @@ class PickupInformation extends StatelessWidget {
               shape: BoxShape.circle,
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: AssetImage('assets/images/sampleProfile.png'),
+                image: _loadImage(viewModel.profileURL),
               ),
             ),
           ),
