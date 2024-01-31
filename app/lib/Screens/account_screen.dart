@@ -91,12 +91,12 @@ class _AccountScreenState extends State<AccountScreen> {
     DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
 
     return OrderCard(
-      imageLocation: 'assets/images/sampleFoodPic.png',
       title: title,
       tags: tags,
       orderInfo: 'Ordered on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
       postId: postId,
       onTap: _onOrderCardTap,
+      imageLocation: documentData['image_url'] ?? '',
     );
   }
 
@@ -133,8 +133,9 @@ class _AccountScreenState extends State<AccountScreen> {
 
   CupertinoSliverNavigationBar _buildNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
-      backgroundColor: CupertinoDynamicColor.resolve(
-        groupedBackgroundColor, context).withOpacity(0.8),
+      backgroundColor:
+          CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
+              .withOpacity(0.8),
       largeTitle: Text('Account'),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,

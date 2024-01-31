@@ -59,7 +59,7 @@ class OrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildImageSection(context),
+          _buildImageSection(context, imageLocation),
           _buildTitleSection(context),
           _buildTagSection(context),
           _buildOrderInfoSection(context),
@@ -78,15 +78,28 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSection(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-      child: Image.asset(imageLocation,
-          width: MediaQuery.of(context).size.width,
-          height: 100,
-          fit: BoxFit.cover),
-    );
-  }
+  Widget _buildImageSection(BuildContext context, String imageLocation) {
+  // Determine if the imageLocation is a network URL or an asset path
+  final isNetworkImage = imageLocation.startsWith('http');
+
+  return ClipRRect(
+    borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+    child: isNetworkImage
+        ? Image.network(
+            imageLocation,
+            width: MediaQuery.of(context).size.width,
+            height: 100,
+            fit: BoxFit.cover,
+          )
+        : Image.asset(
+            'assets/images/sampleFoodPic.png',
+            width: MediaQuery.of(context).size.width,
+            height: 100,
+            fit: BoxFit.cover,
+          ),
+  );
+}
+
 
   Widget _buildTitleSection(BuildContext context) {
     return Padding(
