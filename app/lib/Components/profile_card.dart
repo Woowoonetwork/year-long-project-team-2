@@ -55,14 +55,16 @@ class _ProfileCardState extends State<ProfileCard> {
   void updateProfileData(Map<String, dynamic> documentData) {
     if (mounted) {
       setState(() {
-        firstName = documentData['firstName'];
-        lastName = documentData['lastName'];
-        city = documentData['city'];
-        province = documentData['province'];
-        email = documentData['email'];
-        photo = documentData['profileImagePath'];
-        rating = documentData['rating']?.toDouble();
-        reviews = List<String>.from(documentData['reviews'] ?? []);
+        firstName = documentData['firstName'] as String? ?? '';
+        lastName = documentData['lastName'] as String? ?? '';
+        city = documentData['city'] as String? ?? '';
+        province = documentData['province'] as String? ?? '';
+        email = documentData['email'] as String? ?? '';
+        photo = documentData['profileImagePath'] as String? ??
+            'assets/images/sampleProfile.png';
+        rating = (documentData['rating'] as num?)?.toDouble() ?? 0.0;
+        reviews =
+            List<String>.from(documentData['reviews'] as List<dynamic>? ?? []);
         isLoading = false;
       });
     }
