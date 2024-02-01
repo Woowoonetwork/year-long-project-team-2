@@ -1125,6 +1125,7 @@ class _ReserveButtonState extends State<ReserveButton> {
         onPressed: _isReserved
             ? null
             : () {
+              _handleReservation();
                 Navigator.push(
                   context,
                   CupertinoPageRoute(builder: (context) => DoneePath()),
