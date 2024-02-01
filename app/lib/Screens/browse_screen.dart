@@ -56,6 +56,7 @@ class _BrowseScreenState extends State<BrowseScreen>
   bool isKeyboardVisible = false;
   bool _isZooming = false; // Adding the _isZooming variable here
   Map<String, Color> tagColors = {};
+  List<Map<String, dynamic>> allPosts = [];
 
   List<Map<String, dynamic>> postsInCircle = [];
 
@@ -127,6 +128,22 @@ class _BrowseScreenState extends State<BrowseScreen>
         });
       }
     });
+  }
+
+  void _pickRandomPost() {
+    if (allPosts.isEmpty) {
+      print("No posts available to pick from.");
+      return; // Return if there are no posts
+    }
+
+    var random = math.Random();
+    var randomPostIndex = random.nextInt(allPosts.length);
+    var randomPost = allPosts[randomPostIndex];
+
+    // Assuming 'post_location' is stored as GeoPoint in Firestore
+    GeoPoint location = randomPost['post_location'];
+    LatLng latLng = LatLng(location.latitude, location.longitude);
+    _zoomToPostLocation(latLng); // Navigate to the selected post's location
   }
 
   @override
@@ -337,16 +354,20 @@ class _BrowseScreenState extends State<BrowseScreen>
                   postData['image_url'] ?? 'assets/images/sampleFoodPic.png',
               'title': title,
               'tags': tags,
+              'profileURL':
+                  userData?['profileImagePath'] ?? '', // Add this line
               'tagColors': assignedColors,
               'firstname': userData?['firstName'] ?? 'Unknown',
               'lastname': userData?['lastName'] ?? 'Unknown',
               'timeAgo': timeAgoSinceDate(createdAt),
               'postId': postDocument.id
             };
-            List<dynamic>? postLocation =
-                postData['post_location'] as List<dynamic>?;
-            if (postLocation != null && postLocation.length == 2) {
-              _zoomToPostLocation(postLocation);
+            GeoPoint? postLocationGeoPoint =
+                postData['post_location'] as GeoPoint?;
+            if (postLocationGeoPoint != null) {
+              LatLng postLatLng = LatLng(postLocationGeoPoint.latitude,
+                  postLocationGeoPoint.longitude);
+              _zoomToPostLocation(postLatLng);
             }
           });
         });
@@ -371,12 +392,15 @@ class _BrowseScreenState extends State<BrowseScreen>
     }
   }
 
-  void _zoomToPostLocation(List<dynamic> postLocation) {
-    if (postLocation.length != 2) return;
-    final postLatLng = LatLng(double.parse(postLocation[0].toString()),
-        double.parse(postLocation[1].toString()));
-    mapController?.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: postLatLng, zoom: 18.0)));
+  void _zoomToPostLocation(LatLng postLatLng) {
+    if (mapController == null) return;
+
+    mapController!.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: postLatLng,
+        zoom: 16.0, // You can adjust this zoom level as needed
+      ),
+    ));
   }
 
   void _resetUIState() {
@@ -397,11 +421,12 @@ class _BrowseScreenState extends State<BrowseScreen>
 
       for (var doc in querySnapshot.docs) {
         final data = doc.data();
-        final List<dynamic>? postLocationList = data['post_location'];
-        if (postLocationList != null && postLocationList.length == 2) {
+        final GeoPoint? postLocationGeoPoint =
+            data['post_location'] as GeoPoint?;
+        if (postLocationGeoPoint != null) {
           final postLatLng = LatLng(
-              double.parse(postLocationList[0].toString()),
-              double.parse(postLocationList[1].toString()));
+              postLocationGeoPoint.latitude, postLocationGeoPoint.longitude);
+
           final double distance = Geolocator.distanceBetween(
               searchAreaCircle!.center.latitude,
               searchAreaCircle!.center.longitude,
@@ -558,6 +583,7 @@ class _BrowseScreenState extends State<BrowseScreen>
     String lastname = _selectedPostData['lastname'] ?? 'Unknown';
     String timeAgo = _selectedPostData['timeAgo'] ?? 'Unknown';
     String postId = _selectedPostData['postId'] ?? '0';
+    String profileURL = _selectedPostData['profileURL'] ?? '';
 
     // Define card height and horizontal padding
     final double horizontalPadding = 16.0;
@@ -584,6 +610,7 @@ class _BrowseScreenState extends State<BrowseScreen>
           timeAgo: timeAgo,
           onTap: (postId) => _onMarkerTapped(postId),
           postId: postId,
+          profileURL: profileURL,
           showTags: false,
         ),
       ),
@@ -681,6 +708,7 @@ class _BrowseScreenState extends State<BrowseScreen>
       children: [
         CupertinoSearchNavigationBar(
           title: "Browse",
+          onFeelingLuckyPressed: _pickRandomPost,
           textController: searchController,
           onSearchTextChanged: (text) {
             if (text.isEmpty) {
@@ -718,6 +746,8 @@ class _BrowseScreenState extends State<BrowseScreen>
 
           allMarkers.add(marker);
         }
+
+        allPosts.add(data); // Add post data to the list
       }
       setState(() => _markers = allMarkers);
     }).catchError((error) {

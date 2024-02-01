@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
 import 'package:FoodHood/Components/colors.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Add this import
 
 class PostCard extends StatelessWidget {
   final String imageLocation;
@@ -76,14 +77,22 @@ class PostCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
       child: isImageLocationValid
-          ? Image.network(
-              imageLocation,
+          ? CachedNetworkImage(
+              imageUrl: imageLocation,
               width: MediaQuery.of(context).size.width,
               height: 100,
               fit: BoxFit.cover,
+              placeholder: (context, url) =>
+                  CupertinoActivityIndicator(), // Placeholder widget
+              errorWidget: (context, url, error) => Image.asset(
+                'assets/images/sampleFoodPic.png', // Fallback image on error
+                width: MediaQuery.of(context).size.width,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
             )
           : Image.asset(
-              'assets/images/sampleFoodPic.png', // Replace with your default image path
+              'assets/images/sampleFoodPic.png', // Default image path
               width: MediaQuery.of(context).size.width,
               height: 100,
               fit: BoxFit.cover,
@@ -181,9 +190,28 @@ class PostCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundImage: _buildProfileImageProvider(effectiveAvatarUrl),
-            radius: 9, // Adjust the radius to fit your design
+          // CircleAvatar(
+          //   backgroundImage: 
+          //   //use
+          //   radius: 9, // Adjust the radius to fit your design
+          // ),
+
+                      //use cached network image 
+          ClipOval(
+            child: CachedNetworkImage(
+              imageUrl: effectiveAvatarUrl,
+              width: 18,
+              height: 18,
+              fit: BoxFit.cover,
+              placeholder: (context, url) =>
+                  CupertinoActivityIndicator(), // Placeholder widget
+              errorWidget: (context, url, error) => Image.asset(
+                'assets/images/sampleProfile.png', // Fallback image on error
+                width: 18,
+                height: 18,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           SizedBox(width: 8),
           Text(
@@ -200,12 +228,5 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  ImageProvider _buildProfileImageProvider(String imageUrl) {
-    if (imageUrl.startsWith('http') || imageUrl.startsWith('https')) {
-      return NetworkImage(
-          imageUrl); // Load image from network if it's a valid URL
-    } else {
-      return AssetImage(imageUrl); // Load image from assets
-    }
-  }
+  
 }

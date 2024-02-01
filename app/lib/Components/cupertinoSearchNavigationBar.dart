@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'dart:ui'; // Needed for ImageFilter
+import 'package:FoodHood/components.dart';
 
 class CupertinoSearchNavigationBar extends StatefulWidget {
   final String title;
@@ -11,6 +12,7 @@ class CupertinoSearchNavigationBar extends StatefulWidget {
   final Function(String) onSearchTextChanged;
   final Widget Function() buildFilterButton;
   final VoidCallback onSearchBarTapped;
+  final VoidCallback? onFeelingLuckyPressed;
 
   const CupertinoSearchNavigationBar({
     Key? key,
@@ -20,6 +22,7 @@ class CupertinoSearchNavigationBar extends StatefulWidget {
     required this.onSearchTextChanged,
     required this.buildFilterButton,
     required this.onSearchBarTapped,
+    this.onFeelingLuckyPressed,
   }) : super(key: key);
 
   @override
@@ -110,9 +113,7 @@ class _CupertinoSearchNavigationBarState
         ),
         CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () {
-            // Implement your action for "I'm Feeling Lucky"
-          },
+          onPressed: () => _showFeelingLuckyModal(context),
           child: Text(
             "Feeling Lucky?",
             style: TextStyle(
@@ -124,6 +125,70 @@ class _CupertinoSearchNavigationBarState
           ),
         ),
       ],
+    );
+  }
+
+  void _showFeelingLuckyModal(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemBackground.resolveFrom(context),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(FeatherIcons.frown, size: 42, color: blue),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Struggling to decide?",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.6,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Let us pick a place for you!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color:
+                            CupertinoColors.secondaryLabel.resolveFrom(context),
+                        letterSpacing: -0.6,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    CupertinoButton(
+                      color: accentColor,
+                      child: Text(
+                        'Pick for me',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: -0.8,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // BrowseScreen._pickRandomPost();
+                        widget.onFeelingLuckyPressed?.call();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -202,7 +267,7 @@ class _CupertinoSearchNavigationBarState
           style: TextStyle(
             color: CupertinoColors.label.resolveFrom(context),
             fontSize: 18,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w400,
           ),
         ),
       ),

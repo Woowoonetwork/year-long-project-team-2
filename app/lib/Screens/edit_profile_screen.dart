@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:image_picker/image_picker.dart';
@@ -384,7 +385,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         return FileImage(File(_profileImagePath));
       } else {
         // Assuming _profileImagePath is a URL to a network image
-        return NetworkImage(_profileImagePath);
+        return CachedNetworkImageProvider(_profileImagePath);
       }
     }
     // Fallback to a local asset image if the network image URL or local file path is empty
