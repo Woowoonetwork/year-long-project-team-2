@@ -109,7 +109,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return OrderCard(
       title: title,
       tags: tags,
-      orderInfo: 'Ordered on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
+      orderInfo: 'Posted on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
       postId: postId,
       onTap: _onOrderCardTap,
       imageLocation: documentData['image_url'] ?? '',

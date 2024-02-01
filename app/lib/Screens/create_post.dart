@@ -429,7 +429,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
   void savePost(BuildContext context) async {
   if ([titleController.text, descController.text, pickupInstrController.text]
           .any((element) => element.isEmpty) ||
-      [selectedAllergens, selectedCategories, selectedPickupLocation]
+      [selectedAllergens, selectedCategories]
           .any((list) => list.isEmpty)) {
     showEmptyFieldsAlert(context);
     return;
@@ -676,8 +676,7 @@ void showPostSavedConfirmation(BuildContext context) {
   }
 
   void showDatePickerModal(BuildContext context) {
-    DateTime tempSelectedDate =
-        selectedDate; // Temporary variable to hold the new date selection
+    DateTime tempSelectedDate = selectedDate; // Temporary variable to hold the new date selection
 
     showCupertinoModalPopup(
       context: context,
