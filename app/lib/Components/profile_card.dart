@@ -118,18 +118,22 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   Widget profileImage() {
-    if (photo.isNotEmpty) {
-      // Check if the photo string is a URL (starts with 'http' or 'https')
-      if (Uri.parse(photo).isAbsolute) {
-        return Image.network(photo, width: 70, height: 70, fit: BoxFit.cover);
-      } else {
-        // Assuming the photo is a local asset if not a URL
-        return Image.asset(photo, width: 70, height: 70, fit: BoxFit.cover);
-      }
-    }
-    // Fallback to a default asset image if the photo string is empty
-    return Image.asset('assets/images/sampleProfile.png',
-        width: 70, height: 70, fit: BoxFit.cover);
+    return ClipOval(
+      child: Image.network(
+        photo,
+        width: 70,
+        height: 70,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/images/sampleProfile.png',
+            width: 70,
+            height: 70,
+            fit: BoxFit.cover,
+          );
+        },
+      ),
+    );
   }
 
   List<Widget> profileDetails(BuildContext context) {

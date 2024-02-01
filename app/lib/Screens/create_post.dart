@@ -158,7 +158,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                 ? // fill the container with a color if no image is selected
                 Container(
                     decoration: BoxDecoration(
-                      color: CupertinoColors.tertiarySystemBackground
+                      color: CupertinoColors.secondarySystemFill
                           .resolveFrom(context),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -200,10 +200,10 @@ class _CreatePostPageState extends State<CreatePostScreen>
                         width: 76,
                         height: 74,
                         decoration: BoxDecoration(
-                            color: tertiaryColor.resolveFrom(context),
+                            color: accentColor.resolveFrom(context),
                             borderRadius: BorderRadius.circular(16)),
-                        child: Icon(CupertinoIcons.add,
-                            size: 37, color: accentColor.resolveFrom(context)),
+                        child: Icon(FeatherIcons.plus,
+                            size: 37, color: CupertinoColors.white),
                       ),
                     ),
                   ],
@@ -336,9 +336,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
         },
         body: CustomScrollView(
           slivers: <Widget>[
-            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
             buildImageSection(context, _selectedImagePath),
-            SliverToBoxAdapter(child: SizedBox(height: 20.0)),
+            SliverToBoxAdapter(child: SizedBox(height: 30.0)),
             buildTextField('Title'),
             buildTextInputField(titleController, ''),
             SliverToBoxAdapter(child: SizedBox(height: 10.0)),

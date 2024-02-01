@@ -109,7 +109,12 @@ class _SavedScreenState extends State<SavedScreen> {
             return _buildPostItem(context, savedPostIds[index]);
           } else if (index == savedPostIds.length && savedPostIds.isNotEmpty) {
             // If it's the last item and the list is not empty, display the post count
-            return _buildPostCountIndicator(savedPostIds.length);
+            return Column(
+              children: [
+                _buildPostCountIndicator(savedPostIds.length),
+                SizedBox(height: 100),
+              ],
+            );
           }
           return null; // Return null for indices beyond the data range
         },
@@ -178,14 +183,13 @@ class _SavedScreenState extends State<SavedScreen> {
             Text(
               'No Bookmarks found',
               style: TextStyle(
-                  fontSize: 16,
-                  letterSpacing: -0.6,
-                  fontWeight: FontWeight.w500,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
+                fontSize: 16,
+                letterSpacing: -0.6,
+                fontWeight: FontWeight.w500,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              ),
               textAlign: TextAlign.center,
             ),
-            
           ],
         ),
       ),
@@ -219,7 +223,7 @@ class _SavedScreenState extends State<SavedScreen> {
 
   Widget _buildPostCountIndicator(int postCount) {
     String postCountText =
-        '$postCount Saved ' + (postCount > 1 ? 'Posts' : 'Post');
+        '$postCount Bookmarked ' + (postCount > 1 ? 'Posts' : 'Post');
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Center(
@@ -253,14 +257,6 @@ class _SavedScreenState extends State<SavedScreen> {
   }
 
   List<Color> _assignedColors() {
-    return [
-      CupertinoColors.systemRed,
-      CupertinoColors.systemOrange,
-      CupertinoColors.systemYellow,
-      CupertinoColors.systemGreen,
-      CupertinoColors.systemBlue,
-      CupertinoColors.systemIndigo,
-      CupertinoColors.systemPurple,
-    ];
+    return [yellow, orange, blue, babyPink, Cyan];
   }
 }
