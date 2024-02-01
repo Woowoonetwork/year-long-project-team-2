@@ -1,4 +1,5 @@
 import 'package:FoodHood/Screens/home_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -16,8 +17,7 @@ class DoneeRatingPage extends StatefulWidget {
 class _DoneeRatingPageState extends State<DoneeRatingPage> {
   String? reservedByName;
   int _rating = 0; // State variable to keep track of the rating
-  TextEditingController _commentController =
-      TextEditingController(); // Initialize the text controller
+  TextEditingController _commentController = TextEditingController();
 
   @override
   void initState() {
@@ -175,12 +175,7 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                     ),
                   ),
                 ),
-                CircleAvatar(
-                  backgroundImage:
-                      AssetImage('assets/images/sampleProfile.png'),
-                  radius: 40,
-                  backgroundColor: CupertinoColors.systemGrey4,
-                ),
+                ClipOval(),
                 SizedBox(height: 20),
                 Row(
                   mainAxisSize: MainAxisSize.min,

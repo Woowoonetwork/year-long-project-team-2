@@ -174,12 +174,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                     ),
                   ),
                 ),
-                CircleAvatar(
-                  backgroundImage:
-                      AssetImage('assets/images/sampleProfile.png'),
-                  radius: 40,
-                  backgroundColor: CupertinoColors.systemGrey4,
-                ),
+                ClipOval(),
                 SizedBox(height: 20),
                 Row(
                   mainAxisSize: MainAxisSize.min,
