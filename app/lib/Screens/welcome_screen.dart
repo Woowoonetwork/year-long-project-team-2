@@ -1,5 +1,6 @@
 // welcome_screen.dart
 
+import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/cupertino.dart';
@@ -50,7 +51,7 @@ class WelcomeScreen extends StatelessWidget {
           ),
           SizedBox(height: 28),
           CupertinoButton(
-            color: const Color(0xFF337586),
+            color: accentColor,
             padding: const EdgeInsets.all(16),
             borderRadius: BorderRadius.circular(14),
             onPressed: () {

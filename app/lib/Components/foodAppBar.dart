@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'dart:ui';
 import 'package:share_plus/share_plus.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // Bouncing Widget
 class Bouncing extends StatefulWidget {
@@ -109,30 +110,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
           StretchMode.zoomBackground, // Allow the background to zoom
           StretchMode.blurBackground, // Apply blur effect for a nice transition
         ],
-        background: imageUrl != null && imageUrl!.isNotEmpty
-            ? Image.network(
-                imageUrl!,
-                fit: BoxFit.cover,
-              )
-            : SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: 300,
-                child: Center(
-                  // an icon and a description in a row
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      
-                      Icon(
-                        //face with a sad mouth
-                        FeatherIcons.frown,
-                        size: 60,
-                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+        background: _buildBackgroundImage(),
       ),
       leading: _buildLeading(context),
       actions: [_buildFavoriteButton(context), _buildShareButton(context)],
@@ -146,6 +124,39 @@ class _FoodAppBarState extends State<FoodAppBar> {
         child: Icon(FeatherIcons.chevronLeft,
             size: 20, color: CupertinoColors.label.resolveFrom(context)),
         onPressed: () => Navigator.of(context).pop(),
+      ),
+    );
+  }
+
+  Widget _buildBackgroundImage() {
+    // Check if imageUrl is valid, if not, show default content
+    return widget.imageUrl.isNotEmpty
+        ? CachedNetworkImage(
+            imageUrl: widget.imageUrl,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => CupertinoActivityIndicator(),
+            errorWidget: (context, url, error) => _defaultBackgroundContent(),
+          )
+        : _defaultBackgroundContent();
+  }
+
+  Widget _defaultBackgroundContent() {
+    // Default background content when imageUrl is empty or fails to load
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 300,
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              FeatherIcons.frown,
+              size: 60,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+            // ... additional default content
+          ],
+        ),
       ),
     );
   }

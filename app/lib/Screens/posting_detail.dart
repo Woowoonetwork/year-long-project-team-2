@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -142,7 +143,7 @@ class _PostDetailViewState extends State<PostDetailView> {
       await viewModel.savePost(widget.postId);
       showCupertinoSnackbar(
         context,
-        'Saved "${viewModel.title}" to the list',
+        '"${viewModel.title}" has been added to your bookmarks',
         accentColor,
         Icon(FeatherIcons.check, color: Colors.white),
         _reverseAnimation, // Pass _reverseAnimation as the callback
@@ -151,7 +152,7 @@ class _PostDetailViewState extends State<PostDetailView> {
       await viewModel.unsavePost(widget.postId);
       showCupertinoSnackbar(
         context,
-        'Removed "${viewModel.title}" from the list',
+        '"${viewModel.title}" has been removed from your bookmarks',
         yellow,
         Icon(FeatherIcons.x, color: Colors.white),
         _reverseAnimation,
@@ -273,7 +274,9 @@ class _PostDetailViewState extends State<PostDetailView> {
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+          color: color.computeLuminance() > 0.5
+              ? CupertinoColors.black
+              : CupertinoColors.white,
           fontSize: 10,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
@@ -410,28 +413,32 @@ class IconPlaceholder extends StatelessWidget {
     return Container(
       width: 20,
       height: 20,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        image: DecorationImage(
+      // decoration: BoxDecoration(
+      //   shape: BoxShape.circle,
+      //   image: DecorationImage(
+      //     fit: BoxFit.cover,
+      //     // Dynamically load image from assets or network
+      //     image: _loadImage(imageUrl),
+      //   ),
+      // ),
+      child: ClipOval(
+        child: // use cached network image to load the image
+            CachedNetworkImage(
+          imageUrl: imageUrl,
           fit: BoxFit.cover,
-          // Dynamically load image from assets or network
-          image: _loadImage(imageUrl),
+          placeholder: (context, url) => CupertinoActivityIndicator(),
+          errorWidget: (context, url, error) => 
+          //AssetImage('assets/images/sampleProfile.png'); 
+          Image.asset('assets/images/sampleProfile.png'
+
+          ),
         ),
       ),
     );
   }
 }
 
-// Determine the image type based on the imageUrl format
-ImageProvider _loadImage(String imageUrl) {
-  if (imageUrl.startsWith('http')) {
-    // If imageUrl starts with 'http', assume it's a network image
-    return NetworkImage(imageUrl);
-  } else {
-    // Otherwise, load it from assets
-    return AssetImage('assets/images/sampleProfile.png');
-  }
-}
+
 
 class CombinedTexts extends StatelessWidget {
   final String firstName;
@@ -791,11 +798,15 @@ class PickupInformation extends StatelessWidget {
           child: Container(
             width: 30.0,
             height: 30.0,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
+            // use cached network image to load the image
+            child: //clipoval
+                CachedNetworkImage(
+              imageUrl: viewModel.profileURL,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => CupertinoActivityIndicator(),
+              errorWidget: (context, url, error) => Image.asset(
+                'assets/images/sampleProfile.png',
                 fit: BoxFit.cover,
-                image: _loadImage(viewModel.profileURL),
               ),
             ),
           ),
@@ -1114,6 +1125,7 @@ class _ReserveButtonState extends State<ReserveButton> {
         onPressed: _isReserved
             ? null
             : () {
+              _handleReservation();
                 Navigator.push(
                   context,
                   CupertinoPageRoute(builder: (context) => DoneePath()),

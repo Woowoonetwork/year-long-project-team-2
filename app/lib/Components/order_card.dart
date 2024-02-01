@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/donor_pathway_1.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class OrderCard extends StatelessWidget {
   final String imageLocation;
@@ -79,27 +80,33 @@ class OrderCard extends StatelessWidget {
   }
 
   Widget _buildImageSection(BuildContext context, String imageLocation) {
-  // Determine if the imageLocation is a network URL or an asset path
-  final isNetworkImage = imageLocation.startsWith('http');
+    // Determine if the imageLocation is a network URL or an asset path
+    final isNetworkImage = imageLocation.startsWith('http');
 
-  return ClipRRect(
-    borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-    child: isNetworkImage
-        ? Image.network(
-            imageLocation,
-            width: MediaQuery.of(context).size.width,
-            height: 100,
-            fit: BoxFit.cover,
-          )
-        : Image.asset(
-            'assets/images/sampleFoodPic.png',
-            width: MediaQuery.of(context).size.width,
-            height: 100,
-            fit: BoxFit.cover,
-          ),
-  );
-}
-
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+      child: isNetworkImage
+          ? CachedNetworkImage(
+              imageUrl: imageLocation,
+              width: MediaQuery.of(context).size.width,
+              height: 100,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => CupertinoActivityIndicator(),
+              errorWidget: (context, url, error) => Image.asset(
+                'assets/images/sampleFoodPic.png',
+                width: MediaQuery.of(context).size.width,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
+            )
+          : Image.asset(
+              'assets/images/sampleFoodPic.png',
+              width: MediaQuery.of(context).size.width,
+              height: 100,
+              fit: BoxFit.cover,
+            ),
+    );
+  }
 
   Widget _buildTitleSection(BuildContext context) {
     return Padding(
@@ -166,10 +173,12 @@ class OrderCard extends StatelessWidget {
         width: double.infinity,
         child: CupertinoButton(
           onPressed: () => _handleStatusPress(context),
-          child: Text('Status', style: TextStyle(
-              color: CupertinoColors.label.resolveFrom(context), // CupertinoDynamicColor.resolve(CupertinoColors.label, context
-              fontWeight: FontWeight.w500,
-            fontSize: 16)),
+          child: Text('Status',
+              style: TextStyle(
+                  color: CupertinoColors.label.resolveFrom(
+                      context), // CupertinoDynamicColor.resolve(CupertinoColors.label, context
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16)),
           borderRadius: BorderRadius.circular(16),
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.secondarySystemFill, context),
