@@ -10,7 +10,12 @@ Future<void> addAllergensCategoriesAndPL() async {
     'Wheat',
     'Fish',
     'Shellfish',
-    'Sesame'
+    'Sesame',
+    'Dairy',
+    'Gluten',
+    'Tree Nuts',
+    'Mustard',
+    'Unknown'
   ];
   await addDocument(
     collectionName: 'Data',
@@ -27,7 +32,16 @@ Future<void> addAllergensCategoriesAndPL() async {
     'Chicken',
     'Indian',
     'Italian',
-    'Chinese'
+    'Chinese',
+    'Meat',
+    'Beef',
+    'Gluten-free',
+    'Pizza',
+    'Noodles',
+    'Dessert',
+    'Healthy',
+    'French',
+    'Drinks'
   ];
   await addDocument(
     collectionName: 'Data',

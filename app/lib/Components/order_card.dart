@@ -3,6 +3,14 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/donor_pathway_1.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
+
+//Constants for styling
+const double _defaultTextFontSize = 16.0;
+const double _defaultTitleFontSize = 18.0;
+const double _defaultTagFontSize = 10.0;
+const double _defaultOrderInfoFontSize = 12.0;
 
 class OrderCard extends StatelessWidget {
   final String imageLocation;
@@ -14,8 +22,13 @@ class OrderCard extends StatelessWidget {
   final Function(String) onTap;
   final String postId;
   final VoidCallback? onStatusPressed;
+  late double _textScaleFactor;
+  late double adjustedTextFontSize;
+  late double adjustedTitleFontSize;
+  late double adjustedTagFontSize;
+  late double adjustedOrderInfoFontSize;
 
-  const OrderCard({
+  OrderCard({
     Key? key,
     required this.imageLocation,
     required this.title,
@@ -28,8 +41,18 @@ class OrderCard extends StatelessWidget {
     this.onStatusPressed,
   }) : super(key: key);
 
+  void _updateAdjustedFontSize() {
+    adjustedTextFontSize = _defaultTextFontSize * _textScaleFactor;
+    adjustedTitleFontSize = _defaultTitleFontSize * _textScaleFactor;
+    adjustedTagFontSize = _defaultTagFontSize * _textScaleFactor;
+    adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
+  }
+
   @override
   Widget build(BuildContext context) {
+    _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
+    _updateAdjustedFontSize();
+
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: CupertinoButton(
@@ -115,7 +138,7 @@ class OrderCard extends StatelessWidget {
           style: TextStyle(
               color:
                   CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: 18,
+              fontSize: adjustedTitleFontSize,
               letterSpacing: -0.8,
               fontWeight: FontWeight.w600)),
     );
@@ -148,7 +171,7 @@ class OrderCard extends StatelessWidget {
           style: TextStyle(
               color:
                   CupertinoDynamicColor.resolve(CupertinoColors.black, context),
-              fontSize: 10,
+              fontSize: adjustedTagFontSize,
               letterSpacing: -0.40,
               fontWeight: FontWeight.w600)),
     );
@@ -161,7 +184,7 @@ class OrderCard extends StatelessWidget {
           style: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.secondaryLabel, context),
-              fontSize: 12,
+              fontSize: adjustedOrderInfoFontSize,
               fontWeight: FontWeight.w500)),
     );
   }
@@ -178,7 +201,9 @@ class OrderCard extends StatelessWidget {
                   color: CupertinoColors.label.resolveFrom(
                       context), // CupertinoDynamicColor.resolve(CupertinoColors.label, context
                   fontWeight: FontWeight.w500,
-                  fontSize: 16)),
+                  fontSize: adjustedTextFontSize
+              )
+          ),
           borderRadius: BorderRadius.circular(16),
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.secondarySystemFill, context),
