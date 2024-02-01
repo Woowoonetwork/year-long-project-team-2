@@ -68,10 +68,11 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
             'ratings': ratings,
             'avgRating': avgRating
           });
-          print("Stored in database");
-          Navigator.of(context).pushAndRemoveUntil(
-            CupertinoPageRoute(builder: (context) => HomeScreen()),
-            (Route<dynamic> route) => false,
+          print("Rating stored in database");
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/nav',
+            (route) => false,
+            arguments: {'selectedIndex': 0},
           );
         } else {
           print("User document not found for ID: $userId");
@@ -174,12 +175,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
                     ),
                   ),
                 ),
-                CircleAvatar(
-                  backgroundImage:
-                      AssetImage('assets/images/sampleProfile.png'),
-                  radius: 40,
-                  backgroundColor: CupertinoColors.systemGrey4,
-                ),
+                ClipOval(),
                 SizedBox(height: 20),
                 Row(
                   mainAxisSize: MainAxisSize.min,
