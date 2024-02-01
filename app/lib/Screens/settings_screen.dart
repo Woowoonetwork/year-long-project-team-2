@@ -224,11 +224,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     size: _iconSize,
                     color: CupertinoColors.label.resolveFrom(context)),
                 SizedBox(width: _spacing),
-                Text(title,
+                Text(
+                  title,
                     style: TextStyle(
                         fontSize: adjustedFontSize,
                         fontWeight: FontWeight.w500,
-                        color: CupertinoColors.label.resolveFrom(context))),
+                        color: CupertinoColors.label.resolveFrom(context)
+                    ),
+                ),
               ],
             ),
             Icon(FeatherIcons.chevronRight,
@@ -341,7 +344,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showActionSheet(BuildContext context, String title, String message, VoidCallback onConfirm) {
+   void _showActionSheet(BuildContext context, String title, String message, VoidCallback onConfirm) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -349,12 +352,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title,
           style: TextStyle(
             fontWeight: FontWeight.w500,
-            color: CupertinoColors.secondaryLabel,
-            fontSize: 16,
-            letterSpacing: -0.80,
+            color: CupertinoColors.label.resolveFrom(context),
+            fontSize: 18,
+            letterSpacing: -0.60,
           ),
         ),
-        message: Text(message),
+        message: Text(message,
+            style: TextStyle(
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              fontSize: 14,
+              letterSpacing: -0.40,
+              fontWeight: FontWeight.w500,
+            )),
         actions: <Widget>[
           CupertinoActionSheetAction(
             child: Text(
@@ -379,5 +388,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
-  }
+  } 
 }
