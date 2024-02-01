@@ -796,18 +796,27 @@ class PickupInformation extends StatelessWidget {
             height: 30.0,
             // use cached network image to load the image
             child: //clipoval
-                CachedNetworkImage(
-              imageUrl: viewModel.profileURL,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => CupertinoActivityIndicator(),
-              errorWidget: (context, url, error) => Image.asset(
-                'assets/images/sampleProfile.png',
+                //   CachedNetworkImage(
+                // imageUrl: viewModel.profileURL,
+                // fit: BoxFit.cover,
+                // placeholder: (context, url) => CupertinoActivityIndicator(),
+                // errorWidget: (context, url, error) => Image.asset(
+                //   'assets/images/sampleProfile.png',
+                //   fit: BoxFit.cover,
+                // ),
+                ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: viewModel.profileURL,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => CupertinoActivityIndicator(),
+                errorWidget: (context, url, error) => Image.asset(
+                  'assets/images/sampleProfile.png',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
         ),
-        // MessageBox for Additional Info
         Expanded(
           child: MessageBox(context: context, text: additionalInfo),
         ),
@@ -1121,7 +1130,7 @@ class _ReserveButtonState extends State<ReserveButton> {
         onPressed: _isReserved
             ? null
             : () {
-              _handleReservation();
+                _handleReservation();
                 Navigator.push(
                   context,
                   CupertinoPageRoute(
