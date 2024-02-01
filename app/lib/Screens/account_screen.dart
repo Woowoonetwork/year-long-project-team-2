@@ -16,6 +16,12 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
+
+//Constants for styling
+const double _defaultTextFontSize = 16.0;
+const double _defaultTabTextFontSize = 14.0;
 
 class AccountScreen extends StatefulWidget {
   @override
@@ -26,11 +32,16 @@ class _AccountScreenState extends State<AccountScreen> {
   int segmentedControlGroupValue = 0;
   List<Widget> activeOrders = [];
   List<OrderCard> pastOrders = [];
+  late double _textScaleFactor;
+  late double adjustedTextFontSize;
+  late double adjustedTabTextFontSize;
 
   @override
   void initState() {
     super.initState();
     setUpPostStreamListener();
+    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _updateAdjustedFontSize();
   }
 
   void setUpPostStreamListener() {
@@ -56,6 +67,11 @@ class _AccountScreenState extends State<AccountScreen> {
         print('Error listening to post changes: $error');
       }
     });
+  }
+
+  void _updateAdjustedFontSize() {
+    adjustedTextFontSize = _defaultTextFontSize * _textScaleFactor;
+    adjustedTabTextFontSize = _defaultTabTextFontSize * _textScaleFactor;
   }
 
   @override
@@ -106,11 +122,22 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<int, Widget> myTabs = const <int, Widget>{
+    _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
+    _updateAdjustedFontSize();
+
+    final Map<int, Widget> myTabs = <int, Widget>{
       0: Text('Active Orders',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+          style: TextStyle(
+            fontSize: adjustedTabTextFontSize, 
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       1: Text('Past Orders',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+          style: TextStyle(
+            fontSize: adjustedTabTextFontSize, 
+            fontWeight: FontWeight.w500
+          ),
+        ),
     };
 
     return CupertinoPageScaffold(
@@ -257,7 +284,7 @@ class _AccountScreenState extends State<AccountScreen> {
               Text(
                 'No orders available',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: adjustedTextFontSize,
                   fontWeight: FontWeight.w500,
                   letterSpacing: -0.6,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -285,7 +312,7 @@ class _AccountScreenState extends State<AccountScreen> {
           child: Text(
             'Edit FoodHood Profile',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: adjustedTextFontSize,
               fontWeight: FontWeight.w500,
               letterSpacing: -0.8,
               color: CupertinoColors.white,
