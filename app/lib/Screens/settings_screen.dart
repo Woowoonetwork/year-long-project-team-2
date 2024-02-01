@@ -306,7 +306,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: color, 
               fontWeight: FontWeight.w500
             ),
+            overflow: TextOverflow.visible,
           ),
+        //   child: Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Flexible(
+        //       child: Text(
+        //         title,
+        //         style: TextStyle(
+        //           fontSize: adjustedFontSize,
+        //           color: color,
+        //           fontWeight: FontWeight.w500,
+        //         ),
+        //         overflow: TextOverflow.visible,
+        //       ),
+        //     ),
+        //   ],
+        // ),
+        // child: Center( // Center the text
+        //   child: Text(
+        //     title,
+        //     style: TextStyle(
+        //       fontSize: adjustedFontSize,
+        //       color: color,
+        //       fontWeight: FontWeight.w500,
+        //     ),
+        //     overflow: TextOverflow.visible, // Allow text to overflow
+        //     textAlign: TextAlign.center, // Center text within its container
+        //   ),
+        // ),
         ),
       ),
     );
