@@ -427,18 +427,14 @@ class IconPlaceholder extends StatelessWidget {
           imageUrl: imageUrl,
           fit: BoxFit.cover,
           placeholder: (context, url) => CupertinoActivityIndicator(),
-          errorWidget: (context, url, error) => 
-          //AssetImage('assets/images/sampleProfile.png'); 
-          Image.asset('assets/images/sampleProfile.png'
-
-          ),
+          errorWidget: (context, url, error) =>
+              //AssetImage('assets/images/sampleProfile.png');
+              Image.asset('assets/images/sampleProfile.png'),
         ),
       ),
     );
   }
 }
-
-
 
 class CombinedTexts extends StatelessWidget {
   final String firstName;
@@ -1127,7 +1123,10 @@ class _ReserveButtonState extends State<ReserveButton> {
             : () {
                 Navigator.push(
                   context,
-                  CupertinoPageRoute(builder: (context) => DoneePath()),
+                  CupertinoPageRoute(
+                      builder: (context) => DoneePath(
+                            postId: widget.postId,
+                          )),
                 );
               },
       ),
