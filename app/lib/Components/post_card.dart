@@ -215,7 +215,7 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 8),
           Text(
-            'Posted by $firstname $lastname  $timeAgo',
+            'Posted by $firstname $lastname $timeAgo',
             style: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.secondaryLabel, context),
