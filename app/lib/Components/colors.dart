@@ -35,8 +35,8 @@ final CupertinoDynamicColor accentColor = CupertinoDynamicColor.withBrightness(
 
 final CupertinoDynamicColor secondaryColor =
     CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF6f918a),
-  darkColor: Color(0xFF6f918a),
+  color: Color(0xFF9FD0C6),
+  darkColor: Color(0xFF4f6a67),
 );
 
 final CupertinoDynamicColor tertiaryColor =
