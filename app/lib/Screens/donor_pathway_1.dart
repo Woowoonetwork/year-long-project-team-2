@@ -117,7 +117,9 @@ class _DonorScreenState extends State<DonorScreen> {
             child: SizedBox(height: 16.0),
           ),
           
-          SliverToBoxAdapter(
+          //Only show the order info section if the order has been reserved.
+          if (reservedByName != null)
+            SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal:20.0),
               child: Center (
@@ -130,7 +132,7 @@ class _DonorScreenState extends State<DonorScreen> {
             )        
           ),
           
-          __buildTextField(text: "Pickup at $pickupLocation"),
+          __buildTextField(text: "Pickup at specified location"),
 
           __buildButton(),
         ],
@@ -159,6 +161,10 @@ class _DonorScreenState extends State<DonorScreen> {
 
   // Method to build heading text based on order state
   String _buildHeadingText() {
+    if (reservedByName == null) {
+    return "Your order has not been reserved yet";
+  }
+
     switch (orderState) {
       case OrderState.reserved:
         return "Your order has been reserved by ${reservedByName ?? 'Unknown User'}";
@@ -200,6 +206,11 @@ class _DonorScreenState extends State<DonorScreen> {
   }
 
 Widget __buildButton() {
+  if (reservedByName == null) {
+    // Return an empty container if the order hasn't been reserved yet
+    return SliverToBoxAdapter(child: Container());
+  }
+  
   if (orderState == OrderState.readyToPickUp) {
     return SliverToBoxAdapter(
       child: Padding(
@@ -233,9 +244,6 @@ Widget __buildButton() {
             color: CupertinoColors.tertiarySystemBackground,
             borderRadius: BorderRadius.circular(16.0),
             onPressed: () {
-              // setState(() {
-              //   orderState = _getNextOrderState();
-              // });
               Navigator.of(context).push(
                 CupertinoPageRoute(
                   builder: (context) => DoneeRatingPage(postId: widget.postId,),
@@ -318,7 +326,6 @@ Widget __buildButton() {
         return OrderState.reserved;
     }
   }
-
 }
 
 class OrderInfoSection extends StatelessWidget {
