@@ -299,3 +299,30 @@ N/A, all is complete
 ### Additional Information
 
 N/A.
+
+## Term 2 Week 4
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w4manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- modified code in register_screen
+- created a confirm password field
+- modified form validation rules
+- improved alerts for any problems the registration form may have for clearer communication
+- debugging code
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- edited register_screen code
+- added confirm password field and supporting rules for validation
+- created alerts and pop-ups to let the user know about any problems with the form (missing fields, weak password, password doesn't match confirm password, etc)
+- Completed Week 16 individual log.
+
+### Tasks in progress (from Project Board)
+
+N/A, all is complete
+
+### Additional Information
+
+N/A.
