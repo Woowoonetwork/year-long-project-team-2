@@ -142,11 +142,12 @@ class _LogInScreenState extends State<LogInScreen> {
 
   Future<void> _login() async {
     try {
+      showLoadingDialog(context);
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-      showLoadingDialog(context);
+
       Navigator.of(context).pop();
       Navigator.of(context).pushNamedAndRemoveUntil('/nav', (route) => false,
           arguments: {'selectedIndex': 0});
@@ -165,6 +166,8 @@ class _LogInScreenState extends State<LogInScreen> {
       //   ),
       // );
       // instead of showing a dialog, we change the error text
+      Navigator.of(context).pop();
+
       setState(() {
         _emailErrorText = "Your email or password is incorrect.";
       });
