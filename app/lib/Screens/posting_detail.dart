@@ -523,8 +523,6 @@ class RatingText extends StatelessWidget {
         ),
         const SizedBox(width: 3),
         Text(
-          // '5.0 Rating',
-          //use viewModel.rating instead of hardcoded value
           '${viewModel.rating} Rating',
           style: TextStyle(
             overflow: TextOverflow.fade,
