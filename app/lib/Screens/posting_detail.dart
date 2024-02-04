@@ -115,7 +115,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                   onRefresh: () => Future.value(true)),
             ),
             Container(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 32),
               child: Row(
                 children: [
                   Expanded(
@@ -1078,7 +1078,6 @@ class _ReserveButtonState extends State<ReserveButton> {
 
   void _handleReservation() async {
     if (!_isReserved) {
-      // Update Firestore document
       try {
         await FirebaseFirestore.instance
             .collection('post_details')
@@ -1102,29 +1101,17 @@ class _ReserveButtonState extends State<ReserveButton> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 48, // Set the height of the button
-      decoration: BoxDecoration(
-        color: _isReserved
-            ? CupertinoColors.systemGrey
-            : CupertinoDynamicColor.resolve(accentColor, context),
-        borderRadius: BorderRadius.circular(100), // Rounded corners
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x19000000),
-            blurRadius: 20,
-            offset: Offset(0, 0),
-          ),
-        ],
-      ),
       child: CupertinoButton(
-        padding: EdgeInsets.zero,
+        color: _isReserved ? accentColor.resolveFrom(context).withOpacity(0.2) : accentColor,
+        padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(14),
         child: Text(
           _isReserved ? 'Reserved' : 'Reserve',
           style: TextStyle(
-            color: Colors.white,
+            color: _isReserved ? accentColor : CupertinoColors.white,
             fontSize: 18,
-            letterSpacing: -0.45,
             fontWeight: FontWeight.w600,
+            letterSpacing: -0.90,
           ),
         ),
         onPressed: _isReserved

@@ -131,8 +131,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         buildGoogleSignInButton(context), // Google sign in button
         const SizedBox(height: 16),
         buildAppleSignInButton(context), // Apple sign in button
-        const SizedBox(height: 16),
-        buildSignUpText(context, "Already have an account? ", 'Sign in',
+        const SizedBox(height: 24),
+        buildSignUpText(context, "Already have an account? ", 'Log in',
             '/signin'), // Sign up text
       ],
     );

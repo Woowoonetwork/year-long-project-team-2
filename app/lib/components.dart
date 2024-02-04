@@ -5,7 +5,6 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 
-
 class Styles {
   static TextStyle titleStyle = TextStyle(
     color: CupertinoColors.label,
@@ -49,8 +48,7 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
     border: Border(
       bottom: BorderSide.none,
     ),
-    leading: 
-    GestureDetector(
+    leading: GestureDetector(
       onTap: () => Navigator.pop(context),
       child: Icon(FeatherIcons.chevronLeft,
           color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)),
@@ -61,8 +59,9 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
 CupertinoSliverNavigationBar buildMainNavigationBar(
     BuildContext context, String title) {
   return CupertinoSliverNavigationBar(
-    backgroundColor: CupertinoDynamicColor.resolve(
-        groupedBackgroundColor, context).withOpacity(0.8),
+    backgroundColor:
+        CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
+            .withOpacity(0.8),
     border: const Border(
       bottom: BorderSide.none,
     ),
@@ -126,8 +125,12 @@ Widget buildGoogleSignInButton(BuildContext context) {
   );
 }
 
-Widget buildCupertinoTextField(String placeholder,
-    TextEditingController controller, bool obscureText, BuildContext context, List<String> autofillHints) {
+Widget buildCupertinoTextField(
+    String placeholder,
+    TextEditingController controller,
+    bool obscureText,
+    BuildContext context,
+    List<String> autofillHints) {
   return CupertinoTextField(
     controller: controller,
     obscureText: obscureText,
@@ -140,7 +143,8 @@ Widget buildCupertinoTextField(String placeholder,
       fontWeight: FontWeight.w500,
     ),
     placeholderStyle: TextStyle(
-      color: CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context),
+      color: CupertinoDynamicColor.resolve(
+          CupertinoColors.placeholderText, context),
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
