@@ -115,54 +115,34 @@ class _DoneePathState extends State<DoneePath> {
                       ],
                     ),
                     SizedBox(height: 50),
-                    SizedBox(height: 20),
-                    CupertinoButton(
-                      color: CupertinoColors.activeBlue,
+                    Text(
+                      'Pending Confirmation',
+                      style: TextStyle(
+                        color: CupertinoColors.systemGrey,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 40),
+                    CupertinoButton.filled(
                       onPressed: _navigateToRatingPage,
                       child: Text('Leave a Review'),
-                    ),
-                    SizedBox(height: 50),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 94, vertical: 18),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF9FD0C6),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Text(
-                        'Pending Confirmation',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 50),
-                    CupertinoButton(
-                      onPressed: () {},
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      color: CupertinoColors.white,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 36.0, vertical: 16.0),
                       borderRadius: BorderRadius.circular(18.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Icon(
-                            CupertinoIcons.xmark,
-                            color: CupertinoColors.destructiveRed,
-                            size: 20.0,
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            'Cancel Reservation',
-                            style: TextStyle(
-                              color: CupertinoColors.destructiveRed,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
+                    SizedBox(height: 20),
+                    CupertinoButton(
+                      onPressed: () {
+                        // Action to cancel reservation
+                      },
+                      color: CupertinoColors.destructiveRed,
+                      child: Text('Cancel Reservation'),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 36.0, vertical: 16.0),
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                    SizedBox(height: 50),
                   ],
                 ),
               ),
