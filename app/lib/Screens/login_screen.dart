@@ -1,20 +1,23 @@
-// login_screen.dart
-// a page that allows the user to log in to the app
-
-import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/reset_pwd_screen.dart';
 import 'package:flutter/cupertino.dart';
-import '../components.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/material.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Screens/reset_pwd_screen.dart';
+import '../components.dart';
 
-class LogInScreen extends StatelessWidget {
-  final TextEditingController emailController =
-      TextEditingController(); // text controller for email
-  final TextEditingController passwordController =
-      TextEditingController(); // text controller for password
+class LogInScreen extends StatefulWidget {
+  @override
+  _LogInScreenState createState() => _LogInScreenState();
+}
+
+class _LogInScreenState extends State<LogInScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  String? _emailErrorText;
+  String? _passwordErrorText;
 
   @override
   Widget build(BuildContext context) {
@@ -26,19 +29,10 @@ class LogInScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
-              mainAxisAlignment:
-                  MainAxisAlignment.center, // Center content vertically
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Column(
-                  children: [
-                    buildLoginForm(context),
-                  ],
-                ),
-                Column(
-                  children: [
-                    buildBottomGroup(context),
-                  ],
-                ),
+                buildLoginForm(context),
+                buildBottomGroup(context),
               ],
             ),
           ),
@@ -47,101 +41,56 @@ class LogInScreen extends StatelessWidget {
     );
   }
 
-// Extract the bottom group into its own method
-  Widget buildBottomGroup(BuildContext context) {
+  Widget buildLoginForm(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        buildContinueButton(context, 'Continue', accentColor,
-            CupertinoColors.white), // Continue button
-        const SizedBox(height: 16),
-        buildCenteredText('or', 12, FontWeight.w600),
-        const SizedBox(height: 16),
-        buildGoogleSignInButton(context),
-        const SizedBox(height: 16),
-        buildAppleSignInButton(context),
-        const SizedBox(height: 26),
-        buildSignUpText(
-            context, "Don't have an account? ", 'Sign up', '/signup'),
-      ],
-    );
-  }
-
-  // Log in form
-  Column buildLoginForm(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        buildText('Log in', 34, FontWeight.w600), // Log in text
+        buildText('Log in', 34, FontWeight.w600),
         const SizedBox(height: 50),
-        buildCupertinoTextField('Email Address', emailController, false,
-            context, [AutofillHints.email]),// Email text field
+        buildCupertinoTextField(
+          'Email Address',
+          emailController,
+          false,
+          context,
+          [AutofillHints.email],
+          errorText: _emailErrorText,
+        ),
+        const SizedBox(height: 16),
+        buildCupertinoTextField(
+          'Password',
+          passwordController,
+          true,
+          context,
+          [AutofillHints.password],
+          errorText: _passwordErrorText,
+        ),
+        const SizedBox(height: 16),
+        GestureDetector(
+          onTap: () => Navigator.of(context).push(
+              CupertinoPageRoute(builder: (context) => ForgotPasswordScreen())),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'Forgot Password?',
+              style: TextStyle(
+                color: const Color(0xFF337586),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
         const SizedBox(height: 20),
-        buildCupertinoTextField('Password', passwordController, true,
-            context, [AutofillHints.password]), // Password text field
-        const SizedBox(height: 20),
-        buildTextButton(
-            context,
-            'Forgot Password?',
-            Alignment.centerRight,
-            const Color(0xFF337586),
-            12,
-            FontWeight.w500), // Forgot password text
-        const SizedBox(height: 20),
+        buildContinueButton(
+            context, 'Continue', accentColor, CupertinoColors.white),
       ],
     );
   }
 
-  // Continue button
-  // Continue button with loading indicator
   Widget buildContinueButton(BuildContext context, String text,
       Color backgroundColor, Color textColor) {
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-
     return CupertinoButton(
-      onPressed: () async {
-        try {
-          showLoadingDialog(context); // Show loading dialog
-          final UserCredential userCredential =
-              await _auth.signInWithEmailAndPassword(
-            email: emailController.text,
-            password: passwordController.text,
-          );
-          print("logged in");
-          Navigator.of(context).pop(); // Dismiss loading dialog
-
-          // Navigate to the home screen
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            '/nav',
-            (route) => false,
-            arguments: {'selectedIndex': 0},
-          );
-        } catch (e) {
-          Navigator.of(context).pop(); // Dismiss loading dialog on error
-          String errorMessage = e.toString();
-          errorMessage = errorMessage.replaceAll(RegExp(r'\[.*?\]\s'), '');
-
-          // Display formatted error in Cupertino alert dialog
-          showCupertinoDialog(
-            context: context,
-            builder: (context) {
-              return CupertinoAlertDialog(
-                title: Text('Login Error'),
-                content: Text("Your email or password is incorrect."),
-                actions: <Widget>[
-                  CupertinoDialogAction(
-                    child: Text('OK'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-          print('Login error: $errorMessage');
-        }
-      },
+      onPressed: _validateAndLogin,
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14),
       child: Text(
@@ -155,110 +104,87 @@ class LogInScreen extends StatelessWidget {
     );
   }
 
-  // Update the buildTextButton method to include onPressed callback
-  Widget buildTextButton(BuildContext context, String text, Alignment alignment,
-      Color color, double fontSize, FontWeight fontWeight) {
-    return GestureDetector(
-      onTap: () {
-        // Add your logic for the "Forgot Password?" action here
-        // For example, you can navigate to a password reset screen
-        //Navigator.pushNamed(context, '/reset_password');
-        Navigator.of(context).push(
-            CupertinoPageRoute(builder: (context) => ForgotPasswordScreen()));
-      },
-      child: Align(
-        alignment: alignment,
-        child: Text(
-          text,
-          style: TextStyle(
-            color: color,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-          ),
-        ),
-      ),
-    );
-  }
+  void _validateAndLogin() async {
+    // Reset error messages
+    setState(() {
+      _emailErrorText = null;
+      _passwordErrorText = null;
+    });
 
-  Future<UserCredential> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    bool isFormValid = true;
 
-    if (googleUser == null) {
-      throw FirebaseAuthException(
-        code: 'ERROR_ABORTED_BY_USER',
-        message: 'Sign in aborted by user',
-      );
+    // Check if the email field is empty
+    if (emailController.text.isEmpty) {
+      _emailErrorText = "Email is required.";
+      isFormValid = false;
+    }
+    // Check if the email format is valid
+    else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+        .hasMatch(emailController.text)) {
+      _emailErrorText = "Please enter a valid email address.";
+      isFormValid = false;
     }
 
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    // Check if the password field is empty
+    if (passwordController.text.isEmpty) {
+      _passwordErrorText = "Password is required.";
+      isFormValid = false;
+    }
 
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
+    // Update the UI to display error messages
+    setState(() {});
 
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+    // If form is valid, proceed to log in
+    if (isFormValid) {
+      _login();
+    }
   }
 
-  Future<UserCredential> signInWithApple() async {
-    final appleIdCredential = await SignInWithApple.getAppleIDCredential(
-      scopes: [
-        AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName,
+  Future<void> _login() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+      showLoadingDialog(context);
+      Navigator.of(context).pop();
+      Navigator.of(context).pushNamedAndRemoveUntil('/nav', (route) => false,
+          arguments: {'selectedIndex': 0});
+    } catch (e) {
+      // showCupertinoDialog(
+      //   context: context,
+      //   builder: (context) => CupertinoAlertDialog(
+      //     title: Text('Login Error'),
+      //     content: Text("Your email or password is incorrect."),
+      //     actions: <Widget>[
+      //       CupertinoDialogAction(
+      //         child: Text('OK'),
+      //         onPressed: () => Navigator.of(context).pop(),
+      //       ),
+      //     ],
+      //   ),
+      // );
+      // instead of showing a dialog, we change the error text
+      setState(() {
+        _emailErrorText = "Your email or password is incorrect.";
+      });
+    }
+  }
+
+  Widget buildBottomGroup(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 12),
+        buildCenteredText('or', 12, FontWeight.w600),
+        const SizedBox(height: 12),
+        buildGoogleSignInButton(context),
+        const SizedBox(height: 16),
+        buildAppleSignInButton(context),
+        const SizedBox(height: 26),
+        buildSignUpText(
+            context, "Don't have an account? ", 'Sign up', '/signup'),
       ],
-    );
-
-    final oauthCredential = OAuthProvider("apple.com").credential(
-      idToken: appleIdCredential.identityToken,
-      accessToken: appleIdCredential.authorizationCode,
-    );
-
-    return await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-  }
-
-  Widget buildAppleSignInButton(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 50,
-      decoration: BoxDecoration(
-        color: CupertinoColors.black,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: CupertinoButton(
-        onPressed: () async {
-          try {
-            await signInWithApple();
-            // Navigate to home or desired screen
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              '/nav',
-              (route) => false,
-              arguments: {'selectedIndex': 0},
-            );
-          } catch (e) {
-            // Handle exceptions
-            print('Apple Sign-In error: $e');
-          }
-        },
-        color: CupertinoColors.black,
-        borderRadius: BorderRadius.circular(14),
-        padding: EdgeInsets.zero,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/images/apple.png', width: 16, height: 16),
-            const SizedBox(width: 8),
-            Text(
-              'Sign in with Apple',
-              style: TextStyle(
-                color: CupertinoColors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -278,14 +204,10 @@ class LogInScreen extends StatelessWidget {
         onPressed: () async {
           try {
             await signInWithGoogle();
-            // Navigate to home or desired screen
             Navigator.of(context).pushNamedAndRemoveUntil(
-              '/nav',
-              (route) => false,
-              arguments: {'selectedIndex': 0},
-            );
+                '/nav', (route) => false,
+                arguments: {'selectedIndex': 0});
           } catch (e) {
-            // Handle exceptions like user cancellation or network issues
             print('Google Sign-In error: $e');
           }
         },
@@ -313,7 +235,47 @@ class LogInScreen extends StatelessWidget {
     );
   }
 
-  // Method to show a loading dialog
+  Widget buildAppleSignInButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        color: CupertinoColors.black,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: CupertinoButton(
+        onPressed: () async {
+          try {
+            await signInWithApple();
+            Navigator.of(context).pushNamedAndRemoveUntil(
+                '/nav', (route) => false,
+                arguments: {'selectedIndex': 0});
+          } catch (e) {
+            print('Apple Sign-In error: $e');
+          }
+        },
+        color: CupertinoColors.black,
+        borderRadius: BorderRadius.circular(14),
+        padding: EdgeInsets.zero,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/apple.png', width: 16, height: 16),
+            const SizedBox(width: 8),
+            Text(
+              'Sign in with Apple',
+              style: TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void showLoadingDialog(BuildContext context) {
     showCupertinoModalPopup(
       context: context,
@@ -326,9 +288,7 @@ class LogInScreen extends StatelessWidget {
               color: CupertinoColors.systemBackground.resolveFrom(context),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: 
-            //indicator and the text below it
-            Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CupertinoActivityIndicator(),
@@ -346,5 +306,43 @@ class LogInScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    if (googleUser == null) {
+      throw FirebaseAuthException(
+        code: 'ERROR_ABORTED_BY_USER',
+        message: 'Sign in aborted by user',
+      );
+    }
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final OAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  Future<UserCredential> signInWithApple() async {
+    final AuthorizationCredentialAppleID appleIdCredential =
+        await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+
+    final oauthCredential = OAuthProvider("apple.com").credential(
+      idToken: appleIdCredential.identityToken,
+      accessToken: appleIdCredential.authorizationCode,
+    );
+
+    return await FirebaseAuth.instance.signInWithCredential(oauthCredential);
   }
 }
