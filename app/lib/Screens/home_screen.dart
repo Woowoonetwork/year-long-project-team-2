@@ -62,8 +62,31 @@ class _HomeScreenState extends State<HomeScreen> {
         cards.add(await _buildPostCard(doc));
       }
     }
-    cards.add(SizedBox(height: 100));
+    if (cards.isEmpty) {
+      // If after filtering, no cards are left, add a message widget
+      cards.add(_buildNoPostsWidget());
+    } else {
+      // Add a SizedBox for spacing if there are cards
+      cards.add(SizedBox(height: 100));
+    }
     return cards;
+  }
+
+  Widget _buildNoPostsWidget() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          'No posts available yet',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey, // Customize the color to fit your app theme
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
   }
 
   Future<Widget> _buildPostCard(QueryDocumentSnapshot document) async {
