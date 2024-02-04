@@ -57,7 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<List<Widget>> _processSnapshot(QuerySnapshot snapshot) async {
     List<Widget> cards = [];
     for (var doc in snapshot.docs) {
-      cards.add(await _buildPostCard(doc));
+      var data = doc.data() as Map<String, dynamic>?;
+      if (data != null && !data.containsKey('reserved_by')) {
+        cards.add(await _buildPostCard(doc));
+      }
     }
     cards.add(SizedBox(height: 100));
     return cards;
@@ -126,6 +129,11 @@ class _HomeScreenState extends State<HomeScreen> {
     // Correcting the return type by using Future.wait
     var futures = querySnapshot.docs
         .where((doc) => _matchesSearchString(doc, searchString))
+        .where((doc) {
+          var data = doc.data() as Map<String, dynamic>;
+          // Exclude documents with reserved_by field
+          return !data.containsKey('reserved_by');
+        })
         .map((doc) => _buildPostCard(doc))
         .toList();
 
