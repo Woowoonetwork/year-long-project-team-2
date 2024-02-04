@@ -67,6 +67,20 @@ class _AccountScreenState extends State<AccountScreen> {
         print('Error listening to post changes: $error');
       }
     });
+
+    // Subscribe to changes in the entire collection to refresh the page when any new post is added
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .orderBy('post_timestamp', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      if (mounted) {
+        // Refresh the page when any new post is added but the UI will only be updated for the current user's posts
+        if (snapshot.docs.isNotEmpty) {
+          updateActiveOrders(snapshot.docs);
+        }
+      }
+    });
   }
 
   void _updateAdjustedFontSize() {
