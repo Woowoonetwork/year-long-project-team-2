@@ -27,6 +27,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confPasswordController = TextEditingController();
   final _provinceController = TextEditingController();
   final _cityController = TextEditingController();
 
@@ -55,6 +56,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confPasswordController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _provinceController.dispose();
@@ -102,6 +104,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         const SizedBox(height: 20),
         buildCupertinoTextField('Password', _passwordController, true, context,
             [AutofillHints.password]), // Password text field
+        const SizedBox(height: 20),
+        buildCupertinoTextField('Confirm Password', _confPasswordController, true, context,
+            [AutofillHints.password]), // Confirm password text field
         const SizedBox(height: 20),
         buildTwoPickerFieldsRow(
           'Province',
@@ -204,8 +209,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               _lastNameController.text.isNotEmpty &&
               _emailController.text.isNotEmpty &&
               _passwordController.text.isNotEmpty &&
+              _confPasswordController.text.isNotEmpty &&
               _selectedProvince.isNotEmpty &&
               _selectedCity.isNotEmpty) {
+            if(_passwordController.text!=_confPasswordController.text){
+            showCupertinoDialog(
+              context: context,
+              builder: (BuildContext context) => CupertinoAlertDialog(
+                title: Text('Password Mismatch'),
+                content: Text("The passwords don't match. Please check and try again."),
+                actions: <CupertinoDialogAction>[
+                  CupertinoDialogAction(
+                    isDefaultAction: true,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              ),
+            );
+}else{
             try {
               showLoadingDialog(context); // Show loading dialog
 
@@ -254,7 +278,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             } catch (e) {
               // Handle registration errors
               print('Registration failed: $e');
-            }
+            showCupertinoDialog(
+              context: context,
+              builder: (BuildContext context) => CupertinoAlertDialog(
+                title: Text('Registration Failed'),
+                content: Text('$e'),
+                actions: <CupertinoDialogAction>[
+                  CupertinoDialogAction(
+                    isDefaultAction: true,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              ),
+            );
+            }}
           } else {
             // Show Cupertino alert dialog
             showCupertinoDialog(
