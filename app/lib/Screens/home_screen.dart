@@ -270,22 +270,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: CupertinoSearchTextField(
                     controller: textController,
                     focusNode: _focusNode,
-                    prefixIcon: Icon(
-                      FeatherIcons.search,
-                      size: 18.0,
-                      color:
-                          CupertinoColors.placeholderText.resolveFrom(context),
+                    prefixIcon: Container(
+                      margin: EdgeInsets.only(left: 6.0, top: 2.0),
+                      child: Icon(
+                        FeatherIcons.search,
+                        size: 18.0,
+                      ),
                     ),
-                    backgroundColor: CupertinoColors
-                        .white, //  background to white for search bar
+                    backgroundColor: CupertinoColors.tertiarySystemBackground,
+
                     placeholderStyle: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w400,
                       color:
-                          CupertinoColors.placeholderText.resolveFrom(context),
+                          CupertinoColors.secondaryLabel.resolveFrom(context),
                     ),
                     style: TextStyle(
                       color: CupertinoColors.black,
                     ),
                     placeholder: 'Search',
+                    suffixIcon: Icon(
+                      FeatherIcons.x,
+                      color:
+                          CupertinoColors.secondaryLabel.resolveFrom(context),
+                      size: 20,
+                    ),
                     onSuffixTap:
                         _clearSearch, // Clear text when the suffix (x) icon is tapped
                   ),
