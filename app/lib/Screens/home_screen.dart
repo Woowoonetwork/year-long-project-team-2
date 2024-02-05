@@ -273,6 +273,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     prefixIcon: Icon(
                       FeatherIcons.search,
                       size: 18.0,
+                      color:
+                          CupertinoColors.placeholderText.resolveFrom(context),
+                    ),
+                    backgroundColor: CupertinoColors
+                        .white, //  background to white for search bar
+                    placeholderStyle: TextStyle(
+                      color:
+                          CupertinoColors.placeholderText.resolveFrom(context),
+                    ),
+                    style: TextStyle(
+                      color: CupertinoColors.black,
                     ),
                     placeholder: 'Search',
                     onSuffixTap:
@@ -280,8 +291,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SizedBox(
-                    width: 8), //  spacing between search bar and cancel button
-                // showing Cancel button if the search bar is focused
+                    width: 8), // spacing between search bar and cancel button
+                // Only show the Cancel button if the search bar is focused
                 if (isFocused)
                   GestureDetector(
                     onTap:
@@ -289,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: CupertinoColors.activeBlue,
+                        color: accentColor,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -297,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          if (!isFocused) // showing filter button if the search bar is not focused
+          if (!isFocused) // Only show the filter button if the search bar is not focused
             Padding(
               padding: EdgeInsets.only(left: 8),
               child: _buildFilterButton(),
