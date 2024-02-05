@@ -63,10 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
     if (cards.isEmpty) {
-      // If after filtering, no cards are left, add a message widget
+      // If after filtering, no cards are left, display text
       cards.add(_buildNoPostsWidget());
     } else {
-      // Add a SizedBox for spacing if there are cards
       cards.add(SizedBox(height: 100));
     }
     return cards;
@@ -81,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.grey, // Customize the color to fit your app theme
+            color: Colors.grey,
           ),
           textAlign: TextAlign.center,
         ),
@@ -239,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     } else {
-      // Display the list of post cards
+      // Displaying the list of post cards
       return SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) => postCards[index],
@@ -252,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSearchBar(BuildContext context) {
     bool isFocused = _focusNode.hasFocus;
 
-    // Function to clear text and dismiss keyboard
+    // Clearing text and keyboard pop down
     void _clearSearch() {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => textController.clear());
@@ -281,9 +280,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SizedBox(
-                    width:
-                        8), // Provide some spacing between search bar and cancel button
-                // Only show the Cancel button if the search bar is focused
+                    width: 8), //  spacing between search bar and cancel button
+                // showing Cancel button if the search bar is focused
                 if (isFocused)
                   GestureDetector(
                     onTap:
@@ -299,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          if (!isFocused) // Only show the filter button if the search bar is not focused
+          if (!isFocused) // showing filter button if the search bar is not focused
             Padding(
               padding: EdgeInsets.only(left: 8),
               child: _buildFilterButton(),
