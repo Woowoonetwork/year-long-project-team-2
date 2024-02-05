@@ -251,17 +251,60 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSearchBar(BuildContext context) {
     bool isFocused = _focusNode.hasFocus;
+
+    // Function to clear text and dismiss keyboard
+    void _clearSearch() {
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => textController.clear());
+      FocusScope.of(context).requestFocus(FocusNode());
+    }
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Expanded(child: _buildSearchTextField(context)),
-          if (!isFocused) SizedBox(width: 10),
-          if (!isFocused) _buildFilterButton()
-        ]),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: CupertinoSearchTextField(
+                    controller: textController,
+                    focusNode: _focusNode,
+                    prefixIcon: Icon(
+                      FeatherIcons.search,
+                      size: 18.0,
+                    ),
+                    placeholder: 'Search',
+                    onSuffixTap:
+                        _clearSearch, // Clear text when the suffix (x) icon is tapped
+                  ),
+                ),
+                SizedBox(
+                    width:
+                        8), // Provide some spacing between search bar and cancel button
+                // Only show the Cancel button if the search bar is focused
+                if (isFocused)
+                  GestureDetector(
+                    onTap:
+                        _clearSearch, // Clear text and hide keyboard when "Cancel" is tapped
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: CupertinoColors.activeBlue,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (!isFocused) // Only show the filter button if the search bar is not focused
+            Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: _buildFilterButton(),
+            ),
+        ],
       ),
     );
   }
@@ -302,14 +345,18 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 37,
       width: 37,
       decoration: BoxDecoration(
-          color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-          borderRadius: BorderRadius.circular(10)),
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Icon(FeatherIcons.filter,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              size: 20),
-          onPressed: () {}),
+        padding: EdgeInsets.zero,
+        child: Icon(FeatherIcons.filter,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            size: 20),
+        onPressed: () {
+          // Implement filter logic
+        },
+      ),
     );
   }
 
