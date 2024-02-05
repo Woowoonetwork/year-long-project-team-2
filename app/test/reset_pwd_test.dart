@@ -24,7 +24,7 @@ void main(){
     // Verify that the Text field is rendered.
     expect(find.byType(CupertinoTextField), findsOneWidget, reason: "Text field not found");
 
-    // Verify that the Submit button and back buttons are rendered.
+    // Verify that the submit button and back buttons are rendered.
     expect(find.byType(CupertinoButton), findsNWidgets(2), reason: "Submit and back button not found");
 
   });
