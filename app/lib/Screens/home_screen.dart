@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isSearching = false;
   final TextEditingController textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   List<Widget> postCards = [];
@@ -134,11 +135,24 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _onSearchTextChanged() async {
+  void _onSearchTextChanged() {
     var searchString = textController.text.toLowerCase();
-    if (mounted) {
-      postCards = await fetchPosts(searchString);
-      setState(() {});
+    if (searchString.isNotEmpty) {
+      setState(() {
+        isSearching = true;
+      });
+      fetchPosts(searchString).then((posts) {
+        if (mounted) {
+          setState(() {
+            postCards = posts;
+          });
+        }
+      });
+    } else {
+      setState(() {
+        isSearching = false;
+        _loadInitialPosts(); // Reload initial posts if search text is cleared
+      });
     }
   }
 
@@ -211,34 +225,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildPostListSliver() {
-    if (postCards.isEmpty) {
-      // Display message and icon when there are no posts
+    if (postCards.isEmpty && !isSearching) {
+      // Display message when there are no posts in the initial load
+      return SliverFillRemaining(
+        child: Center(child: _buildNoPostsWidget()),
+      );
+    } else if (postCards.isEmpty && isSearching) {
+      // Display message when search returns no results
       return SliverFillRemaining(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                FeatherIcons.search,
-                size: 42,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-              SizedBox(height: 20),
-              Text(
-                'No results found',
-                style: TextStyle(
-                  fontSize: 16,
-                  letterSpacing: -0.6,
-                  fontWeight: FontWeight.w500,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-              ),
-            ],
+          child: Text(
+            'No results found',
+            style: TextStyle(
+              fontSize: 16,
+              letterSpacing: -0.6,
+              fontWeight: FontWeight.w500,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
           ),
         ),
       );
     } else {
-      // Displaying the list of post cards
+      // Display the list of post cards or search results
       return SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) => postCards[index],
@@ -253,9 +261,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Clearing text and keyboard pop down
     void _clearSearch() {
-      WidgetsBinding.instance
-          .addPostFrameCallback((_) => textController.clear());
-      FocusScope.of(context).requestFocus(FocusNode());
+      // Clear the search text field
+      textController.clear();
+
+      // Dismiss the keyboard by removing focus from the search text field
+      if (_focusNode.hasFocus) {
+        _focusNode.unfocus();
+      }
+
+      // Reset the search state and reload initial posts
+      setState(() {
+        isSearching = false;
+        _loadInitialPosts(); // Reload initial posts to revert UI to its initial state
+      });
     }
 
     return Padding(
@@ -305,11 +323,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (isFocused)
                   GestureDetector(
                     onTap:
-                        _clearSearch, // Clear text and hide keyboard when "Cancel" is tapped
+                        _clearSearch, // Ensure this is correctly set to call _clearSearch
                     child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: accentColor,
+                        color: accentColor, // Use your accent color here
                         fontWeight: FontWeight.w400,
                       ),
                     ),
