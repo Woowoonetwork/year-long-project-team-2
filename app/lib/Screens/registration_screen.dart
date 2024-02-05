@@ -7,8 +7,10 @@ import '../components.dart';
 import '../auth_service.dart';
 import '../firestore_service.dart';
 import 'package:feather_icons/feather_icons.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:FoodHood/Screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final AuthService auth;
@@ -25,11 +27,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confPasswordController = TextEditingController();
   final _provinceController = TextEditingController();
   final _cityController = TextEditingController();
 
   String _selectedProvince = '';
   String _selectedCity = '';
+
+  String? _emailErrorText;
+  String? _passwordErrorText;
+  String? _confPasswordErrorText;
+  String? _firstNameErrorText;
+  String? _lastNameErrorText;
 
   List<String> provinces = []; // Updated to be fetched from Firestore
   Map<String, List<String>> cities = {}; // Updated to be fetched from Firestore
@@ -38,12 +47,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void initState() {
     super.initState();
     fetchProvincesAndCities();
+
+    // Set default values here
+    if (provinces.isNotEmpty) {
+      _selectedProvince = provinces.first;
+      if (cities.containsKey(_selectedProvince) &&
+          cities[_selectedProvince]!.isNotEmpty) {
+        _selectedCity = cities[_selectedProvince]!.first;
+      }
+    }
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confPasswordController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _provinceController.dispose();
@@ -78,19 +97,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       children: [
         buildText(
             'Create an account', 34, FontWeight.w600), // Create an account text
-        const SizedBox(height: 50),
+        SizedBox(height: 30),
         buildTwoFieldsRow(
           'First Name',
           _firstNameController,
           'Last Name',
           _lastNameController,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         buildCupertinoTextField('Email Address', _emailController, false,
-            context), // Email text field
-        const SizedBox(height: 20),
-        buildCupertinoTextField('Password', _passwordController, true, context),
-        const SizedBox(height: 20),
+            context, [AutofillHints.email],
+            errorText: _emailErrorText),
+        const SizedBox(height: 16),
+        buildCupertinoTextField('Password', _passwordController, true, context,
+            [AutofillHints.password],
+            errorText: _passwordErrorText),
+        const SizedBox(height: 16),
+        buildCupertinoTextField('Confirm Password', _confPasswordController,
+            true, context, [AutofillHints.password],
+            errorText: _confPasswordErrorText), // Confirm password text field
+        const SizedBox(height: 16),
         buildTwoPickerFieldsRow(
           'Province',
           _selectedProvince,
@@ -110,15 +136,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             });
           },
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 36),
         _buildContinueButton(
-            context, 'Create account', accentColor, CupertinoColors.white),
-        const SizedBox(height: 20),
-        buildCenteredText('or', 14, FontWeight.w600), // Or text
-        const SizedBox(height: 20),
+            context, 'Register', accentColor, CupertinoColors.white),
+        const SizedBox(height: 12),
+        buildCenteredText('or', 12, FontWeight.w600), // Or text
+        const SizedBox(height: 12),
         buildGoogleSignInButton(context), // Google sign in button
-        const SizedBox(height: 20),
-        buildSignUpText(context, "Already have an account? ", 'Sign in',
+        const SizedBox(height: 16),
+        buildAppleSignInButton(context), // Apple sign in button
+        const SizedBox(height: 24),
+        buildSignUpText(context, "Already have an account? ", 'Log in',
             '/signin'), // Sign up text
       ],
     );
@@ -136,14 +164,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           child: Padding(
             padding: const EdgeInsets.only(right: 10.0),
             child: buildCupertinoTextField(
-                placeholder1, controller1, false, context),
+                placeholder1, controller1, false, context, [],
+                errorText: _firstNameErrorText),
           ),
         ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(left: 10.0),
             child: buildCupertinoTextField(
-                placeholder2, controller2, false, context),
+                placeholder2, controller2, false, context, [],
+                errorText: _lastNameErrorText),
           ),
         ),
       ],
@@ -183,81 +213,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Widget _buildContinueButton(BuildContext context, String text,
       Color backgroundColor, Color textColor) {
     return CupertinoButton(
-      onPressed: () async {
-        if (_formKey.currentState?.validate() ?? false) {
-          // Check if all fields are filled
-          if (_firstNameController.text.isNotEmpty &&
-              _lastNameController.text.isNotEmpty &&
-              _emailController.text.isNotEmpty &&
-              _passwordController.text.isNotEmpty &&
-              _selectedProvince.isNotEmpty &&
-              _selectedCity.isNotEmpty) {
-            try {
-              await widget.auth.signUp(
-                email: _emailController.text,
-                password: _passwordController.text,
-              );
-              // User registration successful
-              print('User registered');
-              String? userID = await widget.auth.getUserId();
-              if (userID != null) {
-                await addDocument(
-                  collectionName: 'user',
-                  filename: userID,
-                  fieldNames: [
-                    'firstName',
-                    'lastName',
-                    'province',
-                    'city',
-                    'email',
-                    'itemsSold',
-                    'description',
-                    'posts'
-                  ],
-                  fieldValues: [
-                    _firstNameController.text,
-                    _lastNameController.text,
-                    _provinceController.text,
-                    _cityController.text,
-                    _emailController.text,
-                    [],
-                    '',
-                    []
-                  ],
-                );
-                print("added new user doc");
-              }
-              // Navigate to the home screen
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/nav',
-                (route) => false,
-                arguments: {'selectedIndex': 0},
-              );
-            } catch (e) {
-              // Handle registration errors
-              print('Registration failed: $e');
-            }
-          } else {
-            // Show Cupertino alert dialog
-            showCupertinoDialog(
-              context: context,
-              builder: (BuildContext context) => CupertinoAlertDialog(
-                title: Text('Incomplete Form'),
-                content: Text('Please fill all the fields to register.'),
-                actions: <CupertinoDialogAction>[
-                  CupertinoDialogAction(
-                    isDefaultAction: true,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              ),
-            );
-          }
-        }
-      },
+      onPressed:
+          _validateAndSubmit, // Pass the function reference directly without braces
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14),
       child: Text(
@@ -267,6 +224,160 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+  }
+
+  Future<void> _validateAndSubmit() async {
+    bool isFormValid = true;
+
+    setState(() {
+      _emailErrorText = null;
+      _passwordErrorText = null;
+      _confPasswordErrorText = null;
+      _firstNameErrorText = null;
+      _lastNameErrorText = null;
+    });
+
+    if (_firstNameController.text.isEmpty) {
+      _firstNameErrorText = "First name is required.";
+      isFormValid = false;
+    }
+    if (_lastNameController.text.isEmpty) {
+      _lastNameErrorText = "Last name is required.";
+      isFormValid = false;
+    }
+    if (_emailController.text.isEmpty) {
+      _emailErrorText = "Email is required.";
+      isFormValid = false;
+    } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+        .hasMatch(_emailController.text)) {
+      _emailErrorText = "Please enter a valid email address.";
+      isFormValid = false;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      _passwordErrorText = "Password is required.";
+      isFormValid = false;
+    }
+    if (_confPasswordController.text.isEmpty) {
+      _confPasswordErrorText = "Please confirm your password.";
+      isFormValid = false;
+    }
+    if (_passwordController.text != _confPasswordController.text) {
+      _passwordErrorText = 'The passwords do not match.';
+      _confPasswordErrorText = 'The passwords do not match.';
+      isFormValid = false;
+    }
+
+    bool isValidForm = _formKey.currentState?.validate() ?? false;
+    isFormValid = isFormValid && isValidForm;
+
+    if (!isFormValid) {
+      setState(() {});
+      return;
+    }
+
+    await registerUser();
+  }
+
+  Future<void> registerUser() async {
+    showLoadingDialog(context);
+
+    try {
+      await widget.auth.signUp(
+          email: _emailController.text, password: _passwordController.text);
+      // Registration successful, continue with further steps
+      String? userID = await widget.auth.getUserId();
+      if (userID != null) {
+        await addDocumentToFirestore(userID);
+        Navigator.of(context).pop(); // Close loading dialog
+        navigateToHomeScreen(); // Navigate to home screen
+      }
+    } on FirebaseAuthException catch (e) {
+      Navigator.of(context).pop(); // Close loading dialog
+      handleFirebaseAuthException(
+          e); // Handle FirebaseAuth exceptions including weak password
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading dialog
+      showGeneralErrorDialog(e.toString()); // Handle other exceptions
+    }
+  }
+
+  void navigateToHomeScreen() {
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil('/nav', (route) => false, arguments: {
+      'selectedIndex': 0,
+    });
+  }
+
+  Future<void> addDocumentToFirestore(String userID) async {
+    // Reference to Firestore
+    String? userID = await widget.auth.getUserId();
+    if (userID == null) {
+      print("User ID is null");
+      return;
+    }
+    try {
+      await addDocument(
+        collectionName: 'user',
+        filename: userID,
+        fieldNames: [
+          'firstName',
+          'lastName',
+          'province',
+          'city',
+          'email',
+          'itemsSold',
+          'description',
+          'posts'
+        ],
+        fieldValues: [
+          _firstNameController.text,
+          _lastNameController.text,
+          _selectedProvince, // Use the selected province
+          _selectedCity, // Use the selected city
+          _emailController.text,
+          [],
+          '',
+          []
+        ],
+      );
+
+      print("User document added successfully.");
+    } catch (e) {
+      print("Error adding user document: $e");
+      throw e; // Rethrow the exception to be handled elsewhere
+    }
+  }
+
+  void handleFirebaseAuthException(FirebaseAuthException e) {
+    // Set state for specific error messages based on the exception code
+    setState(() {
+      if (e.code == 'email-already-in-use')
+        _emailErrorText = 'This email address is already in use.';
+      else if (e.code == 'invalid-email')
+        _emailErrorText = 'Please enter a valid email address.';
+      else if (e.code == 'weak-password')
+        _passwordErrorText = 'The password is too weak.';
+      else
+        _emailErrorText = 'An unexpected error occurred.';
+    });
+  }
+
+  void showGeneralErrorDialog(dynamic e) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: Text('Registration Failed'),
+        content: Text('An unexpected error occurred: $e'),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
       ),
     );
   }
@@ -283,24 +394,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         // Access the 'location' field in the fetched data
         Map<String, dynamic> data = locationData['location'];
 
-        // Rest of your code to process the location data
         Map<String, List<String>> fetchedCities = {};
 
         data.forEach((province, citiesList) {
           if (citiesList is List) {
-            fetchedCities[province] = List<String>.from(citiesList);
+            // Sort cities alphabetically
+            List<String> sortedCities = List<String>.from(citiesList);
+            sortedCities.sort((a, b) => a.compareTo(b));
+            fetchedCities[province] = sortedCities;
           }
         });
 
-        if (fetchedCities.isNotEmpty) {
+        // Sort provinces alphabetically
+        List<String> sortedProvinces = fetchedCities.keys.toList()
+          ..sort((a, b) => a.compareTo(b));
+
+        if (sortedProvinces.isNotEmpty) {
           setState(() {
-            provinces = fetchedCities.keys.toList();
+            provinces = sortedProvinces;
             cities = fetchedCities;
 
-            _selectedProvince = provinces.isNotEmpty ? provinces.first : '';
-            _selectedCity = cities[_selectedProvince]?.isNotEmpty == true
-                ? cities[_selectedProvince]!.first
-                : '';
+            _selectedProvince = provinces.first;
+            _selectedCity = cities[_selectedProvince]?.first ?? '';
           });
         }
       }
@@ -319,7 +434,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CupertinoButton(
-          padding: EdgeInsets.all(12),
+          padding: EdgeInsets.all(16),
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.tertiarySystemBackground, context),
           borderRadius: BorderRadius.circular(12),
@@ -331,15 +446,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               Expanded(
                 child: Text(currentValue,
                     style: TextStyle(
-                        color: currentValue == label
-                            ? CupertinoDynamicColor.resolve(
-                                CupertinoColors.placeholderText, context)
-                            : CupertinoDynamicColor.resolve(
-                                CupertinoColors.label, context),
-                        fontSize:
-                            17.0)), // Use systemGrey if it's a placeholder, otherwise black
+                      color: currentValue == label
+                          ? CupertinoDynamicColor.resolve(
+                              CupertinoColors.placeholderText, context)
+                          : CupertinoDynamicColor.resolve(
+                              CupertinoColors.label, context),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    )), // Use systemGrey if it's a placeholder, otherwise black
               ),
               Icon(FeatherIcons.chevronDown,
+                  size: 18,
                   color: CupertinoDynamicColor.resolve(
                       CupertinoColors.label, context)),
             ],
@@ -359,8 +476,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
-        height: 250,
-        color: CupertinoColors.white,
+        height: 320,
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
         child: Column(
           children: [
             // Button Bar for Done and Cancel
@@ -368,11 +485,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 CupertinoButton(
-                  child: Text('Cancel'),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: CupertinoDynamicColor.resolve(
+                          CupertinoColors.label, context),
+                    ),
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 CupertinoButton(
-                  child: Text('Done'),
+                  child: Text(
+                    'Done',
+                    style: TextStyle(
+                      color: CupertinoDynamicColor.resolve(
+                          CupertinoColors.label, context),
+                    ),
+                  ),
                   onPressed: () {
                     if (onSelectedItemChanged != null) {
                       onSelectedItemChanged(options[initialItem]);
@@ -385,7 +514,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             // Picker
             Expanded(
               child: CupertinoPicker(
-                backgroundColor: CupertinoColors.white,
                 itemExtent: 30,
                 scrollController: FixedExtentScrollController(
                   initialItem: initialItem,
@@ -411,6 +539,237 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         fontWeight: fontWeight,
         letterSpacing: letterSpacing,
       ),
+    );
+  }
+
+  Widget buildGoogleSignInButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.systemGrey2, context),
+          width: 0.6,
+        ),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: CupertinoButton(
+        onPressed: () async {
+          try {
+            await signInWithGoogle();
+            // Navigate to home or desired screen
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/nav',
+              (route) => false,
+              arguments: {'selectedIndex': 0},
+            );
+          } catch (e) {
+            // Handle exceptions like user cancellation or network issues
+            print('Google Sign-In error: $e');
+          }
+        },
+        color: CupertinoDynamicColor.resolve(
+            CupertinoColors.tertiarySystemBackground, context),
+        borderRadius: BorderRadius.circular(14),
+        padding: EdgeInsets.zero,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/google.png', width: 20, height: 20),
+            const SizedBox(width: 2),
+            Text(
+              'Sign in with Google',
+              style: TextStyle(
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    if (googleUser == null) {
+      throw FirebaseAuthException(
+        code: 'ERROR_ABORTED_BY_USER',
+        message: 'Sign in aborted by user',
+      );
+    }
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+
+    String displayName = googleUser.displayName ?? '';
+    List<String> names = displayName.split(' ');
+    String firstName = names.first;
+    String lastName = names.length > 1 ? names.last : '';
+
+    // Create an account in your system using the fetched details
+    await createAccount(userCredential, firstName, lastName);
+
+    return userCredential;
+  }
+
+  Future<UserCredential> signInWithApple() async {
+    final appleIdCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+
+    final oauthCredential = OAuthProvider("apple.com").credential(
+      idToken: appleIdCredential.identityToken,
+      accessToken: appleIdCredential.authorizationCode,
+    );
+
+    UserCredential userCredential =
+        await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+
+    await createAccount(userCredential, appleIdCredential.givenName ?? '',
+        appleIdCredential.familyName ?? '');
+
+    print(userCredential.user?.displayName);
+    print(userCredential.user?.email);
+
+    return userCredential;
+  }
+
+  Future<void> createAccount(
+      UserCredential userCredential, String firstName, String lastName) async {
+    print("Attempting to create account..."); // Debugging print
+
+    try {
+      String? userID = userCredential.user?.uid;
+      print("User ID: $userID"); // Debugging print
+
+      if (userID != null) {
+        // Add the user data to Firestore
+        await addDocument(
+          collectionName: 'user',
+          filename: userID,
+          fieldNames: [
+            'firstName',
+            'lastName',
+            'province',
+            'city',
+            'email',
+            'itemsSold',
+            'description',
+            'posts'
+          ],
+          fieldValues: [
+            firstName,
+            lastName,
+            '',
+            '',
+            userCredential.user?.email ?? '',
+            [],
+            '',
+            []
+          ],
+        );
+        print("Account created for social sign-in"); // Success print
+      } else {
+        print("User ID is null"); // Debugging print for null userID
+      }
+    } catch (e) {
+      print("Failed to create account for social sign-in: $e"); // Error print
+    }
+  }
+
+  Widget buildAppleSignInButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      decoration: BoxDecoration(
+        color: CupertinoColors.black,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: CupertinoButton(
+        onPressed: () async {
+          try {
+            await signInWithApple();
+            // Navigate to home or desired screen
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/nav',
+              (route) => false,
+              arguments: {'selectedIndex': 0},
+            );
+          } catch (e) {
+            // Handle exceptions
+            print('Apple Sign-In error: $e');
+          }
+        },
+        color: CupertinoColors.black,
+        borderRadius: BorderRadius.circular(14),
+        padding: EdgeInsets.zero,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/apple.png', width: 16, height: 16),
+            const SizedBox(width: 8),
+            Text(
+              'Sign in with Apple',
+              style: TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Method to show a loading dialog
+  void showLoadingDialog(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child:
+                //indicator and the text below it
+                Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CupertinoActivityIndicator(),
+                SizedBox(height: 24),
+                Text(
+                  'Logging in',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

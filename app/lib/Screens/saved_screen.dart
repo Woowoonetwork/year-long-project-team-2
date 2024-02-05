@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
-import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Components/post_card.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:feather_icons/feather_icons.dart';
-import 'package:FoodHood/firestore_service.dart';
-
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Components/post_card.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 
 class SavedScreen extends StatefulWidget {
   @override
@@ -15,6 +15,9 @@ class SavedScreen extends StatefulWidget {
 
 class _SavedScreenState extends State<SavedScreen> {
   final String userId = FirebaseAuth.instance.currentUser!.uid;
+  List<String> savedPostIds = [];
+  bool isLoading = true;
+  StreamSubscription? _savedPostsSubscription;
 
   @override
   Widget build(BuildContext context) {
@@ -23,161 +26,216 @@ class _SavedScreenState extends State<SavedScreen> {
       child: CustomScrollView(
         slivers: <Widget>[
           _buildNavigationBar(),
-          _buildSavedPostsStream(),
+          if (isLoading) // If it's loading, show the loading indicator
+            _buildLoadingSliver()
+          else if (savedPostIds
+              .isEmpty) // If there are no saved posts, show the empty message
+            _buildNoSavedPostsMessage()
+          else // If there are saved posts, show the list
+            _buildSavedPostsList(savedPostIds),
         ],
       ),
-    );
-  }
-
-  CupertinoSliverNavigationBar _buildNavigationBar() {
-    return CupertinoSliverNavigationBar(
-      backgroundColor: groupedBackgroundColor,
-      largeTitle: Text('Saved'),
-      border: Border(bottom: BorderSide.none),
-      stretch: true,
     );
   }
 
   @override
   void initState() {
     super.initState();
-    _fetchUserData(userId);
+    _fetchSavedPosts();
+    _listenForSavedPosts();
+  }
+
+  Future<void> _fetchSavedPosts() async {
+    if (mounted) {
+      setState(() => isLoading = true);
+    }
+    var document =
+        await FirebaseFirestore.instance.collection('user').doc(userId).get();
+    if (document.exists && document.data()!.containsKey('saved_posts')) {
+      savedPostIds = List<String>.from(document.data()!['saved_posts']);
+    }
+    if (mounted) {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void _listenForSavedPosts() {
+    _savedPostsSubscription = FirebaseFirestore.instance
+        .collection('user')
+        .doc(userId)
+        .snapshots()
+        .listen(
+      (document) {
+        if (mounted) {
+          if (document.exists && document.data()!.containsKey('saved_posts')) {
+            setState(() {
+              savedPostIds = List<String>.from(document.data()!['saved_posts']);
+              isLoading = false;
+            });
+          }
+        }
+      },
+      onError: (error) => print("Error listening to saved posts: $error"),
+    );
   }
 
   @override
   void dispose() {
+    _savedPostsSubscription?.cancel(); // Cancel the stream subscription
     super.dispose();
   }
 
-  StreamBuilder<DocumentSnapshot> _buildSavedPostsStream() {
-  return StreamBuilder<DocumentSnapshot>(
-    stream: FirebaseFirestore.instance.collection('user').doc(userId).snapshots(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return SliverFillRemaining(
-          child: Center(child: CupertinoActivityIndicator()),
-        );
-      }
-
-      if (!snapshot.hasData || snapshot.data!['saved_posts'] == null || (snapshot.data!['saved_posts'] as List).isEmpty) {
-        // No posts available
-        return SliverFillRemaining(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  FeatherIcons.box, // Replace FeatherIcons.box with the appropriate icon if it's not available
-                  size: 40,
-                  color: CupertinoColors.systemGrey,
-                ),
-                SizedBox(height: 20),
-                Text(
-                  'No saved posts',
-                  style: TextStyle(fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-
-      // Proceed with existing logic if posts are available
-      List<dynamic> savedPostIds = snapshot.data!['saved_posts'];
-      return _buildSavedPostsList(savedPostIds);
-    },
-  );
-}
-
- SliverList _buildSavedPostsList(List<dynamic> savedPostIds) {
-  return SliverList(
-    delegate: SliverChildBuilderDelegate(
-      (BuildContext context, int index) {
-        if (index < savedPostIds.length) {
-          return FutureBuilder<DocumentSnapshot>(
-            future: FirebaseFirestore.instance
-                .collection('post_details')
-                .doc(savedPostIds[index])
-                .get(),
-            builder: (context, postSnapshot) {
-              if (!postSnapshot.hasData || !postSnapshot.data!.exists) {
-                return SizedBox.shrink();
-              }
-
-              var postData = postSnapshot.data!.data() as Map<String, dynamic>;
-              String userId = postData['user_id'] ?? 'Unknown';
-
-              return FutureBuilder<Map<String, dynamic>>(
-                future: _fetchUserData(userId),
-                builder: (context, userSnapshot) {
-                  if (!userSnapshot.hasData) {
-                    return SizedBox.shrink(); // Or some loading indicator
-                  }
-
-                  var userData = userSnapshot.data!;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16.0), // Adjusted vertical padding
-                    child: PostCard(
-                      imageLocation: postData['image_url'] ??
-                          'assets/images/sampleFoodPic.png',
-                      title: postData['title'] ?? 'No Title',
-                      tags: (postData['categories'] as String)
-                          .split(',')
-                          .map((tag) => tag.trim())
-                          .toList(),
-                      firstname: userData['firstName'] ??
-                          'Unknown', // Corrected to userData
-                      lastname: userData['lastName'] ??
-                          'Unknown', // Corrected to userData
-                      timeAgo: timeAgoSinceDate(
-                          (postData['post_timestamp'] as Timestamp).toDate()),
-                      tagColors: _assignedColors(),
-                      onTap: (postId) => _onPostCardTap(
-                          postId), // Make sure this callback is correctly implemented
-                      postId: savedPostIds[index],
-                    ),
-                  );
-                },
-              );
-            },
-          );
-        } else {
-         String postCountText = '${savedPostIds.length} Saved ' + (savedPostIds.length > 1 ? 'Posts' : 'Post');
-          // This will execute when index is equal to the length of savedPostIds
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Text(postCountText,
-                  style: TextStyle(
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w500,
-                  )),
-            ),
-          );
-        }
-      },
-      childCount: savedPostIds.length + (savedPostIds.isNotEmpty ? 1 : 0),
-    ),
-  );
-}
-
-
-  Future<Map<String, dynamic>> _fetchUserData(String userId) async {
-  DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-      .collection('user')
-      .doc(userId)
-      .get();
-
-  if (!userSnapshot.exists) {
-    return {'firstName': 'Unknown', 'lastName': 'Unknown'};
+  CupertinoSliverNavigationBar _buildNavigationBar() {
+    return CupertinoSliverNavigationBar(
+      backgroundColor: groupedBackgroundColor,
+      largeTitle: Text('Bookmarks'),
+      border: Border(bottom: BorderSide.none),
+      stretch: true,
+    );
   }
 
-  return userSnapshot.data() as Map<String, dynamic>;
-}
+  SliverFillRemaining _buildLoadingSliver() {
+    return SliverFillRemaining(
+      child: Center(child: CupertinoActivityIndicator()),
+    );
+  }
 
+  SliverList _buildSavedPostsList(List<String> savedPostIds) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (BuildContext context, int index) {
+          // Check if the current index is the last item in the list
+          if (index < savedPostIds.length) {
+            return _buildPostItem(context, savedPostIds[index]);
+          } else if (index == savedPostIds.length && savedPostIds.isNotEmpty) {
+            // If it's the last item and the list is not empty, display the post count
+            return Column(
+              children: [
+                _buildPostCountIndicator(savedPostIds.length),
+                SizedBox(height: 100),
+              ],
+            );
+          }
+          return null; // Return null for indices beyond the data range
+        },
+        childCount: savedPostIds.isEmpty
+            ? 0
+            : savedPostIds.length + 1, // Add +1 for the post count indicator
+      ),
+    );
+  }
+
+  Widget _buildPostItem(BuildContext context, String postId) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('post_details')
+          .doc(postId)
+          .get(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return SizedBox.shrink();
+        }
+
+        var data = snapshot.data!.data() as Map<String, dynamic>?;
+        if (data == null) {
+          return SizedBox.shrink();
+        }
+        // Correctly cast the data now that we've checked it
+        Map<String, dynamic> postData = data;
+
+        // Fetch the user data for the post
+        return FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance
+              .collection('user')
+              .doc(postData['user_id'])
+              .get(),
+          builder: (context, userSnapshot) {
+            if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+              return SizedBox
+                  .shrink(); // No user data exists, return an empty widget
+            }
+
+            var userData = userSnapshot.data!.data();
+            if (userData == null || userData is! Map<String, dynamic>) {
+              return SizedBox
+                  .shrink(); // User data is null or not the expected format, return an empty widget
+            }
+
+            // Now we can safely use postData and userData, knowing they're not null and are properly formatted
+            return _buildPostCard(postData, userData, postId);
+          },
+        );
+      },
+    );
+  }
+
+  SliverFillRemaining _buildNoSavedPostsMessage() {
+    return SliverFillRemaining(
+      hasScrollBody: false, // Prevents the message from being scrollable
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(FeatherIcons.bookmark,
+                size: 42,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+            SizedBox(height: 10),
+            Text(
+              'No Bookmarks found',
+              style: TextStyle(
+                fontSize: 16,
+                letterSpacing: -0.6,
+                fontWeight: FontWeight.w500,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+// Updated _buildPostCard method to include postId as a parameter
+  Widget _buildPostCard(Map<String, dynamic> postData,
+      Map<String, dynamic> userData, String postId) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: PostCard(
+        imageLocation: postData['image_url'] ?? '',
+        title: postData['title'] ?? 'No Title',
+        tags: (postData['categories'] as String)
+            .split(',')
+            .map((tag) => tag.trim())
+            .toList(),
+        tagColors: _assignedColors(),
+        firstname: userData['firstName'] ?? 'Unknown',
+        lastname: userData['lastName'] ?? 'Unknown',
+        timeAgo: timeAgoSinceDate(
+            (postData['post_timestamp'] as Timestamp).toDate()),
+        onTap: _onPostCardTap, // Using postId directly
+        postId: postId, // Using postId directly
+        profileURL:
+            userData['profileImagePath'] ?? 'assets/images/sampleProfile.png',
+      ),
+    );
+  }
+
+  Widget _buildPostCountIndicator(int postCount) {
+    String postCountText =
+        '$postCount Bookmarked ' + (postCount > 1 ? 'Posts' : 'Post');
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Text(postCountText,
+            style: TextStyle(
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              fontSize: 14.0,
+              fontWeight: FontWeight.w500,
+            )),
+      ),
+    );
+  }
 
   void _onPostCardTap(String postId) {
     print('Post ID: $postId');
@@ -199,14 +257,6 @@ class _SavedScreenState extends State<SavedScreen> {
   }
 
   List<Color> _assignedColors() {
-    return [
-      CupertinoColors.systemRed,
-      CupertinoColors.systemOrange,
-      CupertinoColors.systemYellow,
-      CupertinoColors.systemGreen,
-      CupertinoColors.systemBlue,
-      CupertinoColors.systemIndigo,
-      CupertinoColors.systemPurple,
-    ];
+    return [yellow, orange, blue, babyPink, Cyan];
   }
 }

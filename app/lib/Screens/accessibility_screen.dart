@@ -31,7 +31,7 @@ class _AccessibilityScreenState extends State<AccessibilityScreen> {
       child: CustomScrollView(
         slivers: [
           CupertinoSliverNavigationBar(
-              largeTitle: Text('Accessibility', style: TextStyle(letterSpacing: -1.34)),
+              largeTitle: Text('Accessibility'),
               border: Border(bottom: BorderSide.none),
               backgroundColor: groupedBackgroundColor,
               leading: GestureDetector(

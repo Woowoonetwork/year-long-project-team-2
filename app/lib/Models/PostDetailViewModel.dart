@@ -20,8 +20,11 @@ class PostDetailViewModel extends ChangeNotifier {
   late DateTime postTimestamp;
   late LatLng pickupLatLng;
   late List<String> tags;
+  late String imageUrl; // Add a field for the image URL
+  late String profileURL;
+  late String postLocation;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  bool isFavorite = false; // Add isFavorite property
+  bool isFavorite = false;
 
   PostDetailViewModel(String postId) {
     _initializeFields();
@@ -40,44 +43,47 @@ class PostDetailViewModel extends ChangeNotifier {
     title = 'null';
     rating = 0.0;
     userid = 'null';
+    imageUrl = ''; // Set the image URL
+    profileURL = 'null';
     postTimestamp = DateTime.now();
     pickupLatLng = LatLng(37.7749, -122.4194);
     tags = ['null'];
   }
 
-Future<void> fetchData(String postId) async {
-  try {
-    var documentSnapshot =
-        await firestore.collection('post_details').doc(postId).get();
+  Future<void> fetchData(String postId) async {
+    try {
+      var documentSnapshot =
+          await firestore.collection('post_details').doc(postId).get();
 
-    if (documentSnapshot.exists) {
-      var documentData = documentSnapshot.data() as Map<String, dynamic>;
-      _updatePostDetails(documentData);
-      await _fetchAndUpdateUserDetails(documentData['user_id']); // Fetch user details
-      await checkIfFavorite(postId); // Check if the post is a favorite
-    } else {
-      print('Document with postId $postId does not exist.');
+      if (documentSnapshot.exists) {
+        var documentData = documentSnapshot.data() as Map<String, dynamic>;
+        _updatePostDetails(documentData);
+        await _fetchAndUpdateUserDetails(documentData['user_id']);
+        await checkIfFavorite(postId);
+      } else {
+        print('Document with postId $postId does not exist.');
+      }
+    } catch (e) {
+      print('Error fetching post details: $e');
     }
-  } catch (e) {
-    print('Error fetching post details: $e');
   }
-}
 
-Future<void> _fetchAndUpdateUserDetails(String userId) async {
-  try {
-    var userDocumentSnapshot =
-        await firestore.collection('user').doc(userId).get();
+  Future<void> _fetchAndUpdateUserDetails(String userId) async {
+    try {
+      var userDocumentSnapshot =
+          await firestore.collection('user').doc(userId).get();
 
-    if (userDocumentSnapshot.exists) {
-      var userDocumentData = userDocumentSnapshot.data() as Map<String, dynamic>;
-      _updateUserDetails(userDocumentData);
-    } else {
-      print('User document with userId $userId does not exist.');
+      if (userDocumentSnapshot.exists) {
+        var userDocumentData =
+            userDocumentSnapshot.data() as Map<String, dynamic>;
+        _updateUserDetails(userDocumentData);
+      } else {
+        print('User document with userId $userId does not exist.');
+      }
+    } catch (e) {
+      print('Error fetching user details: $e');
     }
-  } catch (e) {
-    print('Error fetching user details: $e');
   }
-}
 
   Future<void> checkIfFavorite(String postId) async {
     String userId = getCurrentUserUID();
@@ -99,7 +105,19 @@ Future<void> _fetchAndUpdateUserDetails(String userId) async {
     pickupInstructions = documentData['pickup_instructions'] ?? '';
     userid = documentData['user_id'] ?? '';
     rating = documentData['rating'] ?? 0.0;
+    imageUrl = documentData['image_url'] ?? ''; // Set the image URL
     pickupLocation = documentData['pickup_location'] ?? '';
+    // postLocation = documentData['post_location'] ?? '';
+    // like post_ location: |49.89090897212782° N, 119.49003484100103° W]
+
+    if (documentData['post_location'] is GeoPoint) {
+      GeoPoint geoPoint = documentData['post_location'] as GeoPoint;
+      pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+    } else {
+      // Provide a default location or handle the absence of location data
+      pickupLatLng = LatLng(0.0, 0.0); // Example default value
+    }
+    rating = documentData['rating'] ?? 0.0;
     pickupTime = (documentData['pickup_time'] as Timestamp).toDate();
     expirationDate = (documentData['expiration_date'] as Timestamp).toDate();
     postTimestamp = (documentData['post_timestamp'] as Timestamp).toDate();
@@ -110,6 +128,7 @@ Future<void> _fetchAndUpdateUserDetails(String userId) async {
   void _updateUserDetails(Map<String, dynamic> userDocument) {
     firstName = userDocument['firstName'] ?? '';
     lastName = userDocument['lastName'] ?? '';
+    profileURL = userDocument['profileImagePath'] ?? '';
     notifyListeners();
   }
 
@@ -160,11 +179,11 @@ Future<void> _fetchAndUpdateUserDetails(String userId) async {
     if (duration.inDays > 8) {
       return "on " + DateFormat('MMM d').format(dateTime);
     } else if (duration.inDays >= 1) {
-      return '${duration.inDays} day${duration.inDays > 1 ? 'days' : ''} ago';
+      return '${duration.inDays} day${duration.inDays > 1 ? 's' : ''} ago';
     } else if (duration.inHours >= 1) {
-      return '${duration.inHours} hour${duration.inHours > 1 ? 'hrs' : ''} ago';
+      return '${duration.inHours} hour${duration.inHours > 1 ? 's' : ''} ago';
     } else if (duration.inMinutes >= 1) {
-      return '${duration.inMinutes} minute${duration.inMinutes > 1 ? 'mins' : ''} ago';
+      return '${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''} ago';
     } else {
       return 'Just now';
     }

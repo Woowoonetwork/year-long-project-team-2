@@ -1,16 +1,19 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/foodAppBar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:FoodHood/ViewModels/PostDetailViewModel.dart';
+import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:FoodHood/Components/cupertinosnackbar.dart';
+import 'package:FoodHood/Screens/donee_pathway_uno.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
-
   const PostDetailView({Key? key, required this.postId}) : super(key: key);
 
   @override
@@ -19,14 +22,24 @@ class PostDetailView extends StatefulWidget {
 
 class _PostDetailViewState extends State<PostDetailView> {
   late PostDetailViewModel viewModel;
+  AnimationController? _animationController;
   bool isLoading = true; // Added to track loading status
+  late String userID;
+
+  // Method to initialize userID
+  void initializeUserId() {
+    final user = FirebaseAuth.instance.currentUser;
+    userID = user?.uid ?? 'default uid'; // Initialize userId here
+  }
 
   @override
   void initState() {
     super.initState();
+
+    initializeUserId();
+
     viewModel = PostDetailViewModel(widget.postId);
 
-    // Await the completion of fetchData
     viewModel.fetchData(widget.postId).then((_) {
       setState(() {
         isLoading = false;
@@ -72,8 +85,9 @@ class _PostDetailViewState extends State<PostDetailView> {
                       FoodAppBar(
                         postId: widget.postId, // Pass postId to the FoodAppBar
                         isFavorite: viewModel.isFavorite,
-                        onFavoritePressed:
-                            _handleFavoritePressed, // Pass the callback function
+                        onFavoritePressed: _handleFavoritePressed,
+                        imageUrl: viewModel.imageUrl, // Pass the imageUrl here
+// Pass the callback function
                       ),
                       SliverList(
                         delegate: SliverChildListDelegate(
@@ -101,11 +115,15 @@ class _PostDetailViewState extends State<PostDetailView> {
                   onRefresh: () => Future.value(true)),
             ),
             Container(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 32),
               child: Row(
                 children: [
                   Expanded(
-                    child: ReserveButton(isReserved: false),
+                    child: ReserveButton(
+                      isReserved: false,
+                      postId: widget.postId,
+                      userId: userID,
+                    ),
                   ),
                 ],
               ),
@@ -123,30 +141,34 @@ class _PostDetailViewState extends State<PostDetailView> {
 
     if (viewModel.isFavorite) {
       await viewModel.savePost(widget.postId);
-
-      // Show a snackbar with a message indicating that the post has been saved
       showCupertinoSnackbar(
         context,
-        'Saved "${viewModel.title}" to the list',
+        '"${viewModel.title}" has been added to your bookmarks',
         accentColor,
         Icon(FeatherIcons.check, color: Colors.white),
+        _reverseAnimation, // Pass _reverseAnimation as the callback
       );
     } else {
       await viewModel.unsavePost(widget.postId);
       showCupertinoSnackbar(
         context,
-        'Removed "${viewModel.title}" from the list',
+        '"${viewModel.title}" has been removed from your bookmarks',
         yellow,
         Icon(FeatherIcons.x, color: Colors.white),
+        _reverseAnimation,
       );
     }
   }
 
+  void _reverseAnimation() {
+    _animationController?.reverse();
+  }
+
   void showCupertinoSnackbar(BuildContext context, String message,
-      Color backgroundColor, Icon trailingIcon) {
+      Color backgroundColor, Icon trailingIcon, VoidCallback onSnackbarClosed) {
     var overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: 60, // Changed from bottom to top
+        top: 60,
         left: 0,
         right: 0,
         child: CupertinoSnackbar(
@@ -161,6 +183,7 @@ class _PostDetailViewState extends State<PostDetailView> {
 
     Future.delayed(Duration(seconds: 2), () {
       overlayEntry.remove();
+      onSnackbarClosed();
     });
   }
 
@@ -177,6 +200,7 @@ class _PostDetailViewState extends State<PostDetailView> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: CupertinoColors.label.resolveFrom(context),
+                height: 1.2,
                 letterSpacing: -1.45,
                 fontSize: 28,
               ),
@@ -250,7 +274,9 @@ class _PostDetailViewState extends State<PostDetailView> {
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+          color: color.computeLuminance() > 0.5
+              ? CupertinoColors.black
+              : CupertinoColors.white,
           fontSize: 10,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
@@ -261,35 +287,33 @@ class _PostDetailViewState extends State<PostDetailView> {
 
   Widget _buildInfoCards() {
     return InfoCardsRow(
-      expirationDate: viewModel.expirationDate, // Updated to use viewModel
-      pickupTime: viewModel.pickupTime, // Updated to use viewModel
-      allergens: viewModel.allergens, // Updated to use viewModel
+      expirationDate: viewModel.expirationDate,
+      pickupTime: viewModel.pickupTime,
+      allergens: viewModel.allergens,
     );
   }
 
   Widget _buildPickupInformation() {
-    LatLng? pickupCoordinates =
-        viewModel.pickupLatLng; // Updated to use viewModel
+    LatLng? pickupCoordinates = viewModel.pickupLatLng;
     return PickupInformation(
       pickupTime:
           DateFormat('EEE, MMM d, ' 'h:mm a').format(viewModel.pickupTime),
       pickupLocation: viewModel.pickupLocation,
       meetingPoint: '330, 1130 Trello Way\nKelowna, BC\nV1V 5E0',
-      additionalInfo: 'Please reach out for any additional details!',
+      additionalInfo: viewModel.pickupInstructions,
       locationCoordinates: pickupCoordinates,
-      viewModel: viewModel, // Pass viewModel here
+      viewModel: viewModel,
     );
   }
 
   Widget _buildAllergensSection() {
-    List<String> allergenList =
-        viewModel.allergens.split(', '); // Updated to use viewModel
+    List<String> allergenList = viewModel.allergens.split(', ');
     return AllergensSection(allergens: allergenList);
   }
 
-  Widget _buildReserveButton() {
-    return ReserveButton(isReserved: false); // Placeholder, update as needed
-  }
+  // Widget _buildReserveButton() {
+  //   return ReserveButton(isReserved: false); // Placeholder, update as needed
+  // }
 }
 
 // The remaining widget classes like `AvailabilityIndicator`, `InfoRow`, etc., would follow.
@@ -362,14 +386,16 @@ class InfoRow extends StatelessWidget {
     return Container(
       child: Row(
         children: [
-          IconPlaceholder(imageUrl: 'assets/images/sampleProfile.png'),
+          IconPlaceholder(imageUrl: viewModel.profileURL),
           const SizedBox(width: 8),
           Expanded(
+            // Wrap with Expanded to prevent overflow
             child: CombinedTexts(
-                firstName: firstName,
-                lastName: lastName,
-                postTimestamp: postTimestamp,
-                viewModel: viewModel),
+              firstName: firstName,
+              lastName: lastName,
+              postTimestamp: postTimestamp,
+              viewModel: viewModel,
+            ),
           ),
         ],
       ),
@@ -378,7 +404,7 @@ class InfoRow extends StatelessWidget {
 }
 
 class IconPlaceholder extends StatelessWidget {
-  final String imageUrl; // Add a parameter for the image URL
+  final String imageUrl; // Parameter for the image URL
 
   IconPlaceholder({Key? key, required this.imageUrl}) : super(key: key);
 
@@ -387,11 +413,23 @@ class IconPlaceholder extends StatelessWidget {
     return Container(
       width: 20,
       height: 20,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        image: DecorationImage(
+      // decoration: BoxDecoration(
+      //   shape: BoxShape.circle,
+      //   image: DecorationImage(
+      //     fit: BoxFit.cover,
+      //     // Dynamically load image from assets or network
+      //     image: _loadImage(imageUrl),
+      //   ),
+      // ),
+      child: ClipOval(
+        child: // use cached network image to load the image
+            CachedNetworkImage(
+          imageUrl: imageUrl,
           fit: BoxFit.cover,
-          image: AssetImage(imageUrl), // Replace with your image provider
+          placeholder: (context, url) => CupertinoActivityIndicator(),
+          errorWidget: (context, url, error) =>
+              //AssetImage('assets/images/sampleProfile.png');
+              Image.asset('assets/images/sampleProfile.png'),
         ),
       ),
     );
@@ -409,21 +447,24 @@ class CombinedTexts extends StatelessWidget {
     required this.firstName,
     required this.lastName,
     required this.postTimestamp,
-    required this.viewModel, // Include viewModel in the constructor
+    required this.viewModel,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        InfoText(
-          firstName: firstName,
-          lastName: lastName,
-          postTimestamp: postTimestamp,
-          viewModel: viewModel, // Pass the viewModel to InfoText
+        Text(
+          'Made by $firstName $lastName  Posted ${viewModel.timeAgoSinceDate(postTimestamp)}',
+          style: TextStyle(
+            color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.48,
+          ),
         ),
-        const SizedBox(width: 8),
-        RatingText(), // Placeholder, update as needed
+        Text("  "),
+        RatingText(),
       ],
     );
   }
@@ -433,19 +474,20 @@ class InfoText extends StatelessWidget {
   final String firstName;
   final String lastName;
   final DateTime postTimestamp;
-  final PostDetailViewModel viewModel; // Add viewModel here
+  final PostDetailViewModel viewModel;
 
   const InfoText({
     Key? key,
     required this.firstName,
     required this.lastName,
     required this.postTimestamp,
-    required this.viewModel, // Include viewModel in the constructor
+    required this.viewModel,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return RichText(
+      overflow: TextOverflow.fade,
       text: TextSpan(
         style: TextStyle(
           color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
@@ -457,8 +499,7 @@ class InfoText extends StatelessWidget {
           TextSpan(text: 'Prepared by $firstName $lastName'),
           TextSpan(text: '   '),
           TextSpan(
-            text:
-                'Posted ${viewModel.timeAgoSinceDate(postTimestamp)}', // Use viewModel here
+            text: 'Posted ${viewModel.timeAgoSinceDate(postTimestamp)}',
             style: TextStyle(letterSpacing: -0.48),
           ),
         ],
@@ -468,7 +509,8 @@ class InfoText extends StatelessWidget {
 }
 
 class RatingText extends StatelessWidget {
-  // Placeholder widget for rating, update as needed
+  final PostDetailViewModel viewModel = PostDetailViewModel('default');
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -481,8 +523,11 @@ class RatingText extends StatelessWidget {
         ),
         const SizedBox(width: 3),
         Text(
-          '5.0 Rating', // Placeholder rating
+          // '5.0 Rating',
+          //use viewModel.rating instead of hardcoded value
+          '${viewModel.rating} Rating',
           style: TextStyle(
+            overflow: TextOverflow.fade,
             color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -530,7 +575,7 @@ class InfoCardsRow extends StatelessWidget {
             title: 'Pickup Time',
             subtitle: formattedPick,
             context: context,
-            color: blue, // Placeholder color, update as needed
+            color: blue,
           ),
           const SizedBox(width: 16),
           buildInfoCard(
@@ -538,7 +583,7 @@ class InfoCardsRow extends StatelessWidget {
             title: 'Allergens',
             subtitle: allergens.isEmpty ? 'None' : allergens,
             context: context,
-            color: yellow, // Placeholder color, update as needed
+            color: yellow,
           ),
         ],
       ),
@@ -600,13 +645,12 @@ class InfoCardsRow extends StatelessWidget {
   }
 }
 
-// Continue with the remaining widget classes like PickupInformation, CustomInfoTile, etc.
 class PickupInformation extends StatelessWidget {
   final String pickupTime;
   final String pickupLocation;
   final String meetingPoint;
   final String additionalInfo;
-  final LatLng? locationCoordinates; // Make nullable
+  final LatLng? locationCoordinates;
   final PostDetailViewModel viewModel;
 
   const PickupInformation({
@@ -615,7 +659,7 @@ class PickupInformation extends StatelessWidget {
     required this.pickupLocation,
     required this.meetingPoint,
     required this.additionalInfo,
-    this.locationCoordinates, // Nullable
+    this.locationCoordinates,
     required this.viewModel,
   }) : super(key: key);
 
@@ -683,16 +727,14 @@ class PickupInformation extends StatelessWidget {
   }
 
   Widget _buildMap(BuildContext context) {
-    // Check if locationCoordinates are available from the viewModel
     final LatLng? locationCoordinates = viewModel.pickupLatLng;
 
-    // If coordinates are available, display GoogleMap
     if (locationCoordinates != null) {
       return ClipRRect(
         borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
         child: SizedBox(
           width: double.infinity,
-          height: 188.0, // Assign a finite height to the map container
+          height: 188.0,
           child: GoogleMap(
             initialCameraPosition: CameraPosition(
               target: locationCoordinates,
@@ -724,7 +766,7 @@ class PickupInformation extends StatelessWidget {
           color: CupertinoColors.systemGrey4,
         ),
         alignment: Alignment.center,
-        child: Text('Map Placeholder'), // Placeholder text
+        child: Text('Map Placeholder'),
       );
     }
   }
@@ -735,9 +777,7 @@ class PickupInformation extends StatelessWidget {
       children: [
         CustomInfoTile(title: 'Pickup Time', subtitle: pickupTime),
         CustomInfoTile(
-            title: 'Pickup Location',
-            subtitle: viewModel
-                .pickupLocation), // Use viewModel for dynamic meeting point
+            title: 'Pickup Location', subtitle: viewModel.pickupLocation),
         const SizedBox(height: 12),
         _buildAdditionalInfo(context),
         const SizedBox(height: 12),
@@ -749,22 +789,34 @@ class PickupInformation extends StatelessWidget {
   Widget _buildAdditionalInfo(BuildContext context) {
     return Row(
       children: [
-        // Leading Circular Cropped Image
         Padding(
-          padding: EdgeInsets.only(right: 8.0), // Adjust spacing as needed
+          padding: EdgeInsets.only(right: 8.0),
           child: Container(
-            width: 30.0, // Image diameter
-            height: 30.0, // Image diameter
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
+            width: 30.0,
+            height: 30.0,
+            // use cached network image to load the image
+            child: //clipoval
+                //   CachedNetworkImage(
+                // imageUrl: viewModel.profileURL,
+                // fit: BoxFit.cover,
+                // placeholder: (context, url) => CupertinoActivityIndicator(),
+                // errorWidget: (context, url, error) => Image.asset(
+                //   'assets/images/sampleProfile.png',
+                //   fit: BoxFit.cover,
+                // ),
+                ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: viewModel.profileURL,
                 fit: BoxFit.cover,
-                image: AssetImage('assets/images/sampleProfile.png'),
+                placeholder: (context, url) => CupertinoActivityIndicator(),
+                errorWidget: (context, url, error) => Image.asset(
+                  'assets/images/sampleProfile.png',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
         ),
-        // MessageBox for Additional Info
         Expanded(
           child: MessageBox(context: context, text: additionalInfo),
         ),
@@ -783,19 +835,15 @@ class PickupInformation extends StatelessWidget {
             text: 'Ask for more info',
             icon: FeatherIcons.messageCircle,
             iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {
-              // Implement action for "Ask for more info"
-            },
+            onPressed: () {},
           ),
-          SizedBox(width: 10), // Spacing between buttons
+          SizedBox(width: 10),
           InfoButton(
             context: context,
             text: 'Navigate to this Place',
             icon: FeatherIcons.arrowUpRight,
             iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {
-              // Implement action for "Navigate to this Place"
-            },
+            onPressed: () {},
           ),
         ],
       ),
@@ -849,7 +897,6 @@ class CustomInfoTile extends StatelessWidget {
   }
 }
 
-// Continue with MessageBox, InfoButton, AllergensSection, and other widget classes.
 class MessageBox extends StatelessWidget {
   final BuildContext context;
   final String text;
@@ -867,7 +914,7 @@ class MessageBox extends StatelessWidget {
       ),
       child: Text(
         text,
-        textAlign: TextAlign.start, // Align text to the leading edge
+        textAlign: TextAlign.start,
         overflow: TextOverflow.ellipsis,
         maxLines: 2,
         style: TextStyle(
@@ -885,7 +932,7 @@ class InfoButton extends StatelessWidget {
   final BuildContext context;
   final String text;
   final IconData icon;
-  final Color iconColor; // New color parameter for the icon
+  final Color iconColor;
   final VoidCallback onPressed;
 
   const InfoButton({
@@ -893,7 +940,7 @@ class InfoButton extends StatelessWidget {
     required this.context,
     required this.text,
     required this.icon,
-    required this.iconColor, // Include icon color in the constructor
+    required this.iconColor,
     required this.onPressed,
   }) : super(key: key);
 
@@ -907,8 +954,8 @@ class InfoButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: iconColor), // Use the iconColor here
-          SizedBox(width: 8), // Space between icon and text
+          Icon(icon, size: 16, color: iconColor),
+          SizedBox(width: 8),
           Text(
             text,
             textAlign: TextAlign.center,
@@ -1004,46 +1051,80 @@ class AllergensSection extends StatelessWidget {
   }
 }
 
-class ReserveButton extends StatelessWidget {
+class ReserveButton extends StatefulWidget {
   final bool isReserved;
+  final String postId;
+  final String userId;
 
-  const ReserveButton({Key? key, required this.isReserved}) : super(key: key);
+  const ReserveButton({
+    Key? key,
+    required this.isReserved,
+    required this.postId,
+    required this.userId,
+  }) : super(key: key);
+
+  @override
+  _ReserveButtonState createState() => _ReserveButtonState();
+}
+
+class _ReserveButtonState extends State<ReserveButton> {
+  bool _isReserved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isReserved = widget.isReserved;
+  }
+
+  void _handleReservation() async {
+    if (!_isReserved) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('post_details')
+            .doc(widget.postId)
+            .update({'reserved_by': widget.userId});
+        setState(() {
+          _isReserved = true;
+        });
+      } catch (error) {
+        print('Error reserving post: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to reserve post. Please try again.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 48, // Set the height of the button
-      decoration: BoxDecoration(
-        color: isReserved
-            ? CupertinoColors.systemGrey
-            : CupertinoDynamicColor.resolve(accentColor, context),
-        borderRadius: BorderRadius.circular(100), // Rounded corners
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x19000000),
-            blurRadius: 20,
-            offset: Offset(0, 0),
-          ),
-        ],
-      ),
       child: CupertinoButton(
-        padding: EdgeInsets
-            .zero, // Remove padding since we are using a Container for styling
+        color: _isReserved ? accentColor.resolveFrom(context).withOpacity(0.2) : accentColor,
+        padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(14),
         child: Text(
-          isReserved
-              ? 'Reserved'
-              : 'Reserve', // Change button text based on state
+          _isReserved ? 'Reserved' : 'Reserve',
           style: TextStyle(
-            color: CupertinoColors.white, // Text color
-            fontSize: 18, // Text size
-            letterSpacing: -0.45, // Text spacing
-            fontWeight: FontWeight.w600, // Text weight
+            color: _isReserved ? accentColor : CupertinoColors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.90,
           ),
         ),
-        onPressed: isReserved
+        onPressed: _isReserved
             ? null
             : () {
-                // TODO: Add reservation logic here
+                _handleReservation();
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) => DoneePath(
+                            postId: widget.postId,
+                          )),
+                );
               },
       ),
     );
