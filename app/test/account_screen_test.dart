@@ -30,7 +30,6 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
-          //home: AccountScreen()
           home: ChangeNotifierProvider(
           create: (context) => TextScaleProvider(),
           child: AccountScreen(),
