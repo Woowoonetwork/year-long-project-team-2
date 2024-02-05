@@ -226,12 +226,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPostListSliver() {
     if (postCards.isEmpty && !isSearching) {
-      // Display message when there are no posts in the initial load
+      // show message when there are no posts in the initial load
       return SliverFillRemaining(
         child: Center(child: _buildNoPostsWidget()),
       );
     } else if (postCards.isEmpty && isSearching) {
-      // Display message when search returns no results
+      // show message when search returns no results
       return SliverFillRemaining(
         child: Center(
           child: Text(
@@ -272,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Reset the search state and reload initial posts
       setState(() {
         isSearching = false;
-        _loadInitialPosts(); // Reload initial posts to revert UI to its initial state
+        _loadInitialPosts();
       });
     }
 
@@ -322,12 +322,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Only show the Cancel button if the search bar is focused
                 if (isFocused)
                   GestureDetector(
-                    onTap:
-                        _clearSearch, // Ensure this is correctly set to call _clearSearch
+                    onTap: _clearSearch,
                     child: Text(
                       'Cancel',
                       style: TextStyle(
-                        color: accentColor, // Use your accent color here
+                        color: accentColor,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
