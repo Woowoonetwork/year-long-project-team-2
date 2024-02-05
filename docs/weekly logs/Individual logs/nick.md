@@ -283,7 +283,7 @@ N/A
 
 
 
-## Term 2 Week 1: Monday 8th Jan 2023 - Sunday 14th Dec 2023
+## Term 2 Week 1: Monday 8th Jan 2024 - Sunday 14th Dec 2024
 
 ### Tasks Worked On During the Week
 
@@ -321,7 +321,7 @@ N/A.
 
 
 
-## Term 2 Week 2: Monday 15th Jan 2023 - Sunday 21th Dec 2023
+## Term 2 Week 2: Monday 15th Jan 2024 - Sunday 21th Dec 2024
 
 ### Tasks Worked On During the Week
 
@@ -363,7 +363,7 @@ N/A.
 N/A.
 
 
-## Term 2 Week 3: Monday 22th Jan 2023 - Sunday 28th Dec 2023
+## Term 2 Week 3: Monday 22th Jan 2024 - Sunday 28th Dec 2024
 
 ### Tasks Worked On During the Week
 
@@ -394,6 +394,44 @@ N/A.
 - updated marker styles
 - several ui hotfixes and added overflow control on the card views
 - updated widgets tests for both new post and browse screens
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
+
+## Term 2 Week 4: Monday 29th Jan 2024 - Sunday 4th Feb 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/nickT2W4.png)
+
+### Recap of personal goals
+
+- Fixed the bug where province and city weren't recorded once user registers.
+- Added backend/frontend logic to post images on the app, including the post images and profile images.
+- Added sign in with Google and Apple ID for the app.
+- Added new email templates for forgot password and reset password.
+- Fix the bug where the page constantly refreshes on the bookmarked page.
+- Login screen and registration screen should now prompt the user to correct their input if it's invalid.
+- Attened weekly meetings and completed the weekly log.
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+- Helped review and suggest changes to the other team members' PRs and code.
+- Attended peer evals and hosted stations for the team.
+- Ensured code consistency and created guidelines for the team.
+
+### Tasks completed (from Project Board)
+
+- Updated the visual appearance of the login and registration screens to improve accessibility.
+- Addressed the issue where the province and city were not properly recorded when a user registered.
+- Implemented both backend and frontend functionality for uploading images within the app, including both post images and profile pictures.
+- Incorporated the option for users to sign in using their Google and Apple ID credentials.
+- Introduced new email templates to enhance the user experience for forgot password and password reset functionalities.
+- Resolved the bug that caused continuous refreshing of the bookmarked page.
+- Enhanced the login and registration screens to provide users with error prompts if their input is invalid.
 
 ### Tasks in progress (from Project Board)
 
