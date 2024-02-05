@@ -130,32 +130,56 @@ Widget buildCupertinoTextField(
     TextEditingController controller,
     bool obscureText,
     BuildContext context,
-    List<String> autofillHints) {
-  return CupertinoTextField(
-    controller: controller,
-    obscureText: obscureText,
-    placeholder: placeholder,
-    padding: EdgeInsets.all(16.0),
-    textAlign: TextAlign.left,
-    style: TextStyle(
-      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    ),
-    placeholderStyle: TextStyle(
-      color: CupertinoDynamicColor.resolve(
-          CupertinoColors.placeholderText, context),
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    ),
-    autofillHints: autofillHints,
-    decoration: BoxDecoration(
-      color: CupertinoDynamicColor.resolve(
-          CupertinoColors.tertiarySystemBackground, context),
-      borderRadius: BorderRadius.circular(12),
-    ),
+    List<String> autofillHints,
+    {String? errorText, Function(String)? liveValidation}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      CupertinoTextField(
+        controller: controller,
+        obscureText: obscureText,
+        placeholder: placeholder,
+        padding: EdgeInsets.all(16.0),
+        textAlign: TextAlign.left,
+        style: TextStyle(
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+        placeholderStyle: TextStyle(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.placeholderText, context),
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+        autofillHints: autofillHints,
+        decoration: BoxDecoration(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.tertiarySystemBackground, context),
+          borderRadius: BorderRadius.circular(12),
+          border: errorText != null
+              ? Border.all(color: CupertinoColors.systemRed)
+              : null,
+        ),
+        onChanged: (value) {
+          if (liveValidation != null) {
+            liveValidation(value);
+          }
+        },
+      ),
+      if (errorText != null)
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+          child: Text(errorText,
+              style: TextStyle(
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.systemRed, context),
+                  fontSize: 12)), // Display error text if not null
+        ),
+    ],
   );
 }
+
 
 Widget buildText(String text, double fontSize, FontWeight fontWeight) {
   return Text(
@@ -202,7 +226,7 @@ Widget buildSignUpText(
             TextSpan(
               text: link,
               style: TextStyle(
-                color: secondaryColor,
+                color: CupertinoColors.systemCyan ,
                 fontWeight: FontWeight.w500,
                 letterSpacing: -0.20,
               ),

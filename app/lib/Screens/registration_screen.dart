@@ -27,11 +27,18 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confPasswordController = TextEditingController();
   final _provinceController = TextEditingController();
   final _cityController = TextEditingController();
 
   String _selectedProvince = '';
   String _selectedCity = '';
+
+  String? _emailErrorText;
+  String? _passwordErrorText;
+  String? _confPasswordErrorText;
+  String? _firstNameErrorText;
+  String? _lastNameErrorText;
 
   List<String> provinces = []; // Updated to be fetched from Firestore
   Map<String, List<String>> cities = {}; // Updated to be fetched from Firestore
@@ -55,6 +62,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confPasswordController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _provinceController.dispose();
@@ -89,20 +97,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       children: [
         buildText(
             'Create an account', 34, FontWeight.w600), // Create an account text
-        SizedBox(height: 50),
+        SizedBox(height: 30),
         buildTwoFieldsRow(
           'First Name',
           _firstNameController,
           'Last Name',
           _lastNameController,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         buildCupertinoTextField('Email Address', _emailController, false,
-            context, [AutofillHints.email]), // Email text field
-        const SizedBox(height: 20),
+            context, [AutofillHints.email],
+            errorText: _emailErrorText),
+        const SizedBox(height: 16),
         buildCupertinoTextField('Password', _passwordController, true, context,
-            [AutofillHints.password]), // Password text field
-        const SizedBox(height: 20),
+            [AutofillHints.password],
+            errorText: _passwordErrorText),
+        const SizedBox(height: 16),
+        buildCupertinoTextField('Confirm Password', _confPasswordController,
+            true, context, [AutofillHints.password],
+            errorText: _confPasswordErrorText), // Confirm password text field
+        const SizedBox(height: 16),
         buildTwoPickerFieldsRow(
           'Province',
           _selectedProvince,
@@ -122,12 +136,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             });
           },
         ),
-        const SizedBox(height: 48),
+        const SizedBox(height: 36),
         _buildContinueButton(
             context, 'Register', accentColor, CupertinoColors.white),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         buildCenteredText('or', 12, FontWeight.w600), // Or text
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         buildGoogleSignInButton(context), // Google sign in button
         const SizedBox(height: 16),
         buildAppleSignInButton(context), // Apple sign in button
@@ -150,14 +164,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           child: Padding(
             padding: const EdgeInsets.only(right: 10.0),
             child: buildCupertinoTextField(
-                placeholder1, controller1, false, context, []),
+                placeholder1, controller1, false, context, [],
+                errorText: _firstNameErrorText),
           ),
         ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.only(left: 10.0),
             child: buildCupertinoTextField(
-                placeholder2, controller2, false, context, []),
+                placeholder2, controller2, false, context, [],
+                errorText: _lastNameErrorText),
           ),
         ),
       ],
@@ -197,85 +213,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Widget _buildContinueButton(BuildContext context, String text,
       Color backgroundColor, Color textColor) {
     return CupertinoButton(
-      onPressed: () async {
-        if (_formKey.currentState?.validate() ?? false) {
-          // Check if all fields are filled
-          if (_firstNameController.text.isNotEmpty &&
-              _lastNameController.text.isNotEmpty &&
-              _emailController.text.isNotEmpty &&
-              _passwordController.text.isNotEmpty &&
-              _selectedProvince.isNotEmpty &&
-              _selectedCity.isNotEmpty) {
-            try {
-              showLoadingDialog(context); // Show loading dialog
-
-              await widget.auth.signUp(
-                email: _emailController.text,
-                password: _passwordController.text,
-              );
-              // User registration successful
-              print('User registered');
-              String? userID = await widget.auth.getUserId();
-              if (userID != null) {
-                await addDocument(
-                  collectionName: 'user',
-                  filename: userID,
-                  fieldNames: [
-                    'firstName',
-                    'lastName',
-                    'province',
-                    'city',
-                    'email',
-                    'itemsSold',
-                    'description',
-                    'posts'
-                  ],
-                  fieldValues: [
-                    _firstNameController.text,
-                    _lastNameController.text,
-                    _selectedProvince, // Use the selected province
-                    _selectedCity, // Use the selected city
-                    _emailController.text,
-                    [],
-                    '',
-                    []
-                  ],
-                );
-
-                print("added new user doc");
-                Navigator.of(context).pop(); // Dismiss loading dialog
-              }
-              // Navigate to the home screen
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                '/nav',
-                (route) => false,
-                arguments: {'selectedIndex': 0},
-              );
-            } catch (e) {
-              // Handle registration errors
-              print('Registration failed: $e');
-            }
-          } else {
-            // Show Cupertino alert dialog
-            showCupertinoDialog(
-              context: context,
-              builder: (BuildContext context) => CupertinoAlertDialog(
-                title: Text('Enter all fields'),
-                content: Text('Please enter all information to continue.'),
-                actions: <CupertinoDialogAction>[
-                  CupertinoDialogAction(
-                    isDefaultAction: true,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              ),
-            );
-          }
-        }
-      },
+      onPressed:
+          _validateAndSubmit, // Pass the function reference directly without braces
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14),
       child: Text(
@@ -285,6 +224,160 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+  }
+
+  Future<void> _validateAndSubmit() async {
+    bool isFormValid = true;
+
+    setState(() {
+      _emailErrorText = null;
+      _passwordErrorText = null;
+      _confPasswordErrorText = null;
+      _firstNameErrorText = null;
+      _lastNameErrorText = null;
+    });
+
+    if (_firstNameController.text.isEmpty) {
+      _firstNameErrorText = "First name is required.";
+      isFormValid = false;
+    }
+    if (_lastNameController.text.isEmpty) {
+      _lastNameErrorText = "Last name is required.";
+      isFormValid = false;
+    }
+    if (_emailController.text.isEmpty) {
+      _emailErrorText = "Email is required.";
+      isFormValid = false;
+    } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+        .hasMatch(_emailController.text)) {
+      _emailErrorText = "Please enter a valid email address.";
+      isFormValid = false;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      _passwordErrorText = "Password is required.";
+      isFormValid = false;
+    }
+    if (_confPasswordController.text.isEmpty) {
+      _confPasswordErrorText = "Please confirm your password.";
+      isFormValid = false;
+    }
+    if (_passwordController.text != _confPasswordController.text) {
+      _passwordErrorText = 'The passwords do not match.';
+      _confPasswordErrorText = 'The passwords do not match.';
+      isFormValid = false;
+    }
+
+    bool isValidForm = _formKey.currentState?.validate() ?? false;
+    isFormValid = isFormValid && isValidForm;
+
+    if (!isFormValid) {
+      setState(() {});
+      return;
+    }
+
+    await registerUser();
+  }
+
+  Future<void> registerUser() async {
+    showLoadingDialog(context);
+
+    try {
+      await widget.auth.signUp(
+          email: _emailController.text, password: _passwordController.text);
+      // Registration successful, continue with further steps
+      String? userID = await widget.auth.getUserId();
+      if (userID != null) {
+        await addDocumentToFirestore(userID);
+        Navigator.of(context).pop(); // Close loading dialog
+        navigateToHomeScreen(); // Navigate to home screen
+      }
+    } on FirebaseAuthException catch (e) {
+      Navigator.of(context).pop(); // Close loading dialog
+      handleFirebaseAuthException(
+          e); // Handle FirebaseAuth exceptions including weak password
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading dialog
+      showGeneralErrorDialog(e.toString()); // Handle other exceptions
+    }
+  }
+
+  void navigateToHomeScreen() {
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil('/nav', (route) => false, arguments: {
+      'selectedIndex': 0,
+    });
+  }
+
+  Future<void> addDocumentToFirestore(String userID) async {
+    // Reference to Firestore
+    String? userID = await widget.auth.getUserId();
+    if (userID == null) {
+      print("User ID is null");
+      return;
+    }
+    try {
+      await addDocument(
+        collectionName: 'user',
+        filename: userID,
+        fieldNames: [
+          'firstName',
+          'lastName',
+          'province',
+          'city',
+          'email',
+          'itemsSold',
+          'description',
+          'posts'
+        ],
+        fieldValues: [
+          _firstNameController.text,
+          _lastNameController.text,
+          _selectedProvince, // Use the selected province
+          _selectedCity, // Use the selected city
+          _emailController.text,
+          [],
+          '',
+          []
+        ],
+      );
+
+      print("User document added successfully.");
+    } catch (e) {
+      print("Error adding user document: $e");
+      throw e; // Rethrow the exception to be handled elsewhere
+    }
+  }
+
+  void handleFirebaseAuthException(FirebaseAuthException e) {
+    // Set state for specific error messages based on the exception code
+    setState(() {
+      if (e.code == 'email-already-in-use')
+        _emailErrorText = 'This email address is already in use.';
+      else if (e.code == 'invalid-email')
+        _emailErrorText = 'Please enter a valid email address.';
+      else if (e.code == 'weak-password')
+        _passwordErrorText = 'The password is too weak.';
+      else
+        _emailErrorText = 'An unexpected error occurred.';
+    });
+  }
+
+  void showGeneralErrorDialog(dynamic e) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: Text('Registration Failed'),
+        content: Text('An unexpected error occurred: $e'),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
       ),
     );
   }
