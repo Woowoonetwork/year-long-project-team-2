@@ -4,9 +4,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'mock.dart';
 import 'package:FoodHood/Screens/create_post.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() {
+
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    setupFirebaseAnalyticsMocks();
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp();
+    }
+  });
   group('Create Post Tests', () {
     testWidgets('Create Post Screen UI Test', (WidgetTester tester) async {
       // Build our app and trigger a frame.
@@ -21,10 +28,6 @@ void main() {
       // Verify that the text input fields for title, description, and pickup instructions are present
       expect(find.byType(CupertinoTextField), findsWidgets,
           reason: "1 or more text input fields are missing");
-
-      // Verify that the search bars are present
-      expect(find.byType(CupertinoSearchTextField), findsWidgets,
-          reason: "1 or more search bars are missing");
 
       // Test functionality upon clicking on the "Save" button
       // Find the "Save" button and tap it

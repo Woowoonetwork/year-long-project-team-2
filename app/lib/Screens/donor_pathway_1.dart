@@ -92,7 +92,7 @@ class _DonorScreenState extends State<DonorScreen> {
             color: CupertinoColors.label.resolveFrom(context),
           ),
         ),
-        trailing: CupertinoButton(
+        trailing: reservedByName != null ? CupertinoButton(
           padding: EdgeInsets.zero,
           child: Text(
             "Message ${reservedByName ?? 'Unknown User'}",
@@ -104,7 +104,7 @@ class _DonorScreenState extends State<DonorScreen> {
             // Close the current screen
             Navigator.of(context).pop();
           },
-        ),
+        ) : null,
         border: Border(bottom: BorderSide.none),
       ),
       child: CustomScrollView(
@@ -113,11 +113,13 @@ class _DonorScreenState extends State<DonorScreen> {
             text: _buildHeadingText(),
           ),
           
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: SizedBox(height: 16.0),
           ),
           
-          SliverToBoxAdapter(
+          //Only show the order info section if the order has been reserved.
+          if (reservedByName != null)
+            SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal:20.0),
               child: Center (
@@ -130,7 +132,7 @@ class _DonorScreenState extends State<DonorScreen> {
             )        
           ),
           
-          __buildTextField(text: "Pickup at $pickupLocation"),
+          __buildTextField(text: "Pickup at specified location"),
 
           __buildButton(),
         ],
@@ -159,6 +161,10 @@ class _DonorScreenState extends State<DonorScreen> {
 
   // Method to build heading text based on order state
   String _buildHeadingText() {
+    if (reservedByName == null) {
+    return "Your order has not been reserved yet";
+  }
+
     switch (orderState) {
       case OrderState.reserved:
         return "Your order has been reserved by ${reservedByName ?? 'Unknown User'}";
@@ -199,99 +205,100 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-Widget __buildButton() {
-  if (orderState == OrderState.readyToPickUp) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color:
-                  CupertinoColors.quaternarySystemFill.resolveFrom(context),
-              width: 2.0,
-            ),
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                color: CupertinoColors.black.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 2),
+  Widget __buildButton() {
+    if (reservedByName == null) {
+      // Return an empty container if the order hasn't been reserved yet
+      return SliverToBoxAdapter(child: Container());
+    }
+    
+    if (orderState == OrderState.readyToPickUp) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color:
+                    CupertinoColors.quaternarySystemFill.resolveFrom(context),
+                width: 2.0,
               ),
-            ],
-          ),
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: Text(
-              "Leave a Review",
-              style: TextStyle(
-                fontSize: _defaultFontSize,
-                color: CupertinoColors.label,
-              ),
-            ),
-            color: CupertinoColors.tertiarySystemBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            onPressed: () {
-              // setState(() {
-              //   orderState = _getNextOrderState();
-              // });
-              Navigator.of(context).push(
-                CupertinoPageRoute(
-                  builder: (context) => DoneeRatingPage(postId: widget.postId,),
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: [
+                BoxShadow(
+                  color: CupertinoColors.black.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 2,
+                  offset: Offset(0, 2),
                 ),
-              );
-            },
+              ],
+            ),
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Text(
+                "Leave a Review",
+                style: TextStyle(
+                  fontSize: _defaultFontSize,
+                  color: CupertinoColors.label,
+                ),
+              ),
+              color: CupertinoColors.tertiarySystemBackground,
+              borderRadius: BorderRadius.circular(16.0),
+              onPressed: () {
+                Navigator.of(context).push(
+                  CupertinoPageRoute(
+                    builder: (context) => DoneeRatingPage(postId: widget.postId,),
+                  ),
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
-  } 
-  else {
-    String buttonText = _buildButtonText();
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color:
-                  CupertinoColors.quaternarySystemFill.resolveFrom(context),
-              width: 2.0,
-            ),
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                color: CupertinoColors.black.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 2),
+      );
+    } 
+    else {
+      String buttonText = _buildButtonText();
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color:
+                    CupertinoColors.quaternarySystemFill.resolveFrom(context),
+                width: 2.0,
               ),
-            ],
-          ),
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: Text(
-              buttonText,
-              style: TextStyle(
-                fontSize: _defaultFontSize,
-                color: CupertinoColors.label,
-              ),
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: [
+                BoxShadow(
+                  color: CupertinoColors.black.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 2,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
-            color: CupertinoColors.tertiarySystemBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            onPressed: () {
-              setState(() {
-                orderState = _getNextOrderState();
-              });
-            },
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Text(
+                buttonText,
+                style: TextStyle(
+                  fontSize: _defaultFontSize,
+                  color: CupertinoColors.label,
+                ),
+              ),
+              color: CupertinoColors.tertiarySystemBackground,
+              borderRadius: BorderRadius.circular(16.0),
+              onPressed: () {
+                setState(() {
+                  orderState = _getNextOrderState();
+                });
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}
-
 
   String _buildButtonText() {
     switch (orderState) {
@@ -318,7 +325,6 @@ Widget __buildButton() {
         return OrderState.reserved;
     }
   }
-
 }
 
 class OrderInfoSection extends StatelessWidget {

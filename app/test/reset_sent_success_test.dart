@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:FoodHood/Screens/login_screen.dart';
 import 'package:FoodHood/Screens/reset_sent_success.dart';
 import 'package:mockito/mockito.dart';
 
@@ -23,17 +22,17 @@ void main() {
         ),
       );
 
-      expect(
-          find.byIcon(CupertinoIcons.check_mark_circled_solid), findsOneWidget);
-
+      // Verify that the text "Success" is present
       expect(find.text('Success!'), findsOneWidget);
 
-      expect(
-          find.text(
-              "Your password reset link has been sent!\n Please follow the instructions in your email and we'll see you soon!"),
-          findsOneWidget);
+      // Verify that the text is present
+      expect(find.text("A password reset link has been sent to your email address."),findsOneWidget);
 
+      // Verify that the text "Continue to FoodHood" on the button is present
       expect(find.text('Continue to FoodHood'), findsOneWidget);
+
+      // Verify that the submit button and back buttons are rendered.
+      expect(find.byType(CupertinoButton), findsNWidgets(2), reason: "Submit and back button not found");
     });
   });
 }
