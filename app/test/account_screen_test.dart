@@ -5,6 +5,8 @@ import 'package:FoodHood/Components/profile_card.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'mock_firestore_service.dart';
 import 'mock.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   setUpAll(() async {
@@ -26,7 +28,15 @@ void main() {
 
     testWidgets('AccountScreen should display the necessary widgets',
         (WidgetTester tester) async {
-      await tester.pumpWidget(CupertinoApp(home: AccountScreen()));
+      await tester.pumpWidget(
+        CupertinoApp(
+          //home: AccountScreen()
+          home: ChangeNotifierProvider(
+          create: (context) => TextScaleProvider(),
+          child: AccountScreen(),
+        ),
+        )
+      );
 
       expect(find.byType(ProfileCard), findsOneWidget);
       expect(find.text('Active Orders'), findsOneWidget);
