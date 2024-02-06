@@ -1,6 +1,7 @@
 // component.dart
 // Themeing components
 
+import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 
@@ -29,14 +30,14 @@ class Styles {
   static TextStyle signUpTextStyle = TextStyle(
     color: accentColor,
     fontSize: 12,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     letterSpacing: -0.20,
   );
 
   static TextStyle signUpLinkStyle = TextStyle(
     color: secondaryColor,
     fontSize: 12,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     letterSpacing: -0.20,
   );
 }
@@ -47,10 +48,10 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
     border: Border(
       bottom: BorderSide.none,
     ),
-    leading: CupertinoButton(
-      padding: EdgeInsets.zero,
-      child: Icon(CupertinoIcons.back, color: accentColor),
-      onPressed: () => Navigator.pop(context),
+    leading: GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Icon(FeatherIcons.chevronLeft,
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)),
     ),
   );
 }
@@ -58,8 +59,9 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
 CupertinoSliverNavigationBar buildMainNavigationBar(
     BuildContext context, String title) {
   return CupertinoSliverNavigationBar(
-    backgroundColor: CupertinoDynamicColor.resolve(
-        groupedBackgroundColor, context).withOpacity(0.8),
+    backgroundColor:
+        CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
+            .withOpacity(0.8),
     border: const Border(
       bottom: BorderSide.none,
     ),
@@ -78,7 +80,7 @@ CupertinoNavigationBar buildBackNavigationBar(BuildContext context) {
     ),
     leading: CupertinoButton(
       padding: EdgeInsets.zero,
-      child: Icon(CupertinoIcons.back,
+      child: Icon(FeatherIcons.chevronLeft,
           color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)),
       onPressed: () => Navigator.pop(context),
     ),
@@ -123,25 +125,61 @@ Widget buildGoogleSignInButton(BuildContext context) {
   );
 }
 
-Widget buildCupertinoTextField(String placeholder,
-    TextEditingController controller, bool obscureText, BuildContext context) {
-  return CupertinoTextField(
-    controller: controller,
-    obscureText: obscureText,
-    placeholder: placeholder,
-    padding: EdgeInsets.all(16.0),
-    placeholderStyle: TextStyle(
-      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    ),
-    decoration: BoxDecoration(
-      color: CupertinoDynamicColor.resolve(
-          CupertinoColors.tertiarySystemBackground, context),
-      borderRadius: BorderRadius.circular(12),
-    ),
+Widget buildCupertinoTextField(
+    String placeholder,
+    TextEditingController controller,
+    bool obscureText,
+    BuildContext context,
+    List<String> autofillHints,
+    {String? errorText, Function(String)? liveValidation}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      CupertinoTextField(
+        controller: controller,
+        obscureText: obscureText,
+        placeholder: placeholder,
+        padding: EdgeInsets.all(16.0),
+        textAlign: TextAlign.left,
+        style: TextStyle(
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+        placeholderStyle: TextStyle(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.placeholderText, context),
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+        autofillHints: autofillHints,
+        decoration: BoxDecoration(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.tertiarySystemBackground, context),
+          borderRadius: BorderRadius.circular(12),
+          border: errorText != null
+              ? Border.all(color: CupertinoColors.systemRed)
+              : null,
+        ),
+        onChanged: (value) {
+          if (liveValidation != null) {
+            liveValidation(value);
+          }
+        },
+      ),
+      if (errorText != null)
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+          child: Text(errorText,
+              style: TextStyle(
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.systemRed, context),
+                  fontSize: 12)), // Display error text if not null
+        ),
+    ],
   );
 }
+
 
 Widget buildText(String text, double fontSize, FontWeight fontWeight) {
   return Text(
@@ -149,6 +187,7 @@ Widget buildText(String text, double fontSize, FontWeight fontWeight) {
     style: TextStyle(
       fontSize: fontSize,
       fontWeight: fontWeight,
+      letterSpacing: -1.40,
     ),
   );
 }
@@ -181,13 +220,15 @@ Widget buildSignUpText(
             color: accentColor,
             fontSize: 12,
             fontWeight: FontWeight.w500,
+            letterSpacing: -0.20,
           ),
           children: <TextSpan>[
             TextSpan(
               text: link,
               style: TextStyle(
-                color: secondaryColor,
+                color: CupertinoColors.systemCyan ,
                 fontWeight: FontWeight.w500,
+                letterSpacing: -0.20,
               ),
             ),
           ],
@@ -199,6 +240,13 @@ Widget buildSignUpText(
 
 Widget buildCenteredText(String text, double fontSize, FontWeight fontWeight) {
   return Center(
-    child: buildText(text, fontSize, fontWeight),
+    child: Text(
+      text.toUpperCase(), // Convert text to uppercase
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        letterSpacing: -0.4,
+      ),
+    ),
   );
 }

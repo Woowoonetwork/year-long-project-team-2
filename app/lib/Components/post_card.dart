@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
 import 'package:FoodHood/Components/colors.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Add this import
 
 class PostCard extends StatelessWidget {
   final String imageLocation;
@@ -13,15 +14,8 @@ class PostCard extends StatelessWidget {
   final String timeAgo;
   final Function(String) onTap; // New callback parameter
   final String postId;
+  final String profileURL; // New parameter to store the profile image URL
   final bool showTags; // New parameter to indicate whether to show tags or not
-
-  // Define your colors here
-  final List<Color> colors = [
-    Colors.lightGreenAccent, // Light Green
-    Colors.lightBlueAccent, // Light Blue
-    Colors.pinkAccent[100]!, // Light Pink
-    Colors.yellowAccent[100]! // Light Yellow
-  ];
 
   PostCard({
     Key? key,
@@ -34,6 +28,7 @@ class PostCard extends StatelessWidget {
     required this.timeAgo,
     required this.onTap,
     required this.postId,
+    required this.profileURL,
     this.showTags = true, // Default value to show tags
   }) : super(key: key);
 
@@ -65,7 +60,7 @@ class PostCard extends StatelessWidget {
                 ] else ...[
                   SizedBox(height: 10),
                 ],
-                _buildOrderInfoSection(context, ''),
+                _buildOrderInfoSection(context, profileURL),
               ],
             ),
           ),
@@ -75,14 +70,42 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildImageSection(BuildContext context) {
+    // Check if imageLocation is a valid URL, if not, use default image
+    bool isImageLocationValid =
+        imageLocation.isNotEmpty; // Add your own validation logic if needed
+
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      child: Image.asset(
-        imageLocation,
-        width: MediaQuery.of(context).size.width,
-        height: 100,
-        fit: BoxFit.cover,
-      ),
+      child: isImageLocationValid
+          ? CachedNetworkImage(
+              imageUrl: imageLocation,
+              width: MediaQuery.of(context).size.width,
+              height: 100,
+              fit: BoxFit.cover,
+              placeholder: (context, url) =>
+                  CupertinoActivityIndicator(), // Placeholder widget
+              errorWidget: (context, url, error) => Image.asset(
+                'assets/images/sampleFoodPic.png', // Fallback image on error
+                width: MediaQuery.of(context).size.width,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
+            )
+          : Image.asset(
+              'assets/images/sampleFoodPic.png', // Default image path
+              width: MediaQuery.of(context).size.width,
+              height: 100,
+              fit: BoxFit.cover,
+            ),
+    );
+  }
+
+  Widget _defaultImage(BuildContext context) {
+    return Image.asset(
+      'assets/images/sampleFoodPic.png', // Replace with your default image path
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      fit: BoxFit.cover,
     );
   }
 
@@ -159,17 +182,36 @@ class PostCard extends StatelessWidget {
 
   Widget _buildOrderInfoSection(BuildContext context, String avatarUrl) {
     // Use a default image if avatarUrl is empty or null
-    String effectiveAvatarUrl =
-        avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
+    String effectiveAvatarUrl = avatarUrl.isEmpty
+        ? 'assets/images/sampleProfile.png' // Default image
+        : avatarUrl;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundImage:
-                AssetImage(effectiveAvatarUrl), // Load the image from assets
-            radius: 9, // Optional: Adjust the radius to fit your design
+          // CircleAvatar(
+          //   backgroundImage: 
+          //   //use
+          //   radius: 9, // Adjust the radius to fit your design
+          // ),
+
+                      //use cached network image 
+          ClipOval(
+            child: CachedNetworkImage(
+              imageUrl: effectiveAvatarUrl,
+              width: 18,
+              height: 18,
+              fit: BoxFit.cover,
+              placeholder: (context, url) =>
+                  CupertinoActivityIndicator(), // Placeholder widget
+              errorWidget: (context, url, error) => Image.asset(
+                'assets/images/sampleProfile.png', // Fallback image on error
+                width: 18,
+                height: 18,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           SizedBox(width: 8),
           Text(
@@ -185,4 +227,6 @@ class PostCard extends StatelessWidget {
       ),
     );
   }
+
+  
 }

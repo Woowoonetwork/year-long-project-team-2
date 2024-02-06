@@ -1,18 +1,23 @@
-import 'package:FoodHood/Components/colors.dart';
+import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:FoodHood/Components/compact_post_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:flutter/services.dart';
-import 'package:FoodHood/Components/cupertinoSearchNavigationBar.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:math' as math;
-import 'package:FoodHood/firestore_service.dart';
-import 'package:FoodHood/Components/post_card.dart';
 import 'package:intl/intl.dart';
-
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Components/cupertinoSearchNavigationBar.dart';
+import 'package:FoodHood/firestore_service.dart';
+import 'package:FoodHood/Components/filtersheet.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class BrowseScreen extends StatefulWidget {
   @override
@@ -20,39 +25,131 @@ class BrowseScreen extends StatefulWidget {
 }
 
 class _BrowseScreenState extends State<BrowseScreen>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   GoogleMapController? mapController;
   Future<LatLng?>? currentLocationFuture;
   Circle? searchAreaCircle;
   TextEditingController searchController = TextEditingController();
 
+  // Constants for map configurations
   static const double defaultZoomLevel = 14.0;
   static const LatLng fallbackLocation = LatLng(49.2827, -123.1207);
   static const double baseSearchRadius = 1000;
-  double _searchRadius = baseSearchRadius;
   static const Color circleFillColor = Colors.blue;
-  static const double circleFillOpacity = 0.1;
+  static const double circleFillOpacity = 0.2;
   static const Color circleStrokeColor = Colors.blue;
-  static const int circleStrokeWidth = 2;
-  final GlobalKey navBarKey = GlobalKey();
-  bool _isZooming = false;
-  double mapBottomPadding = 100; // Default padding
+  static const int circleStrokeWidth = 3;
+  static const double zoomThreshold = 16.0;
+  static const double maxZoomOutLevel = 10.0;
 
+  // State variables
+  double _searchRadius = baseSearchRadius;
+  double mapBottomPadding = 80; // Default padding
+  double mapTopPadding = 80;
+  double currentZoomLevel = defaultZoomLevel;
   String? _mapStyle;
   Set<Marker> _markers = {};
   bool _showPostCard = false;
   Map<String, dynamic> _selectedPostData = {};
+  CameraPosition? _lastKnownCameraPosition;
+  late StreamSubscription<bool> keyboardVisibilitySubscription;
+  bool isKeyboardVisible = false;
+  bool _isZooming = false; // Adding the _isZooming variable here
+  Map<String, Color> tagColors = {};
+  List<Map<String, dynamic>> allPosts = [];
+
+  List<Map<String, dynamic>> postsInCircle = [];
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     currentLocationFuture = _determineCurrentLocation();
+    _setupKeyboardVisibilityListener();
+    _fetchAllMarkers();
+    _requestLocationPermission(); // Request location permission
+  }
+
+  void _setupKeyboardVisibilityListener() {
+    var keyboardVisibilityController = KeyboardVisibilityController();
+    keyboardVisibilitySubscription = keyboardVisibilityController.onChange
+        .listen(_keyboardVisibilityChanged);
+  }
+
+  void _keyboardVisibilityChanged(bool visible) {
+    _debounceKeyboardHandling(visible);
+  }
+
+  // Method to retrieve posts within the circle's radius
+  Future<void> _retrievePostsInCircle() async {
+    if (searchAreaCircle == null) {
+      postsInCircle = [];
+      return;
+    }
+
+    var querySnapshot =
+        await FirebaseFirestore.instance.collection('post_details').get();
+    List<Map<String, dynamic>> retrievedPosts = [];
+
+    for (var doc in querySnapshot.docs) {
+      var data = doc.data();
+      LatLng postLatLng = LatLng(data['latitude'], data['longitude']);
+      double distance = Geolocator.distanceBetween(
+          searchAreaCircle!.center.latitude,
+          searchAreaCircle!.center.longitude,
+          postLatLng.latitude,
+          postLatLng.longitude);
+
+      if (distance <= searchAreaCircle!.radius) {
+        retrievedPosts.add(data);
+      }
+    }
+
+    setState(() {
+      postsInCircle = retrievedPosts;
+    });
+  }
+
+  Timer? _debounce;
+
+  void _debounceKeyboardHandling(bool visible) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        // Check if the widget is still mounted
+        setState(() {
+          if (visible) {
+            mapBottomPadding = 0;
+            mapTopPadding = 0;
+          } else {
+            mapBottomPadding = 80;
+            mapTopPadding = 80;
+          }
+        });
+      }
+    });
+  }
+
+  void _pickRandomPost() {
+    if (allPosts.isEmpty) {
+      print("No posts available to pick from.");
+      return; // Return if there are no posts
+    }
+
+    var random = math.Random();
+    var randomPostIndex = random.nextInt(allPosts.length);
+    var randomPost = allPosts[randomPostIndex];
+
+    // Assuming 'post_location' is stored as GeoPoint in Firestore
+    GeoPoint location = randomPost['post_location'];
+    LatLng latLng = LatLng(location.latitude, location.longitude);
+    _zoomToPostLocation(latLng); // Navigate to the selected post's location
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    keyboardVisibilitySubscription.cancel();
     searchController.dispose();
     mapController?.dispose();
     super.dispose();
@@ -64,56 +161,24 @@ class _BrowseScreenState extends State<BrowseScreen>
     _checkAndUpdateMapStyle();
   }
 
-  static const double zoomThreshold = 16.0; // Define a threshold for zoom level
-  CameraPosition?
-      _lastKnownCameraPosition; // Variable to store last camera position
-
-  void _onCameraMove(CameraPosition position) {
-    _lastKnownCameraPosition = position; // Store the last known camera position
-
-    double newZoomLevel = position.zoom;
-    setState(() {
-      _isZooming = true;
-      _searchRadius = _calculateSearchRadius(newZoomLevel);
-      if (newZoomLevel > zoomThreshold) {
-        // Hide the circle if zoomed in past the threshold
-        searchAreaCircle = null;
-      } else {
-        // Show the circle otherwise
-        _updateSearchAreaCircle(position.target);
-      }
-      _updateMarkersBasedOnCircle();
-    });
+  Future<void> _requestLocationPermission() async {
+    var status = await Permission.location.request();
+    if (status.isGranted) {
+      // If granted, fetch the current location
+      _fetchAndSetCurrentLocation();
+    }
   }
 
-  void _onCameraIdle() {
-    setState(() {
-      _isZooming = false;
-      if (_lastKnownCameraPosition != null) {
-        double currentZoomLevel = _lastKnownCameraPosition!.zoom;
-        if (currentZoomLevel <= zoomThreshold && searchAreaCircle == null) {
-          // Show the circle again when zooming out past the threshold
-          _updateSearchAreaCircle(_lastKnownCameraPosition!.target);
-        }
-      }
-    });
-  }
-
-  double _calculateSearchRadius(double newZoomLevel) {
-    double scale = math.pow(2, defaultZoomLevel - newZoomLevel).toDouble();
-    return baseSearchRadius * scale;
-  }
-
-  void _checkAndUpdateMapStyle() async {
-    String stylePath =
-        MediaQuery.of(context).platformBrightness == Brightness.dark
-            ? 'assets/map_style_dark.json'
-            : 'assets/map_style_light.json';
-
-    String style = await rootBundle.loadString(stylePath);
-    if (_mapStyle != style) {
-      setState(() => _mapStyle = style);
-      mapController?.setMapStyle(_mapStyle);
+  Future<void> _fetchAndSetCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        currentLocationFuture =
+            Future.value(LatLng(position.latitude, position.longitude));
+      });
+    } catch (e) {
+      print("Error fetching location: $e");
     }
   }
 
@@ -121,12 +186,10 @@ class _BrowseScreenState extends State<BrowseScreen>
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
-      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-      return currentLatLng;
+      return LatLng(position.latitude, position.longitude);
     } catch (e) {
-      // Handle location service errors or user permission issues here
       print("Error fetching location: $e");
-      return fallbackLocation; // Return a default location in case of an error
+      return fallbackLocation;
     }
   }
 
@@ -142,10 +205,69 @@ class _BrowseScreenState extends State<BrowseScreen>
     }
   }
 
-  double getNavBarHeight() {
-    final RenderBox? renderBox =
-        navBarKey.currentContext?.findRenderObject() as RenderBox?;
-    return renderBox?.size.height ?? 0;
+  void _checkAndUpdateMapStyle() async {
+    String stylePath =
+        MediaQuery.of(context).platformBrightness == Brightness.dark
+            ? 'assets/map_style_dark.json'
+            : 'assets/map_style_light.json';
+    String style = await rootBundle.loadString(stylePath);
+    if (_mapStyle != style) {
+      setState(() => _mapStyle = style);
+      mapController?.setMapStyle(_mapStyle);
+    }
+  }
+
+  void _onCameraMove(CameraPosition position) {
+    double newZoomLevel = position.zoom;
+    _lastKnownCameraPosition = position;
+
+    // Check if new zoom level is trying to zoom out beyond max zoom out level
+    if (newZoomLevel < maxZoomOutLevel && !_isZoomingIn(newZoomLevel)) {
+      // Prevent zooming out further by setting camera position back to maxZoomOutLevel
+      mapController?.moveCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: position.target,
+            zoom: maxZoomOutLevel,
+          ),
+        ),
+      );
+    } else {
+      // Allow zooming in or normal movement by updating search radius and circle
+      setState(() {
+        currentZoomLevel = newZoomLevel; // Update current zoom level
+        _searchRadius = _calculateSearchRadius(newZoomLevel);
+        if (newZoomLevel > zoomThreshold) {
+          searchAreaCircle = null;
+        } else {
+          _updateSearchAreaCircle(position.target);
+        }
+        _updateMarkersBasedOnCircle();
+      });
+    }
+  }
+
+  bool _isZoomingIn(double newZoomLevel) {
+    // Determine if the user is zooming in by comparing new zoom level with the last known zoom level
+    return newZoomLevel > currentZoomLevel;
+  }
+
+  void _onCameraIdle() {
+    setState(() {
+      _isZooming = false;
+      if (_lastKnownCameraPosition != null) {
+        double currentZoomLevel = _lastKnownCameraPosition!.zoom;
+        if (currentZoomLevel <= zoomThreshold && searchAreaCircle == null) {
+          _updateSearchAreaCircle(_lastKnownCameraPosition!.target);
+        }
+      }
+      _updateMarkersBasedOnCircle(); // Update this method call
+    });
+  }
+
+  double _calculateSearchRadius(double newZoomLevel) {
+    double scale = math.pow(2, defaultZoomLevel - newZoomLevel).toDouble();
+    return baseSearchRadius * scale;
   }
 
   void _updateSearchAreaCircle(LatLng location) {
@@ -161,54 +283,104 @@ class _BrowseScreenState extends State<BrowseScreen>
     });
   }
 
+  void _filterMarkersByTitle(String searchText) {
+    if (searchText.isEmpty) {
+      // If the search text is empty, show all markers
+      _fetchAllMarkers();
+      return;
+    }
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .where('title',
+            isEqualTo:
+                searchText) // Adjust the field name as per your Firestore collection
+        .get()
+        .then((querySnapshot) {
+      Set<Marker> filteredMarkers = {};
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        final LatLng postLatLng = LatLng(
+            double.parse(data['latitude'].toString()),
+            double.parse(data['longitude'].toString()));
+
+        final marker = Marker(
+            markerId: MarkerId(doc.id),
+            position: postLatLng,
+            onTap: () => _onMarkerTapped(doc.id));
+
+        filteredMarkers.add(marker);
+      }
+      setState(() => _markers = filteredMarkers);
+    }).catchError((error) {
+      print("Error fetching filtered post details: $error");
+    });
+  }
+
   void _onMarkerTapped(String markerId) {
     FirebaseFirestore.instance
         .collection('post_details')
         .doc(markerId)
         .get()
         .then((postDocument) async {
-      if (postDocument.exists) {
-        Map<String, dynamic> postData =
-            postDocument.data() as Map<String, dynamic>;
+      if (postDocument.exists && postDocument.data() != null) {
+        Map<String, dynamic> postData = postDocument.data()!;
 
+        // Extract fields safely
         String title = postData['title'] ?? 'No Title';
+        DateTime createdAt =
+            (postData['post_timestamp'] as Timestamp?)?.toDate() ??
+                DateTime.now();
+        List<String> tags = postData['categories'].split(',');
 
-        DateTime createdAt;
-        createdAt = (postData['post_timestamp'] as Timestamp).toDate();
+        // Assign colors to tags
+        List<Color> assignedColors = tags.map((tag) {
+          tag = tag.trim();
+          if (!tagColors.containsKey(tag)) {
+            tagColors[tag] =
+                _getRandomColor(); // Assign a new color if not already assigned
+          }
+          return tagColors[tag]!;
+        }).toList();
 
-        // Fetch user details (assuming 'UserId' is in documentData)
         String userId = postData['user_id'] ?? 'Unknown';
-        Map<String, dynamic>? userData = await readDocument(
-          collectionName: 'user',
-          docName: userId,
-        );
 
-        setState(() {
-          _showPostCard = true;
-          _selectedPostData = {
-            'image_url':
-                postData['image_url'] ?? 'assets/images/sampleFoodPic.png',
-            'title': title,
-            'tags': List<String>.from(postData['tags'] ?? []),
-            'firstname': userData?['firstName'] ?? 'null',
-            'lastname': userData?['lastName'] ?? 'null',
-            'timeAgo': timeAgoSinceDate(createdAt),
-            'postId': postDocument.id
-          };
-          _zoomToPostLocation(postData['post_location']);
+        await readDocument(collectionName: 'user', docName: userId)
+            .then((userData) {
+          setState(() {
+            _showPostCard = true;
+
+            _selectedPostData = {
+              'image_url':
+                  postData['image_url'] ?? 'assets/images/sampleFoodPic.png',
+              'title': title,
+              'tags': tags,
+              'profileURL':
+                  userData?['profileImagePath'] ?? '', // Add this line
+              'tagColors': assignedColors,
+              'firstname': userData?['firstName'] ?? 'Unknown',
+              'lastname': userData?['lastName'] ?? 'Unknown',
+              'timeAgo': timeAgoSinceDate(createdAt),
+              'postId': postDocument.id
+            };
+            GeoPoint? postLocationGeoPoint =
+                postData['post_location'] as GeoPoint?;
+            if (postLocationGeoPoint != null) {
+              LatLng postLatLng = LatLng(postLocationGeoPoint.latitude,
+                  postLocationGeoPoint.longitude);
+              _zoomToPostLocation(postLatLng);
+            }
+          });
         });
       }
     }).catchError((error) {
-      // Handle error
       print("Error fetching post details: $error");
     });
   }
 
   String timeAgoSinceDate(DateTime dateTime) {
     final duration = DateTime.now().difference(dateTime);
-
     if (duration.inDays > 8) {
-      return 'on ${DateFormat('MMMM dd, yyyy').format(dateTime)}'; // Format the date
+      return 'on ${DateFormat('MMMM dd, yyyy').format(dateTime)}';
     } else if (duration.inDays >= 1) {
       return '${duration.inDays} days ago';
     } else if (duration.inHours >= 1) {
@@ -220,15 +392,15 @@ class _BrowseScreenState extends State<BrowseScreen>
     }
   }
 
-  void _zoomToPostLocation(List<dynamic> postLocation) {
-    if (postLocation.length != 2) return; // Add this check
+  void _zoomToPostLocation(LatLng postLatLng) {
+    if (mapController == null) return;
 
-    final postLatLng = LatLng(
-      double.parse(postLocation[0].toString()),
-      double.parse(postLocation[1].toString()),
-    );
-    mapController?.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: postLatLng, zoom: 18.0)));
+    mapController!.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: postLatLng,
+        zoom: 16.0, // You can adjust this zoom level as needed
+      ),
+    ));
   }
 
   void _resetUIState() {
@@ -239,39 +411,47 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   void _updateMarkersBasedOnCircle() {
-    if (searchAreaCircle == null) return; // Prevents null check exception
-
+    if (searchAreaCircle == null) return;
     FirebaseFirestore.instance
         .collection('post_details')
         .get()
         .then((querySnapshot) {
       Set<Marker> newMarkers = {};
+      bool selectedMarkerInsideCircle = false;
+
       for (var doc in querySnapshot.docs) {
         final data = doc.data();
-        final List<dynamic>? postLocationList = data['post_location'];
-        if (postLocationList != null && postLocationList.length == 2) {
+        final GeoPoint? postLocationGeoPoint =
+            data['post_location'] as GeoPoint?;
+        if (postLocationGeoPoint != null) {
           final postLatLng = LatLng(
-            double.parse(postLocationList[0].toString()),
-            double.parse(postLocationList[1].toString()),
-          );
+              postLocationGeoPoint.latitude, postLocationGeoPoint.longitude);
 
           final double distance = Geolocator.distanceBetween(
-            searchAreaCircle!.center.latitude,
-            searchAreaCircle!.center.longitude,
-            postLatLng.latitude,
-            postLatLng.longitude,
-          );
+              searchAreaCircle!.center.latitude,
+              searchAreaCircle!.center.longitude,
+              postLatLng.latitude,
+              postLatLng.longitude);
 
           if (distance <= _searchRadius) {
             final marker = Marker(
-              markerId: MarkerId(doc.id),
-              position: postLatLng,
-              onTap: () => _onMarkerTapped(doc.id),
-            );
+                markerId: MarkerId(doc.id),
+                position: postLatLng,
+                onTap: () => _onMarkerTapped(doc.id));
             newMarkers.add(marker);
+
+            if (_selectedPostData.isNotEmpty &&
+                doc.id == _selectedPostData['postId']) {
+              selectedMarkerInsideCircle = true;
+            }
           }
         }
       }
+
+      if (!selectedMarkerInsideCircle) {
+        _resetUIState(); // Reset UI state if the selected marker is outside the circle
+      }
+
       setState(() => _markers = newMarkers);
     }).catchError((error) {
       print("Error fetching post details: $error");
@@ -286,9 +466,7 @@ class _BrowseScreenState extends State<BrowseScreen>
         content: Text(message),
         actions: <Widget>[
           CupertinoDialogAction(
-            child: Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
+              child: Text('OK'), onPressed: () => Navigator.of(context).pop()),
         ],
       ),
     );
@@ -296,12 +474,12 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Listen for MediaQuery changes
     double bottomInset = MediaQuery.of(context).viewInsets.bottom;
     double updatedMapBottomPadding = bottomInset > 0 ? 0 : mapBottomPadding;
 
     _checkAndUpdateMapStyle();
     return CupertinoPageScaffold(
+      resizeToAvoidBottomInset: false,
       child: Stack(
         children: [
           _buildFullScreenMap(updatedMapBottomPadding),
@@ -328,51 +506,51 @@ class _BrowseScreenState extends State<BrowseScreen>
         return Stack(
           children: [
             GoogleMap(
-              onMapCreated: (GoogleMapController controller) {
-                mapBottomPadding = 100;
-                mapController = controller;
-              },
+              onMapCreated: _onMapCreated,
               onTap: _onMapTapped,
               onCameraMove: _onCameraMove,
               onCameraIdle: _onCameraIdle,
               markers: _markers,
               initialCameraPosition: CameraPosition(
                 target: snapshot.data!,
-                zoom: defaultZoomLevel,
+                zoom: currentZoomLevel,
               ),
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
               zoomControlsEnabled: false,
               compassEnabled: false,
               circles: searchAreaCircle != null ? {searchAreaCircle!} : {},
-              padding: EdgeInsets.only(
-              bottom: mapBottomPadding,
-              top: mapBottomPadding,
-              right: 0,
-              left: 0,
-            ),
+              padding:
+                  EdgeInsets.only(bottom: mapBottomPadding, top: mapTopPadding),
             ),
             if (_showPostCard) _buildPostCard(),
-            if (!_showPostCard) _buildSearchButton(),
+            if (!_showPostCard) _buildBottomButton(),
           ],
         );
       },
     );
   }
 
-  void _onMapTapped(LatLng tapLocation) {
-    if (_lastKnownCameraPosition == null)
-      return; // Ensure we have a camera position
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+    mapController?.setMapStyle(_mapStyle);
 
+    currentLocationFuture?.then((currentLocation) {
+      if (currentLocation != null) {
+        mapController?.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(target: currentLocation, zoom: defaultZoomLevel)));
+      }
+    });
+  }
+
+  void _onMapTapped(LatLng tapLocation) {
+    if (_lastKnownCameraPosition == null) return;
     double currentZoomLevel = _lastKnownCameraPosition!.zoom;
     if (currentZoomLevel > zoomThreshold) {
-      // Check if tap is outside the search area
       bool isOutside = _isOutsideSearchArea(tapLocation);
-      // If zoomed in, zoom out to the default level
       _zoomOutToDefault(isOutside ? tapLocation : null);
       _resetUIState();
     } else {
-      // Reset the UI state regardless of where the user taps on the map
       _resetUIState();
     }
   }
@@ -380,29 +558,23 @@ class _BrowseScreenState extends State<BrowseScreen>
   bool _isOutsideSearchArea(LatLng tapLocation) {
     if (searchAreaCircle == null) return true;
     final double distance = Geolocator.distanceBetween(
-      searchAreaCircle!.center.latitude,
-      searchAreaCircle!.center.longitude,
-      tapLocation.latitude,
-      tapLocation.longitude,
-    );
+        searchAreaCircle!.center.latitude,
+        searchAreaCircle!.center.longitude,
+        tapLocation.latitude,
+        tapLocation.longitude);
     return distance > _searchRadius;
   }
 
   void _zoomOutToDefault([LatLng? customTarget]) {
     LatLng target = customTarget ?? searchAreaCircle!.center;
-    mapController!.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(target: target, zoom: defaultZoomLevel),
-      ),
-    );
+    mapController!.animateCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(target: target, zoom: defaultZoomLevel)));
   }
 
   Widget _buildPostCard() {
     if (_selectedPostData.isEmpty) {
       return SizedBox.shrink();
     }
-
-    // Extract the details from the selected post data
     String imageLocation =
         _selectedPostData['image_url'] ?? 'assets/images/sampleFoodPic.png';
     String title = _selectedPostData['title'] ?? 'Title Not Found';
@@ -411,21 +583,24 @@ class _BrowseScreenState extends State<BrowseScreen>
     String lastname = _selectedPostData['lastname'] ?? 'Unknown';
     String timeAgo = _selectedPostData['timeAgo'] ?? 'Unknown';
     String postId = _selectedPostData['postId'] ?? '0';
+    String profileURL = _selectedPostData['profileURL'] ?? '';
+
+    // Define card height and horizontal padding
+    final double horizontalPadding = 16.0;
 
     return Positioned(
-      bottom: 110,
+      bottom: mapBottomPadding + 24,
       left: 0,
       right: 0,
       child: GestureDetector(
         onVerticalDragUpdate: (details) {
           if (details.primaryDelta! > 10) {
-            // Threshold for swipe down gesture
             _zoomOutToDefault(null);
             _resetUIState();
           }
         },
         onTap: () => _resetUIState(),
-        child: PostCard(
+        child: CompactPostCard(
           imageLocation: imageLocation,
           title: title,
           tags: tags,
@@ -433,9 +608,10 @@ class _BrowseScreenState extends State<BrowseScreen>
           firstname: firstname,
           lastname: lastname,
           timeAgo: timeAgo,
-          onTap: (postId) => print('PostCard with ID $postId was tapped'),
+          onTap: (postId) => _onMarkerTapped(postId),
           postId: postId,
-          showTags: false, // Hide tags
+          profileURL: profileURL,
+          showTags: false,
         ),
       ),
     );
@@ -447,7 +623,7 @@ class _BrowseScreenState extends State<BrowseScreen>
       Colors.lightGreenAccent,
       Colors.lightBlueAccent,
       Colors.pinkAccent[100]!,
-      Colors.yellowAccent[100]!,
+      Colors.yellowAccent[100]!
     ];
     for (int i = 0; i < numberOfTags; i++) {
       tagColors.add(availableColors[i % availableColors.length]);
@@ -455,18 +631,31 @@ class _BrowseScreenState extends State<BrowseScreen>
     return tagColors;
   }
 
-  Widget _buildSearchButton() {
+  Widget _buildBottomButton() {
     return Positioned(
-      bottom: 116.0,
+      bottom: mapBottomPadding + 16,
       left: 0,
       right: 0,
       child: Center(
-        child: CupertinoButton(
-          onPressed: _currentLocation,
-          color: CupertinoColors.tertiarySystemBackground,
-          borderRadius: BorderRadius.circular(100.0),
-          padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
-          child: _isZooming ? _zoomButtonContent() : _locationButtonContent(),
+        child: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x19000000),
+                blurRadius: 20,
+                offset: Offset(0, 0),
+              ),
+            ],
+            borderRadius:
+                BorderRadius.circular(100.0), // Match button's border radius
+          ),
+          child: CupertinoButton(
+            onPressed: _currentLocation,
+            color: CupertinoColors.tertiarySystemBackground,
+            borderRadius: BorderRadius.circular(100.0),
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
+            child: _isZooming ? _zoomButtonContent() : _locationButtonContent(),
+          ),
         ),
       ),
     );
@@ -519,12 +708,55 @@ class _BrowseScreenState extends State<BrowseScreen>
       children: [
         CupertinoSearchNavigationBar(
           title: "Browse",
+          onFeelingLuckyPressed: _pickRandomPost,
           textController: searchController,
-          onSearchTextChanged: (text) {},
+          onSearchTextChanged: (text) {
+            if (text.isEmpty) {
+              _fetchAllMarkers();
+            } else {
+              _filterMarkersByTitle(text);
+            }
+          },
           buildFilterButton: () => _buildFilterButton(),
+          onSearchBarTapped: _handleSearchBarTapped,
         ),
       ],
     );
+  }
+
+  void _fetchAllMarkers() {
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .get()
+        .then((querySnapshot) {
+      Set<Marker> allMarkers = {};
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        double? latitude = double.tryParse(data['latitude']?.toString() ?? '');
+        double? longitude =
+            double.tryParse(data['longitude']?.toString() ?? '');
+
+        if (latitude != null && longitude != null) {
+          final LatLng postLatLng = LatLng(latitude, longitude);
+
+          final marker = Marker(
+              markerId: MarkerId(doc.id),
+              position: postLatLng,
+              onTap: () => _onMarkerTapped(doc.id));
+
+          allMarkers.add(marker);
+        }
+
+        allPosts.add(data); // Add post data to the list
+      }
+      setState(() => _markers = allMarkers);
+    }).catchError((error) {
+      print("Error fetching all post details: $error");
+    });
+  }
+
+  void _handleSearchBarTapped() {
+    _resetUIState();
   }
 
   Widget _buildFilterButton() {
@@ -546,7 +778,6 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   void _currentLocation() async {
     if (mapController == null) return;
-
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
@@ -565,9 +796,7 @@ class _BrowseScreenState extends State<BrowseScreen>
       context: context,
       backgroundColor:
           CupertinoDynamicColor.resolve(groupedBackgroundColor, context),
-      builder: (context) => SafeArea(
-        child: FilterSheet(),
-      ),
+      builder: (context) => SafeArea(child: FilterSheet()),
     );
   }
 
@@ -578,231 +807,15 @@ class _BrowseScreenState extends State<BrowseScreen>
       return '${(radius / 1000).toStringAsFixed(1)} km';
     }
   }
-}
 
-class FilterSheet extends StatefulWidget {
-  @override
-  _FilterSheetState createState() => _FilterSheetState();
-}
-
-class _FilterSheetState extends State<FilterSheet> {
-  String collectionDay = 'Today';
-  List<String> selectedFoodTypes = [];
-  List<String> selectedDietPreferences = [];
-  RangeValues collectionTime = RangeValues(0, 24);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildDragHandle(),
-        _buildCustomNavigationBar(context),
-        _buildFilterOptions(context),
-        _buildBottomButtons(context),
-      ],
-    );
-  }
-
-  Widget _buildDragHandle() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-      child: Center(
-        child: Container(
-          width: 40,
-          height: 5,
-          decoration: BoxDecoration(
-            color: CupertinoColors.systemGrey,
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomNavigationBar(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text('Filter',
-              style: TextStyle(
-                  fontSize: 28,
-                  letterSpacing: -1.3,
-                  fontWeight: FontWeight.bold)),
-          GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Icon(FeatherIcons.x,
-                  size: 24,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterOptions(BuildContext context) {
-    return Expanded(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.stretch, // Stretch to full width
-          children: [
-            _buildTitle('Collection day'),
-            _buildSegmentedControl(),
-            _buildTitle('Collection time'),
-            _buildSlider(context),
-            _buildTitle('Food types'),
-            _buildCupertinoChoiceButtons(
-                ['Meals', 'Bread & pastries', 'Groceries', 'Other'],
-                selectedFoodTypes),
-            _buildTitle('Diet preferences'),
-            _buildCupertinoChoiceButtons(
-                ['Vegetarian', 'Vegan'], selectedDietPreferences),
-            SizedBox(height: 32.0),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Text(title,
-          style: TextStyle(
-              fontSize: 18,
-              letterSpacing: -0.5,
-              color: CupertinoColors.label.resolveFrom(context),
-              fontWeight: FontWeight.w600)),
-    );
-  }
-
-  Widget _buildSegmentedControl() {
-    return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 16.0), // Ensure full width
-      child: CupertinoSlidingSegmentedControl<String>(
-        children: {
-          'Today': Text('Today'),
-          'Tomorrow': Text('Tomorrow'),
-        },
-        onValueChanged: (String? value) {
-          if (value != null) {
-            setState(() {
-              collectionDay = value;
-            });
-          }
-        },
-        groupValue: collectionDay,
-      ),
-    );
-  }
-
-  Widget _buildSlider(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.zero,
-      child: Material(
-        color: Colors.transparent,
-        child: SliderTheme(
-          data: SliderThemeData(
-            thumbColor: accentColor,
-            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 15.0),
-          ),
-          child: RangeSlider(
-            values: collectionTime,
-            activeColor: accentColor,
-            inactiveColor: accentColor.withOpacity(0.3),
-            min: 0,
-            max: 24,
-            divisions: 24,
-            onChanged: (RangeValues newRange) {
-              setState(() {
-                collectionTime = newRange;
-              });
-            },
-            labels: RangeLabels(
-              _formatTime(collectionTime.start),
-              _formatTime(collectionTime.end),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Helper method to format the time
-  String _formatTime(double time) {
-    final hours = time.toInt();
-    final minutes = ((time - hours) * 60).toInt();
-    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-  }
-
-  Widget _buildCupertinoChoiceButtons(
-      List<String> options, List<String> selectedOptions) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Wrap(
-        spacing: 8.0,
-        runSpacing: 8.0,
-        children: options
-            .map((option) => CupertinoButton(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  borderRadius: BorderRadius.circular(100),
-                  color: selectedOptions.contains(option)
-                      ? accentColor.resolveFrom(context)
-                      : CupertinoColors.tertiarySystemBackground
-                          .resolveFrom(context),
-                  child: Text(option,
-                      style: TextStyle(
-                          color: selectedOptions.contains(option)
-                              ? CupertinoColors.white
-                              : CupertinoColors.label.resolveFrom(context))),
-                  onPressed: () {
-                    setState(() {
-                      if (selectedOptions.contains(option)) {
-                        selectedOptions.remove(option);
-                      } else {
-                        selectedOptions.add(option);
-                      }
-                    });
-                  },
-                ))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildBottomButtons(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          CupertinoButton(
-            child: Text('Clear All',
-                style: TextStyle(
-                    color:
-                        CupertinoColors.secondaryLabel.resolveFrom(context))),
-            onPressed: () {
-              setState(() {
-                // Clear filter logic
-              });
-            },
-          ),
-          CupertinoButton(
-            padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-            color: accentColor,
-            borderRadius: BorderRadius.circular(100),
-            child: Text('Apply',
-                style: TextStyle(
-                    fontWeight: FontWeight.w600, color: CupertinoColors.white)),
-            onPressed: () {
-              // Apply filter logic
-            },
-          ),
-        ],
-      ),
-    );
+  Color _getRandomColor() {
+    var random = math.Random();
+    var colors = [
+      yellow,
+      orange,
+      blue,
+      babyPink,
+    ];
+    return colors[random.nextInt(colors.length)];
   }
 }

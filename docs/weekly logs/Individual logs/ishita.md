@@ -398,3 +398,106 @@ N/A.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Term 2 Week 3: Monday 22nd Jan 2024 - Sunday 28th Jan 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W3.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Updated the order card with a new status button for donors only.
+- Added a new and updated reserve button class in posting_details.dart to save the donee id.
+- Added the front-end of the first donor status screen.
+- Implemented functionality to update the state of the donor screen everytime there is an update on the order.
+- Ensured dark mode readability.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Update the order card with the new status button for donors + backend
+    - Ensured that the status button on the order card is for donors only.
+    - Added a new and updated reserve button class in posting_details.dart to save the donee id.
+    - Fixed many bugs related to the reserve button working as intended from the donor's point of view.
+- Complete all the screens/updates of the donor pathway
+    - Added the front-end of the first donor status screen.
+    - Implemented functionality to update the state of the donor screen everytime there is an update on the order.
+    - Developed a widget test for the donor state screen.
+- Complete the T2 W3 team log.
+- Complete the T2 W3 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Term 2 Week 4: Monday 29th Jan 2024 - Sunday 04th Feb 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W4.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Discussed tasks to be completed by participants with team.
+- Practiced testing our app to find and fix bugs before the official session with team.
+- Designed a questionnaire to be completed by participants for quantitative feedback.
+- Added font size increase functionality to accounts screen and order card (as specified through users in accessibility screen)
+- Fixed the overflow bug in settings when users increase the font size.
+- Fixed a minor bug related to input validation in create post screen.
+- Changed minor texts for UI purposes.
+- Updated the pre-defined lists for allergens and categories.
+- Fixed navigation bug from rating screen and reserve logic.
+- Participated in and ran evaluation sessions in class.
+- Fixed the bug on the edit profile screen of not being able to save changes without entering a bio.
+- Updated the order status screen to accurately show text and buttons if the order has not been reserved yet.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Complete accessibility screen bug fixes
+    - Fixed the overflow bug in settings when users increase the font size.
+    - Added font size increase functionality to accounts screen and order card (as specified through users in accessibility screen)
+- Complete various small bug fixes elsewhere throughout the app
+    - Fixed a minor bug related to input validation in create post screen.
+    - Changed minor texts for UI purposes.
+    - Updated the pre-defined lists for allergens and categories.
+- Fix the navigation bug from the rating page
+- Complete the list of tasks for the peer testing.
+- Complete the questionnaire for the peer testing.
+- Order status should not show up if the order has not been reserved
+    - It will not show buttons to message anyone or confirm the order if it hasn't been reserved.
+    - It's heading is updated to show the order hasn't been reserved yet to correctly inform the user on the order status.
+- Fix bug that requires the bio to save any other change on the edit profile screen
+- Complete the T2 W3 team log.
+- Complete the T2 W3 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.

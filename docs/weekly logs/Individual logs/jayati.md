@@ -326,4 +326,66 @@ Ishita created the 'reset password' PR with some initial code but I took over bo
 
 
 
+# Individual Log: Sunday 21st Jan 2024 - Sunday 28th Jan 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati11.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed
+* Link reserve button to donee intro page
+* Create basic UI for first donee page
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+
+* Created donee page with some basic UI
+* Fixed overflow bug on post details page
+* Fixed time showing bug on post details page
+* Completed team log for the week
+* Completed individual log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+N/A
+
+
+Additional Information 
+
+# Individual Log: Monday 29th Jan 2024 - Sunday 4th Feb 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati12.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed
+* Bettered UI for reserve page
+* Connected UI to backend for reserve page
+* Fixed rating page error
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+
+* Bettered UI for reserve page
+* Connected UI to backend for reserve page
+* Fixed rating page error
+* Completed team log for the week
+* Completed individual log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+N/A
+
+
+Additional Information 
+
+
 

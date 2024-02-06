@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'dart:ui';
 import 'package:share_plus/share_plus.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // Bouncing Widget
 class Bouncing extends StatefulWidget {
@@ -69,25 +70,29 @@ class FoodAppBar extends StatefulWidget {
   final String postId;
   final VoidCallback onFavoritePressed;
   final bool isFavorite;
+  final String imageUrl;
 
   const FoodAppBar({
     Key? key,
     required this.postId,
     required this.onFavoritePressed,
     required this.isFavorite,
+    required this.imageUrl, // Add this line
   }) : super(key: key);
-
   @override
   _FoodAppBarState createState() => _FoodAppBarState();
 }
 
 class _FoodAppBarState extends State<FoodAppBar> {
   bool isFavorite = false;
+  String? imageUrl = '';
 
   @override
   void initState() {
     super.initState();
-    isFavorite = widget.isFavorite; // Initialize isFavorite from the widget prop
+    imageUrl = widget.imageUrl; // Initialize imageUrl from the widget prop
+    isFavorite =
+        widget.isFavorite; // Initialize isFavorite from the widget prop
   }
 
   @override
@@ -105,8 +110,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
           StretchMode.zoomBackground, // Allow the background to zoom
           StretchMode.blurBackground, // Apply blur effect for a nice transition
         ],
-        background:
-            Image.asset('assets/images/chickenrice.jpeg', fit: BoxFit.cover),
+        background: _buildBackgroundImage(),
       ),
       leading: _buildLeading(context),
       actions: [_buildFavoriteButton(context), _buildShareButton(context)],
@@ -124,15 +128,50 @@ class _FoodAppBarState extends State<FoodAppBar> {
     );
   }
 
+  Widget _buildBackgroundImage() {
+    // Check if imageUrl is valid, if not, show default content
+    return widget.imageUrl.isNotEmpty
+        ? CachedNetworkImage(
+            imageUrl: widget.imageUrl,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => CupertinoActivityIndicator(),
+            errorWidget: (context, url, error) => _defaultBackgroundContent(),
+          )
+        : _defaultBackgroundContent();
+  }
+
+  Widget _defaultBackgroundContent() {
+    // Default background content when imageUrl is empty or fails to load
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 300,
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              FeatherIcons.frown,
+              size: 60,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+            // ... additional default content
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildFavoriteButton(BuildContext context) {
     return _blurEffect(
       Bouncing(
         onPress: widget.onFavoritePressed,
         child: Icon(
-          widget.isFavorite ? Icons.favorite : Icons.favorite_border, // Use widget.isFavorite
+          widget.isFavorite
+              ? Icons.bookmark
+              : Icons.bookmark_add_outlined, // Use widget.isFavorite
           size: 18,
           color: widget.isFavorite
-              ? CupertinoColors.systemRed
+              ? CupertinoColors.systemOrange
               : CupertinoColors.label.resolveFrom(context),
         ),
       ),
@@ -155,8 +194,6 @@ class _FoodAppBarState extends State<FoodAppBar> {
       ),
     );
   }
-
-  
 
   Widget _blurEffect(Widget child) {
     return Padding(

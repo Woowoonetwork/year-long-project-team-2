@@ -16,6 +16,12 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
+
+//Constants for styling
+const double _defaultTextFontSize = 16.0;
+const double _defaultTabTextFontSize = 14.0;
 
 class AccountScreen extends StatefulWidget {
   @override
@@ -26,11 +32,16 @@ class _AccountScreenState extends State<AccountScreen> {
   int segmentedControlGroupValue = 0;
   List<Widget> activeOrders = [];
   List<OrderCard> pastOrders = [];
+  late double _textScaleFactor;
+  late double adjustedTextFontSize;
+  late double adjustedTabTextFontSize;
 
   @override
   void initState() {
     super.initState();
     setUpPostStreamListener();
+    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _updateAdjustedFontSize();
   }
 
   void setUpPostStreamListener() {
@@ -56,6 +67,11 @@ class _AccountScreenState extends State<AccountScreen> {
         print('Error listening to post changes: $error');
       }
     });
+  }
+
+  void _updateAdjustedFontSize() {
+    adjustedTextFontSize = _defaultTextFontSize * _textScaleFactor;
+    adjustedTabTextFontSize = _defaultTabTextFontSize * _textScaleFactor;
   }
 
   @override
@@ -91,12 +107,12 @@ class _AccountScreenState extends State<AccountScreen> {
     DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
 
     return OrderCard(
-      imageLocation: 'assets/images/sampleFoodPic.png',
       title: title,
       tags: tags,
-      orderInfo: 'Ordered on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
+      orderInfo: 'Posted on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
       postId: postId,
       onTap: _onOrderCardTap,
+      imageLocation: documentData['image_url'] ?? '',
     );
   }
 
@@ -106,11 +122,22 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<int, Widget> myTabs = const <int, Widget>{
+    _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
+    _updateAdjustedFontSize();
+
+    final Map<int, Widget> myTabs = <int, Widget>{
       0: Text('Active Orders',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+          style: TextStyle(
+            fontSize: adjustedTabTextFontSize, 
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       1: Text('Past Orders',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+          style: TextStyle(
+            fontSize: adjustedTabTextFontSize, 
+            fontWeight: FontWeight.w500
+          ),
+        ),
     };
 
     return CupertinoPageScaffold(
@@ -119,9 +146,7 @@ class _AccountScreenState extends State<AccountScreen> {
         slivers: <Widget>[
           _buildNavigationBar(context),
           SliverToBoxAdapter(child: ProfileCard()), // Display the profile card
-
           _buildEditProfileButton(), // New method to create the Edit Profile button
-
           _buildOrdersSectionTitle(),
           _buildSegmentControl(myTabs),
           SliverPadding(
@@ -135,8 +160,9 @@ class _AccountScreenState extends State<AccountScreen> {
 
   CupertinoSliverNavigationBar _buildNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
-      backgroundColor: CupertinoDynamicColor.resolve(
-        groupedBackgroundColor, context).withOpacity(0.8),
+      backgroundColor:
+          CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
+              .withOpacity(0.8),
       largeTitle: Text('Account'),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
@@ -144,6 +170,7 @@ class _AccountScreenState extends State<AccountScreen> {
             style: TextStyle(fontWeight: FontWeight.w500, color: accentColor)),
         onPressed: () => _navigateToSettings(context),
       ),
+      border: Border(bottom: BorderSide.none),
       stretch: true, // Enable stretch behavior
     );
   }
@@ -171,8 +198,8 @@ class _AccountScreenState extends State<AccountScreen> {
         child: Text('Orders',
             style: TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -1.36)),
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.6)),
       ),
     );
   }
@@ -249,14 +276,19 @@ class _AccountScreenState extends State<AccountScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Icon(
-                FeatherIcons.box,
+                FeatherIcons.shoppingBag,
                 size: 40,
                 color: CupertinoColors.systemGrey,
               ),
               SizedBox(height: 20),
               Text(
                 'No orders available',
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(
+                  fontSize: adjustedTextFontSize,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.6,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -280,7 +312,7 @@ class _AccountScreenState extends State<AccountScreen> {
           child: Text(
             'Edit FoodHood Profile',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: adjustedTextFontSize,
               fontWeight: FontWeight.w500,
               letterSpacing: -0.8,
               color: CupertinoColors.white,
