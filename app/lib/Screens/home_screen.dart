@@ -73,19 +73,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNoPostsWidget() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          'No posts available yet',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey,
-          ),
-          textAlign: TextAlign.center,
+    return 
+    Column(
+      children: [
+        SizedBox(height: 200),
+        Icon(
+          FeatherIcons.meh,
+          size: 40,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
         ),
-      ),
+        SizedBox(height: 16),
+        Text(
+          'No posts available',
+          style: TextStyle(
+            fontSize: 16,
+            letterSpacing: -0.6,
+            fontWeight: FontWeight.w500,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          ),
+        ),
+      ],
     );
   }
 
