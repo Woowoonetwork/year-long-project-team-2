@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:FoodHood/Screens/public_page.dart';
+import 'package:FoodHood/Screens/public_profile_screen.dart';
 
 class ProfileCard extends StatefulWidget {
   ProfileCard({Key? key}) : super(key: key);
@@ -76,7 +76,7 @@ class _ProfileCardState extends State<ProfileCard> {
       onTap: () {
         Navigator.push(
           context,
-          CupertinoPageRoute(builder: (context) => PublicPage()),
+          CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
         );
       },
       child: Container(
