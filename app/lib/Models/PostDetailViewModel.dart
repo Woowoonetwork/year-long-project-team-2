@@ -23,6 +23,7 @@ class PostDetailViewModel extends ChangeNotifier {
   late String imageUrl; // Add a field for the image URL
   late String profileURL;
   late String postLocation;
+  late String isReserved;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   bool isFavorite = false;
 
@@ -48,6 +49,7 @@ class PostDetailViewModel extends ChangeNotifier {
     postTimestamp = DateTime.now();
     pickupLatLng = LatLng(37.7749, -122.4194);
     tags = ['null'];
+    isReserved = 'no';
   }
 
   Future<void> fetchData(String postId) async {
@@ -107,6 +109,7 @@ class PostDetailViewModel extends ChangeNotifier {
     rating = documentData['rating'] ?? 0.0;
     imageUrl = documentData['image_url'] ?? ''; // Set the image URL
     pickupLocation = documentData['pickup_location'] ?? '';
+    isReserved = documentData['is_reserved'] ?? 'no';
     // postLocation = documentData['post_location'] ?? '';
     // like post_ location: |49.89090897212782° N, 119.49003484100103° W]
 
