@@ -30,10 +30,17 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             imageUrl: imageUrl,
           ),
           SliverToBoxAdapter(
-            child: AboutSection(),
-          ),
-          SliverToBoxAdapter(
-            child: ReviewSection(),
+            child: 
+            SafeArea(
+              bottom: true,
+              top: false,
+              child: Column(
+                children: <Widget>[
+                  AboutSection(),
+                  ReviewSection(),
+                ],
+              ),
+            ),
           ),
         ],
       ),

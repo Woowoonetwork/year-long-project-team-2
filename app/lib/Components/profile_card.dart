@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Add this import
+
 
 class ProfileCard extends StatefulWidget {
   ProfileCard({Key? key}) : super(key: key);
@@ -81,11 +84,11 @@ class _ProfileCardState extends State<ProfileCard> {
       },
       child: Container(
         margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.tertiarySystemBackground, context),
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
               color: Color(0x19000000),
@@ -118,21 +121,11 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   Widget profileImage() {
-    return ClipOval(
-      child: Image.network(
+    return CircleAvatar(
+      backgroundImage: CachedNetworkImageProvider(
         photo,
-        width: 70,
-        height: 70,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Image.asset(
-            'assets/images/sampleProfile.png',
-            width: 70,
-            height: 70,
-            fit: BoxFit.cover,
-          );
-        },
       ),
+      radius: 36,
     );
   }
 
@@ -173,7 +166,7 @@ class _ProfileCardState extends State<ProfileCard> {
         color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
         fontSize: fontSize,
         fontWeight: fontWeight,
-        letterSpacing: -1.3,
+        letterSpacing: -1.2,
       ),
     );
   }

@@ -35,7 +35,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _textScaleFactor =
+        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
   }
 
@@ -47,132 +48,122 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
     _updateAdjustedFontSize();
-
     return CupertinoPageScaffold(
       backgroundColor: groupedBackgroundColor,
-      child: CustomScrollView(
-        slivers: [
-          CupertinoSliverNavigationBar(
-            transitionBetweenRoutes: false,
-            largeTitle: Text('Settings'),
-            border: Border(bottom: BorderSide.none),
-            backgroundColor: groupedBackgroundColor,
-            leading: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Icon(FeatherIcons.chevronLeft,
-                  size: _iconSize, color: CupertinoColors.label.resolveFrom(context)),
-            ),
+      navigationBar: _buildNavigationBar(context),
+      child: SafeArea(
+        bottom: false,
+        child: ListView(
+          children: [
+          SizedBox(height: 10),
+          ProfileCard(),
+          SizedBox(height: 10),
+          _buildSettingOption('Push Notifications', _buildSwitch()),
+          SizedBox(height: 16),
+          _buildSettingButton('Accessibility', FeatherIcons.eye, () {
+            Navigator.of(context).push(
+              CupertinoPageRoute(
+                builder: (context) => AccessibilityScreen(),
+              ),
+            );
+          }),
+          SizedBox(height: 14),
+          _buildSettingButton('Help', FeatherIcons.helpCircle, () {}),
+          SizedBox(height: 14),
+          _buildSettingButton('Sign out', FeatherIcons.logOut, () {
+            //showSignOutConfirmationSheet(context);
+            _showActionSheet(
+              context,
+              'Sign Out',
+              'Are you sure you want to sign out?',
+              () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/', (route) => false);
+              },
+            );
+          }),
+
+          SizedBox(
+            height: 36.0,
           ),
-          SliverToBoxAdapter(
-            child: Column(
+
+          // Account settings text
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 20.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(height: 10),
-                ProfileCard(),
-                SizedBox(height: 10),
-                _buildSettingOption('Push Notifications', _buildSwitch()),
-                SizedBox(height: 16),
-                _buildSettingButton('Accessibility', FeatherIcons.eye, () {
-                  Navigator.of(context).push(
-                    CupertinoPageRoute(
-                      builder: (context) => AccessibilityScreen(),
-                    ),
-                  );
-                }),
-                SizedBox(height: 14),
-                _buildSettingButton('Help', FeatherIcons.helpCircle, () {}),
-                SizedBox(height: 14),
-                _buildSettingButton('Sign out', FeatherIcons.logOut, () {
-                  //showSignOutConfirmationSheet(context);
-                  _showActionSheet(
-                    context,
-                    'Sign Out',
-                    'Are you sure you want to sign out?',
-                    () async {
-                      await FirebaseAuth.instance.signOut();
-                      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                    },
-                  );
-                }),
-                
-                SizedBox(height: 36.0,),
-
-                // Account settings text
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.only(right: _spacing), 
-                        child: Text(
-                          "Account Settings",
-                          style: TextStyle(
-                            fontSize: adjustedFontSize,
-                            letterSpacing: -0.8,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 16, 0, 12),
-                  child: _buildActionButtons(
-                    'Reset Password',
-                    CupertinoColors.activeBlue,
-                    () => Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (context) => ForgotPasswordScreen(),
-                      ),
+                  padding: EdgeInsets.only(right: _spacing),
+                  child: Text(
+                    "Account Settings",
+                    style: TextStyle(
+                      fontSize: adjustedFontSize,
+                      letterSpacing: -0.8,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: _buildActionButtons(
-                    'Delete Account',
-                    CupertinoColors.destructiveRed,
-                    () => _showActionSheet(
-                      context,
-                      'Delete Account',
-                      'Are you sure you want to delete your account?',
-                      () async {
-                        try {
-                          User user = FirebaseAuth.instance.currentUser!;
-                          await user.delete();
-                          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                        } catch (e) {
-                          print('Error deleting account: $e');
-                        }
-                      },
-                    ),
-                  ),
-                ),
-
               ],
             ),
           ),
-        ],
+
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 16, 0, 12),
+            child: _buildActionButtons(
+              'Reset Password',
+              CupertinoColors.activeBlue,
+              () => Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (context) => ForgotPasswordScreen(),
+                ),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: _buildActionButtons(
+              'Delete Account',
+              CupertinoColors.destructiveRed,
+              () => _showActionSheet(
+                context,
+                'Delete Account',
+                'Are you sure you want to delete your account?',
+                () async {
+                  try {
+                    User user = FirebaseAuth.instance.currentUser!;
+                    await user.delete();
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil('/', (route) => false);
+                  } catch (e) {
+                    print('Error deleting account: $e');
+                  }
+                },
+              ),
+            ),
+          ),
+        ]
+        ),
       ),
     );
   }
 
-  // ObstructingPreferredSizeWidget _buildNavigationBar(BuildContext context) {
-  //   return CupertinoNavigationBar(
-  //     transitionBetweenRoutes: false,
-  //     backgroundColor: groupedBackgroundColor,
-  //     middle: Text('Settings'),
-  //     leading: GestureDetector(
-  //       onTap: () => Navigator.of(context).pop(),
-  //       child: Icon(FeatherIcons.arrowLeft,
-  //           size: _iconSize, color: CupertinoColors.label.resolveFrom(context)),
-  //     ),
-  //     border: const Border(bottom: BorderSide.none),
-  //   );
-  // }
+  ObstructingPreferredSizeWidget _buildNavigationBar(BuildContext context) {
+    return CupertinoNavigationBar(
+      transitionBetweenRoutes: false,
+      backgroundColor: groupedBackgroundColor,
+      middle: Text('Settings', style: TextStyle(fontSize: adjustedFontSize)),
+      leading: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Icon(FeatherIcons.chevronLeft,
+            size: _iconSize * _textScaleFactor
+            , color: CupertinoColors.label.resolveFrom(context)),
+      ),
+      border: const Border(bottom: BorderSide.none),
+    );
+  }
 
   Widget _buildSettingOption(String title, Widget trailing) {
     return Padding(
@@ -226,11 +217,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(width: _spacing),
                 Text(
                   title,
-                    style: TextStyle(
-                        fontSize: adjustedFontSize,
-                        fontWeight: FontWeight.w500,
-                        color: CupertinoColors.label.resolveFrom(context)
-                    ),
+                  style: TextStyle(
+                      fontSize: adjustedFontSize,
+                      fontWeight: FontWeight.w500,
+                      color: CupertinoColors.label.resolveFrom(context)),
                 ),
               ],
             ),
@@ -305,46 +295,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Text(
             title,
             style: TextStyle(
-              fontSize: adjustedFontSize,
-              color: color, 
-              fontWeight: FontWeight.w500
-            ),
+                fontSize: adjustedFontSize,
+                color: color,
+                fontWeight: FontWeight.w500),
             overflow: TextOverflow.visible,
           ),
-        //   child: Row(
-        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //   children: [
-        //     Flexible(
-        //       child: Text(
-        //         title,
-        //         style: TextStyle(
-        //           fontSize: adjustedFontSize,
-        //           color: color,
-        //           fontWeight: FontWeight.w500,
-        //         ),
-        //         overflow: TextOverflow.visible,
-        //       ),
-        //     ),
-        //   ],
-        // ),
-        // child: Center( // Center the text
-        //   child: Text(
-        //     title,
-        //     style: TextStyle(
-        //       fontSize: adjustedFontSize,
-        //       color: color,
-        //       fontWeight: FontWeight.w500,
-        //     ),
-        //     overflow: TextOverflow.visible, // Allow text to overflow
-        //     textAlign: TextAlign.center, // Center text within its container
-        //   ),
-        // ),
+          //   child: Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     Flexible(
+          //       child: Text(
+          //         title,
+          //         style: TextStyle(
+          //           fontSize: adjustedFontSize,
+          //           color: color,
+          //           fontWeight: FontWeight.w500,
+          //         ),
+          //         overflow: TextOverflow.visible,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // child: Center( // Center the text
+          //   child: Text(
+          //     title,
+          //     style: TextStyle(
+          //       fontSize: adjustedFontSize,
+          //       color: color,
+          //       fontWeight: FontWeight.w500,
+          //     ),
+          //     overflow: TextOverflow.visible, // Allow text to overflow
+          //     textAlign: TextAlign.center, // Center text within its container
+          //   ),
+          // ),
         ),
       ),
     );
   }
 
-   void _showActionSheet(BuildContext context, String title, String message, VoidCallback onConfirm) {
+  void _showActionSheet(BuildContext context, String title, String message,
+      VoidCallback onConfirm) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -388,5 +378,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
-  } 
+  }
 }

@@ -40,7 +40,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
   LatLng? selectedLocation;
   String? _mapStyle;
   Set<Marker> _markers = {};
-  bool _isLoading = false;
   String? _selectedImagePath;
 
   void _updateMarker(LatLng position) {
@@ -264,7 +263,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
 
     if (image != null) {
       setState(() {
-        _isLoading = true; // Show loading indicator
+// Show loading indicator
         _selectedImagePath = image.path;
       });
 
@@ -281,7 +280,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
       }
 
       setState(() {
-        _isLoading = false; // Hide loading indicator
+// Hide loading indicator
       });
     }
   }
@@ -328,13 +327,25 @@ class _CreatePostPageState extends State<CreatePostScreen>
     _checkAndUpdateMapStyle();
     return CupertinoPageScaffold(
       backgroundColor: groupedBackgroundColor,
-      child: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            buildSliverNavigationBar(context),
-          ];
-        },
-        body: CustomScrollView(
+      navigationBar: CupertinoNavigationBar(
+        transitionBetweenRoutes: false,
+        backgroundColor: groupedBackgroundColor,
+        leading: GestureDetector(
+          child: Icon(FeatherIcons.x,
+              color: CupertinoColors.label.resolveFrom(context), size: 24.0),
+          onTap: () async => await showConfirmationDialog(context)
+              ? Navigator.of(context).pop()
+              : null,
+        ),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: Text('Save',
+              style: TextStyle(color: accentColor, fontWeight: FontWeight.w600)),
+          onPressed: () => savePost(context),
+        ),
+        border: const Border(bottom: BorderSide.none),
+      ),
+      child:  CustomScrollView(
           slivers: <Widget>[
             buildImageSection(context, _selectedImagePath),
             SliverToBoxAdapter(child: SizedBox(height: 30.0)),
@@ -365,7 +376,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
             SliverToBoxAdapter(child: SizedBox(height: 40.0)),
           ],
         ),
-      ),
+    
     );
   }
 
