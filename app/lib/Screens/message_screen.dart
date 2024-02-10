@@ -56,27 +56,46 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
         automaticallyImplyLeading: false,
       ),
       body: Padding(
-        padding: const EdgeInsets.only(
-            top: 35.0, left: 8.0, right: 8.0), // Increased top padding
+        padding: const EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
         child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start, // Aligns the message to the left
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
               margin: EdgeInsets.only(left: 20.0),
-              padding: EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                  vertical: 4.0), // Reduced padding inside the container
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
               decoration: BoxDecoration(
-                color: Colors.grey[300], // Background color of the message
-                borderRadius: BorderRadius.circular(
-                    18.0), // Adjust for a smaller oval shape
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(18.0),
               ),
               child: Text(
-                "I will be back home in few minutes",
-                style: TextStyle(
-                  fontSize: 14, // Smaller text size
-                ),
+                "I will be back home in a few minutes",
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+            SizedBox(height: 8), // Adds space between the messages
+            Container(
+              margin: EdgeInsets.only(left: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(18.0),
+              ),
+              child: Text(
+                "Is 8:45 okay for you?",
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+            SizedBox(height: 8), // Adds space between the messages
+            Container(
+              margin: EdgeInsets.only(left: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(18.0),
+              ),
+              child: Text(
+                "I will be back home in a few minutes",
+                style: TextStyle(fontSize: 14),
               ),
             ),
             // Add more widgets as needed
