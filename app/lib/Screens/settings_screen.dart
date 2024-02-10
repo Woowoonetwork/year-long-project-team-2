@@ -8,6 +8,8 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
 
 // Constants for styling
 const double _defaultPadding = 20.0;
@@ -31,6 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool pushNotificationsEnabled = false;
   late double _textScaleFactor;
   late double adjustedFontSize;
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   @override
   void initState() {
@@ -38,10 +41,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
+    checkNotificationPermissionStatus();
   }
 
   void _updateAdjustedFontSize() {
     adjustedFontSize = _defaultFontSize * _textScaleFactor;
+  }
+
+  void checkNotificationPermissionStatus() async {
+    NotificationSettings settings = await messaging.getNotificationSettings();
+    setState(() {
+      pushNotificationsEnabled =
+          settings.authorizationStatus == AuthorizationStatus.authorized;
+    });
   }
 
   @override
@@ -53,8 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       navigationBar: _buildNavigationBar(context),
       child: SafeArea(
         bottom: false,
-        child: ListView(
-          children: [
+        child: ListView(children: [
           SizedBox(height: 10),
           ProfileCard(),
           SizedBox(height: 10),
@@ -144,8 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-        ]
-        ),
+        ]),
       ),
     );
   }
@@ -158,8 +168,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: GestureDetector(
         onTap: () => Navigator.of(context).pop(),
         child: Icon(FeatherIcons.chevronLeft,
-            size: _iconSize * _textScaleFactor
-            , color: CupertinoColors.label.resolveFrom(context)),
+            size: _iconSize * _textScaleFactor,
+            color: CupertinoColors.label.resolveFrom(context)),
       ),
       border: const Border(bottom: BorderSide.none),
     );
@@ -192,8 +202,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
       borderRadius: _switchBorderRadius,
       activeColor: accentColor,
       value: pushNotificationsEnabled,
-      onToggle: (value) => setState(() => pushNotificationsEnabled = value),
+      onToggle: (value) {
+        setState(() => pushNotificationsEnabled = value);
+        if (value) {
+        // Request permission and subscribe to topics as shown previously
+        requestNotificationPermission();
+      } else {
+        // Unsubscribe from all topics (example)
+         unsubscribeFromAllTopics();
+
+        // Optionally, inform your backend about the user's decision to disable notifications
+         updateBackendNotificationPreference(false);
+      }
+      },
     );
+  }
+
+  Future<void> unsubscribeFromAllTopics() async {
+  const topics = ['news', 'updates', 'alerts'];
+  for (String topic in topics) {
+    await FirebaseMessaging.instance.unsubscribeFromTopic(topic);
+  }
+}
+
+Future<void> updateBackendNotificationPreference(bool enabled) async {
+  // Send a request to your backend to update the user's notification preference
+  // This is just a placeholder function. Implement according to your backend API.
+  final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+  final Uri backendUrl = Uri.parse('https://yourbackend.example.com/updatePreference');
+
+  try {
+    await http.post(backendUrl, body: {
+      'userId': userId,
+      'notificationsEnabled': enabled.toString(),
+    });
+  } catch (e) {
+    print('Failed to update notification preference: $e');
+  }
+}
+
+  void requestNotificationPermission() async {
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+      // Optionally subscribe the user to a topic for push notifications
+      messaging.subscribeToTopic('general');
+    } else {
+      print('User declined or has not accepted permission');
+    }
   }
 
   Widget _buildSettingButton(
