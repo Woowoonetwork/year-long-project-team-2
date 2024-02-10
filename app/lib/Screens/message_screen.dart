@@ -18,40 +18,47 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        titleSpacing: 0, // Reduces the default spacing
         title: Row(
           children: <Widget>[
+            // Custom back button with reduced padding
+            IconButton(
+              icon: Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () => Navigator.of(context).pop(),
+              padding:
+                  EdgeInsets.zero, // Reduces the padding around the icon button
+              constraints:
+                  BoxConstraints(), // Further reduces the space around the icon button
+            ),
             Text(
               'Harry Styles',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.black, // Adjust color as needed
+                color: Colors.black,
               ),
             ),
-            SizedBox(width: 8), // Space between text and status circle
-            // Small circle with green fill
+            SizedBox(width: 8), // Adjust the space as per your design
             Container(
-              width: 10, // Adjust size as needed
-              height: 10, // Adjust size as needed
+              width: 10,
+              height: 10,
               decoration: BoxDecoration(
-                color: Colors.green, // Green fill
-                shape: BoxShape.circle, // Circular shape
+                color: Colors.green,
+                shape: BoxShape.circle,
               ),
             ),
-            Expanded(
-              child: Container(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  'Last seen a minute ago',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black.withOpacity(0.6),
-                  ),
-                ),
+            SizedBox(width: 30), // Space after the status indicator
+            // Faded "last seen a minute ago" text
+            Text(
+              'Last seen a minute ago',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black.withOpacity(0.6), // Makes the text faded
               ),
             ),
           ],
         ),
-        centerTitle: false, // Aligns the title to the start
+        automaticallyImplyLeading:
+            false, // Prevents automatic insertion of a leading widget
       ),
       body: Center(
         child: Text('Message Screen Page'),
