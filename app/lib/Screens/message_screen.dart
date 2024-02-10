@@ -98,6 +98,17 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                 style: TextStyle(fontSize: 14),
               ),
             ),
+            SizedBox(height: 8),
+            Padding(
+              padding: EdgeInsets.only(left: 20.0), // Aligns with the messages
+              child: Text(
+                "8:24, seen",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black.withOpacity(0.5), // Faded text
+                ),
+              ),
+            ),
             // Add more widgets as needed
           ],
         ),
