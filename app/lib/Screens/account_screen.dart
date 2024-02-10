@@ -127,6 +127,7 @@ class _AccountScreenState extends State<AccountScreen> {
       postId: postId,
       onTap: _onOrderCardTap,
       imageLocation: documentData['image_url'] ?? '',
+      orderState: OrderState.confirmed,
     );
   }
 

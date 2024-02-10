@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart'; // Add this import
 
-
 class ProfileCard extends StatefulWidget {
   ProfileCard({Key? key}) : super(key: key);
 
@@ -89,13 +88,6 @@ class _ProfileCardState extends State<ProfileCard> {
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.tertiarySystemBackground, context),
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x19000000),
-              blurRadius: 20,
-              offset: Offset(0, 0),
-            ),
-          ],
         ),
         child: isLoading
             ? Center(child: CupertinoActivityIndicator())
@@ -121,12 +113,21 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   Widget profileImage() {
-    return CircleAvatar(
-      backgroundImage: CachedNetworkImageProvider(
-        photo,
-      ),
-      radius: 36,
-    );
+    final isNetworkImage =
+        photo.startsWith('http://') || photo.startsWith('https://');
+    if (isNetworkImage) {
+      return CircleAvatar(
+        backgroundImage: CachedNetworkImageProvider(
+          photo,
+        ),
+        radius: 36,
+      );
+    } else {
+      return CircleAvatar(
+        backgroundImage: AssetImage(photo),
+        radius: 36,
+      );
+    }
   }
 
   List<Widget> profileDetails(BuildContext context) {

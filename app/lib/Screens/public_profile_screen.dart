@@ -1,3 +1,4 @@
+import 'package:FoodHood/Components/post_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/profileAppBar.dart';
@@ -30,13 +31,13 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             imageUrl: imageUrl,
           ),
           SliverToBoxAdapter(
-            child: 
-            SafeArea(
+            child: SafeArea(
               bottom: true,
               top: false,
               child: Column(
                 children: <Widget>[
                   AboutSection(),
+                  RecentPostSection(),
                   ReviewSection(),
                 ],
               ),
@@ -72,7 +73,7 @@ class ReviewSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.only(left: 20, bottom: 16),
           child: Text(
             'Reviews',
             style: TextStyle(
@@ -114,7 +115,7 @@ class AboutSection extends StatelessWidget {
           ),
         ),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 20.0),
+          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
           margin: const EdgeInsets.symmetric(horizontal: 20.0),
           width: double.infinity,
           decoration: BoxDecoration(
@@ -132,11 +133,11 @@ class AboutSection extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.0),
             child: Text(
-              'Strawberry sugar high!!! 🍓⭐⭐⭐⭐⭐',
+              'Strawberry sugar high!!!',
               style: TextStyle(
                 color:
                     CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
                 letterSpacing: -0.40,
               ),
@@ -167,17 +168,21 @@ class ReviewItem extends StatelessWidget {
             radius: 20,
           ),
           SizedBox(width: 12),
-          Expanded( // Wrap the Container in an Expanded widget to take up remaining space
+          Expanded(
+            // Wrap the Container in an Expanded widget to take up remaining space
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               decoration: BoxDecoration(
-                color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+                color:
+                    CupertinoColors.quaternarySystemFill.resolveFrom(context),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 review,
                 style: TextStyle(
-                  color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+                  color: CupertinoColors.label
+                      .resolveFrom(context)
+                      .withOpacity(0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   letterSpacing: -0.40,
@@ -187,6 +192,62 @@ class ReviewItem extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class RecentPostSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(left: 20, top: 16),
+          child: Text(
+            'Recent Posts',
+            style: TextStyle(
+              color:
+                  CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.70,
+            ),
+          ),
+        ),
+        Container(
+          height: 260,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 5,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                width: 300,
+                height: 150,
+                margin: EdgeInsets.only(left: 4.0, top: 24, bottom: 24.0),
+                child: PostCard(
+                  imageLocation: 'assets/images/sampleFood.jpg',
+                  title: 'Strawberry Sugar High',
+                  tags: ['Dessert', 'Strawberry', 'Sweet'],
+                  tagColors: [
+                    CupertinoColors.systemRed,
+                    CupertinoColors.systemGreen,
+                    CupertinoColors.systemYellow,
+                  ],
+                  firstname: 'Harry',
+                  lastname: 'Potter',
+                  timeAgo: '2 hours ago',
+                  onTap: (postid) {
+                    print('Post tapped');
+                  },
+                  postId: 'examplePostId',
+                  profileURL: 'assets/images/sampleProfile.png',
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

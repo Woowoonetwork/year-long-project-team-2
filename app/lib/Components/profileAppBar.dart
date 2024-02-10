@@ -161,13 +161,13 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                   SizedBox(height: 2),
                   Row(
                     children: [
-                      Icon(CupertinoIcons.star_fill, color: yellow, size: 14),
-                      Icon(CupertinoIcons.star_fill, color: yellow, size: 14),
-                      Icon(CupertinoIcons.star_fill, color: yellow, size: 14),
+                      Icon(CupertinoIcons.star_fill, color: _backgroundColor, size: 14),
+                      Icon(CupertinoIcons.star_fill, color: _backgroundColor, size: 14),
+                      Icon(CupertinoIcons.star_fill, color: _backgroundColor, size: 14),
                       Icon(CupertinoIcons.star_fill,
-                          color: yellow,
+                          color: _backgroundColor,
                           size: 14), // Use system colors for consistency
-                      Icon(CupertinoIcons.star_fill, color: yellow, size: 14),
+                      Icon(CupertinoIcons.star_fill, color: _backgroundColor, size: 14),
                       Text('  5.0 Ratings',
                           style: TextStyle(
                               color: CupertinoColors.secondaryLabel

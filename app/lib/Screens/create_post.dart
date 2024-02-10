@@ -110,7 +110,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
 
   Future<String?> _uploadImageToFirebase(File imageFile) async {
     try {
-      String userId = FirebaseAuth.instance.currentUser!.uid;
       String fileName =
           'post_${Uuid().v4()}.jpg'; // Unique file name for the image
       Reference storageRef =

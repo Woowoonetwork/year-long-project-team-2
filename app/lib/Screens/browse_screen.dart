@@ -585,9 +585,6 @@ class _BrowseScreenState extends State<BrowseScreen>
     String postId = _selectedPostData['postId'] ?? '0';
     String profileURL = _selectedPostData['profileURL'] ?? '';
 
-    // Define card height and horizontal padding
-    final double horizontalPadding = 16.0;
-
     return Positioned(
       bottom: mapBottomPadding + 24,
       left: 0,

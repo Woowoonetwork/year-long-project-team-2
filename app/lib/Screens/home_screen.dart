@@ -104,8 +104,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     List<String> tags = (data['categories'] as String?)
             ?.split(',')
-            ?.map((tag) => tag.trim())
-            ?.toList() ??
+            .map((tag) => tag.trim())
+            .toList() ??
         [];
     List<Color> assignedColors = tags
         .map((tag) => tagColors.putIfAbsent(tag, () => _getRandomColor()))
@@ -240,16 +240,26 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (postCards.isEmpty && isSearching) {
       // show message when search returns no results
       return SliverFillRemaining(
-        child: Center(
-          child: Text(
-            'No results found',
-            style: TextStyle(
-              fontSize: 16,
-              letterSpacing: -0.6,
-              fontWeight: FontWeight.w500,
+        child: 
+        Column(
+          children: [
+            SizedBox(height: 200),
+            Icon(
+              FeatherIcons.search,
+              size: 40,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
-          ),
+            SizedBox(height: 16),
+            Text(
+              'No results found',
+              style: TextStyle(
+                fontSize: 16,
+                letterSpacing: -0.6,
+                fontWeight: FontWeight.w500,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              ),
+            ),
+          ],
         ),
       );
     } else {
