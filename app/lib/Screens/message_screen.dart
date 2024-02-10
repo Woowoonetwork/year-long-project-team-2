@@ -16,10 +16,42 @@ class MessageScreenPage extends StatefulWidget {
 class _MessageScreenPageState extends State<MessageScreenPage> {
   @override
   Widget build(BuildContext context) {
-    // This is a placeholder Scaffold widget. Replace it with your actual UI.
     return Scaffold(
       appBar: AppBar(
-        title: Text('Message Screen'),
+        title: Row(
+          children: <Widget>[
+            Text(
+              'Harry Styles',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black, // Adjust color as needed
+              ),
+            ),
+            SizedBox(width: 8), // Space between text and status circle
+            // Small circle with green fill
+            Container(
+              width: 10, // Adjust size as needed
+              height: 10, // Adjust size as needed
+              decoration: BoxDecoration(
+                color: Colors.green, // Green fill
+                shape: BoxShape.circle, // Circular shape
+              ),
+            ),
+            Expanded(
+              child: Container(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  'Last seen a minute ago',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black.withOpacity(0.6),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        centerTitle: false, // Aligns the title to the start
       ),
       body: Center(
         child: Text('Message Screen Page'),
