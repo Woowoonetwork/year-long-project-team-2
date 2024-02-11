@@ -110,6 +110,92 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
               ),
             ),
             // Add more widgets as needed
+
+            SizedBox(height: 20),
+            // Sent message 1
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 15.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: Colors.blue, // Bluish color for the sent message
+                    borderRadius: BorderRadius.circular(18.0),
+                  ),
+                  child: Text(
+                    "Blah Blah Blah Blah",
+                    style: TextStyle(
+                        fontSize: 14, color: Colors.white), // White text
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            // Sent message 2
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 15.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: Colors.blue, // Bluish color for the sent message
+                    borderRadius: BorderRadius.circular(18.0),
+                  ),
+                  child: Text(
+                    "I will be back home in a few minutes",
+                    style: TextStyle(
+                        fontSize: 14, color: Colors.white), // White text
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            // Sent message 3
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 15.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: Colors.blue, // Bluish color for the sent message
+                    borderRadius: BorderRadius.circular(18.0),
+                  ),
+                  child: Text(
+                    "I will be back home in a few minutes",
+                    style: TextStyle(
+                        fontSize: 14, color: Colors.white), // White text
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            // Sent message 3
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: 15.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: Colors.blue, // Bluish color for the sent message
+                    borderRadius: BorderRadius.circular(18.0),
+                  ),
+                  child: Text(
+                    "Are you at the place right now?",
+                    style: TextStyle(
+                        fontSize: 14, color: Colors.white), // White text
+                  ),
+                ),
+              ],
+            ),
+            // Add more widgets as needed
           ],
         ),
       ),
