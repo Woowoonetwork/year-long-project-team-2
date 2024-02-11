@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
+import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:cached_network_image/cached_network_image.dart'; // Add this import
+import 'package:cached_network_image/cached_network_image.dart'; 
+import 'package:FoodHood/Screens/public_profile_screen.dart';
 
 class PostCard extends StatelessWidget {
   final String imageLocation;
@@ -100,27 +101,11 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _defaultImage(BuildContext context) {
-    return Image.asset(
-      'assets/images/sampleFoodPic.png', // Replace with your default image path
-      width: MediaQuery.of(context).size.width,
-      height: 100,
-      fit: BoxFit.cover,
-    );
-  }
-
   BoxDecoration _buildBoxDecoration(BuildContext context) {
     return BoxDecoration(
       color: CupertinoDynamicColor.resolve(
           CupertinoColors.tertiarySystemBackground, context),
       borderRadius: BorderRadius.circular(14),
-      boxShadow: [
-        BoxShadow(
-          color: Color(0x19000000),
-          blurRadius: 20,
-          offset: Offset(0, 0),
-        ),
-      ],
     );
   }
 
@@ -142,7 +127,7 @@ class PostCard extends StatelessWidget {
   Widget _buildTagSection(BuildContext context) {
     const double horizontalSpacing = 7.0;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: List.generate(tags.length, (index) {
           return Row(
@@ -187,46 +172,44 @@ class PostCard extends StatelessWidget {
         : avatarUrl;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Row(
-        children: [
-          // CircleAvatar(
-          //   backgroundImage: 
-          //   //use
-          //   radius: 9, // Adjust the radius to fit your design
-          // ),
-
-                      //use cached network image 
-          ClipOval(
-            child: CachedNetworkImage(
-              imageUrl: effectiveAvatarUrl,
-              width: 18,
-              height: 18,
-              fit: BoxFit.cover,
-              placeholder: (context, url) =>
-                  CupertinoActivityIndicator(), // Placeholder widget
-              errorWidget: (context, url, error) => Image.asset(
-                'assets/images/sampleProfile.png', // Fallback image on error
-                width: 18,
-                height: 18,
-                fit: BoxFit.cover,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
+            );
+          },
+          child: Row(
+            children: [
+              ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: effectiveAvatarUrl,
+                  width: 18,
+                  height: 18,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) =>
+                      CupertinoActivityIndicator(), // Placeholder widget
+                  errorWidget: (context, url, error) => Image.asset(
+                    'assets/images/sampleProfile.png', // Fallback image on error
+                    width: 18,
+                    height: 18,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-            ),
+              SizedBox(width: 8),
+              Text(
+                'Posted by $firstname $lastname $timeAgo',
+                style: TextStyle(
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.secondaryLabel, context),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-          SizedBox(width: 8),
-          Text(
-            'Posted by $firstname $lastname $timeAgo',
-            style: TextStyle(
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.secondaryLabel, context),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
-
-  
 }

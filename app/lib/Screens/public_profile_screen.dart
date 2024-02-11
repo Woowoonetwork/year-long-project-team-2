@@ -10,10 +10,9 @@ class PublicProfileScreen extends StatefulWidget {
 }
 
 class _PublicProfileScreenState extends State<PublicProfileScreen> {
-  // Example data for the profile
   final String postId = "examplePostId";
   final bool isFavorite = false;
-  final String imageUrl = "https://example.com/image.jpg";
+  final String imageUrl = "";
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +23,11 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
         slivers: <Widget>[
           ProfileAppBar(
             postId: postId,
-            onFavoritePressed: () {
-              print("Favorite button pressed");
+            onBlockPressed: () {
+              // Block user here
             },
-            isFavorite: isFavorite,
+            isCurrentUser: false,
+            isBlocked: isFavorite,
             imageUrl: imageUrl,
           ),
           SliverToBoxAdapter(

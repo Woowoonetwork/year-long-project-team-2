@@ -11,7 +11,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/profile_card.dart';
 import 'package:FoodHood/Components/order_card.dart';
-import 'package:FoodHood/Screens/edit_profile_screen.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -161,8 +160,6 @@ class _AccountScreenState extends State<AccountScreen> {
         slivers: <Widget>[
           _buildNavigationBar(context),
           SliverToBoxAdapter(child: ProfileCard()), // Display the profile card
-          _buildEditProfileButton(), // New method to create the Edit Profile button
-          _buildOrdersSectionTitle(),
           _buildSegmentControl(myTabs),
           SliverPadding(
             padding: const EdgeInsets.only(bottom: 100.0),
@@ -175,6 +172,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   CupertinoSliverNavigationBar _buildNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
+      transitionBetweenRoutes: false,
       backgroundColor:
           CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
               .withOpacity(0.8),
@@ -190,15 +188,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void _navigateToEditProfile(BuildContext context) async {
-    final result = await Navigator.of(context).push(
-      CupertinoPageRoute(builder: (context) => EditProfilePage()),
-    );
 
-    if (result == 'updated') {
-      setState(() {});
-    }
-  }
 
   void _navigateToSettings(BuildContext context) {
     // Implement navigation to settings screen
@@ -209,7 +199,7 @@ class _AccountScreenState extends State<AccountScreen> {
   SliverToBoxAdapter _buildOrdersSectionTitle() {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 32.0, 16.0, 16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
         child: Text('Orders',
             style: TextStyle(
                 fontSize: 22,
@@ -313,28 +303,5 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  // Method to build the Edit Profile button
-  Widget _buildEditProfileButton() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: CupertinoButton(
-          color: accentColor,
-          borderRadius: BorderRadius.circular(10),
-          minSize: 44,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          onPressed: () => _navigateToEditProfile(context),
-          child: Text(
-            'Edit FoodHood Profile',
-            style: TextStyle(
-              fontSize: adjustedTextFontSize,
-              fontWeight: FontWeight.w500,
-              letterSpacing: -0.8,
-              color: CupertinoColors.white,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  
 }

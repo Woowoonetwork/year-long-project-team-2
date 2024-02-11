@@ -9,6 +9,7 @@ import 'package:flutter_switch/flutter_switch.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:FoodHood/Screens/edit_profile_screen.dart';
 import 'package:http/http.dart' as http;
 
 // Constants for styling
@@ -69,6 +70,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SizedBox(height: 10),
           ProfileCard(),
           SizedBox(height: 10),
+          _buildEditProfileButton(),
+          SizedBox(height: 16),
           _buildSettingOption('Push Notifications', _buildSwitch()),
           SizedBox(height: 16),
           _buildSettingButton('Accessibility', FeatherIcons.eye, () {
@@ -160,6 +163,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // Method to build the Edit Profile button
+  Widget _buildEditProfileButton() {
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: CupertinoButton(
+          color: accentColor,
+          borderRadius: BorderRadius.circular(10),
+          minSize: 44,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          onPressed: () => _navigateToEditProfile(context),
+          child: Text(
+            'Edit FoodHood Profile',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              letterSpacing: -0.8,
+              color: CupertinoColors.white,
+            ),
+          ),
+        ),
+      );
+  }
+
+  void _navigateToEditProfile(BuildContext context) async {
+    final result = await Navigator.of(context).push(
+      CupertinoPageRoute(builder: (context) => EditProfilePage()),
+    );
+
+    if (result == 'updated') {
+      setState(() {});
+    }
+  }
+
   ObstructingPreferredSizeWidget _buildNavigationBar(BuildContext context) {
     return CupertinoNavigationBar(
       transitionBetweenRoutes: false,
@@ -205,41 +241,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onToggle: (value) {
         setState(() => pushNotificationsEnabled = value);
         if (value) {
-        // Request permission and subscribe to topics as shown previously
-        requestNotificationPermission();
-      } else {
-        // Unsubscribe from all topics (example)
-         unsubscribeFromAllTopics();
+          // Request permission and subscribe to topics as shown previously
+          requestNotificationPermission();
+        } else {
+          // Unsubscribe from all topics (example)
+          unsubscribeFromAllTopics();
 
-        // Optionally, inform your backend about the user's decision to disable notifications
-         updateBackendNotificationPreference(false);
-      }
+          // Optionally, inform your backend about the user's decision to disable notifications
+          updateBackendNotificationPreference(false);
+        }
       },
     );
   }
 
   Future<void> unsubscribeFromAllTopics() async {
-  const topics = ['news', 'updates', 'alerts'];
-  for (String topic in topics) {
-    await FirebaseMessaging.instance.unsubscribeFromTopic(topic);
+    const topics = ['news', 'updates', 'alerts'];
+    for (String topic in topics) {
+      await FirebaseMessaging.instance.unsubscribeFromTopic(topic);
+    }
   }
-}
 
-Future<void> updateBackendNotificationPreference(bool enabled) async {
-  // Send a request to your backend to update the user's notification preference
-  // This is just a placeholder function. Implement according to your backend API.
-  final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-  final Uri backendUrl = Uri.parse('https://yourbackend.example.com/updatePreference');
+  Future<void> updateBackendNotificationPreference(bool enabled) async {
+    // Send a request to your backend to update the user's notification preference
+    // This is just a placeholder function. Implement according to your backend API.
+    final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final Uri backendUrl =
+        Uri.parse('https://yourbackend.example.com/updatePreference');
 
-  try {
-    await http.post(backendUrl, body: {
-      'userId': userId,
-      'notificationsEnabled': enabled.toString(),
-    });
-  } catch (e) {
-    print('Failed to update notification preference: $e');
+    try {
+      await http.post(backendUrl, body: {
+        'userId': userId,
+        'notificationsEnabled': enabled.toString(),
+      });
+    } catch (e) {
+      print('Failed to update notification preference: $e');
+    }
   }
-}
 
   void requestNotificationPermission() async {
     NotificationSettings settings = await messaging.requestPermission(

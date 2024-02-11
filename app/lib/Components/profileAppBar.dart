@@ -7,15 +7,17 @@ import 'package:palette_generator/palette_generator.dart';
 
 class ProfileAppBar extends StatefulWidget {
   final String postId;
-  final VoidCallback onFavoritePressed;
-  final bool isFavorite;
+  final VoidCallback onBlockPressed;
+  final bool isBlocked;
+  final bool isCurrentUser; // New parameter to determine if the profile belongs to the current user
   final String imageUrl;
 
   const ProfileAppBar({
     Key? key,
     required this.postId,
-    required this.onFavoritePressed,
-    required this.isFavorite,
+    required this.onBlockPressed,
+    required this.isBlocked,
+    required this.isCurrentUser, // Initialize in the constructor
     required this.imageUrl,
   }) : super(key: key);
 
@@ -75,7 +77,9 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         titlePadding: EdgeInsets.only(left: 20.0, bottom: 16.0),
       ),
       leading: _buildLeading(context),
-      actions: [buildBlockButton(context)],
+      actions: [
+        if (!widget.isCurrentUser) buildBlockButton(context),
+      ],
     );
   }
 
@@ -161,13 +165,17 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                   SizedBox(height: 2),
                   Row(
                     children: [
-                      Icon(CupertinoIcons.star_fill, color: _backgroundColor, size: 14),
-                      Icon(CupertinoIcons.star_fill, color: _backgroundColor, size: 14),
-                      Icon(CupertinoIcons.star_fill, color: _backgroundColor, size: 14),
+                      Icon(CupertinoIcons.star_fill,
+                          color: _backgroundColor, size: 14),
+                      Icon(CupertinoIcons.star_fill,
+                          color: _backgroundColor, size: 14),
+                      Icon(CupertinoIcons.star_fill,
+                          color: _backgroundColor, size: 14),
                       Icon(CupertinoIcons.star_fill,
                           color: _backgroundColor,
                           size: 14), // Use system colors for consistency
-                      Icon(CupertinoIcons.star_fill, color: _backgroundColor, size: 14),
+                      Icon(CupertinoIcons.star_fill,
+                          color: _backgroundColor, size: 14),
                       Text('  5.0 Ratings',
                           style: TextStyle(
                               color: CupertinoColors.secondaryLabel

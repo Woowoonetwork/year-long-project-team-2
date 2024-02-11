@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildSearchBar(context),
               SizedBox(height: 16),
               _buildCategoryButtons(),
-              SizedBox(height: 16)
+              SizedBox(height: 8)
             ])),
             isLoading ? _buildLoadingSliver(context) : _buildPostListSliver(),
           ]),

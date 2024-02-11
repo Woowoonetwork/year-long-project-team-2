@@ -6,6 +6,7 @@ import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
+import 'dart:ui'; // Import this for ImageFilter.blur
 
 import 'package:palette_generator/palette_generator.dart';
 
@@ -100,8 +101,12 @@ class OrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildStatusRow(context),
-          _buildImageSection(context, imageLocation),
+          Stack(
+            children: [
+              _buildImageSection(context, imageLocation),
+              _buildStatusRow(context),
+            ],
+          ),
           _buildTitleSection(context),
           _buildTagSection(context),
           _buildOrderInfoSection(context),
@@ -115,7 +120,6 @@ class OrderCard extends StatelessWidget {
       color: CupertinoDynamicColor.resolve(
           CupertinoColors.tertiarySystemBackground, context),
       borderRadius: BorderRadius.circular(14),
-      boxShadow: const [BoxShadow(color: Color(0x19000000), blurRadius: 20)],
     );
   }
 
@@ -123,24 +127,25 @@ class OrderCard extends StatelessWidget {
     final isNetworkImage = imageLocation.startsWith('http');
 
     return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
       child: isNetworkImage
           ? CachedNetworkImage(
               imageUrl: imageLocation,
               width: MediaQuery.of(context).size.width,
-              height: 100,
+              height: 112,
               fit: BoxFit.cover,
               placeholder: (context, url) => CupertinoActivityIndicator(),
               errorWidget: (context, url, error) => Image.asset(
                 'assets/images/sampleFoodPic.png',
                 width: MediaQuery.of(context).size.width,
-                height: 100,
+                height: 112,
                 fit: BoxFit.cover,
               ),
             )
           : Image.asset(
               'assets/images/sampleFoodPic.png',
               width: MediaQuery.of(context).size.width,
-              height: 100,
+              height: 112,
               fit: BoxFit.cover,
             ),
     );
@@ -161,7 +166,7 @@ class OrderCard extends StatelessWidget {
 
   Widget _buildTagSection(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Wrap(
         spacing: 7,
         children: tags
@@ -207,7 +212,7 @@ class OrderCard extends StatelessWidget {
   Widget _buildStatusRow(BuildContext context) {
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -218,8 +223,7 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-   Widget _buildStatusText(BuildContext context) {
-    // Modify this method to display status based on orderState
+  Widget _buildStatusText(BuildContext context) {
     String statusText = '';
     Color statusColor = CupertinoColors.systemGreen; // Default color
 
@@ -242,37 +246,67 @@ class OrderCard extends StatelessWidget {
         break;
     }
 
-    return Row(
-      children: [
-        Icon(CupertinoIcons.circle_fill, color: statusColor, size: 14),
-        const SizedBox(width: 8),
-        Text(statusText, style: TextStyle(
-            color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-            fontWeight: FontWeight.w500,
-            fontSize: 14)),
-      ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter:
+            ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur filter
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          color: CupertinoColors.tertiarySystemBackground
+              .resolveFrom(context)
+              .withOpacity(0.9), // Semi-transparent white background
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => _handleStatusPress(context),
+            child: Row(
+              children: [
+                Icon(CupertinoIcons.circle_fill, color: statusColor, size: 12),
+                const SizedBox(width: 6),
+                Text(statusText,
+                    style: TextStyle(
+                        color: CupertinoDynamicColor.resolve(
+                            CupertinoColors.label, context),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13)),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildStatusButton(BuildContext context) {
-    return SizedBox(
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: () => _handleStatusPress(context),
-        child: Row(
-          children: [
-            Text('Status',
-                style: TextStyle(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter:
+            ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur filter
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          color: CupertinoColors.tertiarySystemBackground
+              .resolveFrom(context)
+              .withOpacity(0.9), // Semi-transparent white background
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => _handleStatusPress(context),
+            child: Row(
+              children: [
+                Text('Status',
+                    style: TextStyle(
+                        color: CupertinoDynamicColor.resolve(
+                            CupertinoColors.label, context),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13)),
+                const SizedBox(width: 4),
+                Icon(FeatherIcons.chevronRight,
                     color: CupertinoDynamicColor.resolve(
                         CupertinoColors.label, context),
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14)),
-            const SizedBox(width: 4),
-            Icon(FeatherIcons.chevronRight,
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.label, context),
-                size: 16),
-          ],
+                    size: 14),
+              ],
+            ),
+          ),
         ),
       ),
     );
