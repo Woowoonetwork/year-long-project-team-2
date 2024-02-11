@@ -216,12 +216,12 @@ class RecentPostSection extends StatelessWidget {
           ),
         ),
         Container(
-          height: 260,
+          height: 220,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: 5,
             itemBuilder: (BuildContext context, int index) {
-              return Container(
+              return Container(                
                 width: 300,
                 height: 150,
                 margin: EdgeInsets.only(left: 4.0, top: 24, bottom: 24.0),
@@ -240,6 +240,8 @@ class RecentPostSection extends StatelessWidget {
                   onTap: (postid) {
                     print('Post tapped');
                   },
+                  showShadow: true,
+                  imageHeight: 60,
                   postId: 'examplePostId',
                   profileURL: 'assets/images/sampleProfile.png',
                 ),

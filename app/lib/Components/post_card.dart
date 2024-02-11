@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:cached_network_image/cached_network_image.dart'; 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
 
 class PostCard extends StatelessWidget {
@@ -13,10 +13,12 @@ class PostCard extends StatelessWidget {
   final List<String> tags;
   final List<Color> tagColors;
   final String timeAgo;
-  final Function(String) onTap; // New callback parameter
+  final Function(String) onTap;
   final String postId;
-  final String profileURL; // New parameter to store the profile image URL
-  final bool showTags; // New parameter to indicate whether to show tags or not
+  final String profileURL;
+  final bool showTags;
+  final double imageHeight;
+  final bool showShadow;
 
   PostCard({
     Key? key,
@@ -30,7 +32,9 @@ class PostCard extends StatelessWidget {
     required this.onTap,
     required this.postId,
     required this.profileURL,
-    this.showTags = true, // Default value to show tags
+    this.showTags = true,
+    this.imageHeight = 100.0,
+    this.showShadow = false,
   }) : super(key: key);
 
   @override
@@ -71,9 +75,7 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildImageSection(BuildContext context) {
-    // Check if imageLocation is a valid URL, if not, use default image
-    bool isImageLocationValid =
-        imageLocation.isNotEmpty; // Add your own validation logic if needed
+    bool isImageLocationValid = imageLocation.isNotEmpty;
 
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
@@ -81,21 +83,20 @@ class PostCard extends StatelessWidget {
           ? CachedNetworkImage(
               imageUrl: imageLocation,
               width: MediaQuery.of(context).size.width,
-              height: 100,
+              height: imageHeight, // Use the configurable height
               fit: BoxFit.cover,
-              placeholder: (context, url) =>
-                  CupertinoActivityIndicator(), // Placeholder widget
+              placeholder: (context, url) => CupertinoActivityIndicator(),
               errorWidget: (context, url, error) => Image.asset(
-                'assets/images/sampleFoodPic.png', // Fallback image on error
+                'assets/images/sampleFoodPic.png',
                 width: MediaQuery.of(context).size.width,
-                height: 100,
+                height: imageHeight, // Use the configurable height
                 fit: BoxFit.cover,
               ),
             )
           : Image.asset(
-              'assets/images/sampleFoodPic.png', // Default image path
+              'assets/images/sampleFoodPic.png',
               width: MediaQuery.of(context).size.width,
-              height: 100,
+              height: imageHeight, // Use the configurable height
               fit: BoxFit.cover,
             ),
     );
@@ -106,6 +107,15 @@ class PostCard extends StatelessWidget {
       color: CupertinoDynamicColor.resolve(
           CupertinoColors.tertiarySystemBackground, context),
       borderRadius: BorderRadius.circular(14),
+      boxShadow: showShadow
+          ? [
+              BoxShadow(
+                color: Color(0x19000000),
+                blurRadius: 20,
+                offset: Offset(0, 0),
+              ),
+            ]
+          : [], // Use shadow based on the configurable flag
     );
   }
 
