@@ -161,7 +161,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     // Validation for required fields
     if (_firstNameController.text.isEmpty ||
         _lastNameController.text.isEmpty ||
-        _aboutMeController.text.isEmpty ||
         _emailController.text.isEmpty ||
         _selectedProvince.isEmpty ||
         _selectedCity.isEmpty) {

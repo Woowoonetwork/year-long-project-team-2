@@ -1,8 +1,6 @@
 import 'package:FoodHood/Screens/donee_rating.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:FoodHood/Screens/account_screen.dart';
-import 'package:FoodHood/Components/profile_card.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'mock_firestore_service.dart';
 import 'mock.dart';

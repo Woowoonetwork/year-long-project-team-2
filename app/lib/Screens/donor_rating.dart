@@ -1,9 +1,7 @@
-import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:feather_icons/feather_icons.dart';
-import 'package:FoodHood/firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DonorRatingPage extends StatefulWidget {

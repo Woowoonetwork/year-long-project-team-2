@@ -40,7 +40,7 @@ class SuccessScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Text(
-                "A password reset link has been sent your to email address.",
+                "A password reset link has been sent to your email address.",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
