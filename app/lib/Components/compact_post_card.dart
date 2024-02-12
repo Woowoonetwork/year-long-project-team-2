@@ -1,3 +1,4 @@
+import 'package:FoodHood/Screens/public_profile_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
@@ -151,39 +152,47 @@ class CompactPostCard extends StatelessWidget {
         avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Row(
-        children: [
-          //use cached network image
-          ClipOval(
-            child: Image.network(
-              effectiveAvatarUrl,
-              width: 30,
-              height: 30,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  'assets/images/sampleProfile.png',
-                  width: 30,
-                  height: 30,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (context) => PublicProfileScreen(),
+              ),
+            );
+          },
+          child: Row(
+            children: [
+              ClipOval(
+                child: Image.network(
+                  effectiveAvatarUrl,
+                  width: 20,
+                  height: 20,
                   fit: BoxFit.cover,
-                );
-              },
-            ),
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'assets/images/sampleProfile.png',
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.cover,
+                    );
+                  },
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Posted by $firstname $lastname $timeAgo',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.secondaryLabel, context),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
-          SizedBox(width: 8),
-          Text(
-            'Posted by $firstname $lastname $timeAgo',
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.secondaryLabel, context),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }
