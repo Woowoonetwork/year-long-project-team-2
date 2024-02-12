@@ -440,3 +440,38 @@ N/A.
 ### Additional Information
 
 N/A.
+
+
+## Term 2 Week 5: Monday 5th Feb 2024 - Sunday 11th Feb 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/nickT2W5.png)
+
+### Recap of personal goals
+
+- Added and updated the UI for the Public Profile page.
+- Redesign the order post card to better present the status of the order.
+- Reorganized the account screen and the settings page to improve the logic of each page.
+- Implemented the backend logic for the future implementation of push notifications.
+- Added weekly logs and contributed to the team log.
+- Reviewed and merged PRs from team members.
+
+### Tasks completed (from Project Board)
+
+- Configured Push Notifications APNs for iOS and FCM for Android.
+- Refreshed Public Profile page with a colour matched gradient.
+- Added recent posts and reviews to the Public Profile page.
+- Redesigned the order post card to better present the status of the order.
+- Migrated the Edit Profile buttons to the Settings screen.
+- Fixed laggy performance issues when scrolling down the page by removing shadows for the card.
+- Cleaned up issues and warnings in the project.
+- Completed weekly Log and contributed to the Team Log.
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
