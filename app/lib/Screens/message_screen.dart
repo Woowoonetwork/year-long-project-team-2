@@ -1,13 +1,8 @@
-import 'package:FoodHood/Screens/home_screen.dart';
-import 'package:FoodHood/Screens/public_profile_screen.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-// Ensure these imports match the actual paths and package names in your Flutter project
-import 'package:FoodHood/Components/colors.dart';
 import 'package:feather_icons/feather_icons.dart';
-import 'package:FoodHood/firestore_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Screens/public_profile_screen.dart';
 
 class MessageScreenPage extends StatefulWidget {
   @override
@@ -16,390 +11,353 @@ class MessageScreenPage extends StatefulWidget {
 
 class _MessageScreenPageState extends State<MessageScreenPage> {
   final TextEditingController _messageController = TextEditingController();
-  List<String> recommendedMessages = [
+  final ScrollController _scrollController = ScrollController();
+  final List<String> recommendedMessages = [
     "Sure, see you then!",
     "On my way.",
     "Can we reschedule?",
     "Let me check my calendar.",
     "Running late, sorry!",
-    // Add more recommended messages as needed
   ];
+
+  List<Map<String, dynamic>> messages = [
+    {
+      "text": "I will be back home in a few minutes",
+      "received": true,
+      "read": true
+    },
+    {"text": "Is 8:45 okay for you ?", "received": true, "read": true},
+    {"text": "Blah Blah Blah Blah", "received": false, "read": false},
+    {
+      "text": "Are you at the place right now?",
+      "received": false,
+      "read": false
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 0,
-        title: Row(
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.of(context).pop(),
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(),
-            ),
-            GestureDetector(
-              onTap: () {
-                // Action when Harry Styles is clicked
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                      builder: (context) =>
-                          PublicProfileScreen()), // Adjust according to your MessageScreenPage's constructor
-                );
-                print("Harry Styles clicked");
-              },
-              child: Text(
-                'Harry Styles',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  letterSpacing: -0.70,
-                ),
-              ),
-            ),
-            SizedBox(width: 8),
-            Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.circle,
-              ),
-            ),
-            SizedBox(width: 40),
-            Text(
-              'Last seen a minute ago',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black.withOpacity(0.6),
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.70,
-              ),
-            ),
-          ],
-        ),
-        automaticallyImplyLeading: false,
+      appBar: _buildAppBar(),
+      backgroundColor: CupertinoDynamicColor.resolve(
+        backgroundColor,
+        context,
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(left: 20.0),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(18.0),
-                    ),
-                    child: Text("I will be back home in a few minutes",
-                        style: TextStyle(
-                          fontSize: 14,
-                          letterSpacing: -0.70,
-                        )),
-                  ),
-                  SizedBox(height: 8), // Adds space between the messages
-                  Container(
-                    margin: EdgeInsets.only(left: 20.0),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(18.0),
-                    ),
-                    child: Text("Is 8:45 okay for you ?",
-                        style: TextStyle(
-                          fontSize: 14,
-                          letterSpacing: -0.70,
-                        )),
-                  ),
-                  SizedBox(height: 8), // Adds space between the messages
-                  Container(
-                    margin: EdgeInsets.only(left: 20.0),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(18.0),
-                    ),
-                    child: Text("I will be back home in a few minutes",
-                        style: TextStyle(
-                          fontSize: 14,
-                          letterSpacing: -0.70,
-                        )),
-                  ),
-                  SizedBox(height: 8),
-                  Padding(
-                    padding:
-                        EdgeInsets.only(left: 20.0), // Aligns with the messages
-                    child: Text(
-                      "8:24, seen",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black.withOpacity(0.5),
-                        letterSpacing: -0.70, // Faded text
-                      ),
-                    ),
-                  ),
-                  // Add more widgets as needed
+      body: SafeArea(
+        child: _buildPageContent(),
+      ),
+    );
+  }
 
-                  SizedBox(height: 20),
-                  // Sent message 1
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(right: 15.0),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color:
-                              accentColor, // Bluish color for the sent message
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                        child: Text(
-                          "Blah Blah Blah Blah",
-                          style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                              letterSpacing: -0.70), // White text
-                        ),
-                      ),
-                    ],
+  Widget _buildPageContent() {
+    return Column(
+      children: <Widget>[
+        Expanded(
+          child: _buildMessagesList(),
+        ),
+        _buildMessageInput(),
+      ],
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      titleSpacing: 0,
+      elevation: 0,
+      scrolledUnderElevation: 0.0,
+      leading: _buildBackButton(),
+      backgroundColor: CupertinoDynamicColor.resolve(
+        backgroundColor,
+        context,
+      ),
+      centerTitle: false,
+      title: _buildContactName(),
+      actions: [_buildTrailingItems()],
+      automaticallyImplyLeading: false,
+    );
+  }
+
+  Widget _buildTrailingItems() {
+    return Container(
+      padding: EdgeInsets.only(right: 16),
+      child: Row(
+        children: [
+          _buildOnlineIndicator(),
+          _buildLastSeenText(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackButton() {
+    return IconButton(
+      icon: Icon(FeatherIcons.chevronLeft,
+          size: 22, color: CupertinoColors.label.resolveFrom(context)),
+      onPressed: () => Navigator.of(context).pop(),
+      padding: EdgeInsets.zero,
+      constraints: BoxConstraints(),
+    );
+  }
+
+  Widget _buildContactName() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
+        );
+      },
+      child: Text(
+        'Harry Styles',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: CupertinoColors.label.resolveFrom(context),
+          letterSpacing: -1.3,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOnlineIndicator() {
+    return Container(
+      width: 10,
+      height: 10,
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: CupertinoColors.activeGreen,
+        shape: BoxShape.circle,
+      ),
+    );
+  }
+
+  Widget _buildLastSeenText() {
+    return Text(
+      'Last seen a minute ago',
+      style: TextStyle(
+        fontSize: 14,
+        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.5,
+      ),
+    );
+  }
+
+  Widget _buildMessagesList() {
+    int lastReadMessageIndex = messages
+        .lastIndexWhere((message) => !message["received"] && message["read"]);
+
+    return Expanded(
+      child: ListView.builder(
+        controller: _scrollController, // Use the controller here
+
+        itemCount: messages.length,
+        itemBuilder: (context, index) {
+          final message = messages[index];
+          bool shouldShowReadReceipt = index == lastReadMessageIndex;
+
+          return Column(
+            crossAxisAlignment: message["received"]
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.end,
+            children: [
+              _buildMessage(
+                message["text"],
+                received: message["received"],
+              ),
+              // Show read receipt only for the last read message sent by the user
+              if (shouldShowReadReceipt)
+                Padding(
+                  padding: EdgeInsets.only(
+                    top: 4,
+                    right: !message["received"] ? 16 : 0,
+                    left: message["received"] ? 16 : 0,
                   ),
-                  SizedBox(height: 8),
-                  // Sent message 2
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(right: 15.0),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color:
-                              accentColor, // Bluish color for the sent message
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                        child: Text(
-                          "I will be back home in a few minutes",
-                          style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                              letterSpacing: -0.70), // White text
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  // Sent message 3
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(right: 15.0),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color:
-                              accentColor, // Bluish color for the sent message
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                        child: Text(
-                          "I will be back home in a few minutes",
-                          style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                              letterSpacing: -0.70), // White text
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  // Sent message 3
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(right: 15.0),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color:
-                              accentColor, // Bluish color for the sent message
-                          borderRadius: BorderRadius.circular(18.0),
-                        ),
-                        child: Text(
-                          "Are you at the place right now?",
-                          style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                              letterSpacing: -0.70), // White text
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            right: 15.0), // Aligns 15 units from the right
-                        child: Text(
-                          "8:28, Received",
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.black.withOpacity(0.5),
-                              letterSpacing: -0.70 // Faded black text
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Container(
-                    margin: EdgeInsets.only(left: 20.0),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(18.0),
-                    ),
-                    child: Text("I will be back home in a few minutes",
-                        style: TextStyle(
-                          fontSize: 14,
-                          letterSpacing: -0.70,
-                        )),
-                  ),
-                  SizedBox(height: 8), // Adds space between the messages
-                  Container(
-                    margin: EdgeInsets.only(left: 20.0),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(18.0),
-                    ),
-                    child: Text("Is 8:45 okay for you ?",
-                        style: TextStyle(
-                          fontSize: 14,
-                          letterSpacing: -0.70,
-                        )),
-                  ),
-                  SizedBox(height: 8), // Adds space between the messages
-                  Container(
-                    margin: EdgeInsets.only(left: 20.0),
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(18.0),
-                    ),
-                    child: Text("I will be back home in a few minutes",
-                        style: TextStyle(
-                          fontSize: 14,
-                          letterSpacing: -0.70,
-                        )),
-                  ),
-                  SizedBox(height: 8),
-                  Padding(
-                    padding:
-                        EdgeInsets.only(left: 20.0), // Aligns with the messages
-                    child: Text(
-                      "8:30, seen",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black.withOpacity(0.5), // Faded text
-                      ),
+                  child: Text(
+                    "Read",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
                     ),
                   ),
-                ],
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMessage(String message, {bool received = true}) {
+    return Container(
+      margin: EdgeInsets.only(
+        top: 8,
+        left: received ? 16 : 0,
+        right: received ? 0 : 16,
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: received
+            ? CupertinoColors.tertiarySystemFill.resolveFrom(context)
+            : accentColor,
+        borderRadius: BorderRadius.circular(18.0),
+      ),
+      child: Text(
+        message,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: -0.6,
+          color: received
+              ? CupertinoColors.label.resolveFrom(context)
+              : CupertinoColors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickMessageSuggestions() {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      height: 40, // Adjust the height as necessary
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: recommendedMessages.length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () => _quickMessageTap(recommendedMessages[index]),
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 8),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: CupertinoColors.tertiarySystemFill.resolveFrom(context),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Center(
+                child: Text(
+                  recommendedMessages[index],
+                  style: TextStyle(
+                      fontSize: 14,
+                      letterSpacing: -0.6,
+                      fontWeight: FontWeight.w500,
+                      color: CupertinoColors.label.resolveFrom(context)),
+                ),
               ),
             ),
-          ),
+          );
+        },
+      ),
+    );
+  }
 
-          // Add more widgets as needed
+  void _quickMessageTap(String message) {
+    _messageController.text = message;
+  }
 
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  height: 30,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: recommendedMessages.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        margin: EdgeInsets.only(left: 10, right: 8),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Text(
-                          recommendedMessages[index],
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      );
-                    },
+  Widget _buildMessageInput() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildQuickMessageSuggestions(), // Quick message suggestions row
+          Container(
+            margin: EdgeInsets.only(bottom: 16, left: 16, right: 16),
+            decoration: BoxDecoration(
+              color: CupertinoColors.tertiarySystemFill.resolveFrom(context),
+              borderRadius: BorderRadius.circular(18.0),
+            ),
+            child: TextField(
+              controller: _messageController,
+              style: TextStyle(
+                fontSize: 16.0, // Custom font size
+                color: CupertinoColors.label.resolveFrom(context),
+                letterSpacing: -0.6, // Custom letter spacing
+                fontWeight: FontWeight.w400, // Custom font weight
+                // Add any other TextStyle properties you need
+              ),
+              decoration: InputDecoration(
+                hintText: "Message Harry",
+                hintStyle: TextStyle(
+                  letterSpacing: -0.6,
+                  fontWeight: FontWeight.w500,
+                  color: CupertinoColors.placeholderText.resolveFrom(context),
+                ),
+                border: InputBorder.none,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                suffixIcon: GestureDetector(
+                  onTap: _sendMessage,
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    margin:
+                        EdgeInsets.all(12), // Symmetric padding for the icon
+                    decoration: BoxDecoration(
+                      color: accentColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      FeatherIcons.arrowUp,
+                      size: 24,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                SizedBox(height: 8),
-                Container(
-                  color: Colors.white, // Adjust as needed
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0),
-                          decoration: BoxDecoration(
-                            color:
-                                Colors.grey[300], // Grey color for the text box
-                            borderRadius: BorderRadius.circular(
-                                18.0), // Rounded corners for the text box
-                          ),
-                          child: TextField(
-                            controller: _messageController,
-                            decoration: InputDecoration(
-                              hintText: "Message ...",
-                              border: InputBorder.none, // Removes underline
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () {
-                          print("Send message: ${_messageController.text}");
-                          _messageController.clear();
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.send, color: Colors.black),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _sendMessage() {
+    final String messageText = _messageController.text.trim();
+    if (messageText.isNotEmpty) {
+      setState(() {
+        messages.add({
+          "text": messageText,
+          "received": false, // Assuming the user is sending the message
+          "read": false, // New messages start as unread
+        });
+      });
+      _messageController.clear();
+
+      // Automatically scroll to the latest message
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+
+      // Simulate receiving a reply after a delay
+      Future.delayed(Duration(seconds: 2), () {
+        setState(() {
+          messages.add({
+            "text": "Auto-reply to: $messageText",
+            "received": true,
+            "read": true,
+          });
+
+          // Mark the user's last message as read
+          if (messages.isNotEmpty) {
+            messages[messages.length - 2]["read"] = true;
+          }
+        });
+
+        // Scroll to the bottom to show the auto-reply
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    }
   }
 
   @override
