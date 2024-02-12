@@ -39,6 +39,9 @@ void main() {
 
     // Verify that the switch is there
     expect(find.byType(FlutterSwitch), findsOneWidget, reason: "Switch button not found");
+
+    // Verify that the Edit FoodHood profile text is there
+    expect(find.text('Edit FoodHood Profile'), findsOneWidget);
     
     // Verify that "Account Settings" text is there
     expect(find.text('Account Settings'), findsNWidgets(1), reason: "Account Settings text not found");
