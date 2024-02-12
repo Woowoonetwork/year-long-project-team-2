@@ -1,4 +1,5 @@
 import 'package:FoodHood/Screens/home_screen.dart';
+import 'package:FoodHood/Screens/public_profile_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,12 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
             GestureDetector(
               onTap: () {
                 // Action when Harry Styles is clicked
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) =>
+                          PublicProfileScreen()), // Adjust according to your MessageScreenPage's constructor
+                );
                 print("Harry Styles clicked");
               },
               child: Text(
