@@ -489,8 +489,56 @@ N/A.
     - It will not show buttons to message anyone or confirm the order if it hasn't been reserved.
     - It's heading is updated to show the order hasn't been reserved yet to correctly inform the user on the order status.
 - Fix bug that requires the bio to save any other change on the edit profile screen
-- Complete the T2 W3 team log.
-- Complete the T2 W3 individual log.
+- Complete the T2 W4 team log.
+- Complete the T2 W4 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Term 2 Week 5: Monday 05th Feb 2024 - Sunday 11th Feb 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W5.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Added the font size change functionality to various screens.
+- Fix various tests to ensure they pass with the changes made.
+- Generated the test report and worked to improve quality of our tests to improve the test report results.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Add the font size change functionality to other screens
+    - Added it to the new order card and fixed bugs related to overflow when font size is increased.
+    - Added it to the donor screen.
+    - Added it to the edit profile screen.
+    - Added it to the create post screen.
+    - Added it to the saved posts/ bookmarks screen.
+- Modify the tests of various files to ensure they pass.
+    - Modified the tests of the accounts and settings screen because the "Edit profile" button was moved.
+    - Modified the test of the create post screen.
+    - Modified the test of the saved post screen.
+    - Modified the test of the edit profile screen.
+    - Modified the test of the donor screen.
+    - Modified the mock firestore service.
+- Complete the T2 W5 team log.
+- Complete the T2 W5 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
 
 
