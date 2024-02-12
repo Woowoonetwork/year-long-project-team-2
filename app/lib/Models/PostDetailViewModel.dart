@@ -222,4 +222,17 @@ class PostDetailViewModel extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  Future<void> cancelReservation(String postId) async {
+    try {
+      await firestore.collection('post_details').doc(postId).update({
+        'is_reserved': 'no',
+      });
+      isReserved = 'no';
+      notifyListeners();
+    } catch (e) {
+      print('Error canceling reservation: $e');
+      throw e;
+    }
+  }
 }

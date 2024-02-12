@@ -99,19 +99,13 @@ class _DoneePathState extends State<DoneePath> {
                     },
                   ),
                   SizedBox(height: 20),
-                  Text(
-                    _confirmationStatus(),
-                    style: TextStyle(
-                      color: viewModel.isReserved == "yes"
-                          ? CupertinoColors.activeGreen
-                          : CupertinoColors.systemGrey,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text(_confirmationStatus(),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                   SizedBox(height: 40),
-                  _buildActionButton(context),
+                  _buildCancelButton(context),
                   SizedBox(height: 20),
+                  _navigateToRatingPageButton(),
                 ],
               ),
             ),
@@ -131,18 +125,33 @@ class _DoneePathState extends State<DoneePath> {
     }
   }
 
-  Widget _buildActionButton(BuildContext context) {
-    return viewModel.isReserved == "yes"
-        ? CupertinoButton.filled(
-            onPressed: _navigateToRatingPage,
-            child: Text('Leave a Review'),
-          )
-        : CupertinoButton(
-            onPressed: () {
-              // Action to cancel reservation
-            },
-            color: CupertinoColors.destructiveRed,
-            child: Text('Cancel Reservation'),
-          );
+  Widget _buildCancelButton(BuildContext context) {
+    return CupertinoButton(
+      onPressed: () async {
+        try {
+          await viewModel.cancelReservation(widget.postId);
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Reservation canceled successfully.')));
+
+          Navigator.of(context).pop(mounted);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to cancel reservation.')));
+        }
+      },
+      color: CupertinoColors.destructiveRed,
+      child: Text('Cancel Reservation'),
+    );
+  }
+
+  Widget _navigateToRatingPageButton() {
+    if (viewModel.isReserved == "yes") {
+      return CupertinoButton.filled(
+        onPressed: _navigateToRatingPage,
+        child: Text('Leave a Review'),
+      );
+    } else {
+      return Container();
+    }
   }
 }
