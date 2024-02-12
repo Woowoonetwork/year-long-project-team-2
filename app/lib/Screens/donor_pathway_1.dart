@@ -121,7 +121,12 @@ class _DonorScreenState extends State<DonorScreen> {
                 ),
                 onPressed: () {
                   // Close the current screen
-                  Navigator.of(context).pop();
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                        builder: (context) =>
+                            MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
+                  );
                 },
               )
             : null,
@@ -214,14 +219,12 @@ class _DonorScreenState extends State<DonorScreen> {
             color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
             borderRadius: BorderRadius.circular(16.0),
           ),
-          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: adjustedFontSize,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: adjustedFontSize,
+            ),
           ),
         ),
       ),
