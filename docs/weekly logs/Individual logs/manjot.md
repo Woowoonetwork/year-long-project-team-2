@@ -326,3 +326,30 @@ N/A, all is complete
 ### Additional Information
 
 N/A.
+
+## Term 2 Week 5
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w5manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- modified code in register_screen
+- modified password validation rules
+- enforced more secure/stronger passwords
+- improved alerts for any problems the registration form may have for clearer communication
+- debugging code
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- edited register_screen code
+- Added alert/pop-up for weak password, and how to make it stronger
+- enforced stronger/more secure password rules
+- Completed Week 17 individual log.
+
+### Tasks in progress (from Project Board)
+
+N/A, all is complete
+
+### Additional Information
+
+N/A.
