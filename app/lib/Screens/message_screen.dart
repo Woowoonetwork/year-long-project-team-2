@@ -195,6 +195,24 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                 ),
               ],
             ),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                      right: 15.0), // Aligns 15 units from the right
+                  child: Text(
+                    "8:48, received",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black.withOpacity(0.5), // Faded black text
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
             // Add more widgets as needed
           ],
         ),
