@@ -46,6 +46,7 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
+                  letterSpacing: -0.70,
                 ),
               ),
             ),
@@ -58,12 +59,14 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                 shape: BoxShape.circle,
               ),
             ),
-            SizedBox(width: 30),
+            SizedBox(width: 40),
             Text(
               'Last seen a minute ago',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.black.withOpacity(0.6),
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.70,
               ),
             ),
           ],
@@ -86,10 +89,11 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(18.0),
                     ),
-                    child: Text(
-                      "I will be back home in a few minutes",
-                      style: TextStyle(fontSize: 14),
-                    ),
+                    child: Text("I will be back home in a few minutes",
+                        style: TextStyle(
+                          fontSize: 14,
+                          letterSpacing: -0.70,
+                        )),
                   ),
                   SizedBox(height: 8), // Adds space between the messages
                   Container(
@@ -100,10 +104,11 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(18.0),
                     ),
-                    child: Text(
-                      "Is 8:45 okay for you?",
-                      style: TextStyle(fontSize: 14),
-                    ),
+                    child: Text("Is 8:45 okay for you ?",
+                        style: TextStyle(
+                          fontSize: 14,
+                          letterSpacing: -0.70,
+                        )),
                   ),
                   SizedBox(height: 8), // Adds space between the messages
                   Container(
@@ -114,10 +119,11 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(18.0),
                     ),
-                    child: Text(
-                      "I will be back home in a few minutes",
-                      style: TextStyle(fontSize: 14),
-                    ),
+                    child: Text("I will be back home in a few minutes",
+                        style: TextStyle(
+                          fontSize: 14,
+                          letterSpacing: -0.70,
+                        )),
                   ),
                   SizedBox(height: 8),
                   Padding(
@@ -127,7 +133,8 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                       "8:24, seen",
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.black.withOpacity(0.5), // Faded text
+                        color: Colors.black.withOpacity(0.5),
+                        letterSpacing: -0.70, // Faded text
                       ),
                     ),
                   ),
@@ -150,7 +157,9 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                         child: Text(
                           "Blah Blah Blah Blah",
                           style: TextStyle(
-                              fontSize: 14, color: Colors.white), // White text
+                              fontSize: 14,
+                              color: Colors.white,
+                              letterSpacing: -0.70), // White text
                         ),
                       ),
                     ],
@@ -172,7 +181,9 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                         child: Text(
                           "I will be back home in a few minutes",
                           style: TextStyle(
-                              fontSize: 14, color: Colors.white), // White text
+                              fontSize: 14,
+                              color: Colors.white,
+                              letterSpacing: -0.70), // White text
                         ),
                       ),
                     ],
@@ -194,7 +205,9 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                         child: Text(
                           "I will be back home in a few minutes",
                           style: TextStyle(
-                              fontSize: 14, color: Colors.white), // White text
+                              fontSize: 14,
+                              color: Colors.white,
+                              letterSpacing: -0.70), // White text
                         ),
                       ),
                     ],
@@ -216,7 +229,9 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                         child: Text(
                           "Are you at the place right now?",
                           style: TextStyle(
-                              fontSize: 14, color: Colors.white), // White text
+                              fontSize: 14,
+                              color: Colors.white,
+                              letterSpacing: -0.70), // White text
                         ),
                       ),
                     ],
@@ -231,10 +246,10 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                         child: Text(
                           "8:28, Received",
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black
-                                .withOpacity(0.5), // Faded black text
-                          ),
+                              fontSize: 12,
+                              color: Colors.black.withOpacity(0.5),
+                              letterSpacing: -0.70 // Faded black text
+                              ),
                         ),
                       ),
                     ],
@@ -248,10 +263,11 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(18.0),
                     ),
-                    child: Text(
-                      "I will be back home in a few minutes",
-                      style: TextStyle(fontSize: 14),
-                    ),
+                    child: Text("I will be back home in a few minutes",
+                        style: TextStyle(
+                          fontSize: 14,
+                          letterSpacing: -0.70,
+                        )),
                   ),
                   SizedBox(height: 8), // Adds space between the messages
                   Container(
@@ -262,10 +278,11 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(18.0),
                     ),
-                    child: Text(
-                      "Is 8:45 okay for you?",
-                      style: TextStyle(fontSize: 14),
-                    ),
+                    child: Text("Is 8:45 okay for you ?",
+                        style: TextStyle(
+                          fontSize: 14,
+                          letterSpacing: -0.70,
+                        )),
                   ),
                   SizedBox(height: 8), // Adds space between the messages
                   Container(
@@ -276,10 +293,11 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(18.0),
                     ),
-                    child: Text(
-                      "I will be back home in a few minutes",
-                      style: TextStyle(fontSize: 14),
-                    ),
+                    child: Text("I will be back home in a few minutes",
+                        style: TextStyle(
+                          fontSize: 14,
+                          letterSpacing: -0.70,
+                        )),
                   ),
                   SizedBox(height: 8),
                   Padding(
