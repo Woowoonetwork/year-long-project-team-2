@@ -13,7 +13,6 @@ import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
-import 'package:provider/provider.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -123,10 +122,9 @@ class _PostDetailViewState extends State<PostDetailView> {
                 children: [
                   Expanded(
                     child: ReserveButton(
-                      isReserved: viewModel.isReserved,
+                      isReserved: false,
                       postId: widget.postId,
                       userId: userID,
-                      viewModel: viewModel,
                     ),
                   ),
                 ],
@@ -150,7 +148,7 @@ class _PostDetailViewState extends State<PostDetailView> {
         '"${viewModel.title}" has been added to your bookmarks',
         accentColor,
         Icon(FeatherIcons.check, color: Colors.white),
-        _reverseAnimation,
+        _reverseAnimation, // Pass _reverseAnimation as the callback
       );
     } else {
       await viewModel.unsavePost(widget.postId);
@@ -210,7 +208,8 @@ class _PostDetailViewState extends State<PostDetailView> {
               ),
             ),
           ),
-          AvailabilityIndicator(isReserved: false),
+          AvailabilityIndicator(
+              isReserved: false), // Placeholder, update as needed
         ],
       ),
     );
@@ -1066,17 +1065,15 @@ class AllergensSection extends StatelessWidget {
 }
 
 class ReserveButton extends StatefulWidget {
-  final String isReserved;
+  final bool isReserved;
   final String postId;
   final String userId;
-  final PostDetailViewModel viewModel;
 
   const ReserveButton({
     Key? key,
     required this.isReserved,
     required this.postId,
     required this.userId,
-    required this.viewModel,
   }) : super(key: key);
 
   @override
@@ -1084,63 +1081,66 @@ class ReserveButton extends StatefulWidget {
 }
 
 class _ReserveButtonState extends State<ReserveButton> {
+  bool _isReserved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isReserved = widget.isReserved;
+  }
+
   void _handleReservation() async {
-    final newStatus = 'pending';
-
-    try {
-      await widget.viewModel.updateReservationStatus(widget.postId, newStatus);
-
-      setState(() {});
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reservation status updated to pending.')),
-      );
-    } catch (error) {
-      print('Error reserving post: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Failed to update reservation. Please try again.')),
-      );
+    if (!_isReserved) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('post_details')
+            .doc(widget.postId)
+            .update({'reserved_by': widget.userId});
+        setState(() {
+          _isReserved = true;
+        });
+      } catch (error) {
+        print('Error reserving post: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to reserve post. Please try again.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    String _reservationStatus = '';
-
-    if (widget.isReserved == 'yes') {
-      _reservationStatus = 'Reserved';
-    } else {
-      _reservationStatus = 'Reserve';
-    }
     return Container(
       child: CupertinoButton(
-        color: widget.isReserved == 'yes'
+        color: _isReserved
             ? accentColor.resolveFrom(context).withOpacity(0.2)
             : accentColor,
         padding: const EdgeInsets.all(16),
         borderRadius: BorderRadius.circular(14),
         child: Text(
-          _reservationStatus,
+          _isReserved ? 'Reserved' : 'Reserve',
           style: TextStyle(
-            color: widget.isReserved == 'yes'
-                ? accentColor
-                : CupertinoColors.white,
+            color: _isReserved ? accentColor : CupertinoColors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.90,
           ),
         ),
-        onPressed: () {
-          _handleReservation();
-          Navigator.push(
-            context,
-            CupertinoPageRoute(
-                builder: (context) => DoneePath(
-                      postId: widget.postId,
-                    )),
-          );
-        },
+        onPressed: _isReserved
+            ? null
+            : () {
+                _handleReservation();
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) => DoneePath(
+                            postId: widget.postId,
+                          )),
+                );
+              },
       ),
     );
   }

@@ -20,10 +20,9 @@ class PostDetailViewModel extends ChangeNotifier {
   late DateTime postTimestamp;
   late LatLng pickupLatLng;
   late List<String> tags;
-  late String imageUrl;
+  late String imageUrl; // Add a field for the image URL
   late String profileURL;
   late String postLocation;
-  late String isReserved;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   bool isFavorite = false;
 
@@ -47,7 +46,6 @@ class PostDetailViewModel extends ChangeNotifier {
     imageUrl = ''; // Set the image URL
     profileURL = 'null';
     postTimestamp = DateTime.now();
-    isReserved = "no";
     pickupLatLng = LatLng(37.7749, -122.4194);
     tags = ['null'];
   }
@@ -109,7 +107,6 @@ class PostDetailViewModel extends ChangeNotifier {
     rating = documentData['rating'] ?? 0.0;
     imageUrl = documentData['image_url'] ?? ''; // Set the image URL
     pickupLocation = documentData['pickup_location'] ?? '';
-    isReserved = documentData['is_reserved'] ?? 'no';
     // postLocation = documentData['post_location'] ?? '';
     // like post_ location: |49.89090897212782° N, 119.49003484100103° W]
 
@@ -133,20 +130,6 @@ class PostDetailViewModel extends ChangeNotifier {
     lastName = userDocument['lastName'] ?? '';
     profileURL = userDocument['profileImagePath'] ?? '';
     notifyListeners();
-  }
-
-  Future<void> updateReservationStatus(String postId, String newStatus) async {
-    try {
-      await firestore.collection('post_details').doc(postId).update({
-        'is_reserved': newStatus,
-      });
-      isReserved = newStatus;
-      print('Reservation status updated to: $isReserved');
-      notifyListeners();
-    } catch (e) {
-      print('Error updating reservation status: $e');
-      throw e;
-    }
   }
 
   Future<void> savePost(String postId) async {
@@ -203,36 +186,6 @@ class PostDetailViewModel extends ChangeNotifier {
       return '${duration.inMinutes} minute${duration.inMinutes > 1 ? 's' : ''} ago';
     } else {
       return 'Just now';
-    }
-  }
-
-  void updateFromSnapshot(DocumentSnapshot snapshot) {
-    Map<String, dynamic> documentData = snapshot.data() as Map<String, dynamic>;
-
-    firstName = documentData['firstName'] ?? '';
-    lastName = documentData['lastName'] ?? '';
-    allergens = documentData['allergens'] ?? '';
-    description = documentData['description'] ?? '';
-    title = documentData['title'] ?? '';
-    rating = documentData['rating'] ?? 0.0;
-    imageUrl = documentData['image_url'] ?? '';
-    pickupLocation = documentData['pickup_location'] ?? '';
-    pickupInstructions = documentData['pickup_instructions'] ?? '';
-    isReserved = documentData['is_reserved'] ?? 'no';
-
-    notifyListeners();
-  }
-
-  Future<void> cancelReservation(String postId) async {
-    try {
-      await firestore.collection('post_details').doc(postId).update({
-        'is_reserved': 'no',
-      });
-      isReserved = 'no';
-      notifyListeners();
-    } catch (e) {
-      print('Error canceling reservation: $e');
-      throw e;
     }
   }
 }
