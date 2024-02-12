@@ -1,3 +1,4 @@
+import 'package:FoodHood/Screens/message_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -841,7 +842,14 @@ class PickupInformation extends StatelessWidget {
             text: 'Ask for more info',
             icon: FeatherIcons.messageCircle,
             iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                    builder: (context) =>
+                        MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
+              );
+            },
           ),
           SizedBox(width: 10),
           InfoButton(

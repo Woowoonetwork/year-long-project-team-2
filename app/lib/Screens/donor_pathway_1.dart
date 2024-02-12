@@ -1,5 +1,6 @@
 //donor_pathway_1.dart
 
+import 'package:FoodHood/Screens/message_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -139,7 +140,7 @@ class _DonorScreenState extends State<DonorScreen> {
                 child: Text(
                   "Message ${reservedByName ?? 'Unknown User'}",
                   style: TextStyle(
-                    color: Color(0xFF337586), // Your custom color
+                    color: accentColor,
                   ),
                 ),
                 onPressed: () {
@@ -155,22 +156,26 @@ class _DonorScreenState extends State<DonorScreen> {
           __buildHeadingTextField(
             text: _buildHeadingText(),
           ),
-          SliverToBoxAdapter(
+
+          const SliverToBoxAdapter(
             child: SizedBox(height: 16.0),
           ),
 
           //Only show the order info section if the order has been reserved.
           if (reservedByName != null)
             SliverToBoxAdapter(
-                child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Center(
-                      child: OrderInfoSection(
-                        avatarUrl: '',
-                        reservedByName: reservedByName,
-                        reservedByLastName: reservedByLastName,
-                      ),
-                    ))),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                child: Center(
+                  child: OrderInfoSection(
+                    avatarUrl: '',
+                    reservedByName: reservedByName,
+                    reservedByLastName: reservedByLastName,
+                    adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
+                  ),
+                ),
+              ),
+            ),
 
           __buildTextField(text: "Pickup at specified location"),
 
@@ -237,7 +242,7 @@ class _DonorScreenState extends State<DonorScreen> {
             text,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: _defaultFontSize,
+              fontSize: adjustedFontSize,
             ),
           ),
         ),
@@ -246,6 +251,11 @@ class _DonorScreenState extends State<DonorScreen> {
   }
 
   Widget __buildButton() {
+    if (reservedByName == null) {
+      // Return an empty container if the order hasn't been reserved yet
+      return SliverToBoxAdapter(child: Container());
+    }
+
     if (orderState == OrderState.readyToPickUp) {
       return SliverToBoxAdapter(
         child: Padding(
