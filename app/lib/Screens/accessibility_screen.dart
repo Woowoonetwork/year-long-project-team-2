@@ -72,7 +72,7 @@ class _AccessibilityScreenState extends State<AccessibilityScreen> {
                       activeColor: accentColor,
                       value: provider.textScaleFactor,
                       min: 1.0,
-                      max: 2.0,
+                      max: 1.5,
                       onChanged: (value) {
                         provider.textScaleFactor = value;
                       },
