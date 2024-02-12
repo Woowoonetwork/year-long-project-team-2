@@ -40,8 +40,6 @@ class EditProfileViewModel extends ChangeNotifier {
         if (fetchedCities.isNotEmpty) {
           provinces = fetchedCities.keys.toList();
           cities = fetchedCities;
-          selectedProvince ??= provinces.first;
-          selectedCity ??= cities[selectedProvince]?.first ?? '';
         }
         notifyListeners();
       }

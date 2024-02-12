@@ -73,19 +73,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNoPostsWidget() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          'No posts available yet',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey,
-          ),
-          textAlign: TextAlign.center,
+    return 
+    Column(
+      children: [
+        SizedBox(height: 200),
+        Icon(
+          FeatherIcons.meh,
+          size: 40,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
         ),
-      ),
+        SizedBox(height: 16),
+        Text(
+          'No posts available',
+          style: TextStyle(
+            fontSize: 16,
+            letterSpacing: -0.6,
+            fontWeight: FontWeight.w500,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          ),
+        ),
+      ],
     );
   }
 
@@ -97,8 +104,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     List<String> tags = (data['categories'] as String?)
             ?.split(',')
-            ?.map((tag) => tag.trim())
-            ?.toList() ??
+            .map((tag) => tag.trim())
+            .toList() ??
         [];
     List<Color> assignedColors = tags
         .map((tag) => tagColors.putIfAbsent(tag, () => _getRandomColor()))
@@ -198,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildSearchBar(context),
               SizedBox(height: 16),
               _buildCategoryButtons(),
-              SizedBox(height: 16)
+              SizedBox(height: 8)
             ])),
             isLoading ? _buildLoadingSliver(context) : _buildPostListSliver(),
           ]),
@@ -233,16 +240,26 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (postCards.isEmpty && isSearching) {
       // show message when search returns no results
       return SliverFillRemaining(
-        child: Center(
-          child: Text(
-            'No results found',
-            style: TextStyle(
-              fontSize: 16,
-              letterSpacing: -0.6,
-              fontWeight: FontWeight.w500,
+        child: 
+        Column(
+          children: [
+            SizedBox(height: 200),
+            Icon(
+              FeatherIcons.search,
+              size: 40,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
-          ),
+            SizedBox(height: 16),
+            Text(
+              'No results found',
+              style: TextStyle(
+                fontSize: 16,
+                letterSpacing: -0.6,
+                fontWeight: FontWeight.w500,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              ),
+            ),
+          ],
         ),
       );
     } else {
