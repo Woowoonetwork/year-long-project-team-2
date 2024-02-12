@@ -47,6 +47,7 @@ class PostDetailViewModel extends ChangeNotifier {
     imageUrl = ''; // Set the image URL
     profileURL = 'null';
     postTimestamp = DateTime.now();
+    isReserved = "no";
     pickupLatLng = LatLng(37.7749, -122.4194);
     tags = ['null'];
   }
@@ -203,5 +204,22 @@ class PostDetailViewModel extends ChangeNotifier {
     } else {
       return 'Just now';
     }
+  }
+
+  void updateFromSnapshot(DocumentSnapshot snapshot) {
+    Map<String, dynamic> documentData = snapshot.data() as Map<String, dynamic>;
+
+    firstName = documentData['firstName'] ?? '';
+    lastName = documentData['lastName'] ?? '';
+    allergens = documentData['allergens'] ?? '';
+    description = documentData['description'] ?? '';
+    title = documentData['title'] ?? '';
+    rating = documentData['rating'] ?? 0.0;
+    imageUrl = documentData['image_url'] ?? '';
+    pickupLocation = documentData['pickup_location'] ?? '';
+    pickupInstructions = documentData['pickup_instructions'] ?? '';
+    isReserved = documentData['is_reserved'] ?? 'no';
+
+    notifyListeners();
   }
 }

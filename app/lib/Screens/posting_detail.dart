@@ -1124,18 +1124,16 @@ class _ReserveButtonState extends State<ReserveButton> {
             letterSpacing: -0.90,
           ),
         ),
-        onPressed: widget.isReserved == 'pending'
-            ? null
-            : () {
-                _handleReservation();
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                      builder: (context) => DoneePath(
-                            postId: widget.postId,
-                          )),
-                );
-              },
+        onPressed: () {
+          _handleReservation();
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+                builder: (context) => DoneePath(
+                      postId: widget.postId,
+                    )),
+          );
+        },
       ),
     );
   }
