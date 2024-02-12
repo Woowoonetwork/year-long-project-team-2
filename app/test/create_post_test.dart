@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'mock.dart';
 import 'package:FoodHood/Screens/create_post.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
 
@@ -16,10 +18,15 @@ void main() {
   });
   group('Create Post Tests', () {
     testWidgets('Create Post Screen UI Test', (WidgetTester tester) async {
-      // Build our app and trigger a frame.
-      await tester.pumpWidget(CupertinoApp(
-        home: CreatePostScreen(),
-      ));
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: ChangeNotifierProvider(
+          create: (context) => TextScaleProvider(),
+          child: CreatePostScreen(),
+        ),
+        )
+      );
 
       // Verify that both buttons (save and cancel) are present
       expect(find.byType(CupertinoButton), findsNWidgets(2),

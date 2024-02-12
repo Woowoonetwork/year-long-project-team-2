@@ -7,6 +7,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'mock_firestore_service.dart';
 import 'mock.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   setUpAll(() async {
@@ -19,9 +21,14 @@ void main() {
 
   group('Edit Profile Test', () {
     testWidgets('Edit Profile Screen UI Test', (WidgetTester tester) async {
-      await tester.pumpWidget(CupertinoApp(
-        home: EditProfilePage(),
-      ));
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: ChangeNotifierProvider(
+          create: (context) => TextScaleProvider(),
+          child: EditProfilePage(),
+          ),
+        )
+      );
 
       expect(find.text('Save'), findsOneWidget);
       expect(find.byType(CupertinoTextField), findsNWidgets(4));

@@ -26,13 +26,13 @@ void main(){
   testWidgets('Donor Screen UI Test', (WidgetTester tester) async {
 
     await tester.pumpWidget(
-        CupertinoApp(
-          home: ChangeNotifierProvider(
-          create: (context) => TextScaleProvider(),
-          child: DonorScreen(postId: 'dummyPostId',),
+      CupertinoApp(
+        home: ChangeNotifierProvider(
+        create: (context) => TextScaleProvider(),
+        child: DonorScreen(postId: 'dummyPostId',),
         ),
-        )
-      );
+      )
+    );
 
     // Verify that the back button is there
     expect(find.byIcon(FeatherIcons.x), findsOneWidget, reason: "X icon not found");
