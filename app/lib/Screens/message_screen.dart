@@ -203,7 +203,7 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                   padding: EdgeInsets.only(
                       right: 15.0), // Aligns 15 units from the right
                   child: Text(
-                    "8:48, received",
+                    "8:28, Received",
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.black.withOpacity(0.5), // Faded black text
@@ -211,6 +211,56 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                   ),
                 ),
               ],
+            ),
+            SizedBox(height: 8),
+            Container(
+              margin: EdgeInsets.only(left: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(18.0),
+              ),
+              child: Text(
+                "I will be back home in a few minutes",
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+            SizedBox(height: 8), // Adds space between the messages
+            Container(
+              margin: EdgeInsets.only(left: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(18.0),
+              ),
+              child: Text(
+                "Is 8:45 okay for you?",
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+            SizedBox(height: 8), // Adds space between the messages
+            Container(
+              margin: EdgeInsets.only(left: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(18.0),
+              ),
+              child: Text(
+                "I will be back home in a few minutes",
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+            SizedBox(height: 8),
+            Padding(
+              padding: EdgeInsets.only(left: 20.0), // Aligns with the messages
+              child: Text(
+                "8:30, seen",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black.withOpacity(0.5), // Faded text
+                ),
+              ),
             ),
 
             // Add more widgets as needed
