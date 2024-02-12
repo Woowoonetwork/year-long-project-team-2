@@ -149,7 +149,7 @@ class _PostDetailViewState extends State<PostDetailView> {
         '"${viewModel.title}" has been added to your bookmarks',
         accentColor,
         Icon(FeatherIcons.check, color: Colors.white),
-        _reverseAnimation, // Pass _reverseAnimation as the callback
+        _reverseAnimation,
       );
     } else {
       await viewModel.unsavePost(widget.postId);
@@ -209,8 +209,7 @@ class _PostDetailViewState extends State<PostDetailView> {
               ),
             ),
           ),
-          AvailabilityIndicator(
-              isReserved: false), // Placeholder, update as needed
+          AvailabilityIndicator(isReserved: false),
         ],
       ),
     );

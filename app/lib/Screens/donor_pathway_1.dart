@@ -46,7 +46,7 @@ class _DonorScreenState extends State<DonorScreen> {
       });
 
       setState(() {
-        isConfirmed = true;
+        // isReserved = true;
         orderState = OrderState.confirmed;
       });
 
@@ -370,14 +370,12 @@ class OrderInfoSection extends StatelessWidget {
   final String avatarUrl;
   final String? reservedByName;
   final String? reservedByLastName;
-  final double adjustedOrderInfoFontSize;
 
   const OrderInfoSection({
     Key? key,
     required this.avatarUrl,
     required this.reservedByName,
     required this.reservedByLastName,
-    required this.adjustedOrderInfoFontSize,
   }) : super(key: key);
 
   @override
@@ -401,7 +399,6 @@ class OrderInfoSection extends StatelessWidget {
             style: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.secondaryLabel, context),
-              fontSize: adjustedOrderInfoFontSize,
               fontWeight: FontWeight.w500,
             ),
           ),

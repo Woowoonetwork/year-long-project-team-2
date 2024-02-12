@@ -51,7 +51,6 @@ class _DoneePathState extends State<DoneePath> {
           );
         }
 
-        // Update viewModel with the latest snapshot
         viewModel.updateFromSnapshot(snapshot.data!);
 
         return CupertinoPageScaffold(
@@ -89,7 +88,30 @@ class _DoneePathState extends State<DoneePath> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  Text(_confirmationStatus()),
+                  Image.network(
+                    viewModel.imageUrl,
+                    fit: BoxFit.cover,
+                    height: 200,
+                    width: double.infinity,
+                    errorBuilder: (BuildContext context, Object exception,
+                        StackTrace? stackTrace) {
+                      return const Icon(Icons.error);
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    _confirmationStatus(),
+                    style: TextStyle(
+                      color: viewModel.isReserved == "yes"
+                          ? CupertinoColors.activeGreen
+                          : CupertinoColors.systemGrey,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  _buildActionButton(context),
+                  SizedBox(height: 20),
                 ],
               ),
             ),
@@ -107,5 +129,20 @@ class _DoneePathState extends State<DoneePath> {
     } else {
       return 'Reservation Status Unknown';
     }
+  }
+
+  Widget _buildActionButton(BuildContext context) {
+    return viewModel.isReserved == "yes"
+        ? CupertinoButton.filled(
+            onPressed: _navigateToRatingPage,
+            child: Text('Leave a Review'),
+          )
+        : CupertinoButton(
+            onPressed: () {
+              // Action to cancel reservation
+            },
+            color: CupertinoColors.destructiveRed,
+            child: Text('Cancel Reservation'),
+          );
   }
 }
