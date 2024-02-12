@@ -7,10 +7,13 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/donee_rating.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 34.0;
 const double _defaultFontSize = 16.0;
+const double _defaultOrderInfoFontSize = 12.0;
 
 // Define enum to represent different states
 enum OrderState { reserved, confirmed, delivering, readyToPickUp }
@@ -27,13 +30,20 @@ class _DonorScreenState extends State<DonorScreen> {
   String? reservedByName; // Variable to store the reserved by user name
   String? reservedByLastName;
   String pickupLocation = '';
-  bool isConfirmed = false;
+  //bool isConfirmed = false;
   OrderState orderState = OrderState.reserved;
+  late double _textScaleFactor;
+  late double adjustedFontSize;
+  late double adjustedHeadingFontSize;
+  late double adjustedOrderInfoFontSize;
 
   @override
   void initState() {
     super.initState();
     fetchReservedByName(); // Fetch reserved by user name when the widget initializes
+    _textScaleFactor =
+        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _updateAdjustedFontSize();
   }
 
   Future<void> fetchReservedByName() async {
@@ -79,6 +89,12 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
+  void _updateAdjustedFontSize() {
+    adjustedFontSize = _defaultFontSize * _textScaleFactor;
+    adjustedHeadingFontSize = _defaultHeadingFontSize * _textScaleFactor;
+    adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
+  }
+
   @override
   Widget build(BuildContext context) {
     // double screenWidth = MediaQuery.of(context).size.width;
@@ -100,17 +116,12 @@ class _DonorScreenState extends State<DonorScreen> {
                 child: Text(
                   "Message ${reservedByName ?? 'Unknown User'}",
                   style: TextStyle(
-                    color: Color(0xFF337586), // Your custom color
+                    color: accentColor,
                   ),
                 ),
                 onPressed: () {
                   // Close the current screen
-                  Navigator.push(
-                    context,
-                    CupertinoPageRoute(
-                        builder: (context) =>
-                            MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
-                  );
+                  Navigator.of(context).pop();
                 },
               )
             : null,
@@ -129,15 +140,18 @@ class _DonorScreenState extends State<DonorScreen> {
           //Only show the order info section if the order has been reserved.
           if (reservedByName != null)
             SliverToBoxAdapter(
-                child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Center(
-                      child: OrderInfoSection(
-                        avatarUrl: '',
-                        reservedByName: reservedByName,
-                        reservedByLastName: reservedByLastName,
-                      ),
-                    ))),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                child: Center(
+                  child: OrderInfoSection(
+                    avatarUrl: '',
+                    reservedByName: reservedByName,
+                    reservedByLastName: reservedByLastName,
+                    adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
+                  ),
+                ),
+              ),
+            ),
 
           __buildTextField(text: "Pickup at specified location"),
 
@@ -159,7 +173,7 @@ class _DonorScreenState extends State<DonorScreen> {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: _defaultHeadingFontSize,
+            fontSize: adjustedHeadingFontSize,
           ),
         ),
       ),
@@ -200,12 +214,14 @@ class _DonorScreenState extends State<DonorScreen> {
             color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
             borderRadius: BorderRadius.circular(16.0),
           ),
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: _defaultFontSize,
-            ),
+          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: adjustedFontSize,
           ),
         ),
       ),
@@ -244,7 +260,7 @@ class _DonorScreenState extends State<DonorScreen> {
               child: Text(
                 "Leave a Review",
                 style: TextStyle(
-                  fontSize: _defaultFontSize,
+                  fontSize: adjustedFontSize,
                   color: CupertinoColors.label,
                 ),
               ),
@@ -290,7 +306,7 @@ class _DonorScreenState extends State<DonorScreen> {
               child: Text(
                 buttonText,
                 style: TextStyle(
-                  fontSize: _defaultFontSize,
+                  fontSize: adjustedFontSize,
                   color: CupertinoColors.label,
                 ),
               ),
@@ -339,12 +355,14 @@ class OrderInfoSection extends StatelessWidget {
   final String avatarUrl;
   final String? reservedByName;
   final String? reservedByLastName;
+  final double adjustedOrderInfoFontSize;
 
   const OrderInfoSection({
     Key? key,
     required this.avatarUrl,
     required this.reservedByName,
     required this.reservedByLastName,
+    required this.adjustedOrderInfoFontSize,
   }) : super(key: key);
 
   @override
@@ -368,7 +386,7 @@ class OrderInfoSection extends StatelessWidget {
             style: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.secondaryLabel, context),
-              fontSize: 12,
+              fontSize: adjustedOrderInfoFontSize,
               fontWeight: FontWeight.w500,
             ),
           ),

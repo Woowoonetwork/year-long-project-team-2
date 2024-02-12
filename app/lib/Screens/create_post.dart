@@ -16,6 +16,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
+
+// Constants for styling
+const double _defaultFontSize = 16.0;
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -42,6 +47,9 @@ class _CreatePostPageState extends State<CreatePostScreen>
   Set<Marker> _markers = {};
   String? _selectedImagePath;
 
+  late double _textScaleFactor;
+  late double adjustedFontSize;
+
   void _updateMarker(LatLng position) {
     setState(() {
       _markers = {
@@ -60,6 +68,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
   @override
   void initState() {
     super.initState();
+    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _updateAdjustedFontSize();
     _determinePosition().then((position) {
       if (mounted) {
         setState(() {
@@ -81,6 +91,10 @@ class _CreatePostPageState extends State<CreatePostScreen>
       print('Location error: $error');
     });
     fetchData();
+  }
+
+  void _updateAdjustedFontSize() {
+    adjustedFontSize = _defaultFontSize * _textScaleFactor;
   }
 
   Future<Position> _determinePosition() async {
@@ -164,9 +178,9 @@ class _CreatePostPageState extends State<CreatePostScreen>
                         Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Click "+" to add photo',
+                        Text('Click "+" to add a photo',
                             style: TextStyle(
-                                fontSize: 18,
+                                fontSize: adjustedFontSize,
                                 fontWeight: FontWeight.w500,
                                 color: CupertinoColors.secondaryLabel
                                     .resolveFrom(context))),
@@ -186,7 +200,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                   children: [
                     Text('Photo',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: adjustedFontSize,
                           letterSpacing: -0.5,
                           fontWeight: FontWeight.w500,
                         )),
@@ -215,7 +229,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                       Text(
                         'Alt Text',
                         style: TextStyle(
-                            fontSize: 16,
+                            fontSize: adjustedFontSize,
                             letterSpacing: -0.5,
                             fontWeight: FontWeight.w500),
                       ),
@@ -231,12 +245,12 @@ class _CreatePostPageState extends State<CreatePostScreen>
                           style: TextStyle(
                               color: CupertinoDynamicColor.resolve(
                                   CupertinoColors.label, context),
-                              fontSize: 16,
+                              fontSize: adjustedFontSize,
                               fontWeight: FontWeight.w500),
                           placeholderStyle: TextStyle(
                               color: CupertinoDynamicColor.resolve(
                                   CupertinoColors.placeholderText, context),
-                              fontSize: 16,
+                              fontSize: adjustedFontSize,
                               fontWeight: FontWeight.w500),
                           decoration: BoxDecoration(
                               color: CupertinoDynamicColor.resolve(
@@ -401,7 +415,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                 Text(
                   loadingMessage, // Customizable message
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: adjustedFontSize,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -522,8 +536,13 @@ void showPostSavedConfirmation(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.only(left: 17.0, top: 10.0),
-        child: Text(text,
-            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500)),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: adjustedFontSize, 
+            fontWeight: FontWeight.w500
+          ),
+        ),
       ),
     );
   }
@@ -540,13 +559,15 @@ void showPostSavedConfirmation(BuildContext context) {
           style: TextStyle(
               color:
                   CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: 16,
-              fontWeight: FontWeight.w500),
+              fontSize: adjustedFontSize,
+              fontWeight: FontWeight.w500,
+          ),
           placeholderStyle: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.placeholderText, context),
-              fontSize: 16,
-              fontWeight: FontWeight.w500),
+              fontSize: adjustedFontSize,
+              fontWeight: FontWeight.w500
+          ),
           decoration: BoxDecoration(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.tertiarySystemBackground, context),
@@ -571,12 +592,12 @@ void showPostSavedConfirmation(BuildContext context) {
           style: TextStyle(
               color:
                   CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: 16,
+              fontSize: adjustedFontSize,
               fontWeight: FontWeight.w500),
           placeholderStyle: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.placeholderText, context),
-              fontSize: 16,
+              fontSize: adjustedFontSize,
               fontWeight: FontWeight.w500),
           decoration: BoxDecoration(
               color: CupertinoDynamicColor.resolve(
@@ -626,7 +647,7 @@ void showPostSavedConfirmation(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Expiration Date',
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500)),
+                style: TextStyle(fontSize: adjustedFontSize, fontWeight: FontWeight.w500)),
             GestureDetector(
               onTap: () => showDatePickerModal(context),
               child: Container(
@@ -639,7 +660,7 @@ void showPostSavedConfirmation(BuildContext context) {
                 child: Text(
                   DateFormat('yyyy-MM-dd').format(selectedDate),
                   style: TextStyle(
-                    fontSize: 16.0,
+                    fontSize: adjustedFontSize,
                     color: CupertinoColors.label.resolveFrom(context),
                   ),
                 ),
@@ -660,7 +681,7 @@ void showPostSavedConfirmation(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Pickup Time',
-                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500)),
+                style: TextStyle(fontSize: adjustedFontSize, fontWeight: FontWeight.w500)),
             GestureDetector(
               onTap: () => showTimePickerModal(context),
               child: Container(
@@ -673,7 +694,7 @@ void showPostSavedConfirmation(BuildContext context) {
                 child: Text(
                   DateFormat('h:mm a').format(selectedTime),
                   style: TextStyle(
-                    fontSize: 16.0,
+                    fontSize: adjustedFontSize,
                     color: CupertinoColors.label.resolveFrom(context),
                   ),
                 ),
