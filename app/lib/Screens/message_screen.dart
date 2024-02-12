@@ -14,6 +14,7 @@ class MessageScreenPage extends StatefulWidget {
 }
 
 class _MessageScreenPageState extends State<MessageScreenPage> {
+  final TextEditingController _messageController = TextEditingController();
   List<String> recommendedMessages = [
     "Sure, see you then!",
     "On my way.",
@@ -63,258 +64,310 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.only(left: 20.0),
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(18.0),
-              ),
-              child: Text(
-                "I will be back home in a few minutes",
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
-            SizedBox(height: 8), // Adds space between the messages
-            Container(
-              margin: EdgeInsets.only(left: 20.0),
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(18.0),
-              ),
-              child: Text(
-                "Is 8:45 okay for you?",
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
-            SizedBox(height: 8), // Adds space between the messages
-            Container(
-              margin: EdgeInsets.only(left: 20.0),
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(18.0),
-              ),
-              child: Text(
-                "I will be back home in a few minutes",
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
-            SizedBox(height: 8),
-            Padding(
-              padding: EdgeInsets.only(left: 20.0), // Aligns with the messages
-              child: Text(
-                "8:24, seen",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black.withOpacity(0.5), // Faded text
+      body: SingleChildScrollView(
+        reverse: true,
+        child: Padding(
+          padding: const EdgeInsets.only(
+              top: 20.0, left: 8.0, right: 8.0, bottom: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(left: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+                child: Text(
+                  "I will be back home in a few minutes",
+                  style: TextStyle(fontSize: 14),
                 ),
               ),
-            ),
-            // Add more widgets as needed
+              SizedBox(height: 8), // Adds space between the messages
+              Container(
+                margin: EdgeInsets.only(left: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+                child: Text(
+                  "Is 8:45 okay for you?",
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+              SizedBox(height: 8), // Adds space between the messages
+              Container(
+                margin: EdgeInsets.only(left: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+                child: Text(
+                  "I will be back home in a few minutes",
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+              SizedBox(height: 8),
+              Padding(
+                padding:
+                    EdgeInsets.only(left: 20.0), // Aligns with the messages
+                child: Text(
+                  "8:24, seen",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black.withOpacity(0.5), // Faded text
+                  ),
+                ),
+              ),
+              // Add more widgets as needed
 
-            SizedBox(height: 20),
-            // Sent message 1
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(right: 15.0),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: Colors.blue, // Bluish color for the sent message
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                  child: Text(
-                    "Blah Blah Blah Blah",
-                    style: TextStyle(
-                        fontSize: 14, color: Colors.white), // White text
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            // Sent message 2
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(right: 15.0),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: Colors.blue, // Bluish color for the sent message
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                  child: Text(
-                    "I will be back home in a few minutes",
-                    style: TextStyle(
-                        fontSize: 14, color: Colors.white), // White text
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            // Sent message 3
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(right: 15.0),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: Colors.blue, // Bluish color for the sent message
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                  child: Text(
-                    "I will be back home in a few minutes",
-                    style: TextStyle(
-                        fontSize: 14, color: Colors.white), // White text
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            // Sent message 3
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(right: 15.0),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: Colors.blue, // Bluish color for the sent message
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                  child: Text(
-                    "Are you at the place right now?",
-                    style: TextStyle(
-                        fontSize: 14, color: Colors.white), // White text
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                      right: 15.0), // Aligns 15 units from the right
-                  child: Text(
-                    "8:28, Received",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black.withOpacity(0.5), // Faded black text
+              SizedBox(height: 20),
+              // Sent message 1
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: 15.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.blue, // Bluish color for the sent message
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                    child: Text(
+                      "Blah Blah Blah Blah",
+                      style: TextStyle(
+                          fontSize: 14, color: Colors.white), // White text
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Container(
-              margin: EdgeInsets.only(left: 20.0),
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(18.0),
+                ],
               ),
-              child: Text(
-                "I will be back home in a few minutes",
-                style: TextStyle(fontSize: 14),
+              SizedBox(height: 8),
+              // Sent message 2
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: 15.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.blue, // Bluish color for the sent message
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                    child: Text(
+                      "I will be back home in a few minutes",
+                      style: TextStyle(
+                          fontSize: 14, color: Colors.white), // White text
+                    ),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 8), // Adds space between the messages
-            Container(
-              margin: EdgeInsets.only(left: 20.0),
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(18.0),
+              SizedBox(height: 8),
+              // Sent message 3
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: 15.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.blue, // Bluish color for the sent message
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                    child: Text(
+                      "I will be back home in a few minutes",
+                      style: TextStyle(
+                          fontSize: 14, color: Colors.white), // White text
+                    ),
+                  ),
+                ],
               ),
-              child: Text(
-                "Is 8:45 okay for you?",
-                style: TextStyle(fontSize: 14),
+              SizedBox(height: 8),
+              // Sent message 3
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: 15.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.blue, // Bluish color for the sent message
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                    child: Text(
+                      "Are you at the place right now?",
+                      style: TextStyle(
+                          fontSize: 14, color: Colors.white), // White text
+                    ),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 8), // Adds space between the messages
-            Container(
-              margin: EdgeInsets.only(left: 20.0),
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(18.0),
-              ),
-              child: Text(
-                "I will be back home in a few minutes",
-                style: TextStyle(fontSize: 14),
-              ),
-            ),
-            SizedBox(height: 8),
-            Padding(
-              padding: EdgeInsets.only(left: 20.0), // Aligns with the messages
-              child: Text(
-                "8:30, seen",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black.withOpacity(0.5), // Faded text
-                ),
-              ),
-            ),
-
-            // Add more widgets as needed
-
-            SizedBox(height: 8),
-            Container(
-              margin: EdgeInsets.only(left: 15),
-              height: 30,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: recommendedMessages.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return InkWell(
-                    onTap: () {
-                      // Handle the tap event
-                      print("Tapped on: ${recommendedMessages[index]}");
-                      // You can also use setState or any state management solution
-                      // to update the conversation with the selected recommended message
-                    },
-                    child: Container(
-                      margin: EdgeInsets.only(right: 8), // Space between items
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-                      decoration: BoxDecoration(
+              SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                        right: 15.0), // Aligns 15 units from the right
+                    child: Text(
+                      "8:28, Received",
+                      style: TextStyle(
+                        fontSize: 12,
                         color:
-                            Colors.grey[300], // Grey color for the oval shape
-                        borderRadius: BorderRadius.circular(18), // Oval shape
+                            Colors.black.withOpacity(0.5), // Faded black text
                       ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        recommendedMessages[index],
-                        style: TextStyle(
-                          fontSize:
-                              14, // Match the font size of received/sent messages
-                          color: Colors
-                              .black, // Ensure text color matches that of received messages if needed
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Container(
+                margin: EdgeInsets.only(left: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+                child: Text(
+                  "I will be back home in a few minutes",
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+              SizedBox(height: 8), // Adds space between the messages
+              Container(
+                margin: EdgeInsets.only(left: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+                child: Text(
+                  "Is 8:45 okay for you?",
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+              SizedBox(height: 8), // Adds space between the messages
+              Container(
+                margin: EdgeInsets.only(left: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(18.0),
+                ),
+                child: Text(
+                  "I will be back home in a few minutes",
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
+              SizedBox(height: 8),
+              Padding(
+                padding:
+                    EdgeInsets.only(left: 20.0), // Aligns with the messages
+                child: Text(
+                  "8:30, seen",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black.withOpacity(0.5), // Faded text
+                  ),
+                ),
+              ),
+
+              // Add more widgets as needed
+
+              SizedBox(height: 8), // Adjust space as needed
+              Container(
+                height: 30, // Adjust based on your content
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: recommendedMessages.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return InkWell(
+                      onTap: () {
+                        // Handle the tap event
+                        print("Tapped on: ${recommendedMessages[index]}");
+                      },
+                      child: Container(
+                        margin:
+                            EdgeInsets.only(right: 8), // Space between items
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 12.0, vertical: 4.0),
+                        decoration: BoxDecoration(
+                          color:
+                              Colors.grey[300], // Grey color for the oval shape
+                          borderRadius: BorderRadius.circular(18), // Oval shape
+                        ),
+                        child: Text(
+                          recommendedMessages[index],
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              SizedBox(
+                  height: 8), // Ensures 8 units of space before the text box
+
+              // Text box and send button
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300], // Grey color for the text box
+                        borderRadius: BorderRadius.circular(
+                            18.0), // Rounded corners for the text box
+                      ),
+                      child: TextField(
+                        controller: _messageController,
+                        decoration: InputDecoration(
+                          hintText: "Message ...",
+                          border: InputBorder.none, // Removes underline
                         ),
                       ),
                     ),
-                  );
-                },
+                  ),
+                  SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      // Action to send message
+                      print("Send message: ${_messageController.text}");
+                      _messageController
+                          .clear(); // Clear text field after sending
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300], // Match text box color
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.send, // Upward-pointing arrow icon
+                        color: Colors.black, // Icon color, adjust as needed
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose(); // Don't forget to dispose
   }
 }
