@@ -14,11 +14,12 @@ class FirestoreService {
     print('Mocked document added successfully!');
   }
 
-  Future<Map<String, dynamic>?> readDocument({
+  Future<void> readDocument({
     required String collectionName,
     required String docName,
   }) async {
     // Mock implementation for readDocument
+    print('Mocked document read successfully!');
   }
 }
 

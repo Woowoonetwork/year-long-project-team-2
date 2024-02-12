@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'mock.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
 
 void main(){
   // This ensures the following firebase setup and initialization code runs only once.
@@ -22,9 +24,15 @@ void main(){
   });
 
   testWidgets('Donor Screen UI Test', (WidgetTester tester) async {
-    await tester.pumpWidget(CupertinoApp(
-        home: DonorScreen(postId: 'dummyPostId',),
-      ));
+
+    await tester.pumpWidget(
+        CupertinoApp(
+          home: ChangeNotifierProvider(
+          create: (context) => TextScaleProvider(),
+          child: DonorScreen(postId: 'dummyPostId',),
+        ),
+        )
+      );
 
     // Verify that the back button is there
     expect(find.byIcon(FeatherIcons.x), findsOneWidget, reason: "X icon not found");
