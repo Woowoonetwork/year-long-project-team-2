@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 const double _iconSize = 22.0;
 const double _defaultPadding = 16.0;
 const double _defaultFontSize = 16.0;
-late double _textScaleFactor; // Initial text scale factor
 
 class AccessibilityScreen extends StatefulWidget {
   @override
@@ -17,11 +16,13 @@ class AccessibilityScreen extends StatefulWidget {
 }
 
 class _AccessibilityScreenState extends State<AccessibilityScreen> {
+
+  late double _textScaleFactor; // Initial text scale factor
+
   @override
   void initState() {
     super.initState();
-    _textScaleFactor =
-        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
   }
 
   Widget build(BuildContext context) {
