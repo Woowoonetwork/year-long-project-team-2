@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:FoodHood/Screens/public_page.dart';
+import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Add this import
 
 class ProfileCard extends StatefulWidget {
   ProfileCard({Key? key}) : super(key: key);
@@ -76,23 +78,16 @@ class _ProfileCardState extends State<ProfileCard> {
       onTap: () {
         Navigator.push(
           context,
-          CupertinoPageRoute(builder: (context) => PublicPage()),
+          CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
         );
       },
       child: Container(
         margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.tertiarySystemBackground, context),
-          borderRadius: BorderRadius.circular(22),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x19000000),
-              blurRadius: 20,
-              offset: Offset(0, 0),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(20),
         ),
         child: isLoading
             ? Center(child: CupertinoActivityIndicator())
@@ -118,22 +113,21 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   Widget profileImage() {
-    return ClipOval(
-      child: Image.network(
-        photo,
-        width: 70,
-        height: 70,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Image.asset(
-            'assets/images/sampleProfile.png',
-            width: 70,
-            height: 70,
-            fit: BoxFit.cover,
-          );
-        },
-      ),
-    );
+    final isNetworkImage =
+        photo.startsWith('http://') || photo.startsWith('https://');
+    if (isNetworkImage) {
+      return CircleAvatar(
+        backgroundImage: CachedNetworkImageProvider(
+          photo,
+        ),
+        radius: 36,
+      );
+    } else {
+      return CircleAvatar(
+        backgroundImage: AssetImage(photo),
+        radius: 36,
+      );
+    }
   }
 
   List<Widget> profileDetails(BuildContext context) {
@@ -173,7 +167,7 @@ class _ProfileCardState extends State<ProfileCard> {
         color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
         fontSize: fontSize,
         fontWeight: fontWeight,
-        letterSpacing: -1.3,
+        letterSpacing: -1.2,
       ),
     );
   }

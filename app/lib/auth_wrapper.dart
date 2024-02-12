@@ -1,7 +1,6 @@
 // auth_wrapper.dart
 // wrapper widget that determines whether to display the WelcomeScreen or the NavigationScreen
 
-import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
