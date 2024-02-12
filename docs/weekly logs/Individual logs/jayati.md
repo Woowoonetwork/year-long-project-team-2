@@ -388,4 +388,36 @@ N/A
 Additional Information 
 
 
+# Individual Log: Monday 5th Feb 2024 - Sunday 11th Feb 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati13.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed
+* Tried to make the reserve actions work using providers and then using static set states and then with document snapshots
+* Implemented cancel functionality
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+* Tried to make the reserve actions work using providers and then using static set states and then with document snapshots
+* Implemented cancel functionality
+* Completed team log for the week
+* Completed individual log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+
+
+
+Additional Information 
+
+I didn't commit work while trying out the different scenarios so there's a lot of lost "work" that didn't work anyway
+
+
+
 
