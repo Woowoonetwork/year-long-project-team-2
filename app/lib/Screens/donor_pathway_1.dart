@@ -27,7 +27,7 @@ class _DonorScreenState extends State<DonorScreen> {
   String? reservedByName; // Variable to store the reserved by user name
   String? reservedByLastName;
   String pickupLocation = '';
-  bool isConfirmed = false;
+  //bool isConfirmed = false;
   OrderState orderState = OrderState.reserved;
 
   @override
@@ -97,7 +97,7 @@ class _DonorScreenState extends State<DonorScreen> {
           child: Text(
             "Message ${reservedByName ?? 'Unknown User'}",
             style: TextStyle(
-              color: Color(0xFF337586), // Your custom color
+              color: accentColor, 
             ),
           ),
           onPressed: () {
