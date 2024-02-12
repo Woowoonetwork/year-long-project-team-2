@@ -32,7 +32,7 @@ class _VisibilityControllerState extends State<VisibilityController> {
   }
 
   void addListener() {
-    scrollPosition = Scrollable.of(context).position;
+    scrollPosition = Scrollable.of(context)?.position;
     scrollPosition?.addListener(positionListener);
   }
 
@@ -43,7 +43,6 @@ class _VisibilityControllerState extends State<VisibilityController> {
   void positionListener() {
     final FlexibleSpaceBarSettings? settings =
         context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
-    // Determine if the app bar is expanded or collapsed by comparing extents
     bool expanded =
         settings == null || settings.currentExtent > settings.minExtent;
 
@@ -56,13 +55,20 @@ class _VisibilityControllerState extends State<VisibilityController> {
 
   @override
   Widget build(BuildContext context) {
-    return Visibility(
-        visible: true, // Always visible, but content changes
-        child: isExpanded
-            ? widget.expandedChild
-            : Container(
-                margin: EdgeInsets.only(left: 32.0),
-                child: widget.collapsedChild,
-              ));
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 140),
+      child: isExpanded
+          ? Container(
+              key: ValueKey<bool>(true),
+              alignment: Alignment.topLeft,
+              child: widget.expandedChild,
+            )
+          : Container(
+              key: ValueKey<bool>(false),
+              alignment: Alignment.bottomLeft,
+              margin: EdgeInsets.only(left: 32.0), // Adjust as needed for alignment
+              child: widget.collapsedChild,
+            ),
+    );
   }
 }
