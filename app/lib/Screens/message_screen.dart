@@ -14,6 +14,14 @@ class MessageScreenPage extends StatefulWidget {
 }
 
 class _MessageScreenPageState extends State<MessageScreenPage> {
+  List<String> recommendedMessages = [
+    "Sure, see you then!",
+    "On my way.",
+    "Can we reschedule?",
+    "Let me check my calendar.",
+    "Running late, sorry!",
+    // Add more recommended messages as needed
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -264,6 +272,46 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
             ),
 
             // Add more widgets as needed
+
+            SizedBox(height: 8),
+            Container(
+              margin: EdgeInsets.only(left: 15),
+              height: 30,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: recommendedMessages.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return InkWell(
+                    onTap: () {
+                      // Handle the tap event
+                      print("Tapped on: ${recommendedMessages[index]}");
+                      // You can also use setState or any state management solution
+                      // to update the conversation with the selected recommended message
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(right: 8), // Space between items
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                      decoration: BoxDecoration(
+                        color:
+                            Colors.grey[300], // Grey color for the oval shape
+                        borderRadius: BorderRadius.circular(18), // Oval shape
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        recommendedMessages[index],
+                        style: TextStyle(
+                          fontSize:
+                              14, // Match the font size of received/sent messages
+                          color: Colors
+                              .black, // Ensure text color matches that of received messages if needed
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
