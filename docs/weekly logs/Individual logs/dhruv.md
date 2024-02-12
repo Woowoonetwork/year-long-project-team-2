@@ -307,3 +307,38 @@ N/A.
 
 ---
 ---
+
+## Term 2 Week 4: Monday 29th Jan 2024 - Sunday 04th Feb 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week4.png)
+
+### Recap of personal goals
+- Helped plan out the features for coming milestone
+- Helped assign and prioritize tasks to be completed.
+- Team meetings to priotise tasks to be done and assigning task to team mates
+- Fix bugs like navigation of the review screen to the home screen
+- Discuss and made the tasks to be given to the users for peer testing
+- Preparing the intro and questionnaire questions for the peer testing
+- Worked on the feedback given during the peer testing 
+- Made the post dissapear from home screen if it is reserved
+- Fixed the keyboard and the cancel button on the home screen
+- Display message if there is no post available to show on the home screen 
+
+
+### Tasks completed (from Project Board)
+- Review navigation 
+- Fix the navigation bug from the rating page
+- Complete the list of tasks for the peer testing
+- Remove a post from the home screen if it is reserved
+- Fix bug that doesn't make the keyboard disappear if the search bar is clicked on iOS
+- Add a text message when there is no post available to the home screen
+- Complete T2 W4 Individual Logs
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.

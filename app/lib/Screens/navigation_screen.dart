@@ -28,7 +28,7 @@ class NavigationScreen extends StatelessWidget {
             groupedBackgroundColor, context).withOpacity(0.8),
         border: Border(top: BorderSide.none),
         activeColor: accentColor.color, // active tab color
-        inactiveColor: CupertinoColors.secondaryLabel, // inactive tab color
+        inactiveColor: CupertinoColors.label.resolveFrom(context).withOpacity(0.8), // inactive tab color
         items: [
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.compass),

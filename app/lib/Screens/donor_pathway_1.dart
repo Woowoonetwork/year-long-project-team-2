@@ -117,19 +117,21 @@ class _DonorScreenState extends State<DonorScreen> {
             color: CupertinoColors.label.resolveFrom(context),
           ),
         ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Text(
-            "Message ${reservedByName ?? 'Unknown User'}",
-            style: TextStyle(
-              color: Color(0xFF337586), // Your custom color
-            ),
-          ),
-          onPressed: () {
-            // Close the current screen
-            Navigator.of(context).pop();
-          },
-        ),
+        trailing: reservedByName != null
+            ? CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Text(
+                  "Message ${reservedByName ?? 'Unknown User'}",
+                  style: TextStyle(
+                    color: Color(0xFF337586), // Your custom color
+                  ),
+                ),
+                onPressed: () {
+                  // Close the current screen
+                  Navigator.of(context).pop();
+                },
+              )
+            : null,
         border: Border(bottom: BorderSide.none),
       ),
       child: CustomScrollView(
@@ -178,6 +180,10 @@ class _DonorScreenState extends State<DonorScreen> {
 
   // Method to build heading text based on order state
   String _buildHeadingText() {
+    if (reservedByName == null) {
+      return "Your order has not been reserved yet";
+    }
+
     switch (orderState) {
       case OrderState.reserved:
         return "Your order has been reserved by ${reservedByName ?? 'Unknown User'}";
@@ -219,63 +225,97 @@ class _DonorScreenState extends State<DonorScreen> {
   }
 
   Widget __buildButton() {
-    String buttonText = _buildButtonText();
-    Function()? buttonAction;
-
-    switch (orderState) {
-      case OrderState.reserved:
-        buttonText = "Confirm";
-        buttonAction = _confirmOrder; // Call the confirm order method here
-        break;
-      case OrderState.confirmed:
-        buttonText = "Delivering";
-        // Define action for delivering state if needed
-        break;
-      case OrderState.delivering:
-        buttonText = "Ready to Pick Up";
-        // Define action for ready to pick up state if needed
-        break;
-      case OrderState.readyToPickUp:
-        buttonText = "Confirm"; // This might need to be adjusted to your logic
-        // Define action for ready to pick up confirmation if needed
-        break;
-    }
-
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-              width: 2.0,
-            ),
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                color: CupertinoColors.black.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 2),
+    if (orderState == OrderState.readyToPickUp) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color:
+                    CupertinoColors.quaternarySystemFill.resolveFrom(context),
+                width: 2.0,
               ),
-            ],
-          ),
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: Text(
-              buttonText,
-              style: TextStyle(
-                fontSize: _defaultFontSize,
-                color: CupertinoColors.label,
-              ),
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: [
+                BoxShadow(
+                  color: CupertinoColors.black.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 2,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
-            color: CupertinoColors.tertiarySystemBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            onPressed: buttonAction,
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Text(
+                "Leave a Review",
+                style: TextStyle(
+                  fontSize: _defaultFontSize,
+                  color: CupertinoColors.label,
+                ),
+              ),
+              color: CupertinoColors.tertiarySystemBackground,
+              borderRadius: BorderRadius.circular(16.0),
+              onPressed: () {
+                // setState(() {
+                //   orderState = _getNextOrderState();
+                // });
+                Navigator.of(context).push(
+                  CupertinoPageRoute(
+                    builder: (context) => DoneeRatingPage(
+                      postId: widget.postId,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      String buttonText = _buildButtonText();
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color:
+                    CupertinoColors.quaternarySystemFill.resolveFrom(context),
+                width: 2.0,
+              ),
+              borderRadius: BorderRadius.circular(16.0),
+              boxShadow: [
+                BoxShadow(
+                  color: CupertinoColors.black.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 2,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Text(
+                buttonText,
+                style: TextStyle(
+                  fontSize: _defaultFontSize,
+                  color: CupertinoColors.label,
+                ),
+              ),
+              color: CupertinoColors.tertiarySystemBackground,
+              borderRadius: BorderRadius.circular(16.0),
+              onPressed: () {
+                setState(() {
+                  orderState = _getNextOrderState();
+                });
+              },
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   String _buildButtonText() {

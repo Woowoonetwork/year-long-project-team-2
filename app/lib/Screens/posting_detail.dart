@@ -11,6 +11,7 @@ import 'package:FoodHood/Components/cupertinosnackbar.dart';
 import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:FoodHood/Screens/public_profile_screen.dart';
 import 'package:provider/provider.dart';
 
 class PostDetailView extends StatefulWidget {
@@ -387,6 +388,12 @@ class InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         child: GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
+        );
+      },
       child: Row(
         children: [
           IconPlaceholder(imageUrl: viewModel.profileURL),

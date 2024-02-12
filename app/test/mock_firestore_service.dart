@@ -18,6 +18,8 @@ class FirestoreService {
     required String collectionName,
     required String docName,
   }) async {
+    return null;
+  
     // Mock implementation for readDocument
   }
 }

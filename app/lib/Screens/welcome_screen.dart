@@ -2,7 +2,6 @@
 
 import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/cupertino.dart';
 import '../components.dart';
 
@@ -59,24 +58,21 @@ class WelcomeScreen extends StatelessWidget {
             },
             child: Text('Log in', style: Styles.buttonTextStyle),
           ),
-          const SizedBox(height: 28),
-          Center(
-            child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Not a member? Sign up ',
-                    style: Styles.signUpTextStyle,
-                  ),
-                  TextSpan(
-                    text: 'here',
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.pushNamed(context, '/signup');
-                      },
-                    style: Styles.signUpLinkStyle,
-                  ),
-                ],
+          const SizedBox(height: 14),
+          CupertinoButton(
+            color: secondaryColor.withOpacity(0.2),
+            padding: const EdgeInsets.all(16),
+            borderRadius: BorderRadius.circular(14),
+            onPressed: () {
+              Navigator.pushNamed(context, '/signup');
+            },
+            child: Text(
+              'Sign up',
+              style: TextStyle(
+                color: CupertinoDynamicColor.resolve(accentColor, context),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.90,
               ),
             ),
           ),

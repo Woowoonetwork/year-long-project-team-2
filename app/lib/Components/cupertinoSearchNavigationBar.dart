@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'dart:ui'; // Needed for ImageFilter
-import 'package:FoodHood/components.dart';
 
 class CupertinoSearchNavigationBar extends StatefulWidget {
   final String title;
@@ -45,12 +44,21 @@ class _CupertinoSearchNavigationBarState
 
   void _onSearchBarFocusChange() {
     if (_focusNode.hasFocus) {
+      // When the search bar gains focus, show the cancel button and trigger onSearchBarTapped.
+      setState(() {
+        _showCancelButton = true;
+      });
       widget.onSearchBarTapped();
+    } else {
+      // Optionally, you could handle logic for when the search bar loses focus here,
+      // such as hiding the cancel button if the text field is empty.
+      _updateCancelButtonVisibility();
     }
   }
 
   void _updateCancelButtonVisibility() {
-    final shouldShow = widget.textController.text.isNotEmpty;
+    final shouldShow = widget.textController.text.isNotEmpty ||
+        _focusNode.hasFocus; // Update to include focus check
     if (_showCancelButton != shouldShow) {
       setState(() {
         _showCancelButton = shouldShow;
@@ -79,7 +87,7 @@ class _CupertinoSearchNavigationBarState
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.all(16).copyWith(top: 44),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -96,33 +104,43 @@ class _CupertinoSearchNavigationBarState
   }
 
   Widget _buildTitle(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        Expanded(
-          child: Text(
-            widget.title,
-            style: TextStyle(
-              fontSize: 36,
-              letterSpacing: -1.3,
-              fontWeight: FontWeight.bold,
-              color: CupertinoColors.label.resolveFrom(context),
-              overflow: TextOverflow.ellipsis,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => _showFeelingLuckyModal(context),
+              child: Text(
+                "Feeling Lucky?",
+                style: TextStyle(
+                  color: accentColor,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.6,
+                  fontSize: 16,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-        CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => _showFeelingLuckyModal(context),
-          child: Text(
-            "Feeling Lucky?",
-            style: TextStyle(
-              color: accentColor,
-              fontWeight: FontWeight.w500,
-              letterSpacing: -0.8,
-              fontSize: 16,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                widget.title,
+                style: TextStyle(
+                  fontSize: 36,
+                  letterSpacing: -1.3,
+                  fontWeight: FontWeight.bold,
+                  color: CupertinoColors.label.resolveFrom(context),
+                ),
+                overflow:
+                    TextOverflow.ellipsis, // This applies to the Text widget
+              ),
             ),
-          ),
+          ],
         ),
       ],
     );
@@ -198,8 +216,9 @@ class _CupertinoSearchNavigationBarState
       children: [
         Expanded(
           child: CupertinoSearchTextField(
-            suffixIcon: const Icon(
+            suffixIcon: Icon(
               FeatherIcons.x,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
               size: 20,
             ),
             prefixIcon: Container(
@@ -233,12 +252,12 @@ class _CupertinoSearchNavigationBarState
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           transitionBuilder: (child, animation) {
-            return ScaleTransition(
-              scale: Tween(
-                begin: 1.0,
-                end: 1.0,
-              ).animate(animation),
-              child: child,
+            return FadeTransition(
+              opacity: animation,
+              child: SizeTransition(
+                sizeFactor: animation,
+                child: child,
+              ),
             );
           },
           child: _showCancelButton
@@ -265,7 +284,7 @@ class _CupertinoSearchNavigationBarState
         child: Text(
           'Cancel',
           style: TextStyle(
-            color: CupertinoColors.label.resolveFrom(context),
+            color: accentColor,
             fontSize: 18,
             fontWeight: FontWeight.w400,
           ),
