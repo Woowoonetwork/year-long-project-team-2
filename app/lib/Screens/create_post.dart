@@ -68,7 +68,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
   @override
   void initState() {
     super.initState();
-    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _textScaleFactor =
+        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
     _determinePosition().then((position) {
       if (mounted) {
@@ -353,43 +354,43 @@ class _CreatePostPageState extends State<CreatePostScreen>
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           child: Text('Save',
-              style: TextStyle(color: accentColor, fontWeight: FontWeight.w600)),
+              style:
+                  TextStyle(color: accentColor, fontWeight: FontWeight.w600)),
           onPressed: () => savePost(context),
         ),
         border: const Border(bottom: BorderSide.none),
       ),
-      child:  CustomScrollView(
-          slivers: <Widget>[
-            buildImageSection(context, _selectedImagePath),
-            SliverToBoxAdapter(child: SizedBox(height: 30.0)),
-            buildTextField('Title'),
-            buildTextInputField(titleController, ''),
-            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-            buildTextField('Description'),
-            buildLargeTextInputField(descController, ''),
-            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-            buildTextField('Allergens'),
-            buildSearchBar(allergensList, selectedAllergens),
-            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-            buildExpireDateSection(),
-            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-            buildTextField('Category'),
-            buildSearchBar(categoriesList, selectedCategories),
-            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-            buildTextField('Pickup Location'),
-            buildSearchBar(pickupLocationsList, selectedPickupLocation),
-            buildMapSection(),
-            SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-            buildTextField('Pickup Instructions'),
-            buildLargeTextInputField(
-              pickupInstrController,
-              '',
-            ),
-            buildTimeSection(),
-            SliverToBoxAdapter(child: SizedBox(height: 40.0)),
-          ],
-        ),
-    
+      child: CustomScrollView(
+        slivers: <Widget>[
+          buildImageSection(context, _selectedImagePath),
+          SliverToBoxAdapter(child: SizedBox(height: 30.0)),
+          buildTextField('Title'),
+          buildTextInputField(titleController, ''),
+          SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          buildTextField('Description'),
+          buildLargeTextInputField(descController, ''),
+          SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          buildTextField('Allergens'),
+          buildSearchBar(allergensList, selectedAllergens),
+          SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          buildExpireDateSection(),
+          SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          buildTextField('Category'),
+          buildSearchBar(categoriesList, selectedCategories),
+          SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          buildTextField('Pickup Location'),
+          buildSearchBar(pickupLocationsList, selectedPickupLocation),
+          buildMapSection(),
+          SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+          buildTextField('Pickup Instructions'),
+          buildLargeTextInputField(
+            pickupInstrController,
+            '',
+          ),
+          buildTimeSection(),
+          SliverToBoxAdapter(child: SizedBox(height: 40.0)),
+        ],
+      ),
     );
   }
 
@@ -451,86 +452,86 @@ class _CreatePostPageState extends State<CreatePostScreen>
   }
 
   void savePost(BuildContext context) async {
-  if ([titleController.text, descController.text, pickupInstrController.text]
-          .any((element) => element.isEmpty) ||
-      [selectedAllergens, selectedCategories]
-          .any((list) => list.isEmpty)) {
-    showEmptyFieldsAlert(context);
-    return;
-  }
-
-  showLoadingDialog(context, loadingMessage: 'Saving Post...'); // Show loading indicator
-
-  String? imageUrl;
-  if (_selectedImagePath != null) {
-    imageUrl = await _uploadImageToFirebase(File(_selectedImagePath!));
-    if (imageUrl == null) {
-      print("Image upload failed");
-      Navigator.of(context).pop(); // Close the loading dialog
-      // Optionally show an error message to the user
+    if ([titleController.text, descController.text, pickupInstrController.text]
+            .any((element) => element.isEmpty) ||
+        [selectedAllergens, selectedCategories].any((list) => list.isEmpty)) {
+      showEmptyFieldsAlert(context);
       return;
+    }
+
+    showLoadingDialog(context,
+        loadingMessage: 'Saving Post...'); // Show loading indicator
+
+    String? imageUrl;
+    if (_selectedImagePath != null) {
+      imageUrl = await _uploadImageToFirebase(File(_selectedImagePath!));
+      if (imageUrl == null) {
+        print("Image upload failed");
+        Navigator.of(context).pop(); // Close the loading dialog
+        // Optionally show an error message to the user
+        return;
+      }
+    }
+
+    // Continue with saving the post details including imageUrl if available
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      String userId = user?.uid ?? 'default uid';
+      String documentId = Uuid().v4();
+
+      await FirebaseFirestore.instance
+          .collection('post_details')
+          .doc(documentId)
+          .set({
+        'title': titleController.text,
+        'description': descController.text,
+        'allergens': selectedAllergens.join(', '),
+        'categories': selectedCategories.join(', '),
+        'expiration_date': Timestamp.fromDate(selectedDate),
+        'pickup_location': selectedPickupLocation.join(', '),
+        'pickup_instructions': pickupInstrController.text,
+        'pickup_time': Timestamp.fromDate(selectedTime),
+        'user_id': userId,
+        'post_location':
+            GeoPoint(selectedLocation!.latitude, selectedLocation!.longitude),
+        'post_timestamp': FieldValue.serverTimestamp(),
+        'image_url': imageUrl ?? '',
+        'post_status': "not reserved" // Add image URL to the document
+      });
+
+      Navigator.of(context).pop(); // Close the loading dialog
+
+      // Success callback or navigate the user away from the current screen
+      Navigator.of(context).pop(); // Pop the current screen to go back
+
+      // Show a confirmation dialog on the previous screen
+      showPostSavedConfirmation(context);
+    } catch (e) {
+      print("Error saving post: $e");
+      Navigator.of(context).pop(); // Close the loading dialog
+      // Optionally handle the error, e.g., by showing an error message to the user
     }
   }
 
-  // Continue with saving the post details including imageUrl if available
-  try {
-    final user = FirebaseAuth.instance.currentUser;
-    String userId = user?.uid ?? 'default uid';
-    String documentId = Uuid().v4();
-
-    await FirebaseFirestore.instance
-        .collection('post_details')
-        .doc(documentId)
-        .set({
-      'title': titleController.text,
-      'description': descController.text,
-      'allergens': selectedAllergens.join(', '),
-      'categories': selectedCategories.join(', '),
-      'expiration_date': Timestamp.fromDate(selectedDate),
-      'pickup_location': selectedPickupLocation.join(', '),
-      'pickup_instructions': pickupInstrController.text,
-      'pickup_time': Timestamp.fromDate(selectedTime),
-      'user_id': userId,
-      'post_location':
-          GeoPoint(selectedLocation!.latitude, selectedLocation!.longitude),
-      'post_timestamp': FieldValue.serverTimestamp(),
-      'image_url': imageUrl ?? '', // Add image URL to the document
-    });
-
-    Navigator.of(context).pop(); // Close the loading dialog
-
-    // Success callback or navigate the user away from the current screen
-    Navigator.of(context).pop(); // Pop the current screen to go back
-
-    // Show a confirmation dialog on the previous screen
-    showPostSavedConfirmation(context);
-  } catch (e) {
-    print("Error saving post: $e");
-    Navigator.of(context).pop(); // Close the loading dialog
-    // Optionally handle the error, e.g., by showing an error message to the user
+  void showPostSavedConfirmation(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text('Post Published'),
+          content: Text('Your post has been published successfully.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Hooraay!'),
+            ),
+          ],
+        );
+      },
+    );
   }
-}
-
-void showPostSavedConfirmation(BuildContext context) {
-  showCupertinoDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return CupertinoAlertDialog(
-        title: Text('Post Published'),
-        content: Text('Your post has been published successfully.'),
-        actions: <Widget>[
-          CupertinoDialogAction(
-            onPressed: () {
-              Navigator.pop(context); // Close the dialog
-            },
-            child: Text('Hooraay!'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
 
   SliverToBoxAdapter buildTextField(String text) {
     return SliverToBoxAdapter(
@@ -539,9 +540,7 @@ void showPostSavedConfirmation(BuildContext context) {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: adjustedFontSize, 
-            fontWeight: FontWeight.w500
-          ),
+              fontSize: adjustedFontSize, fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -557,17 +556,16 @@ void showPostSavedConfirmation(BuildContext context) {
           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
           placeholder: placeholder,
           style: TextStyle(
-              color:
-                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: adjustedFontSize,
-              fontWeight: FontWeight.w500,
+            color:
+                CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+            fontSize: adjustedFontSize,
+            fontWeight: FontWeight.w500,
           ),
           placeholderStyle: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.placeholderText, context),
               fontSize: adjustedFontSize,
-              fontWeight: FontWeight.w500
-          ),
+              fontWeight: FontWeight.w500),
           decoration: BoxDecoration(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.tertiarySystemBackground, context),
@@ -647,7 +645,8 @@ void showPostSavedConfirmation(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Expiration Date',
-                style: TextStyle(fontSize: adjustedFontSize, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontSize: adjustedFontSize, fontWeight: FontWeight.w500)),
             GestureDetector(
               onTap: () => showDatePickerModal(context),
               child: Container(
@@ -681,7 +680,8 @@ void showPostSavedConfirmation(BuildContext context) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Pickup Time',
-                style: TextStyle(fontSize: adjustedFontSize, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontSize: adjustedFontSize, fontWeight: FontWeight.w500)),
             GestureDetector(
               onTap: () => showTimePickerModal(context),
               child: Container(
@@ -707,7 +707,8 @@ void showPostSavedConfirmation(BuildContext context) {
   }
 
   void showDatePickerModal(BuildContext context) {
-    DateTime tempSelectedDate = selectedDate; // Temporary variable to hold the new date selection
+    DateTime tempSelectedDate =
+        selectedDate; // Temporary variable to hold the new date selection
 
     showCupertinoModalPopup(
       context: context,

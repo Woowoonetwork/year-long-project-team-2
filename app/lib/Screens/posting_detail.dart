@@ -1095,7 +1095,7 @@ class _ReserveButtonState extends State<ReserveButton> {
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
-            .update({'reserved_by': widget.userId});
+            .update({'reserved_by': widget.userId, 'post_status': "pending"});
         setState(() {
           _isReserved = true;
         });
