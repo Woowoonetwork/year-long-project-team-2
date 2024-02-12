@@ -2,8 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'mock_firestore_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'mock.dart';
-import 'package:FoodHood/Screens/create_post.dart';
-import 'package:flutter/cupertino.dart';
 
 void main() {
   setUpAll(() async {

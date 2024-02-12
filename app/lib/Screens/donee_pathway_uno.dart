@@ -1,9 +1,7 @@
-import 'package:FoodHood/Screens/donee_rating.dart';
+import 'package:FoodHood/Screens/donor_rating.dart';
+import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 
 class DoneePath extends StatefulWidget {
@@ -36,7 +34,7 @@ class _DoneePathState extends State<DoneePath> {
     Navigator.push(
       context,
       CupertinoPageRoute(
-        builder: (context) => DoneeRatingPage(postId: widget.postId),
+        builder: (context) => DonorRatingPage(postId: widget.postId),
       ),
     );
   }
@@ -71,13 +69,16 @@ class _DoneePathState extends State<DoneePath> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(height: 80),
-                    Text(
-                      'You have reserved the ${viewModel.title} from ${viewModel.firstName}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'You have reserved the ${viewModel.title} from ${viewModel.firstName}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
@@ -96,73 +97,49 @@ class _DoneePathState extends State<DoneePath> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Posted by ${viewModel.firstName} ',
-                          style: TextStyle(color: Colors.grey),
+                          'Made by ${viewModel.firstName} ${viewModel.lastName}   Posted ${viewModel.timeAgoSinceDate(viewModel.postTimestamp)}   ',
+                          style: TextStyle(
+                            color: CupertinoColors.label
+                                .resolveFrom(context)
+                                .withOpacity(0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -0.48,
+                          ),
                         ),
-                        Icon(
-                          CupertinoIcons.star_fill,
-                          color: Colors.amber,
-                          size: 14,
-                        ),
-                        Text(
-                          ' ${viewModel.rating.toStringAsFixed(1)} Rating ',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        Text(
-                          viewModel.timeAgoSinceDate(viewModel.postTimestamp),
-                          style: TextStyle(color: Colors.grey),
-                        ),
+                        Text(""),
+                        RatingText(),
                       ],
                     ),
                     SizedBox(height: 50),
-                    SizedBox(height: 20),
-                    CupertinoButton(
-                      color: CupertinoColors.activeBlue,
+                    Text(
+                      'Pending Confirmation',
+                      style: TextStyle(
+                        color: CupertinoColors.systemGrey,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 40),
+                    CupertinoButton.filled(
                       onPressed: _navigateToRatingPage,
                       child: Text('Leave a Review'),
-                    ),
-                    SizedBox(height: 50),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 94, vertical: 18),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF9FD0C6),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Text(
-                        'Pending Confirmation',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 50),
-                    CupertinoButton(
-                      onPressed: () {},
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      color: CupertinoColors.white,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 36.0, vertical: 16.0),
                       borderRadius: BorderRadius.circular(18.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Icon(
-                            CupertinoIcons.xmark,
-                            color: CupertinoColors.destructiveRed,
-                            size: 20.0,
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            'Cancel Reservation',
-                            style: TextStyle(
-                              color: CupertinoColors.destructiveRed,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
+                    SizedBox(height: 20),
+                    CupertinoButton(
+                      onPressed: () {
+                        // Action to cancel reservation
+                      },
+                      color: CupertinoColors.destructiveRed,
+                      child: Text('Cancel Reservation'),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 36.0, vertical: 16.0),
+                      borderRadius: BorderRadius.circular(18.0),
+                    ),
+                    SizedBox(height: 50),
                   ],
                 ),
               ),

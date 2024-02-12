@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isSearching = false;
   final TextEditingController textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   List<Widget> postCards = [];
@@ -57,10 +58,42 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<List<Widget>> _processSnapshot(QuerySnapshot snapshot) async {
     List<Widget> cards = [];
     for (var doc in snapshot.docs) {
-      cards.add(await _buildPostCard(doc));
+      var data = doc.data() as Map<String, dynamic>?;
+      if (data != null && !data.containsKey('reserved_by')) {
+        cards.add(await _buildPostCard(doc));
+      }
     }
-    cards.add(SizedBox(height: 100));
+    if (cards.isEmpty) {
+      // If after filtering, no cards are left, display text
+      cards.add(_buildNoPostsWidget());
+    } else {
+      cards.add(SizedBox(height: 100));
+    }
     return cards;
+  }
+
+  Widget _buildNoPostsWidget() {
+    return 
+    Column(
+      children: [
+        SizedBox(height: 200),
+        Icon(
+          FeatherIcons.meh,
+          size: 40,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        ),
+        SizedBox(height: 16),
+        Text(
+          'No posts available',
+          style: TextStyle(
+            fontSize: 16,
+            letterSpacing: -0.6,
+            fontWeight: FontWeight.w500,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          ),
+        ),
+      ],
+    );
   }
 
   Future<Widget> _buildPostCard(QueryDocumentSnapshot document) async {
@@ -71,8 +104,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     List<String> tags = (data['categories'] as String?)
             ?.split(',')
-            ?.map((tag) => tag.trim())
-            ?.toList() ??
+            .map((tag) => tag.trim())
+            .toList() ??
         [];
     List<Color> assignedColors = tags
         .map((tag) => tagColors.putIfAbsent(tag, () => _getRandomColor()))
@@ -109,11 +142,24 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _onSearchTextChanged() async {
+  void _onSearchTextChanged() {
     var searchString = textController.text.toLowerCase();
-    if (mounted) {
-      postCards = await fetchPosts(searchString);
-      setState(() {});
+    if (searchString.isNotEmpty) {
+      setState(() {
+        isSearching = true;
+      });
+      fetchPosts(searchString).then((posts) {
+        if (mounted) {
+          setState(() {
+            postCards = posts;
+          });
+        }
+      });
+    } else {
+      setState(() {
+        isSearching = false;
+        _loadInitialPosts(); // Reload initial posts if search text is cleared
+      });
     }
   }
 
@@ -126,6 +172,11 @@ class _HomeScreenState extends State<HomeScreen> {
     // Correcting the return type by using Future.wait
     var futures = querySnapshot.docs
         .where((doc) => _matchesSearchString(doc, searchString))
+        .where((doc) {
+          var data = doc.data() as Map<String, dynamic>;
+          // Exclude documents with reserved_by field
+          return !data.containsKey('reserved_by');
+        })
         .map((doc) => _buildPostCard(doc))
         .toList();
 
@@ -154,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildSearchBar(context),
               SizedBox(height: 16),
               _buildCategoryButtons(),
-              SizedBox(height: 16)
+              SizedBox(height: 8)
             ])),
             isLoading ? _buildLoadingSliver(context) : _buildPostListSliver(),
           ]),
@@ -181,34 +232,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildPostListSliver() {
-    if (postCards.isEmpty) {
-      // Display message and icon when there are no posts
+    if (postCards.isEmpty && !isSearching) {
+      // show message when there are no posts in the initial load
       return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                FeatherIcons.search,
-                size: 42,
+        child: Center(child: _buildNoPostsWidget()),
+      );
+    } else if (postCards.isEmpty && isSearching) {
+      // show message when search returns no results
+      return SliverFillRemaining(
+        child: 
+        Column(
+          children: [
+            SizedBox(height: 200),
+            Icon(
+              FeatherIcons.search,
+              size: 40,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'No results found',
+              style: TextStyle(
+                fontSize: 16,
+                letterSpacing: -0.6,
+                fontWeight: FontWeight.w500,
                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
               ),
-              SizedBox(height: 20),
-              Text(
-                'No results found',
-                style: TextStyle(
-                  fontSize: 16,
-                  letterSpacing: -0.6,
-                  fontWeight: FontWeight.w500,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     } else {
-      // Display the list of post cards
+      // Display the list of post cards or search results
       return SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) => postCards[index],
@@ -220,17 +275,88 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSearchBar(BuildContext context) {
     bool isFocused = _focusNode.hasFocus;
+
+    // Clearing text and keyboard pop down
+    void _clearSearch() {
+      // Clear the search text field
+      textController.clear();
+
+      // Dismiss the keyboard by removing focus from the search text field
+      if (_focusNode.hasFocus) {
+        _focusNode.unfocus();
+      }
+
+      // Reset the search state and reload initial posts
+      setState(() {
+        isSearching = false;
+        _loadInitialPosts();
+      });
+    }
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16),
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Expanded(child: _buildSearchTextField(context)),
-          if (!isFocused) SizedBox(width: 10),
-          if (!isFocused) _buildFilterButton()
-        ]),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: CupertinoSearchTextField(
+                    controller: textController,
+                    focusNode: _focusNode,
+                    prefixIcon: Container(
+                      margin: EdgeInsets.only(left: 6.0, top: 2.0),
+                      child: Icon(
+                        FeatherIcons.search,
+                        size: 18.0,
+                      ),
+                    ),
+                    backgroundColor: CupertinoColors.tertiarySystemBackground,
+
+                    placeholderStyle: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w400,
+                      color:
+                          CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
+                    style: TextStyle(
+                      color: CupertinoColors.black,
+                    ),
+                    placeholder: 'Search',
+                    suffixIcon: Icon(
+                      FeatherIcons.x,
+                      color:
+                          CupertinoColors.secondaryLabel.resolveFrom(context),
+                      size: 20,
+                    ),
+                    onSuffixTap:
+                        _clearSearch, // Clear text when the suffix (x) icon is tapped
+                  ),
+                ),
+                SizedBox(
+                    width: 8), // spacing between search bar and cancel button
+                // Only show the Cancel button if the search bar is focused
+                if (isFocused)
+                  GestureDetector(
+                    onTap: _clearSearch,
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: accentColor,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (!isFocused) // Only show the filter button if the search bar is not focused
+            Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: _buildFilterButton(),
+            ),
+        ],
       ),
     );
   }
@@ -271,14 +397,18 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 37,
       width: 37,
       decoration: BoxDecoration(
-          color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-          borderRadius: BorderRadius.circular(10)),
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Icon(FeatherIcons.filter,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              size: 20),
-          onPressed: () {}),
+        padding: EdgeInsets.zero,
+        child: Icon(FeatherIcons.filter,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            size: 20),
+        onPressed: () {
+          // Implement filter logic
+        },
+      ),
     );
   }
 

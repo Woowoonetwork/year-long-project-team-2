@@ -11,6 +11,7 @@ import 'package:FoodHood/Components/cupertinosnackbar.dart';
 import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:FoodHood/Screens/public_profile_screen.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -384,12 +385,19 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+        child: GestureDetector(
+
+      onTap: () {
+         Navigator.push(
+          context,
+          CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
+        );
+      },
       child: Row(
         children: [
           IconPlaceholder(imageUrl: viewModel.profileURL),
           const SizedBox(width: 8),
           Expanded(
-            // Wrap with Expanded to prevent overflow
             child: CombinedTexts(
               firstName: firstName,
               lastName: lastName,
@@ -399,7 +407,7 @@ class InfoRow extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -523,8 +531,6 @@ class RatingText extends StatelessWidget {
         ),
         const SizedBox(width: 3),
         Text(
-          // '5.0 Rating',
-          //use viewModel.rating instead of hardcoded value
           '${viewModel.rating} Rating',
           style: TextStyle(
             overflow: TextOverflow.fade,
@@ -1102,7 +1108,9 @@ class _ReserveButtonState extends State<ReserveButton> {
   Widget build(BuildContext context) {
     return Container(
       child: CupertinoButton(
-        color: _isReserved ? accentColor.resolveFrom(context).withOpacity(0.2) : accentColor,
+        color: _isReserved
+            ? accentColor.resolveFrom(context).withOpacity(0.2)
+            : accentColor,
         padding: const EdgeInsets.all(16),
         borderRadius: BorderRadius.circular(14),
         child: Text(
