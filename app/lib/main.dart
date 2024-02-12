@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:FoodHood/Models/PostDetailViewModel.dart';
 
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -30,8 +31,7 @@ void main() async {
 
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.black.withOpacity(0.002),
-
+    systemNavigationBarColor: Colors.black.withOpacity(0.002),
   ));
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -55,7 +55,6 @@ void main() async {
           ChangeNotifierProvider<TextScaleProvider>(
             create: (context) => TextScaleProvider(),
           ),
-          // Add other providers if needed
         ],
         child: FoodHoodApp(),
       ),
@@ -128,8 +127,7 @@ class FoodHoodApp extends StatelessWidget {
             );
           case '/browse':
             return MaterialWithModalsPageRoute(
-              builder: (context) => BrowseScreen()
-            ); 
+                builder: (context) => BrowseScreen());
           default:
             return MaterialWithModalsPageRoute(
               builder: (context) => HomeScreen(),

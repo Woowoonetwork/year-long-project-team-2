@@ -11,6 +11,7 @@ import 'package:FoodHood/Components/cupertinosnackbar.dart';
 import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -115,7 +116,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                   onRefresh: () => Future.value(true)),
             ),
             Container(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 32),
               child: Row(
                 children: [
                   Expanded(
@@ -123,6 +124,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                       isReserved: viewModel.isReserved,
                       postId: widget.postId,
                       userId: userID,
+                      viewModel: viewModel,
                     ),
                   ),
                 ],
@@ -207,8 +209,7 @@ class _PostDetailViewState extends State<PostDetailView> {
             ),
           ),
           AvailabilityIndicator(
-              isReserved:
-                  viewModel.isReserved), // Placeholder, update as needed
+              isReserved: false), // Placeholder, update as needed
         ],
       ),
     );
@@ -321,21 +322,20 @@ class _PostDetailViewState extends State<PostDetailView> {
 // AvailabilityIndicator, InfoRow, and other supporting widgets
 
 class AvailabilityIndicator extends StatelessWidget {
-  final String isReserved;
+  final bool isReserved;
 
   const AvailabilityIndicator({Key? key, required this.isReserved})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Color indicatorColor = isReserved == 'yes'
+    Color indicatorColor = isReserved
         ? CupertinoColors.systemRed.withOpacity(0.15)
         : CupertinoColors.activeGreen.withOpacity(0.15);
 
-    Color circleColor = isReserved == 'yes'
-        ? CupertinoColors.systemRed
-        : CupertinoColors.activeGreen;
-    String statusText = isReserved == 'yes' ? 'Reserved' : 'Available';
+    Color circleColor =
+        isReserved ? CupertinoColors.systemRed : CupertinoColors.activeGreen;
+    String statusText = isReserved ? 'Reserved' : 'Available';
 
     return Container(
       decoration: BoxDecoration(
@@ -386,12 +386,12 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+        child: GestureDetector(
       child: Row(
         children: [
           IconPlaceholder(imageUrl: viewModel.profileURL),
           const SizedBox(width: 8),
           Expanded(
-            // Wrap with Expanded to prevent overflow
             child: CombinedTexts(
               firstName: firstName,
               lastName: lastName,
@@ -401,7 +401,7 @@ class InfoRow extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -1052,15 +1052,17 @@ class AllergensSection extends StatelessWidget {
 }
 
 class ReserveButton extends StatefulWidget {
+  final String isReserved;
   final String postId;
   final String userId;
-  final String isReserved;
+  final PostDetailViewModel viewModel;
 
   const ReserveButton({
     Key? key,
+    required this.isReserved,
     required this.postId,
     required this.userId,
-    required this.isReserved,
+    required this.viewModel,
   }) : super(key: key);
 
   @override
@@ -1068,85 +1070,65 @@ class ReserveButton extends StatefulWidget {
 }
 
 class _ReserveButtonState extends State<ReserveButton> {
-  late String isReserved;
-
-  @override
-  void initState() {
-    super.initState();
-    isReserved = widget.isReserved;
-  }
-
-  void _toggleReservation() async {
-    String newisReserved;
-    switch (widget.isReserved) {
-      case 'yes':
-        newisReserved = 'no';
-        break;
-      case 'pending':
-        newisReserved = 'no';
-        break;
-      case 'no':
-      default:
-        newisReserved = 'pending';
-        break;
-    }
+  void _handleReservation() async {
+    final newStatus = 'pending';
 
     try {
-      await FirebaseFirestore.instance
-          .collection('post_details')
-          .doc(widget.postId)
-          .update({
-        'reserved_by': widget.userId,
-        'reservation_status': newisReserved
-      });
+      await widget.viewModel.updateReservationStatus(widget.postId, newStatus);
 
       setState(() {});
 
-      if (newisReserved == 'yes' || newisReserved == 'pending') {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => DoneePath(postId: widget.postId),
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Reservation status updated to pending.')),
+      );
     } catch (error) {
-      print('Error updating reservation status: $error');
+      print('Error reserving post: $error');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text('Failed to update reservation status. Please try again.'),
-          duration: Duration(seconds: 2),
-        ),
+            content: Text('Failed to update reservation. Please try again.')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    String _reservationStatus = '';
+
+    if (widget.isReserved == 'yes') {
+      _reservationStatus = 'Reserved';
+    } else {
+      _reservationStatus = 'Reserve';
+    }
     return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: isReserved == 'yes'
-            ? CupertinoColors.systemGrey
-            : CupertinoDynamicColor.resolve(accentColor, context),
-        borderRadius: BorderRadius.circular(100),
-        boxShadow: [
-          BoxShadow(
-              color: Color(0x19000000), blurRadius: 20, offset: Offset(0, 0))
-        ],
-      ),
       child: CupertinoButton(
-        padding: EdgeInsets.zero,
+        color: widget.isReserved == 'yes'
+            ? accentColor.resolveFrom(context).withOpacity(0.2)
+            : accentColor,
+        padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(14),
         child: Text(
-          isReserved == 'yes' ? 'Reserved' : 'Reserve',
+          _reservationStatus,
           style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              letterSpacing: -0.45,
-              fontWeight: FontWeight.w600),
+            color: widget.isReserved == 'yes'
+                ? accentColor
+                : CupertinoColors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.90,
+          ),
         ),
-        onPressed: _toggleReservation,
+        onPressed: widget.isReserved == 'pending'
+            ? null
+            : () {
+                _handleReservation();
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) => DoneePath(
+                            postId: widget.postId,
+                          )),
+                );
+              },
       ),
     );
   }

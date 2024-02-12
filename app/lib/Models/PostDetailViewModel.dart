@@ -20,7 +20,7 @@ class PostDetailViewModel extends ChangeNotifier {
   late DateTime postTimestamp;
   late LatLng pickupLatLng;
   late List<String> tags;
-  late String imageUrl; // Add a field for the image URL
+  late String imageUrl;
   late String profileURL;
   late String postLocation;
   late String isReserved;
@@ -49,7 +49,6 @@ class PostDetailViewModel extends ChangeNotifier {
     postTimestamp = DateTime.now();
     pickupLatLng = LatLng(37.7749, -122.4194);
     tags = ['null'];
-    isReserved = 'no';
   }
 
   Future<void> fetchData(String postId) async {
@@ -133,6 +132,20 @@ class PostDetailViewModel extends ChangeNotifier {
     lastName = userDocument['lastName'] ?? '';
     profileURL = userDocument['profileImagePath'] ?? '';
     notifyListeners();
+  }
+
+  Future<void> updateReservationStatus(String postId, String newStatus) async {
+    try {
+      await firestore.collection('post_details').doc(postId).update({
+        'is_reserved': newStatus,
+      });
+      isReserved = newStatus;
+      print('Reservation status updated to: $isReserved');
+      notifyListeners();
+    } catch (e) {
+      print('Error updating reservation status: $e');
+      throw e;
+    }
   }
 
   Future<void> savePost(String postId) async {

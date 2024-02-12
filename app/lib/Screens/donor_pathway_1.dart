@@ -23,12 +23,36 @@ class DonorScreen extends StatefulWidget {
 }
 
 class _DonorScreenState extends State<DonorScreen> {
-
   String? reservedByName; // Variable to store the reserved by user name
   String? reservedByLastName;
   String pickupLocation = '';
   bool isConfirmed = false;
   OrderState orderState = OrderState.reserved;
+
+  Future<void> _confirmOrder() async {
+    final CollectionReference postDetailsCollection =
+        FirebaseFirestore.instance.collection('post_details');
+
+    try {
+      await postDetailsCollection.doc(widget.postId).update({
+        'is_reserved': 'yes',
+      });
+
+      setState(() {
+        isConfirmed = true;
+        orderState = OrderState.confirmed;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Order confirmed as pending for pickup.')),
+      );
+    } catch (error) {
+      print('Error confirming order: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to confirm order. Please try again.')),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -60,14 +84,16 @@ class _DonorScreenState extends State<DonorScreen> {
 
         if (userSnapshot.exists) {
           // Extract the user name from the user document
-          final userName = userSnapshot['firstName']; 
+          final userName = userSnapshot['firstName'];
           final userLastName = userSnapshot['lastName'];
           setState(() {
-            reservedByName = userName; // Update the reserved by user name in the UI
+            reservedByName =
+                userName; // Update the reserved by user name in the UI
             reservedByLastName = userLastName;
           });
         } else {
-          print('User document does not exist for reserved by user ID: $reservedByUserId');
+          print(
+              'User document does not exist for reserved by user ID: $reservedByUserId');
         }
       } else {
         print('Post details document does not exist for ID: $postId');
@@ -112,26 +138,20 @@ class _DonorScreenState extends State<DonorScreen> {
           __buildHeadingTextField(
             text: _buildHeadingText(),
           ),
-          
           SliverToBoxAdapter(
             child: SizedBox(height: 16.0),
           ),
-          
           SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal:20.0),
-              child: Center (
-                child: OrderInfoSection(
-                  avatarUrl: '', 
-                  reservedByName: reservedByName, 
-                  reservedByLastName: reservedByLastName,
-                ),
-              )
-            )        
-          ),
-          
+              child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Center(
+                    child: OrderInfoSection(
+                      avatarUrl: '',
+                      reservedByName: reservedByName,
+                      reservedByLastName: reservedByLastName,
+                    ),
+                  ))),
           __buildTextField(text: "Pickup at $pickupLocation"),
-
           __buildButton(),
         ],
       ),
@@ -178,85 +198,57 @@ class _DonorScreenState extends State<DonorScreen> {
       child: Padding(
         padding: EdgeInsets.all(24.0),
         child: Container(
-        padding: EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          border: Border.all(
+          padding: EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+              width: 1.0,
+            ),
             color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 1.0, 
+            borderRadius: BorderRadius.circular(16.0),
           ),
-          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-          borderRadius: BorderRadius.circular(16.0), 
-        ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: _defaultFontSize,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: _defaultFontSize,
+            ),
           ),
         ),
-      ),
       ),
     );
   }
 
-Widget __buildButton() {
-  if (orderState == OrderState.readyToPickUp) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color:
-                  CupertinoColors.quaternarySystemFill.resolveFrom(context),
-              width: 2.0,
-            ),
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                color: CupertinoColors.black.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: Text(
-              "Leave a Review",
-              style: TextStyle(
-                fontSize: _defaultFontSize,
-                color: CupertinoColors.label,
-              ),
-            ),
-            color: CupertinoColors.tertiarySystemBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            onPressed: () {
-              // setState(() {
-              //   orderState = _getNextOrderState();
-              // });
-              Navigator.of(context).push(
-                CupertinoPageRoute(
-                  builder: (context) => DoneeRatingPage(postId: widget.postId,),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  } 
-  else {
+  Widget __buildButton() {
     String buttonText = _buildButtonText();
+    Function()? buttonAction;
+
+    switch (orderState) {
+      case OrderState.reserved:
+        buttonText = "Confirm";
+        buttonAction = _confirmOrder; // Call the confirm order method here
+        break;
+      case OrderState.confirmed:
+        buttonText = "Delivering";
+        // Define action for delivering state if needed
+        break;
+      case OrderState.delivering:
+        buttonText = "Ready to Pick Up";
+        // Define action for ready to pick up state if needed
+        break;
+      case OrderState.readyToPickUp:
+        buttonText = "Confirm"; // This might need to be adjusted to your logic
+        // Define action for ready to pick up confirmation if needed
+        break;
+    }
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(
-              color:
-                  CupertinoColors.quaternarySystemFill.resolveFrom(context),
+              color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
               width: 2.0,
             ),
             borderRadius: BorderRadius.circular(16.0),
@@ -280,18 +272,12 @@ Widget __buildButton() {
             ),
             color: CupertinoColors.tertiarySystemBackground,
             borderRadius: BorderRadius.circular(16.0),
-            onPressed: () {
-              setState(() {
-                orderState = _getNextOrderState();
-              });
-            },
+            onPressed: buttonAction,
           ),
         ),
       ),
     );
   }
-}
-
 
   String _buildButtonText() {
     switch (orderState) {
@@ -318,7 +304,6 @@ Widget __buildButton() {
         return OrderState.reserved;
     }
   }
-
 }
 
 class OrderInfoSection extends StatelessWidget {
@@ -346,7 +331,7 @@ class OrderInfoSection extends StatelessWidget {
           CircleAvatar(
             backgroundImage:
                 AssetImage(effectiveAvatarUrl), // Load the image from assets
-            radius: 9, 
+            radius: 9,
           ),
           SizedBox(width: 8),
           Text(

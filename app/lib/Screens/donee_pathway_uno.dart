@@ -1,11 +1,11 @@
-import 'package:FoodHood/Screens/donor_rating.dart';
-import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
+import 'package:FoodHood/Screens/donor_rating.dart';
+import 'package:FoodHood/Screens/posting_detail.dart';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -40,6 +40,16 @@ class _DoneePathState extends State<DoneePath> {
         builder: (context) => DonorRatingPage(postId: widget.postId),
       ),
     );
+  }
+
+  String _confirmationStatus() {
+    if (viewModel.isReserved == "yes") {
+      return 'Order Confirmed';
+    } else if (viewModel.isReserved == "pending") {
+      return 'Pending Confirmation';
+    } else {
+      return 'Reservation Status Unknown';
+    }
   }
 
   @override
@@ -116,31 +126,45 @@ class _DoneePathState extends State<DoneePath> {
                     ),
                     SizedBox(height: 50),
                     Text(
-                      'Pending Confirmation',
+                      _confirmationStatus(),
                       style: TextStyle(
-                        color: CupertinoColors.systemGrey,
+                        color: viewModel.isReserved == "yes"
+                            ? CupertinoColors.activeGreen
+                            : CupertinoColors.systemGrey,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     SizedBox(height: 40),
-                    CupertinoButton.filled(
-                      onPressed: _navigateToRatingPage,
-                      child: Text('Leave a Review'),
+                    Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 36.0, vertical: 16.0),
-                      borderRadius: BorderRadius.circular(18.0),
+                        horizontal: 36.0,
+                        vertical: 16.0,
+                      ),
+                      child: CupertinoButton.filled(
+                        onPressed: _navigateToRatingPage,
+                        child: Text('Leave a Review'),
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18.0),
+                      ),
                     ),
                     SizedBox(height: 20),
-                    CupertinoButton(
-                      onPressed: () {
-                        // Action to cancel reservation
-                      },
-                      color: CupertinoColors.destructiveRed,
-                      child: Text('Cancel Reservation'),
+                    Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 36.0, vertical: 16.0),
-                      borderRadius: BorderRadius.circular(18.0),
+                        horizontal: 36.0,
+                        vertical: 16.0,
+                      ),
+                      child: CupertinoButton(
+                        onPressed: () {
+                          // Action to cancel reservation
+                        },
+                        color: CupertinoColors.destructiveRed,
+                        child: Text('Cancel Reservation'),
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18.0),
+                      ),
                     ),
                     SizedBox(height: 50),
                   ],
