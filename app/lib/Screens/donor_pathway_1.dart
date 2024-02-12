@@ -1,5 +1,6 @@
 //donor_pathway_1.dart
 
+import 'package:FoodHood/Screens/message_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -23,7 +24,6 @@ class DonorScreen extends StatefulWidget {
 }
 
 class _DonorScreenState extends State<DonorScreen> {
-
   String? reservedByName; // Variable to store the reserved by user name
   String? reservedByLastName;
   String pickupLocation = '';
@@ -60,14 +60,16 @@ class _DonorScreenState extends State<DonorScreen> {
 
         if (userSnapshot.exists) {
           // Extract the user name from the user document
-          final userName = userSnapshot['firstName']; 
+          final userName = userSnapshot['firstName'];
           final userLastName = userSnapshot['lastName'];
           setState(() {
-            reservedByName = userName; // Update the reserved by user name in the UI
+            reservedByName =
+                userName; // Update the reserved by user name in the UI
             reservedByLastName = userLastName;
           });
         } else {
-          print('User document does not exist for reserved by user ID: $reservedByUserId');
+          print(
+              'User document does not exist for reserved by user ID: $reservedByUserId');
         }
       } else {
         print('Post details document does not exist for ID: $postId');
@@ -92,19 +94,26 @@ class _DonorScreenState extends State<DonorScreen> {
             color: CupertinoColors.label.resolveFrom(context),
           ),
         ),
-        trailing: reservedByName != null ? CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Text(
-            "Message ${reservedByName ?? 'Unknown User'}",
-            style: TextStyle(
-              color: Color(0xFF337586), // Your custom color
-            ),
-          ),
-          onPressed: () {
-            // Close the current screen
-            Navigator.of(context).pop();
-          },
-        ) : null,
+        trailing: reservedByName != null
+            ? CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Text(
+                  "Message ${reservedByName ?? 'Unknown User'}",
+                  style: TextStyle(
+                    color: Color(0xFF337586), // Your custom color
+                  ),
+                ),
+                onPressed: () {
+                  // Close the current screen
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                        builder: (context) =>
+                            MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
+                  );
+                },
+              )
+            : null,
         border: Border(bottom: BorderSide.none),
       ),
       child: CustomScrollView(
@@ -112,26 +121,24 @@ class _DonorScreenState extends State<DonorScreen> {
           __buildHeadingTextField(
             text: _buildHeadingText(),
           ),
-          
+
           const SliverToBoxAdapter(
             child: SizedBox(height: 16.0),
           ),
-          
+
           //Only show the order info section if the order has been reserved.
           if (reservedByName != null)
             SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal:20.0),
-              child: Center (
-                child: OrderInfoSection(
-                  avatarUrl: '', 
-                  reservedByName: reservedByName, 
-                  reservedByLastName: reservedByLastName,
-                ),
-              )
-            )        
-          ),
-          
+                child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Center(
+                      child: OrderInfoSection(
+                        avatarUrl: '',
+                        reservedByName: reservedByName,
+                        reservedByLastName: reservedByLastName,
+                      ),
+                    ))),
+
           __buildTextField(text: "Pickup at specified location"),
 
           __buildButton(),
@@ -162,8 +169,8 @@ class _DonorScreenState extends State<DonorScreen> {
   // Method to build heading text based on order state
   String _buildHeadingText() {
     if (reservedByName == null) {
-    return "Your order has not been reserved yet";
-  }
+      return "Your order has not been reserved yet";
+    }
 
     switch (orderState) {
       case OrderState.reserved:
@@ -184,23 +191,23 @@ class _DonorScreenState extends State<DonorScreen> {
       child: Padding(
         padding: EdgeInsets.all(24.0),
         child: Container(
-        padding: EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          border: Border.all(
+          padding: EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+              width: 1.0,
+            ),
             color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 1.0, 
+            borderRadius: BorderRadius.circular(16.0),
           ),
-          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-          borderRadius: BorderRadius.circular(16.0), 
-        ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: _defaultFontSize,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: _defaultFontSize,
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -210,7 +217,7 @@ class _DonorScreenState extends State<DonorScreen> {
       // Return an empty container if the order hasn't been reserved yet
       return SliverToBoxAdapter(child: Container());
     }
-    
+
     if (orderState == OrderState.readyToPickUp) {
       return SliverToBoxAdapter(
         child: Padding(
@@ -246,7 +253,9 @@ class _DonorScreenState extends State<DonorScreen> {
               onPressed: () {
                 Navigator.of(context).push(
                   CupertinoPageRoute(
-                    builder: (context) => DoneeRatingPage(postId: widget.postId,),
+                    builder: (context) => DoneeRatingPage(
+                      postId: widget.postId,
+                    ),
                   ),
                 );
               },
@@ -254,8 +263,7 @@ class _DonorScreenState extends State<DonorScreen> {
           ),
         ),
       );
-    } 
-    else {
+    } else {
       String buttonText = _buildButtonText();
       return SliverToBoxAdapter(
         child: Padding(
@@ -352,7 +360,7 @@ class OrderInfoSection extends StatelessWidget {
           CircleAvatar(
             backgroundImage:
                 AssetImage(effectiveAvatarUrl), // Load the image from assets
-            radius: 9, 
+            radius: 9,
           ),
           SizedBox(width: 8),
           Text(
