@@ -342,3 +342,38 @@ N/A.
 ### Additional Information
 
 N/A.
+
+-----
+-----
+
+## Term 2 Week 5: Monday 05th Feb 2024 - Sunday 11th Feb 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/dhruv_term2_week5.png)
+### Recap of personal goals
+- Helped plan out the feature to work on this week
+- Team meating to prioritise and assign tasks for people 
+- Completed the message UI
+- Completed the tests for message UI
+- Contributed to team log
+- Completed individual log
+
+### Tasks completed (from Project Board)
+- Complete the messaging page front-end
+   - Added the app bar title which leads to public profile 
+   - Added recieved text 
+   - Added sent text 
+   - Added a text box to enter messages
+   - Added recommended messages 
+- Complete the T2 W5 individual logs
+- Reviewed other team members' PR.
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+

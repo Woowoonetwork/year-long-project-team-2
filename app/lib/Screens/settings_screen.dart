@@ -176,7 +176,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Text(
             'Edit FoodHood Profile',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: adjustedFontSize,
               fontWeight: FontWeight.w500,
               letterSpacing: -0.8,
               color: CupertinoColors.white,
