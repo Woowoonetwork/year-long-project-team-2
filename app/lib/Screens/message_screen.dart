@@ -110,9 +110,10 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
       child: Text(
         'Harry Styles',
         style: TextStyle(
-          fontWeight: FontWeight.bold,
+          fontSize: 20,
+          letterSpacing: -0.6,
+          fontWeight: FontWeight.w500,
           color: CupertinoColors.label.resolveFrom(context),
-          letterSpacing: -1.3,
         ),
       ),
     );
