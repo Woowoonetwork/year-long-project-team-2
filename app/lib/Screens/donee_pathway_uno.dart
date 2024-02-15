@@ -4,6 +4,7 @@ import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
+import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -20,10 +21,12 @@ class _DoneePathState extends State<DoneePath> {
   late PostDetailViewModel viewModel;
   bool isLoading = true;
   bool isReserved = true;
+  String postStatus = "";
 
   @override
   void initState() {
     super.initState();
+    fetchPostDetails();
     viewModel = PostDetailViewModel(widget.postId);
     viewModel.fetchData(widget.postId).then((_) {
       if (mounted) {
@@ -33,6 +36,19 @@ class _DoneePathState extends State<DoneePath> {
         });
       }
     });
+  }
+
+  void fetchPostDetails() async {
+    final docSnapshot = await FirebaseFirestore.instance
+        .collection('post_details')
+        .doc(widget.postId)
+        .get();
+    if (docSnapshot.exists) {
+      setState(() {
+        isLoading = false;
+        postStatus = docSnapshot.data()?['post_status'] ?? "";
+      });
+    }
   }
 
   void _navigateToRatingPage() {
@@ -120,32 +136,56 @@ class _DoneePathState extends State<DoneePath> {
                       ],
                     ),
                     SizedBox(height: 50),
-                    Text(
-                      'Pending Confirmation',
-                      style: TextStyle(
-                        color: CupertinoColors.systemGrey,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    PendingConfirmationWithTimer(durationInSeconds: 120),
                     SizedBox(height: 40),
-                    CupertinoButton.filled(
-                      onPressed: _navigateToRatingPage,
-                      child: Text('Leave a Review'),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 36.0, vertical: 16.0),
-                      borderRadius: BorderRadius.circular(18.0),
-                    ),
-                    SizedBox(height: 20),
-                    CupertinoButton(
-                      onPressed: () {
-                        _handleCancelReservation();
-                      },
-                      color: CupertinoColors.destructiveRed,
-                      child: Text('Cancel Reservation'),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 36.0, vertical: 16.0),
-                      borderRadius: BorderRadius.circular(18.0),
+                    if (postStatus == "picked up")
+                      CupertinoButton.filled(
+                        onPressed: _navigateToRatingPage,
+                        child: Text('Leave a Review'),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 36.0, vertical: 16.0),
+                        borderRadius: BorderRadius.circular(18.0),
+                      ),
+                    SizedBox(height: 0),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: CupertinoButton(
+                        onPressed: () {
+                          _handleCancelReservation();
+                        },
+                        color: CupertinoColors.white,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 36.0, vertical: 16.0),
+                        borderRadius: BorderRadius.circular(30.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.xmark,
+                              color: CupertinoColors.destructiveRed,
+                              size: 24.0,
+                            ),
+                            SizedBox(width: 8.0),
+                            Text(
+                              'Cancel Order',
+                              style: TextStyle(
+                                  color: CupertinoColors.black,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     SizedBox(height: 50),
                   ],
