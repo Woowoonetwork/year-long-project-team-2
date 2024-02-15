@@ -4,21 +4,8 @@ import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
-import 'package:FoodHood/Screens/message_screen.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Components/foodAppBar.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:FoodHood/Models/PostDetailViewModel.dart';
-import 'package:feather_icons/feather_icons.dart';
-import 'package:intl/intl.dart';
-import 'package:FoodHood/Components/cupertinosnackbar.dart';
-import 'package:FoodHood/Screens/donee_pathway_uno.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:FoodHood/Screens/public_profile_screen.dart';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -32,6 +19,7 @@ class DoneePath extends StatefulWidget {
 class _DoneePathState extends State<DoneePath> {
   late PostDetailViewModel viewModel;
   bool isLoading = true;
+  bool isReserved = true;
 
   @override
   void initState() {
@@ -41,6 +29,7 @@ class _DoneePathState extends State<DoneePath> {
       if (mounted) {
         setState(() {
           isLoading = false;
+          isReserved = true;
         });
       }
     });
@@ -174,6 +163,10 @@ class _DoneePathState extends State<DoneePath> {
           .update({
         'reserved_by': FieldValue.delete(),
         'post_status': "not reserved"
+      });
+
+      setState(() {
+        isReserved = false;
       });
 
       print("checkuno");

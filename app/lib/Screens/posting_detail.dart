@@ -27,6 +27,7 @@ class _PostDetailViewState extends State<PostDetailView> {
   AnimationController? _animationController;
   bool isLoading = true; // Added to track loading status
   late String userID;
+  bool isReserved = false;
 
   // Method to initialize userID
   void initializeUserId() {
@@ -122,7 +123,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                 children: [
                   Expanded(
                     child: ReserveButton(
-                      isReserved: false,
+                      isReserved: isReserved,
                       postId: widget.postId,
                       userId: userID,
                     ),
@@ -209,7 +210,7 @@ class _PostDetailViewState extends State<PostDetailView> {
             ),
           ),
           AvailabilityIndicator(
-              isReserved: false), // Placeholder, update as needed
+              isReserved: isReserved), // Placeholder, update as needed
         ],
       ),
     );
@@ -834,7 +835,7 @@ class PickupInformation extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           InfoButton(
             context: context,
@@ -850,10 +851,10 @@ class PickupInformation extends StatelessWidget {
               );
             },
           ),
-          SizedBox(width: 10),
+          SizedBox(width: 0),
           InfoButton(
             context: context,
-            text: 'Navigate to this Place',
+            text: 'Navigate Here',
             icon: FeatherIcons.arrowUpRight,
             iconColor: CupertinoColors.label.resolveFrom(context),
             onPressed: () {},
@@ -1081,7 +1082,7 @@ class ReserveButton extends StatefulWidget {
 }
 
 class _ReserveButtonState extends State<ReserveButton> {
-  bool _isReserved = false;
+  late bool _isReserved;
 
   @override
   void initState() {
