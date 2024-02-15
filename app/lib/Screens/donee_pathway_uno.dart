@@ -136,7 +136,8 @@ class _DoneePathState extends State<DoneePath> {
                       ],
                     ),
                     SizedBox(height: 50),
-                    PendingConfirmationWithTimer(durationInSeconds: 120),
+                    PendingConfirmationWithTimer(
+                        durationInSeconds: 120, postId: widget.postId),
                     SizedBox(height: 40),
                     if (postStatus == "picked up")
                       CupertinoButton.filled(

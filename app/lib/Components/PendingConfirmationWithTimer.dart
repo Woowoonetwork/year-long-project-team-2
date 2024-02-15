@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PendingConfirmationWithTimer extends StatefulWidget {
   final int durationInSeconds;
+  final String postId;
 
-  PendingConfirmationWithTimer({required this.durationInSeconds});
+  PendingConfirmationWithTimer({
+    required this.durationInSeconds,
+    required this.postId,
+  });
 
   @override
   _PendingConfirmationWithTimerState createState() =>
@@ -17,7 +22,6 @@ class _PendingConfirmationWithTimerState
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   Timer? _timer;
-  double _progress = 0;
 
   @override
   void initState() {
@@ -27,29 +31,26 @@ class _PendingConfirmationWithTimerState
       duration: Duration(seconds: widget.durationInSeconds),
     );
 
-    PendingConfirmationWithTimer(durationInSeconds: 120);
-    _controller.value = 0.02;
+    _controller.addListener(() {
+      if (_controller.isCompleted) {
+        _updatePostStatusAndPop();
+      }
+    });
 
     _controller.forward();
-    _startTimer();
   }
 
-  void _startTimer() {
-    const oneSec = const Duration(seconds: 1);
-    _timer = Timer.periodic(
-      oneSec,
-      (Timer timer) {
-        if (_progress >= widget.durationInSeconds) {
-          setState(() {
-            timer.cancel();
-          });
-        } else {
-          setState(() {
-            _progress += 1;
-          });
-        }
-      },
-    );
+  void _updatePostStatusAndPop() async {
+    await FirebaseFirestore.instance
+        .collection('post_details')
+        .doc(widget.postId)
+        .update({'post_status': 'not reserved'}).then((_) {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    }).catchError((error) {
+      // Handle errors, perhaps log them or show a Snackbar
+    });
   }
 
   @override
