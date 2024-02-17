@@ -170,14 +170,6 @@ class CompactPostCard extends StatelessWidget {
                   width: 20,
                   height: 20,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/sampleProfile.png',
-                      width: 20,
-                      height: 20,
-                      fit: BoxFit.cover,
-                    );
-                  },
                 ),
               ),
               SizedBox(width: 8),

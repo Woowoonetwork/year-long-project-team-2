@@ -221,12 +221,12 @@ class RecentPostSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemCount: 5,
             itemBuilder: (BuildContext context, int index) {
-              return Container(                
+              return Container(
                 width: 300,
                 height: 150,
                 margin: EdgeInsets.only(left: 4.0, top: 24, bottom: 24.0),
                 child: PostCard(
-                  imageLocation: 'assets/images/sampleFood.jpg',
+                  imageUrl: 'assets/images/sampleFood.jpg',
                   title: 'Strawberry Sugar High',
                   tags: ['Dessert', 'Strawberry', 'Sweet'],
                   tagColors: [

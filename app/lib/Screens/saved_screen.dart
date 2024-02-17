@@ -52,7 +52,8 @@ class _SavedScreenState extends State<SavedScreen> {
     super.initState();
     _fetchSavedPosts();
     _listenForSavedPosts();
-    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _textScaleFactor =
+        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
   }
 
@@ -218,7 +219,7 @@ class _SavedScreenState extends State<SavedScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: PostCard(
-        imageLocation: postData['image_url'] ?? '',
+        imageUrl: postData['image_url'] ?? '',
         title: postData['title'] ?? 'No Title',
         tags: (postData['categories'] as String)
             .split(',')

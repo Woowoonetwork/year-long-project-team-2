@@ -1,3 +1,4 @@
+import 'package:FoodHood/components.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
@@ -6,7 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
 
 class PostCard extends StatelessWidget {
-  final String imageLocation;
+  final String imageUrl;
   final String firstname;
   final String lastname;
   final String title;
@@ -22,7 +23,7 @@ class PostCard extends StatelessWidget {
 
   PostCard({
     Key? key,
-    required this.imageLocation,
+    required this.imageUrl,
     required this.title,
     required this.tags,
     required this.tagColors,
@@ -75,30 +76,18 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildImageSection(BuildContext context) {
-    bool isImageLocationValid = imageLocation.isNotEmpty;
-
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      child: isImageLocationValid
-          ? CachedNetworkImage(
-              imageUrl: imageLocation,
-              width: MediaQuery.of(context).size.width,
-              height: imageHeight, // Use the configurable height
-              fit: BoxFit.cover,
-              placeholder: (context, url) => CupertinoActivityIndicator(),
-              errorWidget: (context, url, error) => Image.asset(
-                'assets/images/sampleFoodPic.png',
-                width: MediaQuery.of(context).size.width,
-                height: imageHeight, // Use the configurable height
-                fit: BoxFit.cover,
-              ),
-            )
-          : Image.asset(
-              'assets/images/sampleFoodPic.png',
-              width: MediaQuery.of(context).size.width,
-              height: imageHeight, // Use the configurable height
-              fit: BoxFit.cover,
-            ),
+      child: Hero(
+          tag: imageUrl,
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+            width: MediaQuery.of(context).size.width,
+            height: imageHeight, // Use the configurable height
+            fit: BoxFit.cover,
+            placeholder: (context, url) => CupertinoActivityIndicator(),
+            errorWidget: (context, url, error) => buildImageFailedPlaceHolder(context, true),
+          )),
     );
   }
 

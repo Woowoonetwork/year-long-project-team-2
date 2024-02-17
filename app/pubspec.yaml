@@ -69,6 +69,8 @@ dependencies:
   cached_network_image: ^3.3.1
   palette_generator: ^0.3.3+3
   firebase_messaging: ^14.7.15
+  smooth_page_indicator: ^1.1.0
+  photo_view: ^0.14.0
 
 dev_dependencies:
   flutter_test:

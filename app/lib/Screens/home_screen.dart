@@ -73,8 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNoPostsWidget() {
-    return 
-    Column(
+    return Column(
       children: [
         SizedBox(height: 200),
         Icon(
@@ -118,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 16),
       child: PostCard(
-        imageLocation: data['image_url'] ?? '',
+        imageUrl: data['image_url'] ?? '',
         title: data['title'] ?? 'No Title',
         tags: tags,
         tagColors: assignedColors,
@@ -240,8 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (postCards.isEmpty && isSearching) {
       // show message when search returns no results
       return SliverFillRemaining(
-        child: 
-        Column(
+        child: Column(
           children: [
             SizedBox(height: 200),
             Icon(
