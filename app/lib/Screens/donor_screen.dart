@@ -100,6 +100,27 @@ class _DonorScreenState extends State<DonorScreen> {
           print(
               'User document does not exist for reserved by user ID: $reservedByUserId');
         }
+        // Extract post_status and set orderState accordingly
+        final String postStatus = postSnapshot['post_status'];
+        setState(() {
+          switch (postStatus) {
+            case 'reserved':
+              orderState = OrderState.reserved;
+              break;
+            case 'confirmed':
+              orderState = OrderState.confirmed;
+              break;
+            case 'delivering':
+              orderState = OrderState.delivering;
+              break;
+            case 'readyToPickUp':
+              orderState = OrderState.readyToPickUp;
+              break;
+            default:
+              orderState = OrderState.reserved; // Default to reserved state
+              break;
+          }
+        });
       } else {
         print('Post details document does not exist for ID: $postId');
       }
@@ -174,7 +195,7 @@ class _DonorScreenState extends State<DonorScreen> {
               ),
             ),
           
-          __buildTextField(text: "Pickup at specified location"),
+          //__buildTextField(text: "Pickup at specified location"),
           //print(pickupLatLng),
            _buildMap(context),
            __buildButton(),
