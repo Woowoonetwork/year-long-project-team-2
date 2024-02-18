@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/donee_rating.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -36,17 +37,19 @@ class _DonorScreenState extends State<DonorScreen> {
   late double adjustedFontSize;
   late double adjustedHeadingFontSize;
   late double adjustedOrderInfoFontSize;
+  late LatLng pickupLatLng;
 
   @override
   void initState() {
     super.initState();
-    fetchReservedByName(); // Fetch reserved by user name when the widget initializes
+    pickupLatLng = LatLng(49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
+    fetchPostInformation(); // Fetch reserved by user name when the widget initializes
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
-    _updateAdjustedFontSize();
+    _updateAdjustedFontSize();   
   }
 
-  Future<void> fetchReservedByName() async {
+  Future<void> fetchPostInformation() async {
     final CollectionReference postDetailsCollection =
         FirebaseFirestore.instance.collection('post_details');
 
@@ -61,6 +64,22 @@ class _DonorScreenState extends State<DonorScreen> {
         // Extract the reserved_by user ID from the post details
         final String reservedByUserId = postSnapshot['reserved_by'];
         pickupLocation = postSnapshot['pickup_location'];
+        
+        if (postSnapshot['post_location'] is GeoPoint) {
+          GeoPoint geoPoint = postSnapshot['post_location'] as GeoPoint;
+          //pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+          setState(() {
+            pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+          });
+        } else {
+          // Provide a default location
+          setState(() {
+            pickupLatLng = LatLng(49.8862, -119.4971); 
+          }); 
+        }
+        print(pickupLatLng);
+
+        setState(() {});
 
         // Fetch the user document using reserved_by user ID
         final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
@@ -156,7 +175,9 @@ class _DonorScreenState extends State<DonorScreen> {
             ),
           
           __buildTextField(text: "Pickup at specified location"),
-          __buildButton(),
+          //print(pickupLatLng),
+           _buildMap(context),
+           __buildButton(),
 
         ],
       ),
@@ -195,6 +216,51 @@ class _DonorScreenState extends State<DonorScreen> {
         return "Your order is out for delivery for ${reservedByName ?? 'Unknown User'}";
       case OrderState.readyToPickUp:
         return "Your order for ${reservedByName ?? 'Unknown User'} is ready to pick up";
+    }
+  }
+
+  Widget _buildMap(BuildContext context) {
+    final LatLng? locationCoordinates = pickupLatLng;
+
+    if (locationCoordinates != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+        child: SizedBox(
+          width: double.infinity,
+          height: 250.0,
+          child: GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: locationCoordinates,
+              zoom: 12.0,
+            ),
+            markers: Set.from([
+              Marker(
+                markerId: MarkerId('pickupLocation'),
+                position: locationCoordinates,
+              ),
+            ]),
+            zoomControlsEnabled: false,
+            scrollGesturesEnabled: true,
+            rotateGesturesEnabled: false,
+            tiltGesturesEnabled: false,
+            zoomGesturesEnabled: true,
+            myLocationEnabled: false,
+            mapType: MapType.normal,
+            myLocationButtonEnabled: false,
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: double.infinity,
+        height: 250.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          color: CupertinoColors.systemGrey4,
+        ),
+        alignment: Alignment.center,
+        child: Text('Map Placeholder'),
+      );
     }
   }
 
@@ -342,6 +408,8 @@ class _DonorScreenState extends State<DonorScreen> {
         return OrderState.reserved;
     }
   }
+
+  
 }
 
 class OrderInfoSection extends StatelessWidget {
