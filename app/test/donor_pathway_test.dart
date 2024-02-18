@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:FoodHood/Screens/donor_pathway_1.dart';
+import 'package:FoodHood/Screens/donor_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:firebase_core/firebase_core.dart';

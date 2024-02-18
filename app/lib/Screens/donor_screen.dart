@@ -1,4 +1,4 @@
-//donor_pathway_1.dart
+//donor_screen.dart
 
 import 'package:FoodHood/Screens/message_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +11,7 @@ import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 
 const double _iconSize = 22.0;
-const double _defaultHeadingFontSize = 34.0;
+const double _defaultHeadingFontSize = 32.0;
 const double _defaultFontSize = 16.0;
 const double _defaultOrderInfoFontSize = 12.0;
 
@@ -125,42 +125,39 @@ class _DonorScreenState extends State<DonorScreen> {
                     context,
                     CupertinoPageRoute(
                         builder: (context) =>
-                            MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
+                            MessageScreenPage()
+                    ), 
                   );
                 },
               )
             : null,
         border: Border(bottom: BorderSide.none),
       ),
-      child: CustomScrollView(
-        slivers: <Widget>[
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
           __buildHeadingTextField(
             text: _buildHeadingText(),
           ),
-
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 16.0),
-          ),
+          SizedBox(height: 16.0),
 
           //Only show the order info section if the order has been reserved.
           if (reservedByName != null)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                child: Center(
-                  child: OrderInfoSection(
-                    avatarUrl: '',
-                    reservedByName: reservedByName,
-                    reservedByLastName: reservedByLastName,
-                    adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
-                  ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              child: Center(
+                child: OrderInfoSection(
+                  avatarUrl: '',
+                  reservedByName: reservedByName,
+                  reservedByLastName: reservedByLastName,
+                  adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
                 ),
               ),
             ),
-
+          
           __buildTextField(text: "Pickup at specified location"),
-
           __buildButton(),
+
         ],
       ),
     );
@@ -170,16 +167,14 @@ class _DonorScreenState extends State<DonorScreen> {
   Widget __buildHeadingTextField({
     required String text,
   }) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.all(10.0),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: adjustedHeadingFontSize,
-          ),
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: adjustedHeadingFontSize,
         ),
       ),
     );
@@ -206,25 +201,23 @@ class _DonorScreenState extends State<DonorScreen> {
   Widget __buildTextField({
     required String text,
   }) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsets.all(24.0),
-        child: Container(
-          padding: EdgeInsets.all(12.0),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-              width: 1.0,
-            ),
+    return Padding(
+      padding: EdgeInsets.all(24.0),
+      child: Container(
+        padding: EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          border: Border.all(
             color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            borderRadius: BorderRadius.circular(16.0),
+            width: 1.0,
           ),
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: adjustedFontSize,
-            ),
+          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: adjustedFontSize,
           ),
         ),
       ),
@@ -234,92 +227,89 @@ class _DonorScreenState extends State<DonorScreen> {
   Widget __buildButton() {
     if (reservedByName == null) {
       // Return an empty container if the order hasn't been reserved yet
-      return SliverToBoxAdapter(child: Container());
+      return Padding(
+        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+        child: Container(),
+      );
     }
 
     if (orderState == OrderState.readyToPickUp) {
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color:
-                    CupertinoColors.quaternarySystemFill.resolveFrom(context),
-                width: 2.0,
-              ),
-              borderRadius: BorderRadius.circular(16.0),
-              boxShadow: [
-                BoxShadow(
-                  color: CupertinoColors.black.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 2,
-                  offset: Offset(0, 2),
-                ),
-              ],
+      return Padding(
+        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+              width: 2.0,
             ),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Text(
-                "Leave a Review",
-                style: TextStyle(
-                  fontSize: adjustedFontSize,
-                  color: CupertinoColors.label,
-                ),
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: [
+              BoxShadow(
+                color: CupertinoColors.black.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: Offset(0, 2),
               ),
-              color: CupertinoColors.tertiarySystemBackground,
-              borderRadius: BorderRadius.circular(16.0),
-              onPressed: () {
-                Navigator.of(context).push(
-                  CupertinoPageRoute(
-                    builder: (context) => DoneeRatingPage(
-                      postId: widget.postId,
-                    ),
+            ],
+          ),
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,            
+            color: CupertinoColors.tertiarySystemBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            onPressed: () {
+              Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (context) => DoneeRatingPage(
+                    postId: widget.postId,
                   ),
-                );
-              },
+                ),
+              );
+            },
+            child: Text(
+              "Leave a Review",
+              style: TextStyle(
+                fontSize: adjustedFontSize,
+                color: CupertinoColors.label,
+              ),
             ),
           ),
         ),
       );
     } else {
       String buttonText = _buildButtonText();
-      return SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color:
-                    CupertinoColors.quaternarySystemFill.resolveFrom(context),
-                width: 2.0,
-              ),
-              borderRadius: BorderRadius.circular(16.0),
-              boxShadow: [
-                BoxShadow(
-                  color: CupertinoColors.black.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 2,
-                  offset: Offset(0, 2),
-                ),
-              ],
+      return Padding(
+        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+              width: 2.0,
             ),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Text(
-                buttonText,
-                style: TextStyle(
-                  fontSize: adjustedFontSize,
-                  color: CupertinoColors.label,
-                ),
+            borderRadius: BorderRadius.circular(16.0),
+            boxShadow: [
+              BoxShadow(
+                color: CupertinoColors.black.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: Offset(0, 2),
               ),
-              color: CupertinoColors.tertiarySystemBackground,
-              borderRadius: BorderRadius.circular(16.0),
-              onPressed: () {
-                setState(() {
-                  orderState = _getNextOrderState();
-                });
-              },
+            ],
+          ),
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            color: CupertinoColors.tertiarySystemBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            onPressed: () {
+              setState(() {
+                orderState = _getNextOrderState();
+              });
+            },
+            child: Text(
+              buttonText,
+              style: TextStyle(
+                fontSize: adjustedFontSize,
+                color: CupertinoColors.label,
+              ),
             ),
           ),
         ),
