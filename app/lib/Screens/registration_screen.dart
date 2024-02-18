@@ -113,6 +113,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             [AutofillHints.password],
             errorText: _passwordErrorText),
         const SizedBox(height: 16),
+        buildText(
+            'Password must be at least 8 letters long, contain at least one upper case letter, at least one lower case letter, and at least one number.', 18, FontWeight.w300),
         buildCupertinoTextField('Confirm Password', _confPasswordController,
             true, context, [AutofillHints.password],
             errorText: _confPasswordErrorText), // Confirm password text field
