@@ -367,7 +367,7 @@ class _DonorScreenState extends State<DonorScreen> {
             borderRadius: BorderRadius.circular(16.0),
             onPressed: () {
               setState(() {
-                orderState = _getNextOrderState();
+                _handlePostStatus();
               });
             },
             child: Text(
@@ -396,20 +396,58 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
-  OrderState _getNextOrderState() {
-    switch (orderState) {
-      case OrderState.reserved:
-        return OrderState.confirmed;
-      case OrderState.confirmed:
-        return OrderState.delivering;
-      case OrderState.delivering:
-        return OrderState.readyToPickUp;
-      case OrderState.readyToPickUp:
-        return OrderState.reserved;
+  void _handlePostStatus() async {
+    try {
+      String newStatus;
+      switch (orderState) {
+        case OrderState.reserved:
+          newStatus = 'confirmed'; // Update post_status to 'confirmed'
+          orderState = OrderState.confirmed;
+          break;
+        case OrderState.confirmed:
+          newStatus = 'delivering'; // Update post_status to 'delivering'
+          orderState = OrderState.delivering; 
+          break;
+        case OrderState.delivering:
+          newStatus = 'readyToPickUp'; // Update post_status to 'readyToPickUp'
+          orderState = OrderState.readyToPickUp;
+          break;
+        case OrderState.readyToPickUp:
+          newStatus = 'confirmed'; // Update post_status back to 'confirmed'
+          orderState = OrderState.confirmed; 
+          break;
+      }
+      
+      // Update the post_status field in Firestore
+      await FirebaseFirestore.instance
+          .collection('post_details')
+          .doc(widget.postId)
+          .update({'post_status': newStatus});
+      
+      setState(() {});
+    } catch (error) {
+      print('Error updating post status: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update post status. Please try again.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
-  
+  // OrderState _getNextOrderState() {
+  //   switch (orderState) {
+  //     case OrderState.reserved:
+  //       return OrderState.confirmed;
+  //     case OrderState.confirmed:
+  //       return OrderState.delivering;
+  //     case OrderState.delivering:
+  //       return OrderState.readyToPickUp;
+  //     case OrderState.readyToPickUp:
+  //       return OrderState.reserved;
+  //   }
+  // } 
 }
 
 class OrderInfoSection extends StatelessWidget {
