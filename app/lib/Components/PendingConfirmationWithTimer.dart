@@ -44,7 +44,10 @@ class _PendingConfirmationWithTimerState
     await FirebaseFirestore.instance
         .collection('post_details')
         .doc(widget.postId)
-        .update({'post_status': 'not reserved'}).then((_) {
+        .update({
+      'post_status': 'not reserved',
+      'reserved_by': FieldValue.delete(),
+    }).then((_) {
       if (mounted) {
         Navigator.of(context).pop();
       }
