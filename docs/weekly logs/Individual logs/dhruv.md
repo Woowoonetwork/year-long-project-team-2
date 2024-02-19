@@ -377,3 +377,33 @@ N/A.
 
 N/A.
 
+-----
+-----
+
+## Term 2 Week 5: Monday 12th Feb 2024 - Sunday 18th Feb 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week6.png)
+### Recap of personal goals
+- Helped plan out the feature to work on this week
+- Team meating to prioritise and assign tasks for people 
+- Removed reserve post from browse screen
+- Removed reserve post from saved screen 
+- Contributed to team log
+- Completed individual log
+
+
+### Tasks completed (from Project Board)
+- Remove the posts from browse and saved screen if they have been reserved
+- Complete the T2 W6 individual logs
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+- I was not well this week and I have already given my doctor's note to the Professor
+
+-----
+-----
