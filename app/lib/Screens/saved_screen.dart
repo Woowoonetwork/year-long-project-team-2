@@ -7,6 +7,11 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/post_card.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
+
+const double _defaultFontSize = 16.0;
+const double _defaultPostCountFontSize = 14.0;
 
 class SavedScreen extends StatefulWidget {
   @override
@@ -18,6 +23,10 @@ class _SavedScreenState extends State<SavedScreen> {
   List<String> savedPostIds = [];
   bool isLoading = true;
   StreamSubscription? _savedPostsSubscription;
+
+  late double _textScaleFactor;
+  late double adjustedFontSize;
+  late double adjustedPostCountFontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +52,13 @@ class _SavedScreenState extends State<SavedScreen> {
     super.initState();
     _fetchSavedPosts();
     _listenForSavedPosts();
+    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _updateAdjustedFontSize();
+  }
+
+  void _updateAdjustedFontSize() {
+    adjustedFontSize = _defaultFontSize * _textScaleFactor;
+    adjustedPostCountFontSize = _defaultPostCountFontSize * _textScaleFactor;
   }
 
   Future<void> _fetchSavedPosts() async {
@@ -181,9 +197,9 @@ class _SavedScreenState extends State<SavedScreen> {
                 color: CupertinoColors.secondaryLabel.resolveFrom(context)),
             SizedBox(height: 10),
             Text(
-              'No Bookmarks found',
+              'No Bookmarks Found',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: adjustedFontSize,
                 letterSpacing: -0.6,
                 fontWeight: FontWeight.w500,
                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -230,7 +246,7 @@ class _SavedScreenState extends State<SavedScreen> {
         child: Text(postCountText,
             style: TextStyle(
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              fontSize: 14.0,
+              fontSize: adjustedPostCountFontSize,
               fontWeight: FontWeight.w500,
             )),
       ),

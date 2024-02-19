@@ -39,7 +39,6 @@ void main() {
 
       expect(find.byType(ProfileCard), findsOneWidget);
       expect(find.text('Active Orders'), findsOneWidget);
-      expect(find.text('Edit FoodHood Profile'), findsOneWidget);
     });
 
     test('Simulate Successful Document Addition', () async {

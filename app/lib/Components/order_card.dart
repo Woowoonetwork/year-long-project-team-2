@@ -15,6 +15,7 @@ const double _defaultTextFontSize = 16.0;
 const double _defaultTitleFontSize = 18.0;
 const double _defaultTagFontSize = 10.0;
 const double _defaultOrderInfoFontSize = 12.0;
+const double _defaultStatusFontSize = 13.0;
 
 enum OrderState { reserved, confirmed, delivering, readyToPickUp }
 
@@ -34,6 +35,7 @@ class OrderCard extends StatelessWidget {
   late double adjustedTitleFontSize;
   late double adjustedTagFontSize;
   late double adjustedOrderInfoFontSize;
+  late double adjustedStatusFontSize;
   final OrderState orderState;
 
   OrderCard({
@@ -55,6 +57,7 @@ class OrderCard extends StatelessWidget {
     adjustedTitleFontSize = _defaultTitleFontSize * _textScaleFactor;
     adjustedTagFontSize = _defaultTagFontSize * _textScaleFactor;
     adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
+    adjustedStatusFontSize = _defaultStatusFontSize * _textScaleFactor;
   }
 
   @override
@@ -185,15 +188,17 @@ class OrderCard extends StatelessWidget {
   Widget _buildTag(String text, Color color, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration:
-          BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
-      child: Text(text,
-          style: TextStyle(
-              color:
-                  CupertinoDynamicColor.resolve(CupertinoColors.black, context),
-              fontSize: adjustedTagFontSize,
-              letterSpacing: -0.40,
-              fontWeight: FontWeight.w600)),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+          fontSize: adjustedTagFontSize,
+          letterSpacing: -0.40,
+          fontWeight: FontWeight.w600
+        ),
+        overflow: TextOverflow.visible,
+      ),
     );
   }
 
@@ -252,7 +257,11 @@ class OrderCard extends StatelessWidget {
         filter:
             ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur filter
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12, 
+            vertical: 6
+            //vertical: verticalPadding
+          ),
           color: CupertinoColors.tertiarySystemBackground
               .resolveFrom(context)
               .withOpacity(0.9), // Semi-transparent white background
@@ -263,12 +272,15 @@ class OrderCard extends StatelessWidget {
               children: [
                 Icon(CupertinoIcons.circle_fill, color: statusColor, size: 12),
                 const SizedBox(width: 6),
-                Text(statusText,
-                    style: TextStyle(
-                        color: CupertinoDynamicColor.resolve(
-                            CupertinoColors.label, context),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13)),
+                Text(
+                  statusText,
+                  style: TextStyle(
+                    color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+                    fontWeight: FontWeight.w500,
+                    fontSize: adjustedStatusFontSize
+                  ),
+                  overflow: TextOverflow.visible,
+                ),
               ],
             ),
           ),
@@ -293,12 +305,15 @@ class OrderCard extends StatelessWidget {
             onPressed: () => _handleStatusPress(context),
             child: Row(
               children: [
-                Text('Status',
-                    style: TextStyle(
-                        color: CupertinoDynamicColor.resolve(
-                            CupertinoColors.label, context),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13)),
+                Text(
+                  'Status',
+                  style: TextStyle(
+                    color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+                    fontWeight: FontWeight.w500,
+                    fontSize: adjustedStatusFontSize
+                  ),
+                  overflow: TextOverflow.visible,
+                ),
                 const SizedBox(width: 4),
                 Icon(FeatherIcons.chevronRight,
                     color: CupertinoDynamicColor.resolve(
