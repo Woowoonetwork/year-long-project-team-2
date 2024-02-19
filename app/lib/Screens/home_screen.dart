@@ -10,6 +10,8 @@ import 'package:FoodHood/Screens/create_post.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:feather_icons/feather_icons.dart';
 import '../components.dart';
+// import gesture
+import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -24,6 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, Color> tagColors = {};
   StreamSubscription<QuerySnapshot>? postsSubscription;
   bool isLoading = true;
+
+  double _scale = 1.0; // Scale factor for the button
 
   @override
   void initState() {
@@ -73,8 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNoPostsWidget() {
-    return 
-    Column(
+    return Column(
       children: [
         SizedBox(height: 200),
         Icon(
@@ -115,10 +118,23 @@ class _HomeScreenState extends State<HomeScreen> {
     var createdAt =
         (data['post_timestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
 
+    // Extract images with alt text
+    List<Map<String, String>> imagesWithAltText = [];
+    if (data.containsKey('images') && data['images'] is List) {
+      imagesWithAltText = List<Map<String, String>>.from(
+        (data['images'] as List).map((image) {
+          return {
+            'url': image['url'] as String? ?? '',
+            'alt_text': image['alt_text'] as String? ?? '',
+          };
+        }),
+      );
+    }
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 16),
       child: PostCard(
-        imageLocation: data['image_url'] ?? '',
+        imagesWithAltText: imagesWithAltText, // Pass the images with alt text
         title: data['title'] ?? 'No Title',
         tags: tags,
         tagColors: assignedColors,
@@ -127,8 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
         timeAgo: timeAgoSinceDate(createdAt),
         onTap: (postId) => setState(() => {}),
         postId: document.id,
-        profileURL: userData?['profileImagePath'] ??
-            'assets/images/sampleProfile.png', // Fallback to default image if null
+        profileURL: userData?['profileImagePath'] ?? '',
       ),
     );
   }
@@ -240,8 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (postCards.isEmpty && isSearching) {
       // show message when search returns no results
       return SliverFillRemaining(
-        child: 
-        Column(
+        child: Column(
           children: [
             SizedBox(height: 200),
             Icon(
@@ -451,22 +465,67 @@ class _HomeScreenState extends State<HomeScreen> {
     return Positioned(
       bottom: 100.0,
       right: 16.0,
-      child: Container(
-        decoration: const BoxDecoration(boxShadow: [
-          BoxShadow(
-              color: Color(0x19000000), blurRadius: 20, offset: Offset(0, 0))
-        ], shape: BoxShape.circle),
-        child: CupertinoButton(
-          onPressed: () => Navigator.of(context).push(
-              CupertinoPageRoute(builder: (context) => CreatePostScreen())),
-          child:
-              Icon(FeatherIcons.plus, color: CupertinoColors.white, size: 30),
-          color: accentColor,
-          padding: EdgeInsets.all(16.0),
-          borderRadius: BorderRadius.circular(40.0),
+      child: GestureDetector(
+        onTapDown: (_) {
+          setState(() => _scale = 0.85); // Shrink the button a bit when pressed
+          HapticFeedback.lightImpact(); // Provide haptic feedback
+        },
+        onTapUp: (_) {
+          setState(() => _scale = 1.0); // Revert the button size on release
+          _openCreatePostScreen(context); // Your original onPressed function
+        },
+        onTapCancel: () {
+          setState(() =>
+              _scale = 1.0); // Ensure button size reverts if tap is canceled
+        },
+        child: Transform.scale(
+          scale: _scale,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                    color: Color(0x19000000),
+                    blurRadius: 20,
+                    offset: Offset(0, 0)),
+              ],
+            ),
+            child: CupertinoButton(
+              onPressed: () => _openCreatePostScreen(context),
+              padding: EdgeInsets.all(16.0),
+              color: accentColor,
+              child: Icon(FeatherIcons.plus,
+                  color: CupertinoColors.white, size: 30),
+              borderRadius: BorderRadius.circular(40.0),
+            ),
+          ),
         ),
       ),
     );
+  }
+
+  void _openCreatePostScreen(BuildContext context) {
+    Navigator.of(context).push(PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          CreatePostScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(0.0, 1.0);
+        const end = Offset.zero;
+        const curve = Curves.easeInOutCubic;
+
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(
+          position: offsetAnimation,
+          child: child,
+        );
+      },
+      transitionDuration: Duration(milliseconds: 500), // Customize the duration
+      // The reverse transition duration can also be customized (optional)
+      reverseTransitionDuration: Duration(milliseconds: 500),
+    ));
   }
 
   String timeAgoSinceDate(DateTime dateTime) {
