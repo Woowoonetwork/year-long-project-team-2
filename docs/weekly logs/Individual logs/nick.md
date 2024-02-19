@@ -479,6 +479,8 @@ N/A.
 
 ## Term 2 Week 6: Monday 12th Feb 2024 - Sunday 18th Feb 2024
 
+![Peer Evaluation](./images/nickT2W6.png)
+
 ### Tasks completed (from Project Board)
 
 - Added feature for the mulitple image upload for the post and gallery view of the post.
