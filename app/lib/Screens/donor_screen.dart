@@ -194,12 +194,13 @@ class _DonorScreenState extends State<DonorScreen> {
           
           //__buildTextField(text: "Pickup at specified location"),
           //print(pickupLatLng),
-           _buildMap(context),
-           _buildButton(),
-           if (reservedByName != null)
-            _buildCancelButton(),
-           
+          _buildMap(context),
+          
+          SizedBox(height: 16.0,),
 
+          if (reservedByName != null)
+            _buildButtonAndCancelButtonRow(), // Call the new method here
+           
         ],
       ),
     );
@@ -244,51 +245,6 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
-  Widget _buildMap(BuildContext context) {
-    final LatLng? locationCoordinates = pickupLatLng;
-
-    if (locationCoordinates != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-        child: SizedBox(
-          width: double.infinity,
-          height: 250.0,
-          child: GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: locationCoordinates,
-              zoom: 12.0,
-            ),
-            markers: Set.from([
-              Marker(
-                markerId: MarkerId('pickupLocation'),
-                position: locationCoordinates,
-              ),
-            ]),
-            zoomControlsEnabled: false,
-            scrollGesturesEnabled: true,
-            rotateGesturesEnabled: false,
-            tiltGesturesEnabled: false,
-            zoomGesturesEnabled: true,
-            myLocationEnabled: false,
-            mapType: MapType.normal,
-            myLocationButtonEnabled: false,
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        width: double.infinity,
-        height: 250.0,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-          color: CupertinoColors.systemGrey4,
-        ),
-        alignment: Alignment.center,
-        child: Text('Map Placeholder'),
-      );
-    }
-  }
-
   Widget __buildTextField({
     required String text,
   }) {
@@ -315,15 +271,55 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  Widget _buildButton() {
-    if (reservedByName == null) {
-      // Return an empty container if the order hasn't been reserved yet
+  Widget _buildMap(BuildContext context) {
+    final LatLng? locationCoordinates = pickupLatLng;
+
+    if (locationCoordinates != null) {
       return Padding(
-        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
-        child: Container(),
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(15), bottom: Radius.circular(15)),
+          child: SizedBox(
+            width: double.infinity,
+            height: 250.0,
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: locationCoordinates,
+                zoom: 12.0,
+              ),
+              markers: Set.from([
+                Marker(
+                  markerId: MarkerId('pickupLocation'),
+                  position: locationCoordinates,
+                ),
+              ]),
+              zoomControlsEnabled: false,
+              scrollGesturesEnabled: true,
+              rotateGesturesEnabled: false,
+              tiltGesturesEnabled: false,
+              zoomGesturesEnabled: true,
+              myLocationEnabled: false,
+              mapType: MapType.normal,
+              myLocationButtonEnabled: false,
+            ),
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: double.infinity,
+        height: 250.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          color: CupertinoColors.systemGrey4,
+        ),
+        alignment: Alignment.center,
+        child: Text('Map Placeholder'),
       );
     }
+  }
 
+  Widget _buildButton() {
     if (orderState == OrderState.readyToPickUp) {
       return Padding(
         padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
@@ -408,7 +404,7 @@ class _DonorScreenState extends State<DonorScreen> {
                   style: TextStyle(
                     fontSize: adjustedFontSize,
                     color: CupertinoColors.label,
-                    fontWeight: FontWeight.w600
+                    fontWeight: FontWeight.w500
                   ),
                 ),
               ],
@@ -526,7 +522,7 @@ class _DonorScreenState extends State<DonorScreen> {
                 style: TextStyle(
                   fontSize: adjustedFontSize,
                   color: CupertinoColors.label,
-                  fontWeight: FontWeight.w600
+                  fontWeight: FontWeight.w500
                 ),
               ),
             ],
@@ -592,6 +588,22 @@ class _DonorScreenState extends State<DonorScreen> {
         );
       }
     }
+  }
+
+  Widget _buildButtonAndCancelButtonRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          child: _buildButton(),
+        ),
+        //SizedBox(width: 8), 
+        if (orderState != OrderState.readyToPickUp)
+          Expanded(
+            child: _buildCancelButton(),
+          ),
+      ],
+    );
   }
 
 }
