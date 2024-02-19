@@ -353,3 +353,30 @@ N/A, all is complete
 ### Additional Information
 
 N/A.
+
+## Term 2 Week 6
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w6manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- modified code in register_screen
+- modified password validation rules UI
+- created the server-side (firebase) collection, documents and rules for user messaging
+- edited code in message_screen for messaging between users
+- debugging code
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- edited register_screen code
+- updated password rules UI
+- created rules, collection and documents for messaging
+- Completed Week 18 individual log.
+
+### Tasks in progress (from Project Board)
+
+- updating code in message_screen, all is complete
+
+### Additional Information
+
+N/A.
