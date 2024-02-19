@@ -52,7 +52,8 @@ class _SavedScreenState extends State<SavedScreen> {
     super.initState();
     _fetchSavedPosts();
     _listenForSavedPosts();
-    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _textScaleFactor =
+        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
   }
 
@@ -153,10 +154,11 @@ class _SavedScreenState extends State<SavedScreen> {
         }
 
         var data = snapshot.data!.data() as Map<String, dynamic>?;
-        if (data == null) {
+        if (data == null || data.containsKey('reserved_by')) {
+          // If data is null or post is reserved, don't display it
           return SizedBox.shrink();
         }
-        // Correctly cast the data now that we've checked it
+        // Now we can proceed as before, as we have filtered out reserved posts
         Map<String, dynamic> postData = data;
 
         // Fetch the user data for the post
