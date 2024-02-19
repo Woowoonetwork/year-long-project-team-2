@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
 import 'package:FoodHood/Components/colors.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Add this import
 
 class CompactPostCard extends StatelessWidget {
   final String imageLocation;
@@ -147,42 +148,36 @@ class CompactPostCard extends StatelessWidget {
   }
 
   Widget _buildOrderInfoSection(BuildContext context, String avatarUrl) {
-    // Use a default image if avatarUrl is empty or null
-    String effectiveAvatarUrl =
-        avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
-
     return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              CupertinoPageRoute(
-                builder: (context) => PublicProfileScreen(),
-              ),
-            );
-          },
-          child: Row(
-            children: [
-              ClipOval(
-                child: Image.network(
-                  effectiveAvatarUrl,
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+              builder: (context) => PublicProfileScreen(),
+            ),
+          );
+        },
+        child: Row(
+          children: [
+            ClipOval(
+                child: CachedNetworkImage(
+              imageUrl: avatarUrl,
+              width: 20,
+              height: 20,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Image.asset(
+                  'assets/images/sampleProfile.png',
                   width: 20,
                   height: 20,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/sampleProfile.png',
-                      width: 20,
-                      height: 20,
-                      fit: BoxFit.cover,
-                    );
-                  },
-                ),
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Posted by $firstname $lastname $timeAgo',
+                  fit: BoxFit.cover),
+            )),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Posted by $firstname $lastname $timeAgo', // Ensure variables `firstname`, `lastname`, and `timeAgo` are defined and accessible
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: CupertinoDynamicColor.resolve(
@@ -191,8 +186,10 @@ class CompactPostCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-            ],
-          ),
-        ));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

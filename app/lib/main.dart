@@ -19,7 +19,6 @@ import 'package:flutter/services.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:FoodHood/Models/PostDetailViewModel.dart';
 
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 

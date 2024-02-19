@@ -39,7 +39,8 @@ class _AccountScreenState extends State<AccountScreen> {
   void initState() {
     super.initState();
     setUpPostStreamListener();
-    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _textScaleFactor =
+        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
   }
 
@@ -119,13 +120,25 @@ class _AccountScreenState extends State<AccountScreen> {
     List<String> tags = documentData['categories'].split(',');
     DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
 
+    List<Map<String, String>> imagesWithAltText = [];
+    if (documentData.containsKey('images') && documentData['images'] is List) {
+      imagesWithAltText = List<Map<String, String>>.from(
+        (documentData['images'] as List).map((image) {
+          return {
+            'url': image['url'] as String? ?? '',
+            'alt_text': image['alt_text'] as String? ?? '',
+          };
+        }),
+      );
+    }
+
     return OrderCard(
       title: title,
       tags: tags,
       orderInfo: 'Posted on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
       postId: postId,
       onTap: _onOrderCardTap,
-      imageLocation: documentData['image_url'] ?? '',
+      imagesWithAltText: imagesWithAltText,
       orderState: OrderState.confirmed,
     );
   }
@@ -140,18 +153,18 @@ class _AccountScreenState extends State<AccountScreen> {
     _updateAdjustedFontSize();
 
     final Map<int, Widget> myTabs = <int, Widget>{
-      0: Text('Active Orders',
-          style: TextStyle(
-            fontSize: adjustedTabTextFontSize, 
-            fontWeight: FontWeight.w500,
-          ),
+      0: Text(
+        'Active Orders',
+        style: TextStyle(
+          fontSize: adjustedTabTextFontSize,
+          fontWeight: FontWeight.w500,
         ),
-      1: Text('Past Orders',
-          style: TextStyle(
-            fontSize: adjustedTabTextFontSize, 
-            fontWeight: FontWeight.w500
-          ),
-        ),
+      ),
+      1: Text(
+        'Past Orders',
+        style: TextStyle(
+            fontSize: adjustedTabTextFontSize, fontWeight: FontWeight.w500),
+      ),
     };
 
     return CupertinoPageScaffold(
@@ -187,8 +200,6 @@ class _AccountScreenState extends State<AccountScreen> {
       stretch: true, // Enable stretch behavior
     );
   }
-
-
 
   void _navigateToSettings(BuildContext context) {
     // Implement navigation to settings screen
@@ -302,6 +313,4 @@ class _AccountScreenState extends State<AccountScreen> {
       ),
     );
   }
-
-  
 }
