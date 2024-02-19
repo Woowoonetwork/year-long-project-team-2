@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DoneePath extends StatefulWidget {
@@ -203,7 +202,7 @@ class _DoneePathState extends State<DoneePath> {
           .doc(widget.postId)
           .update({
         'reserved_by': FieldValue.delete(),
-        'post_status': "not reserved"
+        'post_status': "not reserved",
       });
 
       setState(() {
