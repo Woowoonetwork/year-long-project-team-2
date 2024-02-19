@@ -1,6 +1,7 @@
 //donor_screen.dart
 
 import 'package:FoodHood/Screens/message_screen.dart';
+import 'package:FoodHood/Screens/saved_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -43,11 +44,12 @@ class _DonorScreenState extends State<DonorScreen> {
   @override
   void initState() {
     super.initState();
-    pickupLatLng = LatLng(49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
+    pickupLatLng = LatLng(
+        49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
     fetchPostInformation(); // Fetch reserved by user name when the widget initializes
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
-    _updateAdjustedFontSize();   
+    _updateAdjustedFontSize();
   }
 
   Future<void> fetchPostInformation() async {
@@ -92,7 +94,8 @@ class _DonorScreenState extends State<DonorScreen> {
             final userLastName = userSnapshot['lastName'];
             final userRating = userSnapshot['avgRating'];
             setState(() {
-              reservedByName = userName; // Update the reserved by user name in the UI
+              reservedByName =
+                  userName; // Update the reserved by user name in the UI
               reservedByLastName = userLastName;
               rating = userRating;
             });
@@ -153,59 +156,57 @@ class _DonorScreenState extends State<DonorScreen> {
         trailing: reservedByName != null
             ? CupertinoButton(
                 padding: EdgeInsets.zero,
-                child: Text(
-                  "Message ${reservedByName ?? 'Unknown User'}",
-                  style: TextStyle(
-                    color: accentColor,
-                  ),
-                ),
+                child: Text("Message ${reservedByName ?? 'Unknown User'}",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w500, color: accentColor)),
                 onPressed: () {
                   // Close the current screen
                   Navigator.push(
                     context,
                     CupertinoPageRoute(
-                        builder: (context) =>
-                            MessageScreenPage()
-                    ), 
+                        builder: (context) => MessageScreenPage()),
                   );
                 },
               )
             : null,
-        border: Border(bottom: BorderSide.none),
+        border: null,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          __buildHeadingTextField(
-            text: _buildHeadingText(),
-          ),
-          SizedBox(height: 16.0),
+      child: SafeArea(
+        child: Container(
+          margin: EdgeInsets.all(16.0),
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: <Widget>[
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  __buildHeadingTextField(text: _buildHeadingText()),
+                  SizedBox(height: 16.0),
+                  //Only show the order info section if the order has been reserved.
+                  if (reservedByName != null)
+                    OrderInfoSection(
+                      avatarUrl: '',
+                      reservedByName: reservedByName,
+                      reservedByLastName: reservedByLastName,
+                      adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
+                      rating: rating,
+                    ),
 
-          //Only show the order info section if the order has been reserved.
-          if (reservedByName != null)
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
-              child: Center(
-                child: OrderInfoSection(
-                  avatarUrl: '',
-                  reservedByName: reservedByName,
-                  reservedByLastName: reservedByLastName,
-                  adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
-                  rating: rating,
-                ),
+                  //__buildTextField(text: "Pickup at specified location"),
+                  //print(pickupLatLng),
+                  _buildMap(context),
+
+                  // Replace the placeholder with the chat bubble in the future, placeholder for now
+                  SizedBox(height: 200.0),
+                ],
               ),
-            ),
-          
-          //__buildTextField(text: "Pickup at specified location"),
-          //print(pickupLatLng),
-          _buildMap(context),
-          
-          SizedBox(height: 16.0,),
 
-          if (reservedByName != null)
-            _buildButtonAndCancelButtonRow(), // Call the new method here
-           
-        ],
+              if (reservedByName != null)
+                _buildButtonAndCancelButtonRow(), // Call the new method here
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -220,7 +221,8 @@ class _DonorScreenState extends State<DonorScreen> {
         text,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -1.0,
           fontSize: adjustedHeadingFontSize,
         ),
       ),
@@ -279,10 +281,9 @@ class _DonorScreenState extends State<DonorScreen> {
     final LatLng? locationCoordinates = pickupLatLng;
 
     if (locationCoordinates != null) {
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(15), bottom: Radius.circular(15)),
+      return  ClipRRect(
+          borderRadius: BorderRadius.vertical(
+              top: Radius.circular(16), bottom: Radius.circular(15)),
           child: SizedBox(
             width: double.infinity,
             height: 250.0,
@@ -307,8 +308,7 @@ class _DonorScreenState extends State<DonorScreen> {
               myLocationButtonEnabled: false,
             ),
           ),
-        ),
-      );
+        );
     } else {
       return Container(
         width: double.infinity,
@@ -325,100 +325,84 @@ class _DonorScreenState extends State<DonorScreen> {
 
   Widget _buildButton() {
     if (orderState == OrderState.readyToPickUp) {
-      return Padding(
-        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-              width: 2.0,
+      return Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x19000000),
+              //spreadRadius: 1,
+              blurRadius: 20,
+              offset: Offset(0, 0),
             ),
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x19000000),
-                //spreadRadius: 1,
-                blurRadius: 20,
-                offset: Offset(0, 0),
-              ),
-            ],
-          ),
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,            
-            color: CupertinoColors.tertiarySystemBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            onPressed: () {
-              Navigator.of(context).push(
-                CupertinoPageRoute(
-                  builder: (context) => DoneeRatingPage(
-                    postId: widget.postId,
-                  ),
+          ],
+        ),
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          borderRadius: BorderRadius.circular(100.0),
+          color: CupertinoColors.tertiarySystemBackground,
+          onPressed: () {
+            Navigator.of(context).push(
+              CupertinoPageRoute(
+                builder: (context) => DoneeRatingPage(
+                  postId: widget.postId,
                 ),
-              );
-            },
-            child: Text(
-              "Leave a Review",
-              style: TextStyle(
-                fontSize: adjustedFontSize,
-                color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.label, context),
               ),
+            );
+          },
+          child: Text(
+            "Leave a Review",
+            style: TextStyle(
+              fontSize: adjustedFontSize,
+              color:
+                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
             ),
           ),
         ),
       );
     } else {
       String buttonText = _buildButtonText();
-      return Padding(
-        padding: EdgeInsets.fromLTRB(24.0, 10.0, 10.0, 10.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-              width: 2.0,
+      return Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x19000000),
+              //spreadRadius: 1,
+              blurRadius: 20,
+              offset: Offset(0, 0),
             ),
-            borderRadius: BorderRadius.circular(16.0),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x19000000),
-                //spreadRadius: 1,
-                blurRadius: 20,
-                offset: Offset(0, 0),
+          ],
+        ),
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          color: CupertinoColors.tertiarySystemBackground,
+          borderRadius: BorderRadius.circular(100.0),
+          onPressed: () {
+            setState(() {
+              _handlePostStatus();
+            });
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                FeatherIcons.check,
+                color: CupertinoColors.systemGreen,
+                size: 24,
+              ),
+              SizedBox(width: 8),
+              Text(
+                buttonText,
+                style: TextStyle(
+                    fontSize: adjustedFontSize,
+                    color: CupertinoDynamicColor.resolve(
+                        CupertinoColors.label, context),
+                    fontWeight: FontWeight.w500),
               ),
             ],
           ),
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            color: CupertinoColors.tertiarySystemBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            onPressed: () {
-              setState(() {
-                _handlePostStatus();
-              });
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  FeatherIcons.check,
-                  color: CupertinoColors.systemGreen,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  buttonText,
-                  style: TextStyle(
-                    fontSize: adjustedFontSize,
-                    color: CupertinoDynamicColor.resolve(
-                          CupertinoColors.label, context),
-                    fontWeight: FontWeight.w500
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       );
-    } 
+    }
   }
 
   String _buildButtonText() {
@@ -432,7 +416,7 @@ class _DonorScreenState extends State<DonorScreen> {
       default:
         return "Confirm";
       //case OrderState.readyToPickUp:
-        //return "Confirm";
+      //return "Confirm";
     }
   }
 
@@ -446,7 +430,7 @@ class _DonorScreenState extends State<DonorScreen> {
           break;
         case OrderState.confirmed:
           newStatus = 'delivering'; // Update post_status to 'delivering'
-          orderState = OrderState.delivering; 
+          orderState = OrderState.delivering;
           break;
         case OrderState.delivering:
           newStatus = 'readyToPickUp'; // Update post_status to 'readyToPickUp'
@@ -454,16 +438,16 @@ class _DonorScreenState extends State<DonorScreen> {
           break;
         case OrderState.readyToPickUp:
           newStatus = 'confirmed'; // Update post_status back to 'confirmed'
-          orderState = OrderState.confirmed; 
+          orderState = OrderState.confirmed;
           break;
       }
-      
+
       // Update the post_status field in Firestore
       await FirebaseFirestore.instance
           .collection('post_details')
           .doc(widget.postId)
           .update({'post_status': newStatus});
-      
+
       setState(() {});
     } catch (error) {
       print('Error updating post status: $error');
@@ -487,53 +471,44 @@ class _DonorScreenState extends State<DonorScreen> {
   //     case OrderState.readyToPickUp:
   //       return OrderState.reserved;
   //   }
-  // } 
+  // }
 
-  Widget _buildCancelButton(){
-    return Padding(
-      padding: EdgeInsets.fromLTRB(10.0, 10.0, 24.0, 10.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 1.0,
+  Widget _buildCancelButton() {
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x19000000),
+            spreadRadius: 1,
+            blurRadius: 16,
+            offset: Offset(0, 0),
           ),
-          borderRadius: BorderRadius.circular(100.0),
-          boxShadow: [
-            BoxShadow(
-                color: Color(0x19000000),
-                spreadRadius: 1,
-                blurRadius: 16,
-                offset: Offset(0, 0),
-              ),
-          ],
-        ),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          color: CupertinoColors.tertiarySystemBackground,
-          borderRadius: BorderRadius.circular(16.0),
-          onPressed: () {
-            _handleCancelOrder();
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                FeatherIcons.x,
-                color: CupertinoColors.systemRed,
-              ),
-              SizedBox(width: 8),
-              Text(
-                "Cancel Order",
-                style: TextStyle(
+        ],
+      ),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        color: CupertinoColors.tertiarySystemBackground,
+        borderRadius: BorderRadius.circular(100.0),
+        onPressed: () {
+          _handleCancelOrder();
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              FeatherIcons.x,
+              color: CupertinoColors.systemRed,
+            ),
+            SizedBox(width: 8),
+            Text(
+              "Cancel",
+              style: TextStyle(
                   fontSize: adjustedFontSize,
                   color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.label, context),
-                  fontWeight: FontWeight.w500
-                ),
-              ),
-            ],
-          ),
+                      CupertinoColors.label, context),
+                  fontWeight: FontWeight.w500),
+            ),
+          ],
         ),
       ),
     );
@@ -551,7 +526,8 @@ class _DonorScreenState extends State<DonorScreen> {
             CupertinoDialogAction(
               child: Text("Cancel"),
               onPressed: () {
-                Navigator.pop(context, false); // Return false to indicate cancel
+                Navigator.pop(
+                    context, false); // Return false to indicate cancel
               },
             ),
             CupertinoDialogAction(
@@ -599,12 +575,13 @@ class _DonorScreenState extends State<DonorScreen> {
 
   Widget _buildButtonAndCancelButtonRow() {
     return Row(
-      //mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
           child: _buildButton(),
         ),
-        //SizedBox(width: 8), 
+        SizedBox(width: 8), // Add some space between the buttons
         if (orderState != OrderState.readyToPickUp)
           Expanded(
             child: _buildCancelButton(),
@@ -612,7 +589,6 @@ class _DonorScreenState extends State<DonorScreen> {
       ],
     );
   }
-
 }
 
 class OrderInfoSection extends StatelessWidget {
@@ -638,44 +614,52 @@ class OrderInfoSection extends StatelessWidget {
         avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundImage:
-                AssetImage(effectiveAvatarUrl), // Load the image from assets
-            radius: 9,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Expanded(
+          // Wrap the Container in an Expanded widget to take up remaining space
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                backgroundImage: AssetImage(
+                    effectiveAvatarUrl), // Load the image from assets
+                radius: 10,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Reserved by $reservedByName $reservedByLastName',
+                style: TextStyle(
+                  color: CupertinoColors.label
+                      .resolveFrom(context)
+                      .withOpacity(0.8),
+                  fontSize: adjustedOrderInfoFontSize,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(
+                width: 12,
+              ),
+              Icon(
+                Icons.star,
+                color: secondaryColor,
+                size: 14,
+              ),
+              const SizedBox(width: 3),
+              Text(
+                '${rating} Rating',
+                style: TextStyle(
+                  overflow: TextOverflow.fade,
+                  color: CupertinoColors.label
+                      .resolveFrom(context)
+                      .withOpacity(0.8),
+                  fontSize: adjustedOrderInfoFontSize,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.48,
+                ),
+              ),
+            ],
           ),
-          SizedBox(width: 8),
-          Text(
-            'Reserved by $reservedByName $reservedByLastName',
-            style: TextStyle(
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.secondaryLabel, context),
-              fontSize: adjustedOrderInfoFontSize,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(width: 12,),
-          Icon(
-            Icons.star,
-            color: secondaryColor,
-            size: 14,
-          ),
-          const SizedBox(width: 3),
-          Text(
-            '${rating} Rating',
-            style: TextStyle(
-              overflow: TextOverflow.fade,
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.secondaryLabel, context),
-              fontSize: adjustedOrderInfoFontSize,
-              fontWeight: FontWeight.w500,
-              letterSpacing: -0.48,
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }
