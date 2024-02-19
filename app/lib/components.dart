@@ -4,6 +4,7 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
+import 'package:flutter/material.dart';
 
 class Styles {
   static TextStyle titleStyle = TextStyle(
@@ -257,9 +258,9 @@ Widget buildImageFailedPlaceHolder(BuildContext context, bool isCompact) {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(CupertinoIcons.photo_fill_on_rectangle_fill,
-                size: 30,
-                color: CupertinoColors.activeOrange.resolveFrom(context)),
+            Icon(Icons.broken_image_rounded,
+                size: 40,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context)),
           ],
         )
       : Column(
@@ -268,9 +269,9 @@ Widget buildImageFailedPlaceHolder(BuildContext context, bool isCompact) {
           children: [
             Padding(padding: EdgeInsets.only(top: 80)),
             //broken image icon
-            Icon(CupertinoIcons.photo_fill_on_rectangle_fill,
+            Icon(Icons.broken_image_rounded,
                 size: 60,
-                color: CupertinoColors.activeOrange.resolveFrom(context)),
+                color: CupertinoColors.secondaryLabel.resolveFrom(context)),
             SizedBox(height: 8.0), // Add some spacing
             Text(
               'Image failed to load',

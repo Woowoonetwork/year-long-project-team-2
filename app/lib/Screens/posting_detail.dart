@@ -16,7 +16,6 @@ import 'package:FoodHood/Screens/public_profile_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
 
-
 class PostDetailView extends StatefulWidget {
   final String postId;
   const PostDetailView({Key? key, required this.postId}) : super(key: key);
@@ -88,13 +87,11 @@ class _PostDetailViewState extends State<PostDetailView> {
                 physics: AlwaysScrollableScrollPhysics(),
                 slivers: [
                   FoodAppBar(
-                    postId: widget.postId, // Pass postId to the FoodAppBar
+                    postId: widget.postId,
                     isFavorite: viewModel.isFavorite,
                     onFavoritePressed: _handleFavoritePressed,
-                    imageUrls: List.generate(
-                        5,
-                        (_) => viewModel
-                            .imageUrl), // Updated to pass a list of image URLs
+                    imagesWithAltText: viewModel
+                        .imagesWithAltText, // Pass the images with alt text
                   ),
                   SliverList(
                     delegate: SliverChildListDelegate(
@@ -847,8 +844,10 @@ class PickupInformation extends StatelessWidget {
 }
 
 Future<void> _launchMapUrl(LatLng locationCoordinates) async {
-  final String googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=${locationCoordinates.latitude},${locationCoordinates.longitude}';
-  final String appleMapsUrl = 'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}';
+  final String googleMapsUrl =
+      'https://www.google.com/maps/search/?api=1&query=${locationCoordinates.latitude},${locationCoordinates.longitude}';
+  final String appleMapsUrl =
+      'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}';
 
   // Check if the device is running on iOS
   if (Platform.isIOS) {
@@ -867,7 +866,6 @@ Future<void> _launchMapUrl(LatLng locationCoordinates) async {
     }
   }
 }
-
 
 class CustomInfoTile extends StatelessWidget {
   final String title;

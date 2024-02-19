@@ -412,7 +412,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         return CachedNetworkImageProvider(_profileImagePath);
       }
     }
-    return AssetImage("assets/images/sampleProfile.png");
+    return AssetImage('assets/images/sampleProfile.png');
   }
 
   Widget _buildTextField(String label, String placeholder,

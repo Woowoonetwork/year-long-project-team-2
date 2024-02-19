@@ -226,7 +226,13 @@ class RecentPostSection extends StatelessWidget {
                 height: 150,
                 margin: EdgeInsets.only(left: 4.0, top: 24, bottom: 24.0),
                 child: PostCard(
-                  imageUrl: 'assets/images/sampleFood.jpg',
+                  imagesWithAltText: [
+                    {
+                      'image':
+                          'https://images.unsplash.com/photo-1556912173-65b6f4f4f6f0',
+                      'alt_text': 'Strawberry Sugar High'
+                    },
+                  ],
                   title: 'Strawberry Sugar High',
                   tags: ['Dessert', 'Strawberry', 'Sweet'],
                   tagColors: [
@@ -243,7 +249,7 @@ class RecentPostSection extends StatelessWidget {
                   showShadow: true,
                   imageHeight: 60,
                   postId: 'examplePostId',
-                  profileURL: 'assets/images/sampleProfile.png',
+                  profileURL: '',
                 ),
               );
             },

@@ -150,17 +150,28 @@ class _SavedScreenState extends State<SavedScreen> {
           .get(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return SizedBox.shrink();
+          return SizedBox
+              .shrink(); // No post details exist, return an empty widget
         }
 
-        var data = snapshot.data!.data() as Map<String, dynamic>?;
-        if (data == null) {
-          return SizedBox.shrink();
+        var postData = snapshot.data!.data() as Map<String, dynamic>?;
+        if (postData == null) {
+          return SizedBox.shrink(); // Post data is null, return an empty widget
         }
-        // Correctly cast the data now that we've checked it
-        Map<String, dynamic> postData = data;
 
-        // Fetch the user data for the post
+        // Extract the first image URL from the imagesWithAltText list
+        List<Map<String, String>> imagesWithAltText = [];
+        if (postData.containsKey('images') && postData['images'] is List) {
+          imagesWithAltText = List<Map<String, String>>.from(
+            (postData['images'] as List).map((image) {
+              return {
+                'url': image['url'] as String? ?? '',
+                'alt_text': image['alt_text'] as String? ?? '',
+              };
+            }),
+          );
+        }
+
         return FutureBuilder<DocumentSnapshot>(
           future: FirebaseFirestore.instance
               .collection('user')
@@ -172,14 +183,35 @@ class _SavedScreenState extends State<SavedScreen> {
                   .shrink(); // No user data exists, return an empty widget
             }
 
-            var userData = userSnapshot.data!.data();
-            if (userData == null || userData is! Map<String, dynamic>) {
+            var userData = userSnapshot.data!.data() as Map<String, dynamic>?;
+            if (userData == null) {
               return SizedBox
-                  .shrink(); // User data is null or not the expected format, return an empty widget
+                  .shrink(); // User data is null, return an empty widget
             }
 
             // Now we can safely use postData and userData, knowing they're not null and are properly formatted
-            return _buildPostCard(postData, userData, postId);
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: PostCard(
+                imagesWithAltText: imagesWithAltText,
+                title: postData['title'] ?? 'No Title',
+                tags: (postData['categories'] as String)
+                    .split(',')
+                    .map((tag) => tag.trim())
+                    .toList(),
+                tagColors: _assignedColors(),
+                firstname: userData['firstName'] ?? 'Unknown',
+                lastname: userData['lastName'] ?? 'Unknown',
+                timeAgo: timeAgoSinceDate(
+                    (postData['post_timestamp'] as Timestamp).toDate()),
+                onTap: (postId) => _onPostCardTap(postId),
+                postId: postId,
+                profileURL: userData['profileImagePath'] ?? '',
+                showTags: true, // Assuming showTags is true by default
+                imageHeight: 100.0, // Assuming a default height
+                showShadow: false, // Assuming no shadow by default
+              ),
+            );
           },
         );
       },
@@ -209,31 +241,6 @@ class _SavedScreenState extends State<SavedScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-// Updated _buildPostCard method to include postId as a parameter
-  Widget _buildPostCard(Map<String, dynamic> postData,
-      Map<String, dynamic> userData, String postId) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: PostCard(
-        imageUrl: postData['image_url'] ?? '',
-        title: postData['title'] ?? 'No Title',
-        tags: (postData['categories'] as String)
-            .split(',')
-            .map((tag) => tag.trim())
-            .toList(),
-        tagColors: _assignedColors(),
-        firstname: userData['firstName'] ?? 'Unknown',
-        lastname: userData['lastName'] ?? 'Unknown',
-        timeAgo: timeAgoSinceDate(
-            (postData['post_timestamp'] as Timestamp).toDate()),
-        onTap: _onPostCardTap, // Using postId directly
-        postId: postId, // Using postId directly
-        profileURL:
-            userData['profileImagePath'] ?? 'assets/images/sampleProfile.png',
       ),
     );
   }

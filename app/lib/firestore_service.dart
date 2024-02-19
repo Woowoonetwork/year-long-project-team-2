@@ -110,7 +110,6 @@ Future<Map<String, dynamic>?> readDocument({
           documentSnapshot.data() as Map<String, dynamic>;
       return data;
     } else {
-      print('Document does not exist.');
       return null;
     }
   } catch (e) {

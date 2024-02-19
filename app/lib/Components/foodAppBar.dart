@@ -6,21 +6,20 @@ import 'dart:ui';
 import 'package:share_plus/share_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+import 'package:FoodHood/Screens/photo_gallery_screen.dart';
 
 class FoodAppBar extends StatefulWidget {
   final String postId;
-  final VoidCallback onFavoritePressed;
   final bool isFavorite;
-  final List<String> imageUrls;
+  final VoidCallback onFavoritePressed;
+  final List<Map<String, String>> imagesWithAltText;
 
   const FoodAppBar({
     Key? key,
     required this.postId,
-    required this.onFavoritePressed,
     required this.isFavorite,
-    required this.imageUrls,
+    required this.onFavoritePressed,
+    required this.imagesWithAltText,
   }) : super(key: key);
 
   @override
@@ -31,7 +30,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
   final PageController _pageController = PageController();
 
   bool _showIndicator = false;
-  bool _showAltText = false;
+
   @override
   void initState() {
     super.initState();
@@ -91,7 +90,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
   }
 
   Widget _buildLeading(BuildContext context) {
-    return _blurEffect(
+    return blurEffect(
       CircleAvatar(
         backgroundColor: Colors.transparent,
         child: CupertinoButton(
@@ -111,86 +110,25 @@ class _FoodAppBarState extends State<FoodAppBar> {
   Widget _buildBackgroundImage() {
     return PageView.builder(
       controller: _pageController,
-      itemCount: widget.imageUrls.length,
+      itemCount: widget.imagesWithAltText.length,
       itemBuilder: (context, index) {
-        final String imageUrl = widget.imageUrls[index];
+        final String imageUrl = widget.imagesWithAltText[index]['url']!;
         return GestureDetector(
           onTap: () => _openPhotoGalleryView(context, index),
           child: Hero(
-            tag: imageUrl,
+            tag: 'imageHero${widget.imagesWithAltText[index]['url']}',
             child: CachedNetworkImage(
               imageUrl: imageUrl,
               fit: BoxFit.cover,
               placeholder: (context, url) => CupertinoActivityIndicator(),
               errorWidget: (context, url, error) => Icon(
-                  CupertinoIcons.exclamationmark_triangle_fill,
-                  color: CupertinoColors.systemOrange,
+                  Icons.broken_image_rounded,
+                  color: CupertinoColors.systemGrey.resolveFrom(context),
                   size: 60),
             ),
           ),
         );
       },
-    );
-  }
-
-  // Ensuring ALT text is shown based on _showAltText
-  Widget _buildAltTextBox() {
-    if (!_showAltText) return Container(); // If _showAltText is false, don't show the ALT text box.
-
-    return Positioned(
-      bottom: 100, // Adjust as needed
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              "Alternative Text Displayed Here",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAltButton() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                color:
-                    _showAltText ? blue : CupertinoColors.darkBackgroundGray),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                setState(() {
-                  _showAltText = !_showAltText;
-                });
-              },
-              child: Text(
-                'ALT',
-                style: TextStyle(
-                  color: CupertinoColors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -215,62 +153,18 @@ class _FoodAppBarState extends State<FoodAppBar> {
   }
 
   void _openPhotoGalleryView(BuildContext context, int initialIndex) {
-    PageController galleryPageController =
-        PageController(initialPage: initialIndex);
-
     Navigator.of(context).push(
       smoothRoute(
-        Scaffold(
-          backgroundColor: Colors.black,
-          extendBodyBehindAppBar: true,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: _blurEffect(
-              Icon(FeatherIcons.x, size: 20, color: CupertinoColors.white),
-              CupertinoColors.darkBackgroundGray,
-              () => Navigator.of(context).pop(),
-            ),
-            actions: [_buildAltButton()],
-          ),
-          body: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              PhotoViewGallery.builder(
-                itemCount: widget.imageUrls.length,
-                builder: (context, index) {
-                  final String imageUrl = widget.imageUrls[index];
-                  return PhotoViewGalleryPageOptions(
-                    imageProvider: CachedNetworkImageProvider(imageUrl),
-                    minScale: PhotoViewComputedScale.contained * 0.8,
-                    maxScale: PhotoViewComputedScale.covered * 2,
-                    heroAttributes: PhotoViewHeroAttributes(tag: imageUrl),
-                    onTapUp: (context, details, controllerValue) {
-                      Navigator.of(context).pop(); // Close gallery on tap
-                    },
-                  );
-                },
-                pageController: galleryPageController,
-                scrollPhysics: const BouncingScrollPhysics(),
-                backgroundDecoration: BoxDecoration(color: Colors.black),
-                loadingBuilder: (context, event) =>
-                    Center(child: CircularProgressIndicator()),
-              ),
-              Container(
-                padding: EdgeInsets.only(bottom: 16),
-                child: _buildPageIndicator(galleryPageController,
-                    CupertinoColors.darkBackgroundGray.withOpacity(0.8)),
-              ),
-              if (_showAltText) _buildAltTextBox(),
-            ],
-          ),
+        PhotoGalleryScreen(
+          imagesWithAltText: widget.imagesWithAltText,
+          initialIndex: initialIndex,
         ),
       ),
     );
   }
 
   Widget _buildFavoriteButton(BuildContext context) {
-    return _blurEffect(
+    return blurEffect(
       Icon(
         widget.isFavorite ? Icons.bookmark : Icons.bookmark_add_outlined,
         size: 18,
@@ -286,7 +180,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
   }
 
   Widget _buildShareButton(BuildContext context) {
-    return _blurEffect(
+    return blurEffect(
       Icon(FeatherIcons.share,
           size: 18, color: CupertinoColors.label.resolveFrom(context)),
       CupertinoColors.secondarySystemBackground
@@ -296,7 +190,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
     );
   }
 
-  Widget _blurEffect(
+  Widget blurEffect(
       Widget child, Color backgroundColor, VoidCallback onPressed) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -339,7 +233,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
                 padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                 child: SmoothPageIndicator(
                   controller: pageController,
-                  count: widget.imageUrls.length,
+                  count: widget.imagesWithAltText.length,
                   effect: WormEffect(
                       dotHeight: 6,
                       dotWidth: 6,
