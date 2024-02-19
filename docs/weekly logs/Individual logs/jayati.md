@@ -419,5 +419,37 @@ Additional Information
 I didn't commit work while trying out the different scenarios so there's a lot of lost "work" that didn't work anyway
 
 
+# Individual Log: Monday 12th Feb 2024 - Sunday 18th Feb 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati14.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed
+* Made reserve button work and change reserved by fields
+* Added progress bar which pops back to posting page once time is up
+* Made UI changes to donee pathway
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+* Made reserve button work and change reserved by fields
+* Added progress bar which pops back to posting page once time is up
+* Made UI changes to donee pathway
+* Completed team log for the week
+* Completed individual log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+
+
+
+Additional Information 
+Nick accidentally pulled my branch into his branch and it got merged so all my commits are there and merged, that's why it shows as less lines of code.
+
+
 
 
