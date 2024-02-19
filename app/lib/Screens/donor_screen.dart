@@ -139,9 +139,9 @@ class _DonorScreenState extends State<DonorScreen> {
   Widget build(BuildContext context) {
     // double screenWidth = MediaQuery.of(context).size.width;
     return CupertinoPageScaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: detailsBackgroundColor,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: backgroundColor,
+        backgroundColor: detailsBackgroundColor,
         leading: GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Icon(
@@ -336,10 +336,10 @@ class _DonorScreenState extends State<DonorScreen> {
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
-                color: CupertinoColors.black.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 2),
+                color: Color(0x19000000),
+                //spreadRadius: 1,
+                blurRadius: 20,
+                offset: Offset(0, 0),
               ),
             ],
           ),
@@ -360,7 +360,8 @@ class _DonorScreenState extends State<DonorScreen> {
               "Leave a Review",
               style: TextStyle(
                 fontSize: adjustedFontSize,
-                color: CupertinoColors.label,
+                color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.label, context),
               ),
             ),
           ),
@@ -369,7 +370,7 @@ class _DonorScreenState extends State<DonorScreen> {
     } else {
       String buttonText = _buildButtonText();
       return Padding(
-        padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+        padding: EdgeInsets.fromLTRB(24.0, 10.0, 10.0, 10.0),
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(
@@ -379,10 +380,10 @@ class _DonorScreenState extends State<DonorScreen> {
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
-                color: CupertinoColors.black.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 2,
-                offset: Offset(0, 2),
+                color: Color(0x19000000),
+                //spreadRadius: 1,
+                blurRadius: 20,
+                offset: Offset(0, 0),
               ),
             ],
           ),
@@ -407,7 +408,8 @@ class _DonorScreenState extends State<DonorScreen> {
                   buttonText,
                   style: TextStyle(
                     fontSize: adjustedFontSize,
-                    color: CupertinoColors.label,
+                    color: CupertinoDynamicColor.resolve(
+                          CupertinoColors.label, context),
                     fontWeight: FontWeight.w500
                   ),
                 ),
@@ -489,21 +491,21 @@ class _DonorScreenState extends State<DonorScreen> {
 
   Widget _buildCancelButton(){
     return Padding(
-      padding: EdgeInsets.fromLTRB(24.0, 10.0, 24.0, 10.0),
+      padding: EdgeInsets.fromLTRB(10.0, 10.0, 24.0, 10.0),
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
             color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 2.0,
+            width: 1.0,
           ),
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(100.0),
           boxShadow: [
             BoxShadow(
-              color: CupertinoColors.black.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 2,
-              offset: Offset(0, 2),
-            ),
+                color: Color(0x19000000),
+                spreadRadius: 1,
+                blurRadius: 16,
+                offset: Offset(0, 0),
+              ),
           ],
         ),
         child: CupertinoButton(
@@ -525,7 +527,8 @@ class _DonorScreenState extends State<DonorScreen> {
                 "Cancel Order",
                 style: TextStyle(
                   fontSize: adjustedFontSize,
-                  color: CupertinoColors.label,
+                  color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.label, context),
                   fontWeight: FontWeight.w500
                 ),
               ),
