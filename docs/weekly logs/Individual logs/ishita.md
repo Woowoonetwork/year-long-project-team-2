@@ -549,3 +549,44 @@ N/A.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Term 2 Week 6: Monday 12th Feb 2024 - Sunday 18th Feb 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W6.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Added the backend functionality to the donor screen - saving post status and updating the state on the page.
+- Added the cancel reservation button and logic.
+- Added the map to display the pin location of the post on the donor screen.
+- Made UI changes to make it more cohesive.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Complete the donor screen backend by saving the status of the orders.
+    - Added the map to display the pin location of the post on the donor screen.
+    - Added the cancel reservation button and logic.
+    - Added backend - saving post status and updating the state on the page.
+    - Updated the UI of some components to make it more similar to the Figma design.
+- Complete the T2 W5 team log.
+- Complete the T2 W5 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
