@@ -30,6 +30,7 @@ class DonorScreen extends StatefulWidget {
 class _DonorScreenState extends State<DonorScreen> {
   String? reservedByName; // Variable to store the reserved by user name
   String? reservedByLastName;
+  double rating = 0.0;
   String pickupLocation = '';
   //bool isConfirmed = false;
   OrderState orderState = OrderState.reserved;
@@ -89,9 +90,11 @@ class _DonorScreenState extends State<DonorScreen> {
             // Extract the user name from the user document
             final userName = userSnapshot['firstName'];
             final userLastName = userSnapshot['lastName'];
+            final userRating = userSnapshot['avgRating'];
             setState(() {
               reservedByName = userName; // Update the reserved by user name in the UI
               reservedByLastName = userLastName;
+              rating = userRating;
             });
           } else {
             print(
@@ -188,6 +191,7 @@ class _DonorScreenState extends State<DonorScreen> {
                   reservedByName: reservedByName,
                   reservedByLastName: reservedByLastName,
                   adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
+                  rating: rating,
                 ),
               ),
             ),
@@ -592,7 +596,7 @@ class _DonorScreenState extends State<DonorScreen> {
 
   Widget _buildButtonAndCancelButtonRow() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      //mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
           child: _buildButton(),
@@ -613,6 +617,7 @@ class OrderInfoSection extends StatelessWidget {
   final String? reservedByName;
   final String? reservedByLastName;
   final double adjustedOrderInfoFontSize;
+  final double rating;
 
   const OrderInfoSection({
     Key? key,
@@ -620,6 +625,7 @@ class OrderInfoSection extends StatelessWidget {
     required this.reservedByName,
     required this.reservedByLastName,
     required this.adjustedOrderInfoFontSize,
+    required this.rating,
   }) : super(key: key);
 
   @override
@@ -645,6 +651,24 @@ class OrderInfoSection extends StatelessWidget {
                   CupertinoColors.secondaryLabel, context),
               fontSize: adjustedOrderInfoFontSize,
               fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(width: 12,),
+          Icon(
+            Icons.star,
+            color: secondaryColor,
+            size: 14,
+          ),
+          const SizedBox(width: 3),
+          Text(
+            '${rating} Rating',
+            style: TextStyle(
+              overflow: TextOverflow.fade,
+              color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.secondaryLabel, context),
+              fontSize: adjustedOrderInfoFontSize,
+              fontWeight: FontWeight.w500,
+              letterSpacing: -0.48,
             ),
           ),
         ],
