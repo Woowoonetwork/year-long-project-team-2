@@ -448,6 +448,7 @@ I didn't commit work while trying out the different scenarios so there's a lot o
 
 
 Additional Information 
+Nick accidentally pulled my branch into his branch and it got merged so all my commits are there and merged, that's why it shows as less lines of code.
 
 
 
