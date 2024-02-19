@@ -45,6 +45,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
   double adjustedFontSize = 16.0;
   LatLng? initialLocation;
   GoogleMapController? mapController;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -144,50 +145,53 @@ class _CreatePostPageState extends State<CreatePostScreen>
       return;
     }
 
-    List<File> imageFiles =
-        _selectedImagesWithAltText.keys.map((path) => File(path)).toList();
+    setState(() => _isSaving = true); // Start loading
+    showLoadingDialog(context); // Show loading indicator
 
-    Map<String, String> imageUrlsWithPaths =
-        await viewModel.uploadImagesToFirebase(imageFiles);
+    try {
+      List<File> imageFiles =
+          _selectedImagesWithAltText.keys.map((path) => File(path)).toList();
 
-    // The alt text is no longer mandatory, so provide a default empty string if it's missing
-    Map<String, String> imageUrlsWithAltText = imageUrlsWithPaths.map(
-        (url, path) => MapEntry(url, _selectedImagesWithAltText[path] ?? ""));
+      Map<String, String> imageUrlsWithPaths =
+          await viewModel.uploadImagesToFirebase(imageFiles);
 
-    showLoadingDialog(context, loadingMessage: 'Saving post...');
+      // The alt text is no longer mandatory, so provide a default empty string if it's missing
+      Map<String, String> imageUrlsWithAltText = imageUrlsWithPaths.map(
+          (url, path) => MapEntry(url, _selectedImagesWithAltText[path] ?? ""));
 
-    bool success = await viewModel.savePost(
-      title: titleController.text,
-      description: descController.text,
-      allergens: selectedAllergens,
-      categories: selectedCategories,
-      expirationDate: selectedDate,
-      pickupLocation: selectedPickupLocation,
-      pickupInstructions: pickupInstrController.text,
-      pickupTime: selectedTime,
-      postLocation: selectedLocation!,
-      imageUrlsWithAltText: imageUrlsWithAltText,
-    );
-    if (success) {
-      Navigator.pop(context);
-
-      Navigator.pop(context);
-
-      showCupertinoDialog(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: Text("Success"),
-          content: Text("Post saved successfully."),
-          actions: [
-            CupertinoDialogAction(
-              child: Text('OK'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
+      bool success = await viewModel.savePost(
+        title: titleController.text,
+        description: descController.text,
+        allergens: selectedAllergens,
+        categories: selectedCategories,
+        expirationDate: selectedDate,
+        pickupLocation: selectedPickupLocation,
+        pickupInstructions: pickupInstrController.text,
+        pickupTime: selectedTime,
+        postLocation: selectedLocation!,
+        imageUrlsWithAltText: imageUrlsWithAltText,
       );
-    } else {
-      // There was an error saving the post
+      if (success) {
+        if (mounted) {
+          setState(() => _isSaving = false); // Stop loading
+          Navigator.pop(context); // Close loading indicator
+        }
+        Navigator.pop(context); // Close the create post screen
+        showCupertinoDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: Text("Success"),
+            content: Text("Post saved successfully."),
+            actions: [
+              CupertinoDialogAction(
+                child: Text('OK'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
@@ -201,6 +205,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
           ],
         ),
       );
+   
     }
   }
 
