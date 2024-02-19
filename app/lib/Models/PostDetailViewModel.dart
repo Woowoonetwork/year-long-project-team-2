@@ -23,6 +23,7 @@ class PostDetailViewModel extends ChangeNotifier {
   late String imageUrl; // Add a field for the image URL
   late String profileURL;
   late String postLocation;
+  late List<Map<String, String>> imagesWithAltText = [];
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   bool isFavorite = false;
 
@@ -60,8 +61,6 @@ class PostDetailViewModel extends ChangeNotifier {
         _updatePostDetails(documentData);
         await _fetchAndUpdateUserDetails(documentData['user_id']);
         await checkIfFavorite(postId);
-      } else {
-        print('Document with postId $postId does not exist.');
       }
     } catch (e) {
       print('Error fetching post details: $e');
@@ -77,8 +76,6 @@ class PostDetailViewModel extends ChangeNotifier {
         var userDocumentData =
             userDocumentSnapshot.data() as Map<String, dynamic>;
         _updateUserDetails(userDocumentData);
-      } else {
-        print('User document with userId $userId does not exist.');
       }
     } catch (e) {
       print('Error fetching user details: $e');
@@ -105,18 +102,27 @@ class PostDetailViewModel extends ChangeNotifier {
     pickupInstructions = documentData['pickup_instructions'] ?? '';
     userid = documentData['user_id'] ?? '';
     rating = documentData['rating'] ?? 0.0;
-    imageUrl = documentData['image_url'] ?? ''; // Set the image URL
     pickupLocation = documentData['pickup_location'] ?? '';
-    // postLocation = documentData['post_location'] ?? '';
-    // like post_ location: |49.89090897212782° N, 119.49003484100103° W]
 
-    if (documentData['post_location'] is GeoPoint) {
-      GeoPoint geoPoint = documentData['post_location'] as GeoPoint;
-      pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+    GeoPoint geoPoint = documentData['post_location'] as GeoPoint;
+    pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+
+    if (documentData.containsKey('images') && documentData['images'] is List) {
+      imagesWithAltText = List<Map<String, String>>.from(
+        (documentData['images'] as List).map((imageMap) {
+          Map<String, dynamic> image = imageMap as Map<String, dynamic>;
+          return {
+            'url': image['url'] as String? ?? '',
+            'alt_text':
+                image['alt_text'] as String? ?? '',
+          };
+        }),
+      );
     } else {
-      // Provide a default location or handle the absence of location data
-      pickupLatLng = LatLng(0.0, 0.0); // Example default value
+      imagesWithAltText =
+          []; // This ensures imagesWithAltText is always initialized.
     }
+
     rating = documentData['rating'] ?? 0.0;
     pickupTime = (documentData['pickup_time'] as Timestamp).toDate();
     expirationDate = (documentData['expiration_date'] as Timestamp).toDate();

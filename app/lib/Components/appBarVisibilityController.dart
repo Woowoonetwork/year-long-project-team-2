@@ -32,7 +32,7 @@ class _VisibilityControllerState extends State<VisibilityController> {
   }
 
   void addListener() {
-    scrollPosition = Scrollable.of(context)?.position;
+    scrollPosition = Scrollable.of(context).position;
     scrollPosition?.addListener(positionListener);
   }
 

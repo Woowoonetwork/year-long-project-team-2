@@ -7,15 +7,14 @@ import 'mock.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 
-void main(){
+void main() {
   // This ensures the following firebase setup and initialization code runs only once.
   setUpAll(() async {
-
-    // Ensure the test environment is set up correctly  
+    // Ensure the test environment is set up correctly
     TestWidgetsFlutterBinding.ensureInitialized();
 
     // Mock Firebase Analytics
-    setupFirebaseAnalyticsMocks(); 
+    setupFirebaseAnalyticsMocks();
 
     // Initialize Firebase only if it hasn't been initialized yet
     if (Firebase.apps.isEmpty) {
@@ -24,23 +23,23 @@ void main(){
   });
 
   testWidgets('Donor Screen UI Test', (WidgetTester tester) async {
-
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: ChangeNotifierProvider(
+    await tester.pumpWidget(CupertinoApp(
+      home: ChangeNotifierProvider(
         create: (context) => TextScaleProvider(),
-        child: DonorScreen(postId: 'dummyPostId',),
+        child: DonorScreen(
+          postId: 'dummyPostId',
         ),
-      )
-    );
+      ),
+    ));
 
     // Verify that the back button is there
-    expect(find.byIcon(FeatherIcons.x), findsOneWidget, reason: "X icon not found");
+    expect(find.byIcon(FeatherIcons.x), findsOneWidget,
+        reason: "X icon not found");
 
     // Verify that the 2 buttons (Message donee and the Status Change button) are there.
     //expect(find.byType(CupertinoButton), findsNWidgets(2), reason: "Button not found");
 
     // Verify that the first button (the option to "confirm" is present)
-    //expect(find.text("Confirm"), findsOneWidget);   
+    //expect(find.text("Confirm"), findsOneWidget);
   });
 }

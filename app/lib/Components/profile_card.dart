@@ -17,7 +17,7 @@ class _ProfileCardState extends State<ProfileCard> {
   String? lastName;
   String? city;
   String? province;
-  String photo = 'assets/images/sampleProfile.png';
+  String photo = '';
   String? email;
   double? rating;
   List<String>? reviews;
@@ -63,7 +63,7 @@ class _ProfileCardState extends State<ProfileCard> {
         province = documentData['province'] as String? ?? '';
         email = documentData['email'] as String? ?? '';
         photo = documentData['profileImagePath'] as String? ??
-            'assets/images/sampleProfile.png';
+            '';
         rating = (documentData['rating'] as num?)?.toDouble() ?? 0.0;
         reviews =
             List<String>.from(documentData['reviews'] as List<dynamic>? ?? []);
@@ -113,21 +113,17 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   Widget profileImage() {
-    final isNetworkImage =
-        photo.startsWith('http://') || photo.startsWith('https://');
-    if (isNetworkImage) {
-      return CircleAvatar(
-        backgroundImage: CachedNetworkImageProvider(
-          photo,
-        ),
-        radius: 36,
-      );
-    } else {
-      return CircleAvatar(
-        backgroundImage: AssetImage(photo),
-        radius: 36,
-      );
-    }
+    return CachedNetworkImage(
+      imageUrl: photo,
+      width: 60,
+      height: 60,
+      placeholder: (context, url) => CupertinoActivityIndicator(),
+      errorWidget: (context, url, error) => Image.asset(
+        'assets/images/sampleProfile.png',
+        width: 60,
+        height: 60,
+      ),
+    );
   }
 
   List<Widget> profileDetails(BuildContext context) {

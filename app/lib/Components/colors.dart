@@ -29,7 +29,7 @@ const Color detailsBackgroundColor = CupertinoDynamicColor.withBrightness(
 */
 
 final CupertinoDynamicColor accentColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF337586),
+  color: Color.fromARGB(255, 63, 133, 151),
   darkColor: Color(0xFF1B3C4A),
 );
 
