@@ -50,82 +50,81 @@ class _DonorScreenState extends State<DonorScreen> {
   }
 
   Future<void> fetchPostInformation() async {
-  final CollectionReference postDetailsCollection =
-      FirebaseFirestore.instance.collection('post_details');
+    final CollectionReference postDetailsCollection =
+        FirebaseFirestore.instance.collection('post_details');
 
-  // Retrieve the reserved_by user ID from your current data
-  final String postId = widget.postId;
-  try {
-    // Fetch the post details document
-    final DocumentSnapshot postSnapshot =
-        await postDetailsCollection.doc(postId).get();
+    // Retrieve the reserved_by user ID from your current data
+    final String postId = widget.postId;
+    try {
+      // Fetch the post details document
+      final DocumentSnapshot postSnapshot =
+          await postDetailsCollection.doc(postId).get();
 
-    if (postSnapshot.exists) {
-      // Extract the reserved_by user ID from the post details
-      final String? reservedByUserId = postSnapshot['reserved_by'];
-      pickupLocation = postSnapshot['pickup_location'];
+      if (postSnapshot.exists) {
+        // Extract the reserved_by user ID from the post details
+        final String? reservedByUserId = postSnapshot['reserved_by'];
+        pickupLocation = postSnapshot['pickup_location'];
 
-      if (postSnapshot['post_location'] is GeoPoint) {
-        GeoPoint geoPoint = postSnapshot['post_location'] as GeoPoint;
-        setState(() {
-          pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
-        });
-      } else {
-        // Provide a default location
-        setState(() {
-          pickupLatLng = LatLng(49.8862, -119.4971);
-        });
-      }
-      print(pickupLatLng);
-
-      // Fetch the user document using reserved_by user ID if it exists
-      if (reservedByUserId != null) {
-        final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-            .collection('user')
-            .doc(reservedByUserId)
-            .get();
-
-        if (userSnapshot.exists) {
-          // Extract the user name from the user document
-          final userName = userSnapshot['firstName'];
-          final userLastName = userSnapshot['lastName'];
+        if (postSnapshot['post_location'] is GeoPoint) {
+          GeoPoint geoPoint = postSnapshot['post_location'] as GeoPoint;
           setState(() {
-            reservedByName = userName; // Update the reserved by user name in the UI
-            reservedByLastName = userLastName;
+            pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
           });
         } else {
-          print(
-              'User document does not exist for reserved by user ID: $reservedByUserId');
+          // Provide a default location
+          setState(() {
+            pickupLatLng = LatLng(49.8862, -119.4971);
+          });
         }
+        print(pickupLatLng);
+
+        // Fetch the user document using reserved_by user ID if it exists
+        if (reservedByUserId != null) {
+          final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+              .collection('user')
+              .doc(reservedByUserId)
+              .get();
+
+          if (userSnapshot.exists) {
+            // Extract the user name from the user document
+            final userName = userSnapshot['firstName'];
+            final userLastName = userSnapshot['lastName'];
+            setState(() {
+              reservedByName = userName; // Update the reserved by user name in the UI
+              reservedByLastName = userLastName;
+            });
+          } else {
+            print(
+                'User document does not exist for reserved by user ID: $reservedByUserId');
+          }
+        }
+
+        // Extract post_status and set orderState accordingly
+        final String postStatus = postSnapshot['post_status'];
+        setState(() {
+          switch (postStatus) {
+            case 'pending':
+              orderState = OrderState.reserved;
+              break;
+            case 'confirmed':
+              orderState = OrderState.confirmed;
+              break;
+            case 'delivering':
+              orderState = OrderState.delivering;
+              break;
+            case 'readyToPickUp':
+              orderState = OrderState.readyToPickUp;
+              break;
+          }
+        });
+      } else {
+        // Handle the case where the post details document doesn't exist
+        print('Post details document does not exist for ID: $postId');
       }
-
-      // Extract post_status and set orderState accordingly
-      final String postStatus = postSnapshot['post_status'];
-      setState(() {
-        switch (postStatus) {
-          case 'pending':
-            orderState = OrderState.reserved;
-            break;
-          case 'confirmed':
-            orderState = OrderState.confirmed;
-            break;
-          case 'delivering':
-            orderState = OrderState.delivering;
-            break;
-          case 'readyToPickUp':
-            orderState = OrderState.readyToPickUp;
-            break;
-        }
-      });
-    } else {
-      // Handle the case where the post details document doesn't exist
-      print('Post details document does not exist for ID: $postId');
+    } catch (error) {
+      print('Error fetching reserved by user name: $error');
     }
-  } catch (error) {
-    print('Error fetching reserved by user name: $error');
   }
-}
-
 
   void _updateAdjustedFontSize() {
     adjustedFontSize = _defaultFontSize * _textScaleFactor;
@@ -396,12 +395,23 @@ class _DonorScreenState extends State<DonorScreen> {
                 _handlePostStatus();
               });
             },
-            child: Text(
-              buttonText,
-              style: TextStyle(
-                fontSize: adjustedFontSize,
-                color: CupertinoColors.label,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  FeatherIcons.check,
+                  color: CupertinoColors.systemGreen,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  buttonText,
+                  style: TextStyle(
+                    fontSize: adjustedFontSize,
+                    color: CupertinoColors.label,
+                    fontWeight: FontWeight.w600
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -503,12 +513,23 @@ class _DonorScreenState extends State<DonorScreen> {
           onPressed: () {
             _handleCancelOrder();
           },
-          child: Text(
-            "Cancel Order",
-            style: TextStyle(
-              fontSize: adjustedFontSize,
-              color: CupertinoColors.label,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                FeatherIcons.x,
+                color: CupertinoColors.systemRed,
+              ),
+              SizedBox(width: 8),
+              Text(
+                "Cancel Order",
+                style: TextStyle(
+                  fontSize: adjustedFontSize,
+                  color: CupertinoColors.label,
+                  fontWeight: FontWeight.w600
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -516,33 +537,63 @@ class _DonorScreenState extends State<DonorScreen> {
   }
 
   void _handleCancelOrder() async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('post_details')
-          .doc(widget.postId)
-          .update({
-        'reserved_by': FieldValue.delete(),
-        'post_status': "not reserved"
-      });
-      
-      Navigator.pop(context);
+    // Show a confirmation dialog
+    bool confirmCancel = await showCupertinoDialog(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: Text("Cancel Order"),
+          content: Text("Are you sure you want to cancel this order?"),
+          actions: [
+            CupertinoDialogAction(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.pop(context, false); // Return false to indicate cancel
+              },
+            ),
+            CupertinoDialogAction(
+              child: Text("Confirm"),
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.pop(context, true); // Return true to indicate confirm
+              },
+            ),
+          ],
+        );
+      },
+    );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Order cancelled successfully.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    } catch (error) {
-      print('Error cancelling order: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to cancel order. Please try again.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+    // If the user confirms the cancelation, proceed with canceling the order
+    if (confirmCancel == true) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('post_details')
+            .doc(widget.postId)
+            .update({
+          'reserved_by': FieldValue.delete(),
+          'post_status': "not reserved"
+        });
+
+        Navigator.pop(context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Order cancelled successfully.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } catch (error) {
+        print('Error cancelling order: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to cancel order. Please try again.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
+
 }
 
 class OrderInfoSection extends StatelessWidget {
