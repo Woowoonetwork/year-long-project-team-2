@@ -475,3 +475,34 @@ N/A.
 ### Additional Information
 
 N/A.
+
+
+## Term 2 Week 6: Monday 12th Feb 2024 - Sunday 18th Feb 2024
+
+### Tasks completed (from Project Board)
+
+- Added feature for the mulitple image upload for the post and gallery view of the post.
+- Added the backend logic for image upload and gallery view.
+- Refactored the code further to make it more modular and reusable.
+- Attended weekly meetings and completed the weekly log.
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+
+### Recap of personal goals
+
+- added multiple images upload on create post scree, alt text sheet, image grid.
+- Made image view on the FoodAppBar, photo gallery view when tapped on the photos, each matched with Hero transition.
+- Minor adjustment to the UI from the peer review feedbacks.
+- Improve haptics on the buttons.
+- Adapted components for the new image view.
+- Improve the criterion when creating a post.
+- fixed refresh issues on the account screen.
+- Refractor screens to cohere MVVM model, and added more modularization to the code.
+
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
