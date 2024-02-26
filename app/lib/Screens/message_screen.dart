@@ -1,12 +1,16 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
-import '../auth_service.dart';
-import '../firestore_service.dart';
 
 class MessageScreenPage extends StatefulWidget {
+  final String uid2;
+
+  MessageScreenPage({required this.uid2});
+
   @override
   _MessageScreenPageState createState() => _MessageScreenPageState();
 }
@@ -14,26 +18,43 @@ class MessageScreenPage extends StatefulWidget {
 class _MessageScreenPageState extends State<MessageScreenPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<String> recommendedMessages = [
-    "Sure, see you then!",
-    "On my way.",
-    "Can we reschedule?",
-    "Let me check my calendar.",
-    "Running late, sorry!",
-  ];
-
-  late String myUid;
-  late List<Map<String, Object>> messages = [];
+  late List<Map<String, dynamic>> messages = [];
+  late String userId;
 
   @override
   void initState() {
     super.initState();
+    _initializeMessagingDocument(); // Step 3
+    _getUserID(); // Fetch the user ID
+  }
 
-    // Fetch the user ID when the widget initializes
-    _authService.getUserId().then((userId) {
+  // Step 2: Fetch the user ID
+  void _getUserID() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
       setState(() {
-        myUid = userId ?? ''; // Set the user ID to the variable, defaulting to an empty string if null
+        userId = user.uid;
       });
+    }
+  }
+
+  // Step 3: Initialize the messaging document in Firestore
+  void _initializeMessagingDocument() {
+    // Concatenate userId and uid2 alphabetically
+    String concatenatedString =
+        [userId, widget.uid2].toList()..sort().join();
+
+    // Create a new document in 'messaging' collection
+    FirebaseFirestore.instance.collection('messaging').doc(concatenatedString).set({});
+
+    // Step 5: Listen for updates to the messaging document
+    FirebaseFirestore.instance.collection('messaging').doc(concatenatedString).snapshots().listen((docSnapshot) {
+      if (docSnapshot.exists) {
+        // Update messages when the document is updated
+        setState(() {
+          messages = List<Map<String, dynamic>>.from(docSnapshot.data()?['messages'] ?? []);
+        });
+      }
     });
   }
 
@@ -146,36 +167,35 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
 
   Widget _buildMessagesList() {
     int lastReadMessageIndex = messages
-        .lastIndexWhere((message) => !message["received"] && message["read"]);
+        .lastIndexWhere((message) => message["sender"] == userId);
 
     return Expanded(
       child: ListView.builder(
-        controller: _scrollController, // Use the controller here
+        controller: _scrollController,
 
         itemCount: messages.length,
         itemBuilder: (context, index) {
           final message = messages[index];
-          bool shouldShowReadReceipt = index == lastReadMessageIndex;
+          bool isCurrentUser = message["sender"] == userId;
 
           return Column(
-            crossAxisAlignment: message["received"]
-                ? CrossAxisAlignment.start
-                : CrossAxisAlignment.end,
+            crossAxisAlignment: isCurrentUser
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
             children: [
               _buildMessage(
-                message["text"],
-                received: message["received"],
+                isCurrentUser
+                    ? "You: ${message["text"]}"
+                    : message["text"],
               ),
-              // Show read receipt only for the last read message sent by the user
-              if (shouldShowReadReceipt)
+              if (isCurrentUser)
                 Padding(
                   padding: EdgeInsets.only(
                     top: 4,
-                    right: !message["received"] ? 16 : 0,
-                    left: message["received"] ? 16 : 0,
+                    right: 16,
                   ),
                   child: Text(
-                    "Read",
+                    "Sent ${message["timestamp"]}", // Step 6
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
@@ -189,18 +209,16 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
     );
   }
 
-  Widget _buildMessage(String message, {bool received = true}) {
+  Widget _buildMessage(String message) {
     return Container(
       margin: EdgeInsets.only(
         top: 8,
-        left: received ? 16 : 0,
-        right: received ? 0 : 16,
+        left: 0,
+        right: 0,
       ),
       padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
-        color: received
-            ? CupertinoColors.tertiarySystemFill.resolveFrom(context)
-            : accentColor,
+        color: CupertinoColors.tertiarySystemFill.resolveFrom(context),
         borderRadius: BorderRadius.circular(18.0),
       ),
       child: Text(
@@ -209,9 +227,7 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
           fontSize: 14,
           fontWeight: FontWeight.w500,
           letterSpacing: -0.6,
-          color: received
-              ? CupertinoColors.label.resolveFrom(context)
-              : CupertinoColors.white,
+          color: CupertinoColors.label.resolveFrom(context),
         ),
       ),
     );
@@ -220,7 +236,7 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
   Widget _buildQuickMessageSuggestions() {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      height: 40, // Adjust the height as necessary
+      height: 40,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: recommendedMessages.length,
@@ -261,7 +277,7 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildQuickMessageSuggestions(), // Quick message suggestions row
+          _buildQuickMessageSuggestions(),
           Container(
             margin: EdgeInsets.only(bottom: 16, left: 16, right: 16),
             decoration: BoxDecoration(
@@ -271,11 +287,10 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
             child: TextField(
               controller: _messageController,
               style: TextStyle(
-                fontSize: 16.0, // Custom font size
+                fontSize: 16.0,
                 color: CupertinoColors.label.resolveFrom(context),
-                letterSpacing: -0.6, // Custom letter spacing
-                fontWeight: FontWeight.w400, // Custom font weight
-                // Add any other TextStyle properties you need
+                letterSpacing: -0.6,
+                fontWeight: FontWeight.w400,
               ),
               decoration: InputDecoration(
                 hintText: "Message Harry",
@@ -291,8 +306,7 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
                   onTap: _sendMessage,
                   child: Container(
                     padding: EdgeInsets.all(8),
-                    margin:
-                        EdgeInsets.all(12), // Symmetric padding for the icon
+                    margin: EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: accentColor,
                       borderRadius: BorderRadius.circular(12),
@@ -312,19 +326,33 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
     );
   }
 
+  // Step 4: Modify _sendMessage function
   void _sendMessage() {
     final String messageText = _messageController.text.trim();
     if (messageText.isNotEmpty) {
+      // Step 4: Add new message to Firestore
+      FirebaseFirestore.instance
+          .collection('messaging')
+          .doc([userId, widget.uid2].toList()..sort().join())
+          .update({
+        'messages': FieldValue.arrayUnion([
+          {
+            "text": messageText,
+            "sender": userId,
+            "timestamp": DateTime.now().toString(),
+          }
+        ]),
+      });
+
       setState(() {
         messages.add({
           "text": messageText,
-          "received": false, // Assuming the user is sending the message
-          "read": false, // New messages start as unread
+          "sender": userId,
+          "timestamp": DateTime.now().toString(),
         });
       });
       _messageController.clear();
 
-      // Automatically scroll to the latest message
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
           _scrollController.animateTo(
@@ -335,22 +363,19 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
         }
       });
 
-      // Simulate receiving a reply after a delay
       Future.delayed(Duration(seconds: 2), () {
         setState(() {
           messages.add({
             "text": "Auto-reply to: $messageText",
-            "received": true,
-            "read": true,
+            "sender": widget.uid2,
+            "timestamp": DateTime.now().toString(),
           });
 
-          // Mark the user's last message as read
           if (messages.isNotEmpty) {
             messages[messages.length - 2]["read"] = true;
           }
         });
 
-        // Scroll to the bottom to show the auto-reply
         if (_scrollController.hasClients) {
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,

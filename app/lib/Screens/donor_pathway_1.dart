@@ -15,6 +15,8 @@ const double _defaultHeadingFontSize = 34.0;
 const double _defaultFontSize = 16.0;
 const double _defaultOrderInfoFontSize = 12.0;
 
+late String uid2;
+
 // Define enum to represent different states
 enum OrderState { reserved, confirmed, delivering, readyToPickUp }
 
@@ -60,6 +62,7 @@ class _DonorScreenState extends State<DonorScreen> {
       if (postSnapshot.exists) {
         // Extract the reserved_by user ID from the post details
         final String reservedByUserId = postSnapshot['reserved_by'];
+        uid2 = reservedByUserId;
         pickupLocation = postSnapshot['pickup_location'];
 
         // Fetch the user document using reserved_by user ID
@@ -125,7 +128,7 @@ class _DonorScreenState extends State<DonorScreen> {
                     context,
                     CupertinoPageRoute(
                         builder: (context) =>
-                            MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
+                            MessageScreenPage(uid2: uid2)), // Adjust according to your MessageScreenPage's constructor
                   );
                 },
               )

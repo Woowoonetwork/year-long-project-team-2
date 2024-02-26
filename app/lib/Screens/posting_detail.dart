@@ -14,6 +14,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
 
+  late String uid2;
+
 class PostDetailView extends StatefulWidget {
   final String postId;
   const PostDetailView({Key? key, required this.postId}) : super(key: key);
@@ -47,6 +49,23 @@ class _PostDetailViewState extends State<PostDetailView> {
         isLoading = false;
       });
     });
+
+FirebaseFirestore.instance
+    .collection('post_details')
+    .doc(widget.postId)
+    .get()
+    .then((DocumentSnapshot postSnapshot) {
+  // Check if the document exists and contains the "uid" field
+  if (postSnapshot.exists && postSnapshot.data() != null) {
+    Map<String, dynamic>? data = postSnapshot.data() as Map<String, dynamic>?;
+
+    if (data != null) {
+      setState(() {
+        uid2 = data['user_id'] ?? "";
+      });
+    }
+  }
+});
   }
 
 // Define your colors here
@@ -846,7 +865,7 @@ class PickupInformation extends StatelessWidget {
                 context,
                 CupertinoPageRoute(
                     builder: (context) =>
-                        MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
+                        MessageScreenPage(uid2: uid2)), // Adjust according to your MessageScreenPage's constructor
               );
             },
           ),
