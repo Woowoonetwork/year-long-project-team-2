@@ -22,8 +22,8 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
     "Running late, sorry!",
   ];
 
-  final AuthService _authService = AuthService(FirebaseAuth.instance);
   late String myUid;
+  late List<Map<String, Object>> messages = [];
 
   @override
   void initState() {
