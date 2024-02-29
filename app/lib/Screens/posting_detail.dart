@@ -13,6 +13,8 @@ import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:io' show Platform;
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -27,6 +29,7 @@ class _PostDetailViewState extends State<PostDetailView> {
   AnimationController? _animationController;
   bool isLoading = true; // Added to track loading status
   late String userID;
+  bool isReserved = false;
 
   // Method to initialize userID
   void initializeUserId() {
@@ -80,41 +83,39 @@ class _PostDetailViewState extends State<PostDetailView> {
         return Column(
           children: [
             Expanded(
-              child: RefreshIndicator(
-                  child: CustomScrollView(
-                    physics: BouncingScrollPhysics(),
-                    slivers: [
-                      FoodAppBar(
-                        postId: widget.postId, // Pass postId to the FoodAppBar
-                        isFavorite: viewModel.isFavorite,
-                        onFavoritePressed: _handleFavoritePressed,
-                        imageUrl: viewModel.imageUrl, // Pass the imageUrl here
-// Pass the callback function
-                      ),
-                      SliverList(
-                        delegate: SliverChildListDelegate(
-                          [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildPostTitleSection(),
-                                const SizedBox(height: 16),
-                                _buildDescription(),
-                                const SizedBox(height: 16),
-                                _buildInfoCards(),
-                                _buildPickupInformation(),
-                                const SizedBox(height: 16),
-                                _buildAllergensSection(),
-                                const SizedBox(height: 16),
-                                const SizedBox(height: 16),
-                              ],
-                            ),
+              child: CustomScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  FoodAppBar(
+                    postId: widget.postId,
+                    isFavorite: viewModel.isFavorite,
+                    onFavoritePressed: _handleFavoritePressed,
+                    imagesWithAltText: viewModel
+                        .imagesWithAltText, // Pass the images with alt text
+                  ),
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                      [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildPostTitleSection(),
+                            const SizedBox(height: 16),
+                            _buildDescription(),
+                            const SizedBox(height: 16),
+                            _buildInfoCards(),
+                            _buildPickupInformation(),
+                            const SizedBox(height: 16),
+                            _buildAllergensSection(),
+                            const SizedBox(height: 16),
+                            const SizedBox(height: 16),
                           ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  onRefresh: () => Future.value(true)),
+                ],
+              ),
             ),
             Container(
               padding: EdgeInsets.fromLTRB(16, 12, 16, 32),
@@ -122,7 +123,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                 children: [
                   Expanded(
                     child: ReserveButton(
-                      isReserved: false,
+                      isReserved: isReserved,
                       postId: widget.postId,
                       userId: userID,
                     ),
@@ -209,7 +210,7 @@ class _PostDetailViewState extends State<PostDetailView> {
             ),
           ),
           AvailabilityIndicator(
-              isReserved: false), // Placeholder, update as needed
+              isReserved: isReserved), // Placeholder, update as needed
         ],
       ),
     );
@@ -421,24 +422,20 @@ class IconPlaceholder extends StatelessWidget {
     return Container(
       width: 20,
       height: 20,
-      // decoration: BoxDecoration(
-      //   shape: BoxShape.circle,
-      //   image: DecorationImage(
-      //     fit: BoxFit.cover,
-      //     // Dynamically load image from assets or network
-      //     image: _loadImage(imageUrl),
-      //   ),
-      // ),
       child: ClipOval(
-        child: // use cached network image to load the image
-            CachedNetworkImage(
-          imageUrl: imageUrl,
-          fit: BoxFit.cover,
-          placeholder: (context, url) => CupertinoActivityIndicator(),
-          errorWidget: (context, url, error) =>
-              //AssetImage('assets/images/sampleProfile.png');
-              Image.asset('assets/images/sampleProfile.png'),
-        ),
+        child:
+            // You shouldn't be creating a CachedNetworkImage at all if you don't have an image to load.
+            // check if imageurl is a valid http url
+
+            imageUrl.isNotEmpty && imageUrl.startsWith('http')
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    'assets/images/sampleProfile.png',
+                    fit: BoxFit.cover,
+                  ),
       ),
     );
   }
@@ -802,25 +799,7 @@ class PickupInformation extends StatelessWidget {
             height: 30.0,
             // use cached network image to load the image
             child: //clipoval
-                //   CachedNetworkImage(
-                // imageUrl: viewModel.profileURL,
-                // fit: BoxFit.cover,
-                // placeholder: (context, url) => CupertinoActivityIndicator(),
-                // errorWidget: (context, url, error) => Image.asset(
-                //   'assets/images/sampleProfile.png',
-                //   fit: BoxFit.cover,
-                // ),
-                ClipOval(
-              child: CachedNetworkImage(
-                imageUrl: viewModel.profileURL,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => CupertinoActivityIndicator(),
-                errorWidget: (context, url, error) => Image.asset(
-                  'assets/images/sampleProfile.png',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+                IconPlaceholder(imageUrl: viewModel.profileURL),
           ),
         ),
         Expanded(
@@ -834,7 +813,7 @@ class PickupInformation extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           InfoButton(
             context: context,
@@ -850,17 +829,41 @@ class PickupInformation extends StatelessWidget {
               );
             },
           ),
-          SizedBox(width: 10),
+          SizedBox(width: 0),
           InfoButton(
             context: context,
-            text: 'Navigate to this Place',
+            text: 'Navigate Here',
             icon: FeatherIcons.arrowUpRight,
             iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {},
+            onPressed: () => _launchMapUrl(viewModel.pickupLatLng!),
           ),
         ],
       ),
     );
+  }
+}
+
+Future<void> _launchMapUrl(LatLng locationCoordinates) async {
+  final String googleMapsUrl =
+      'https://www.google.com/maps/search/?api=1&query=${locationCoordinates.latitude},${locationCoordinates.longitude}';
+  final String appleMapsUrl =
+      'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}';
+
+  // Check if the device is running on iOS
+  if (Platform.isIOS) {
+    // Attempt to open Apple Maps
+    if (await canLaunch(appleMapsUrl)) {
+      await launch(appleMapsUrl);
+    } else {
+      throw 'Could not launch $appleMapsUrl';
+    }
+  } else {
+    // Attempt to open Google Maps or the default map application on other devices
+    if (await canLaunch(googleMapsUrl)) {
+      await launch(googleMapsUrl);
+    } else {
+      throw 'Could not launch $googleMapsUrl';
+    }
   }
 }
 
@@ -1081,7 +1084,7 @@ class ReserveButton extends StatefulWidget {
 }
 
 class _ReserveButtonState extends State<ReserveButton> {
-  bool _isReserved = false;
+  late bool _isReserved;
 
   @override
   void initState() {
@@ -1095,7 +1098,7 @@ class _ReserveButtonState extends State<ReserveButton> {
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
-            .update({'reserved_by': widget.userId});
+            .update({'reserved_by': widget.userId, 'post_status': "pending"});
         setState(() {
           _isReserved = true;
         });
@@ -1129,18 +1132,18 @@ class _ReserveButtonState extends State<ReserveButton> {
             letterSpacing: -0.90,
           ),
         ),
-        onPressed: _isReserved
-            ? null
-            : () {
-                _handleReservation();
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                      builder: (context) => DoneePath(
-                            postId: widget.postId,
-                          )),
-                );
-              },
+        onPressed: () {
+          if (!_isReserved) {
+            _handleReservation();
+          }
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+                builder: (context) => DoneePath(
+                      postId: widget.postId,
+                    )),
+          );
+        },
       ),
     );
   }

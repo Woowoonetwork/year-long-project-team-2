@@ -405,17 +405,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   ImageProvider _getProfileImage() {
     if (_profileImagePath.isNotEmpty) {
-      // Check if the path is a local file path
       if (Uri.parse(_profileImagePath).scheme == 'file') {
-        // Use FileImage for local file paths
         return FileImage(File(_profileImagePath));
-      } else {
-        // Assuming _profileImagePath is a URL to a network image
+      } else if (Uri.parse(_profileImagePath).scheme == 'http' ||
+          Uri.parse(_profileImagePath).scheme == 'https') {
         return CachedNetworkImageProvider(_profileImagePath);
       }
     }
-    // Fallback to a local asset image if the network image URL or local file path is empty
-    return AssetImage("assets/images/sampleProfile.png");
+    return AssetImage('assets/images/sampleProfile.png');
   }
 
   Widget _buildTextField(String label, String placeholder,

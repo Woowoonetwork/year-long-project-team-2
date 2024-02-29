@@ -1,14 +1,13 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/donor_pathway_1.dart';
+import 'package:FoodHood/Screens/donor_screen.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui'; // Import this for ImageFilter.blur
-
-import 'package:palette_generator/palette_generator.dart';
+import 'package:FoodHood/components.dart'; // Import this for the Styles class
 
 //Constants for styling
 const double _defaultTextFontSize = 16.0;
@@ -16,12 +15,13 @@ const double _defaultTitleFontSize = 18.0;
 const double _defaultTagFontSize = 10.0;
 const double _defaultOrderInfoFontSize = 12.0;
 const double _defaultStatusFontSize = 13.0;
+const double imageHeight = 140;
 
 enum OrderState { reserved, confirmed, delivering, readyToPickUp }
 
 // ignore: must_be_immutable
 class OrderCard extends StatelessWidget {
-  final String imageLocation;
+  final List<Map<String, String>> imagesWithAltText;
   final String title;
   final List<String> tags;
   final String orderInfo;
@@ -40,7 +40,7 @@ class OrderCard extends StatelessWidget {
 
   OrderCard({
     Key? key,
-    required this.imageLocation,
+    required this.imagesWithAltText,
     required this.title,
     required this.tags,
     required this.orderInfo,
@@ -80,15 +80,6 @@ class OrderCard extends StatelessWidget {
     Navigator.pop(context);
   }
 
-  Future<PaletteGenerator> _updatePaletteGenerator(String imageLocation) async {
-    final PaletteGenerator paletteGenerator =
-        await PaletteGenerator.fromImageProvider(
-      CachedNetworkImageProvider(imageLocation),
-      size: Size(200, 100), // Adjust according to your image size
-    );
-    return paletteGenerator;
-  }
-
   void _onCardTap(BuildContext context) {
     onTap(postId);
     Navigator.push(
@@ -106,7 +97,7 @@ class OrderCard extends StatelessWidget {
         children: [
           Stack(
             children: [
-              _buildImageSection(context, imageLocation),
+              _buildImageSection(context),
               _buildStatusRow(context),
             ],
           ),
@@ -126,31 +117,23 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSection(BuildContext context, String imageLocation) {
-    final isNetworkImage = imageLocation.startsWith('http');
+  Widget _buildImageSection(BuildContext context) {
+    // Use the first image URL if available, otherwise a placeholder
+    final String imageToShow = imagesWithAltText.isNotEmpty
+        ? imagesWithAltText[0]['url'] ?? ''
+        : 'assets/images/sampleFoodPic.jpg';
 
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      child: isNetworkImage
-          ? CachedNetworkImage(
-              imageUrl: imageLocation,
-              width: MediaQuery.of(context).size.width,
-              height: 112,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => CupertinoActivityIndicator(),
-              errorWidget: (context, url, error) => Image.asset(
-                'assets/images/sampleFoodPic.png',
-                width: MediaQuery.of(context).size.width,
-                height: 112,
-                fit: BoxFit.cover,
-              ),
-            )
-          : Image.asset(
-              'assets/images/sampleFoodPic.png',
-              width: MediaQuery.of(context).size.width,
-              height: 112,
-              fit: BoxFit.cover,
-            ),
+      child: CachedNetworkImage(
+        imageUrl: imageToShow,
+        width: MediaQuery.of(context).size.width,
+        height: imageHeight,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => CupertinoActivityIndicator(),
+        errorWidget: (context, url, error) =>
+            buildImageFailedPlaceHolder(context, true),
+      ),
     );
   }
 
@@ -188,15 +171,16 @@ class OrderCard extends StatelessWidget {
   Widget _buildTag(String text, Color color, BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
+      decoration:
+          BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
-          fontSize: adjustedTagFontSize,
-          letterSpacing: -0.40,
-          fontWeight: FontWeight.w600
-        ),
+            color:
+                CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+            fontSize: adjustedTagFontSize,
+            letterSpacing: -0.40,
+            fontWeight: FontWeight.w600),
         overflow: TextOverflow.visible,
       ),
     );
@@ -257,11 +241,9 @@ class OrderCard extends StatelessWidget {
         filter:
             ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur filter
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12, 
-            vertical: 6
-            //vertical: verticalPadding
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6
+              //vertical: verticalPadding
+              ),
           color: CupertinoColors.tertiarySystemBackground
               .resolveFrom(context)
               .withOpacity(0.9), // Semi-transparent white background
@@ -275,10 +257,10 @@ class OrderCard extends StatelessWidget {
                 Text(
                   statusText,
                   style: TextStyle(
-                    color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-                    fontWeight: FontWeight.w500,
-                    fontSize: adjustedStatusFontSize
-                  ),
+                      color: CupertinoDynamicColor.resolve(
+                          CupertinoColors.label, context),
+                      fontWeight: FontWeight.w500,
+                      fontSize: adjustedStatusFontSize),
                   overflow: TextOverflow.visible,
                 ),
               ],
@@ -308,10 +290,10 @@ class OrderCard extends StatelessWidget {
                 Text(
                   'Status',
                   style: TextStyle(
-                    color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-                    fontWeight: FontWeight.w500,
-                    fontSize: adjustedStatusFontSize
-                  ),
+                      color: CupertinoDynamicColor.resolve(
+                          CupertinoColors.label, context),
+                      fontWeight: FontWeight.w500,
+                      fontSize: adjustedStatusFontSize),
                   overflow: TextOverflow.visible,
                 ),
                 const SizedBox(width: 4),

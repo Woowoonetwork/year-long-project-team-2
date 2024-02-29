@@ -113,6 +113,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             [AutofillHints.password],
             errorText: _passwordErrorText),
         const SizedBox(height: 16),
+        buildText(
+            'Password must be at least 8 letters long, contain at least one upper case letter, at least one lower case letter, and at least one number.', 18, FontWeight.w300),
         buildCupertinoTextField('Confirm Password', _confPasswordController,
             true, context, [AutofillHints.password],
             errorText: _confPasswordErrorText), // Confirm password text field
@@ -269,6 +271,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       _confPasswordErrorText = 'The passwords do not match.';
       isFormValid = false;
     }
+
+//updated validation rules for password
+if (_passwordController.text.length < 8 ||
+    !_passwordController.text.contains(RegExp(r'[a-z]')) ||
+    !_passwordController.text.contains(RegExp(r'[A-Z]')) ||
+    !_passwordController.text.contains(RegExp(r'[0-9]'))) {
+      _passwordErrorText = "Password is weak. Password must be at least 8 letters long, contain at least one upper case letter, at least one lower case letter, and at least one number.";
+      isFormValid = false;
+}
 
     bool isValidForm = _formKey.currentState?.validate() ?? false;
     isFormValid = isFormValid && isValidForm;
