@@ -4,6 +4,7 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
+import 'package:flutter/material.dart';
 
 class Styles {
   static TextStyle titleStyle = TextStyle(
@@ -131,7 +132,8 @@ Widget buildCupertinoTextField(
     bool obscureText,
     BuildContext context,
     List<String> autofillHints,
-    {String? errorText, Function(String)? liveValidation}) {
+    {String? errorText,
+    Function(String)? liveValidation}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -180,7 +182,6 @@ Widget buildCupertinoTextField(
   );
 }
 
-
 Widget buildText(String text, double fontSize, FontWeight fontWeight) {
   return Text(
     text,
@@ -226,7 +227,7 @@ Widget buildSignUpText(
             TextSpan(
               text: link,
               style: TextStyle(
-                color: CupertinoColors.systemCyan ,
+                color: CupertinoColors.systemCyan,
                 fontWeight: FontWeight.w500,
                 letterSpacing: -0.20,
               ),
@@ -250,3 +251,37 @@ Widget buildCenteredText(String text, double fontSize, FontWeight fontWeight) {
     ),
   );
 }
+
+Widget buildImageFailedPlaceHolder(BuildContext context, bool isCompact) {
+  return isCompact
+      ? Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.broken_image_rounded,
+                size: 40,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+          ],
+        )
+      : Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(padding: EdgeInsets.only(top: 80)),
+            //broken image icon
+            Icon(Icons.broken_image_rounded,
+                size: 60,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+            SizedBox(height: 8.0), // Add some spacing
+            Text(
+              'Image failed to load',
+              style: TextStyle(
+                  fontSize: 16,
+                  letterSpacing: -0.5,
+                  fontWeight: FontWeight.w500,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+            )
+          ],
+        );
+}
+
