@@ -6,10 +6,10 @@ import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui'; // Import this for ImageFilter.blur
-import 'package:FoodHood/components.dart'; // Import this for the Styles class
+import 'dart:ui';
+import 'package:FoodHood/components.dart';
+import 'package:flutter/material.dart';
 
-//Constants for styling
 const double _defaultTextFontSize = 16.0;
 const double _defaultTitleFontSize = 18.0;
 const double _defaultTagFontSize = 10.0;
@@ -17,7 +17,7 @@ const double _defaultOrderInfoFontSize = 12.0;
 const double _defaultStatusFontSize = 13.0;
 const double imageHeight = 140;
 
-enum OrderState { reserved, confirmed, delivering, readyToPickUp }
+enum OrderState { reserved, confirmed, delivering, readyToPickUp, pending }
 
 // ignore: must_be_immutable
 class OrderCard extends StatelessWidget {
@@ -118,28 +118,46 @@ class OrderCard extends StatelessWidget {
   }
 
   Widget _buildImageSection(BuildContext context) {
-    // Use the first image URL if available, otherwise a placeholder
     final String imageToShow = imagesWithAltText.isNotEmpty
         ? imagesWithAltText[0]['url'] ?? ''
         : 'assets/images/sampleFoodPic.jpg';
 
-    return ClipRRect(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      child: CachedNetworkImage(
-        imageUrl: imageToShow,
-        width: MediaQuery.of(context).size.width,
-        height: imageHeight,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => CupertinoActivityIndicator(),
-        errorWidget: (context, url, error) =>
-            buildImageFailedPlaceHolder(context, true),
-      ),
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+          child: CachedNetworkImage(
+            imageUrl: imageToShow,
+            width: MediaQuery.of(context).size.width,
+            height: imageHeight,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => CupertinoActivityIndicator(),
+            errorWidget: (context, url, error) =>
+                buildImageFailedPlaceHolder(context, true),
+          ),
+        ),
+        Container(
+          height: imageHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.grey.withOpacity(0.4),
+                Colors.transparent,
+              ],
+              stops: [0.0, 0.5],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildTitleSection(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Text(title,
           style: TextStyle(
               color:
@@ -152,7 +170,7 @@ class OrderCard extends StatelessWidget {
 
   Widget _buildTagSection(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Wrap(
         spacing: 7,
         children: tags
@@ -227,26 +245,27 @@ class OrderCard extends StatelessWidget {
         break;
       case OrderState.delivering:
         statusText = 'Delivering';
-        statusColor = CupertinoColors.systemOrange;
+        statusColor = CupertinoColors.systemBlue;
         break;
       case OrderState.readyToPickUp:
         statusText = 'Ready to Pick Up';
-        statusColor = CupertinoColors.systemCyan;
+        statusColor = CupertinoColors.systemGreen;
+        break;
+      case OrderState.pending:
+        statusText = 'Pending';
+        statusColor = CupertinoColors.systemOrange;
         break;
     }
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
-        filter:
-            ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur filter
+        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6
-              //vertical: verticalPadding
-              ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           color: CupertinoColors.tertiarySystemBackground
               .resolveFrom(context)
-              .withOpacity(0.9), // Semi-transparent white background
+              .withOpacity(0.9),
           child: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () => _handleStatusPress(context),
@@ -278,10 +297,8 @@ class OrderCard extends StatelessWidget {
         filter:
             ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur filter
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          color: CupertinoColors.tertiarySystemBackground
-              .resolveFrom(context)
-              .withOpacity(0.9), // Semi-transparent white background
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
           child: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () => _handleStatusPress(context),

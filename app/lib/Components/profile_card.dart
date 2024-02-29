@@ -115,13 +115,13 @@ class _ProfileCardState extends State<ProfileCard> {
   Widget profileImage() {
     return CachedNetworkImage(
       imageUrl: photo,
-      width: 60,
-      height: 60,
+      width: 80,
+      height: 80,
       placeholder: (context, url) => CupertinoActivityIndicator(),
       errorWidget: (context, url, error) => Image.asset(
         'assets/images/sampleProfile.png',
-        width: 60,
-        height: 60,
+        width: 70,
+        height: 70,
       ),
     );
   }

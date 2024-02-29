@@ -46,6 +46,8 @@ class _AccountScreenState extends State<AccountScreen> {
 
   void setUpPostStreamListener() {
     String currentUserUID = getCurrentUserUID();
+
+    // Active Orders Stream
     FirebaseFirestore.instance
         .collection('post_details')
         .where('user_id', isEqualTo: currentUserUID)
@@ -53,35 +55,46 @@ class _AccountScreenState extends State<AccountScreen> {
         .snapshots()
         .listen((snapshot) {
       if (mounted) {
-        if (snapshot.docs.isEmpty) {
-          print('No posts found for the current user.');
-        } else {
-          // Update the active orders if posts are available
-          updateActiveOrders(snapshot.docs);
-        }
+        updateActiveOrders(snapshot.docs);
       }
-    }, onError: (error) {
-      if (error is FirebaseException && error.code == 'failed-precondition') {
-        print('No Post Details index found.');
-      } else {
-        print('Error listening to post changes: $error');
-      }
-    });
+    }, onError: (error) => print('Error listening to active orders: $error'));
 
-    // // Subscribe to changes in the entire collection to refresh the page when any new post is added
-    // FirebaseFirestore.instance
-    //     .collection('post_details')
-    //     .orderBy('post_timestamp', descending: true)
-    //     .snapshots()
-    //     .listen((snapshot) {
-    //   if (mounted) {
-    //     // Refresh the page when any new post is added but the UI will only be updated for the current user's posts
-    //     if (snapshot.docs.isNotEmpty) {
-    //       updateActiveOrders(snapshot.docs);
-    //     }
-    //   }
-    // });
+    // Past Orders Stream
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .where('user_id', isEqualTo: currentUserUID)
+        .where('status', isEqualTo: 'past') // Adjust based on your schema
+        .orderBy('post_timestamp', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      if (mounted) {
+        updatePastOrders(snapshot.docs);
+      }
+    }, onError: (error) => print('Error listening to past orders: $error'));
   }
+
+  void updatePastOrders(List<QueryDocumentSnapshot> documents) {
+    setState(() {
+      pastOrders = documents
+          .map((doc) =>
+              createOrderCard(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
+    });
+  }
+
+  // // Subscribe to changes in the entire collection to refresh the page when any new post is added
+  // FirebaseFirestore.instance
+  //     .collection('post_details')
+  //     .orderBy('post_timestamp', descending: true)
+  //     .snapshots()
+  //     .listen((snapshot) {
+  //   if (mounted) {
+  //     // Refresh the page when any new post is added but the UI will only be updated for the current user's posts
+  //     if (snapshot.docs.isNotEmpty) {
+  //       updateActiveOrders(snapshot.docs);
+  //     }
+  //   }
+  // });
 
   void _updateAdjustedFontSize() {
     adjustedTextFontSize = _defaultTextFontSize * _textScaleFactor;
@@ -103,14 +116,9 @@ class _AccountScreenState extends State<AccountScreen> {
   void updateActiveOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
       activeOrders = documents.map((doc) {
-        var data = doc.data();
+        var data = doc.data() as Map<String, dynamic>;
         var postId = doc.id;
-        if (data is Map<String, dynamic>) {
-          return createOrderCard(data, postId);
-        } else {
-          print('Document data is not a Map<String, dynamic>');
-          return SizedBox.shrink();
-        }
+        return createOrderCard(data, postId);
       }).toList();
     });
   }
@@ -139,8 +147,25 @@ class _AccountScreenState extends State<AccountScreen> {
       postId: postId,
       onTap: _onOrderCardTap,
       imagesWithAltText: imagesWithAltText,
-      orderState: OrderState.confirmed,
+      orderState: getOrderState(documentData['post_status'] as String? ?? ''),
     );
+  }
+
+  OrderState getOrderState(String status) {
+    switch (status) {
+      case 'not reserved':
+        return OrderState.pending;
+      case 'confirmed':
+        return OrderState.confirmed;
+      case 'delivering':
+        return OrderState.delivering;
+      case 'readyToPickUp':
+        return OrderState.readyToPickUp;
+      case 'reserved':
+        return OrderState.reserved;
+      default:
+        return OrderState.pending;
+    }
   }
 
   String getCurrentUserUID() {
@@ -281,10 +306,9 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-// Method to build the placeholder text when there are no orders
   SliverFillRemaining _buildPlaceholderText() {
     return SliverFillRemaining(
-      hasScrollBody: false, // Prevents the sliver from being scrollable
+      hasScrollBody: false,
       child: SizedBox(
         height: 50,
         child: Container(

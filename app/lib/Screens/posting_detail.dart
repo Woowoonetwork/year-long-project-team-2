@@ -815,27 +815,31 @@ class PickupInformation extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          InfoButton(
-            context: context,
-            text: 'Ask for more info',
-            icon: FeatherIcons.messageCircle,
-            iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(
-                    builder: (context) =>
-                        MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
-              );
-            },
+          Expanded(
+            child: InfoButton(
+              context: context,
+              text: 'Ask for more info',
+              icon: FeatherIcons.messageCircle,
+              iconColor: CupertinoColors.label.resolveFrom(context),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) =>
+                          MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
+                );
+              },
+            ),
           ),
-          SizedBox(width: 0),
-          InfoButton(
-            context: context,
-            text: 'Navigate Here',
-            icon: FeatherIcons.arrowUpRight,
-            iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () => _launchMapUrl(viewModel.pickupLatLng!),
+          SizedBox(width: 16),
+          Expanded(
+            child: InfoButton(
+              context: context,
+              text: 'Navigate Here',
+              icon: FeatherIcons.arrowUpRight,
+              iconColor: CupertinoColors.label.resolveFrom(context),
+              onPressed: () => _launchMapUrl(viewModel.pickupLatLng!),
+            ),
           ),
         ],
       ),

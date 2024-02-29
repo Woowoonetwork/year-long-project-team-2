@@ -37,7 +37,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
       selectedCategories = [],
       selectedPickupLocation = [];
   LatLng? selectedLocation;
-  Set<Marker> _markers = {};
   Map<String, String> _selectedImagesWithAltText = {};
   CreatePostViewModel viewModel = CreatePostViewModel();
   double _defaultFontSize = 16.0;
@@ -45,11 +44,25 @@ class _CreatePostPageState extends State<CreatePostScreen>
   double adjustedFontSize = 16.0;
   LatLng? initialLocation;
   GoogleMapController? mapController;
-  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
+    titleController.addListener(() {
+      final text = titleController.text;
+      titleController.value = titleController.value.copyWith(
+        text: text.capitalize(),
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+    });
+
+    descController.addListener(() {
+      final text = descController.text;
+      descController.value = descController.value.copyWith(
+        text: text.capitalize(),
+        selection: TextSelection.collapsed(offset: text.length),
+      );
+    });
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
@@ -84,9 +97,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
   }
 
   void _updateMarker(LatLng position) {
-    setState(() => _markers = {
-          Marker(markerId: MarkerId('centerMarker'), position: position)
-        });
   }
 
   Future<void> _pickImage() async {
@@ -145,7 +155,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
       return;
     }
 
-    setState(() => _isSaving = true); // Start loading
+// Start loading
     showLoadingDialog(context); // Show loading indicator
 
     try {
@@ -173,15 +183,15 @@ class _CreatePostPageState extends State<CreatePostScreen>
       );
       if (success) {
         if (mounted) {
-          setState(() => _isSaving = false); // Stop loading
+// Stop loading
           Navigator.pop(context); // Close loading indicator
         }
         Navigator.pop(context); // Close the create post screen
         showCupertinoDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: Text("Success"),
-            content: Text("Post saved successfully."),
+            title: Text("Post published"),
+            content: Text("Your post has been posted successfully."),
             actions: [
               CupertinoDialogAction(
                 child: Text('OK'),
@@ -205,7 +215,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
           ],
         ),
       );
-   
     }
   }
 
@@ -369,17 +378,17 @@ class _CreatePostPageState extends State<CreatePostScreen>
           onPressed: () => _pickImage(),
           padding: EdgeInsets.zero,
           child: Container(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
+            padding: EdgeInsets.symmetric(vertical: 14.0),
             decoration: BoxDecoration(
               color: accentColor,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(100),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.add_photo_alternate_rounded,
-                  size: 30,
+                  size: 28,
                   color: CupertinoColors.white,
                 ),
                 SizedBox(width: 10),
@@ -655,5 +664,13 @@ class _CreatePostPageState extends State<CreatePostScreen>
         ),
       ),
     );
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return split(' ')
+        .map((str) => str[0].toUpperCase() + str.substring(1))
+        .join(' ');
   }
 }

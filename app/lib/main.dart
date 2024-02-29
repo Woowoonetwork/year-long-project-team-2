@@ -23,9 +23,7 @@ import 'package:provider/provider.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 void main() async {
-  // Initialize Firebase
   WidgetsFlutterBinding.ensureInitialized();
-  // make status bar transparent and nav bar transparent
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -34,21 +32,11 @@ void main() async {
   ));
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Call the function to add a pre-defined list of allergens and categories
   await addAllergensCategoriesAndPL();
 
-  // Run the app
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown
-  ]) // Restrict orientation to portrait
-      .then((_) {
-    //runApp(FoodHoodApp());
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(
-      // ChangeNotifierProvider(
-      //   create: (context) => TextScaleProvider(),
-      //   child: FoodHoodApp(),
-      // ),
       MultiProvider(
         providers: [
           ChangeNotifierProvider<TextScaleProvider>(
@@ -72,16 +60,9 @@ class FoodHoodApp extends StatelessWidget {
       ],
       theme: CupertinoThemeData(
         textTheme: CupertinoTextThemeData(
-          // textStyle: TextStyle(
-          //     fontSize: 16,
-          //     fontStyle: FontStyle.normal,
-          //     fontWeight: FontWeight.normal,
-          //     overflow: TextOverflow.visible,
-          //     color: CupertinoColors.label
-          // ),
           navLargeTitleTextStyle: TextStyle(
               fontSize: 34,
-              letterSpacing: -1.3,
+              letterSpacing: -1.4,
               fontStyle: FontStyle.normal,
               fontWeight: FontWeight.bold,
               color: CupertinoColors.label),

@@ -7,6 +7,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:FoodHood/Screens/photo_gallery_screen.dart';
+import 'package:palette_generator/palette_generator.dart';
+import 'package:flutter/services.dart';
 
 class FoodAppBar extends StatefulWidget {
   final String postId;
@@ -28,6 +30,7 @@ class FoodAppBar extends StatefulWidget {
 
 class _FoodAppBarState extends State<FoodAppBar> {
   final PageController _pageController = PageController();
+  final List<PaletteGenerator?> _paletteGenerators = [];
 
   bool _showIndicator = false;
 
@@ -35,6 +38,17 @@ class _FoodAppBarState extends State<FoodAppBar> {
   void initState() {
     super.initState();
     _pageController.addListener(_scrollListener);
+    _generatePaletteGenerators(); // Call this method in initState
+  }
+
+  void _generatePaletteGenerators() async {
+    for (var imageData in widget.imagesWithAltText) {
+      final PaletteGenerator generator =
+          await PaletteGenerator.fromImageProvider(
+        CachedNetworkImageProvider(imageData['url']!),
+      );
+      _paletteGenerators.add(generator);
+    }
   }
 
   @override
@@ -54,6 +68,21 @@ class _FoodAppBarState extends State<FoodAppBar> {
           setState(() => _showIndicator = false);
         }
       });
+      _updateStatusBarColor(_pageController.page!.round());
+    }
+  }
+
+  void _updateStatusBarColor(int pageIndex) {
+    if (pageIndex < _paletteGenerators.length &&
+        _paletteGenerators[pageIndex] != null) {
+      PaletteColor? dominantColor =
+          _paletteGenerators[pageIndex]!.dominantColor;
+      if (dominantColor != null) {
+        SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+          statusBarColor: dominantColor.color, // Dominant color of the image
+          statusBarIconBrightness: Brightness.light, // Ensure icons are visible
+        ));
+      }
     }
   }
 
@@ -108,27 +137,46 @@ class _FoodAppBarState extends State<FoodAppBar> {
   }
 
   Widget _buildBackgroundImage() {
-    return PageView.builder(
-      controller: _pageController,
-      itemCount: widget.imagesWithAltText.length,
-      itemBuilder: (context, index) {
-        final String imageUrl = widget.imagesWithAltText[index]['url']!;
-        return GestureDetector(
-          onTap: () => _openPhotoGalleryView(context, index),
-          child: Hero(
-            tag: 'imageHero${widget.imagesWithAltText[index]['url']}',
-            child: CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => CupertinoActivityIndicator(),
-              errorWidget: (context, url, error) => Icon(
-                  Icons.broken_image_rounded,
-                  color: CupertinoColors.systemGrey.resolveFrom(context),
-                  size: 60),
+    return Stack(
+      children: [
+        PageView.builder(
+          controller: _pageController,
+          itemCount: widget.imagesWithAltText.length,
+          itemBuilder: (context, index) {
+            final String imageUrl = widget.imagesWithAltText[index]['url']!;
+            return GestureDetector(
+              onTap: () => _openPhotoGalleryView(context, index),
+              child: Hero(
+                tag: 'imageHero${widget.imagesWithAltText[index]['url']}',
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => CupertinoActivityIndicator(),
+                  errorWidget: (context, url, error) => Icon(
+                      Icons.broken_image_rounded,
+                      color: CupertinoColors.systemGrey.resolveFrom(context),
+                      size: 60),
+                ),
+              ),
+            );
+          },
+        ),
+        // Gradient overlay with IgnorePointer
+        IgnorePointer(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.2), // Start color of the gradient
+                  Colors.transparent, // End color of the gradient
+                ],
+              ),
             ),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 

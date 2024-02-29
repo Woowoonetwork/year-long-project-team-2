@@ -76,7 +76,7 @@ class ImageTile extends StatelessWidget {
                         size: 16,
                         color: CupertinoColors.label
                             .resolveFrom(context)
-                            .withOpacity(0.8),
+                            .withOpacity(0.9),
                       ),
                       onTap: onRemove,
                     ),
@@ -102,7 +102,7 @@ class ImageTile extends StatelessWidget {
                             ? blue
                             : CupertinoColors.systemGrey6
                                 .resolveFrom(context)
-                                .withOpacity(0.8)),
+                                .withOpacity(0.9)),
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       child: Text(

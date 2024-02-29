@@ -12,16 +12,16 @@ import 'package:provider/provider.dart';
 
 const double _defaultFontSize = 16.0;
 
-class EditProfilePage extends StatefulWidget {
+class EditProfileScreen extends StatefulWidget {
   final Function? onProfileUpdated;
 
-  EditProfilePage({this.onProfileUpdated});
+  EditProfileScreen({this.onProfileUpdated});
 
   @override
-  _EditProfilePageState createState() => _EditProfilePageState();
+  _EditProfileScreenState createState() => _EditProfileScreenState();
 }
 
-class _EditProfilePageState extends State<EditProfilePage> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _aboutMeController = TextEditingController();
@@ -39,7 +39,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     _fetchUserDetails();
-    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _textScaleFactor =
+        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
   }
 
@@ -156,9 +157,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   CupertinoColors.label, context))),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
-        child: Text('Save',
+        child: Text(
+          'Save',
           style: TextStyle(
-            color: accentColor, 
+            color: accentColor,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -380,12 +382,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           'Upload Profile Picture',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: adjustedFontSize,
-                            color: CupertinoDynamicColor.resolve(
-                                CupertinoColors.label, context),
-                            letterSpacing: -0.60,
-                            fontWeight: FontWeight.w500
-                          ),
+                              fontSize: adjustedFontSize,
+                              color: CupertinoDynamicColor.resolve(
+                                  CupertinoColors.label, context),
+                              letterSpacing: -0.60,
+                              fontWeight: FontWeight.w500),
                           overflow: TextOverflow.visible,
                         ),
                       ),
@@ -425,11 +426,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
           Text(
             label,
             style: TextStyle(
-              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: adjustedFontSize,
-              letterSpacing: -0.40,
-              fontWeight: FontWeight.w500
-            ),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
+                fontSize: adjustedFontSize,
+                letterSpacing: -0.40,
+                fontWeight: FontWeight.w500),
           ),
           SizedBox(height: 8),
           CupertinoTextField(
@@ -437,16 +438,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
             padding: EdgeInsets.all(16.0),
             placeholder: placeholder,
             style: TextStyle(
-              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: adjustedFontSize,
-              fontWeight: FontWeight.w500
-            ),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
+                fontSize: adjustedFontSize,
+                fontWeight: FontWeight.w500),
             placeholderStyle: TextStyle(
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.placeholderText, context),
-              fontSize: adjustedFontSize,
-              fontWeight: FontWeight.w500
-            ),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.placeholderText, context),
+                fontSize: adjustedFontSize,
+                fontWeight: FontWeight.w500),
             decoration: BoxDecoration(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.tertiarySystemBackground, context),
@@ -469,8 +469,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             label,
             style: TextStyle(
               letterSpacing: -0.60,
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.label, context),
+              color:
+                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
               fontSize: adjustedFontSize,
               fontWeight: FontWeight.w500,
             ),
@@ -489,12 +489,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 fontWeight: FontWeight.w500,
               ),
               decoration: BoxDecoration(
-                color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemBackground, context),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.tertiarySystemBackground, context),
                 borderRadius: BorderRadius.circular(12),
               ),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
                 fontSize: adjustedFontSize,
                 fontWeight: FontWeight.w500,
               ),
@@ -520,8 +522,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             label,
             style: TextStyle(
               letterSpacing: -0.60,
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.label, context),
+              color:
+                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
               fontSize: adjustedFontSize,
               fontWeight: FontWeight.w500,
             ),
@@ -539,17 +541,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
               children: [
                 Expanded(
                   child: Text(
-                      currentValue,
-                      style: TextStyle(
-                        color: currentValue == label
-                            ? CupertinoDynamicColor.resolve(
-                                CupertinoColors.placeholderText, context)
-                            : CupertinoDynamicColor.resolve(
-                                CupertinoColors.label, context),
-                        fontSize: adjustedFontSize,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    currentValue,
+                    style: TextStyle(
+                      color: currentValue == label
+                          ? CupertinoDynamicColor.resolve(
+                              CupertinoColors.placeholderText, context)
+                          : CupertinoDynamicColor.resolve(
+                              CupertinoColors.label, context),
+                      fontSize: adjustedFontSize,
+                      fontWeight: FontWeight.w500,
                     ),
+                  ),
                 ),
                 Icon(FeatherIcons.chevronDown,
                     size: 18,

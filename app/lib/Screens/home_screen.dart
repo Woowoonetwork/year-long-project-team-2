@@ -494,7 +494,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () => _openCreatePostScreen(context),
               padding: EdgeInsets.all(16.0),
               color: accentColor,
-              child: Icon(FeatherIcons.plus,
+              child: Icon(CupertinoIcons.add,
                   color: CupertinoColors.white, size: 30),
               borderRadius: BorderRadius.circular(40.0),
             ),
@@ -505,27 +505,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openCreatePostScreen(BuildContext context) {
-    Navigator.of(context).push(PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          CreatePostScreen(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(0.0, 1.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOutCubic;
-
-        var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
-      },
-      transitionDuration: Duration(milliseconds: 500), // Customize the duration
-      // The reverse transition duration can also be customized (optional)
-      reverseTransitionDuration: Duration(milliseconds: 500),
-    ));
+    Navigator.of(context).push(
+     CupertinoModalPopupRoute(
+        builder: (context) => CreatePostScreen(),
+      ),
+    );
   }
 
   String timeAgoSinceDate(DateTime dateTime) {
