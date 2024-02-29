@@ -21,7 +21,6 @@ class SavedScreen extends StatefulWidget {
 class _SavedScreenState extends State<SavedScreen> {
   final String userId = FirebaseAuth.instance.currentUser!.uid;
   List<String> savedPostIds = [];
-  List<String> filteredPostIds = []; // Added for filtered post IDs
   bool isLoading = true;
   StreamSubscription? _savedPostsSubscription;
 
@@ -30,24 +29,25 @@ class _SavedScreenState extends State<SavedScreen> {
   late double adjustedPostCountFontSize;
 
   @override
-  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: groupedBackgroundColor,
       child: CustomScrollView(
         slivers: <Widget>[
           _buildNavigationBar(),
-          if (isLoading)
+          if (isLoading) // If it's loading, show the loading indicator
             _buildLoadingSliver()
-          else if (filteredPostIds.isEmpty) // Use filteredPostIds here
+          else if (savedPostIds
+              .isEmpty) // If there are no saved posts, show the empty message
             _buildNoSavedPostsMessage()
-          else
-            _buildSavedPostsList(filteredPostIds), // Use filteredPostIds here
+          else // If there are saved posts, show the list
+            _buildSavedPostsList(savedPostIds),
         ],
       ),
     );
   }
 
+  @override
   void initState() {
     super.initState();
     _fetchSavedPosts();
@@ -70,16 +70,6 @@ class _SavedScreenState extends State<SavedScreen> {
         await FirebaseFirestore.instance.collection('user').doc(userId).get();
     if (document.exists && document.data()!.containsKey('saved_posts')) {
       savedPostIds = List<String>.from(document.data()!['saved_posts']);
-      filteredPostIds.clear(); // Clear previous data
-      await Future.forEach(savedPostIds, (String postId) async {
-        var postDoc = await FirebaseFirestore.instance
-            .collection('post_details')
-            .doc(postId)
-            .get();
-        if (!postDoc.exists || !postDoc.data()!.containsKey('reserved_by')) {
-          filteredPostIds.add(postId); // Add post if it's not reserved
-        }
-      });
     }
     if (mounted) {
       setState(() => isLoading = false);
@@ -131,22 +121,23 @@ class _SavedScreenState extends State<SavedScreen> {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
+          // Check if the current index is the last item in the list
           if (index < savedPostIds.length) {
             return _buildPostItem(context, savedPostIds[index]);
           } else if (index == savedPostIds.length && savedPostIds.isNotEmpty) {
+            // If it's the last item and the list is not empty, display the post count
             return Column(
               children: [
-                _buildPostCountIndicator(), // Now dynamically reflects the filtered list size
+                _buildPostCountIndicator(savedPostIds.length),
                 SizedBox(height: 100),
               ],
             );
           }
-          return null;
+          return null; // Return null for indices beyond the data range
         },
         childCount: savedPostIds.isEmpty
             ? 0
-            : savedPostIds.length +
-                1, // Account for the dynamically added post count indicator
+            : savedPostIds.length + 1, // Add +1 for the post count indicator
       ),
     );
   }
@@ -157,52 +148,70 @@ class _SavedScreenState extends State<SavedScreen> {
           .collection('post_details')
           .doc(postId)
           .get(),
-      builder:
-          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        // Check for data existence and handle null or error states
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-              child:
-                  CupertinoActivityIndicator()); // Show a loading indicator while waiting
-        }
+      builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return SizedBox.shrink(); // If no data exists, return an empty space
+          return SizedBox
+              .shrink(); // No post details exist, return an empty widget
         }
 
-        // Explicitly cast the snapshot data to a Map<String, dynamic>
         var postData = snapshot.data!.data() as Map<String, dynamic>?;
-        if (postData == null || postData.containsKey('reserved_by')) {
-          // If postData is null or contains 'reserved_by', do not display it
-          return SizedBox.shrink();
+        if (postData == null) {
+          return SizedBox.shrink(); // Post data is null, return an empty widget
         }
 
-        // Fetch the user data for the post
+        // Extract the first image URL from the imagesWithAltText list
+        List<Map<String, String>> imagesWithAltText = [];
+        if (postData.containsKey('images') && postData['images'] is List) {
+          imagesWithAltText = List<Map<String, String>>.from(
+            (postData['images'] as List).map((image) {
+              return {
+                'url': image['url'] as String? ?? '',
+                'alt_text': image['alt_text'] as String? ?? '',
+              };
+            }),
+          );
+        }
+
         return FutureBuilder<DocumentSnapshot>(
           future: FirebaseFirestore.instance
               .collection('user')
-              .doc(postData['user_id'] as String)
+              .doc(postData['user_id'])
               .get(),
-          builder: (BuildContext context,
-              AsyncSnapshot<DocumentSnapshot> userSnapshot) {
-            if (userSnapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                  child:
-                      CupertinoActivityIndicator()); // Show a loading indicator while waiting
-            }
+          builder: (context, userSnapshot) {
             if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
               return SizedBox
-                  .shrink(); // If no user data exists, return an empty space
+                  .shrink(); // No user data exists, return an empty widget
             }
 
-            // Explicitly cast the userSnapshot data to a Map<String, dynamic>
-            var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+            var userData = userSnapshot.data!.data() as Map<String, dynamic>?;
             if (userData == null) {
               return SizedBox
-                  .shrink(); // If userData is null, return an empty space
+                  .shrink(); // User data is null, return an empty widget
             }
 
-            // Now that we have both postData and userData, we can build and return the post card widget
-            return _buildPostCard(postData, userData, postId);
+            // Now we can safely use postData and userData, knowing they're not null and are properly formatted
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: PostCard(
+                imagesWithAltText: imagesWithAltText,
+                title: postData['title'] ?? 'No Title',
+                tags: (postData['categories'] as String)
+                    .split(',')
+                    .map((tag) => tag.trim())
+                    .toList(),
+                tagColors: _assignedColors(),
+                firstname: userData['firstName'] ?? 'Unknown',
+                lastname: userData['lastName'] ?? 'Unknown',
+                timeAgo: timeAgoSinceDate(
+                    (postData['post_timestamp'] as Timestamp).toDate()),
+                onTap: (postId) => _onPostCardTap(postId),
+                postId: postId,
+                profileURL: userData['profileImagePath'] ?? '',
+                showTags: true, // Assuming showTags is true by default
+                imageHeight: 100.0, // Assuming a default height
+                showShadow: false, // Assuming no shadow by default
+              ),
+            );
           },
         );
       },
@@ -236,34 +245,9 @@ class _SavedScreenState extends State<SavedScreen> {
     );
   }
 
-// Updated _buildPostCard method to include postId as a parameter
-  Widget _buildPostCard(Map<String, dynamic> postData,
-      Map<String, dynamic> userData, String postId) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: PostCard(
-        imageLocation: postData['image_url'] ?? '',
-        title: postData['title'] ?? 'No Title',
-        tags: (postData['categories'] as String)
-            .split(',')
-            .map((tag) => tag.trim())
-            .toList(),
-        tagColors: _assignedColors(),
-        firstname: userData['firstName'] ?? 'Unknown',
-        lastname: userData['lastName'] ?? 'Unknown',
-        timeAgo: timeAgoSinceDate(
-            (postData['post_timestamp'] as Timestamp).toDate()),
-        onTap: _onPostCardTap, // Using postId directly
-        postId: postId, // Using postId directly
-        profileURL:
-            userData['profileImagePath'] ?? 'assets/images/sampleProfile.png',
-      ),
-    );
-  }
-
-  Widget _buildPostCountIndicator() {
-    String postCountText = '${filteredPostIds.length} Bookmarked ' +
-        (filteredPostIds.length == 1 ? 'Post' : 'Posts');
+  Widget _buildPostCountIndicator(int postCount) {
+    String postCountText =
+        '$postCount Bookmarked ' + (postCount > 1 ? 'Posts' : 'Post');
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Center(
