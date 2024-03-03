@@ -41,8 +41,9 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
   // Step 3: Initialize the messaging document in Firestore
   void _initializeMessagingDocument() {
     // Concatenate userId and uid2 alphabetically
-    String concatenatedString =
-        [userId, widget.uid2].toList()..sort().join();
+List<String> userIDs = [userId, widget.uid2].toList();
+userIDs.sort();
+    String concatenatedString = userIDs.join();
 
     // Create a new document in 'messaging' collection
     FirebaseFirestore.instance.collection('messaging').doc(concatenatedString).set({});
