@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:FoodHood/Screens/public_profile_screen.dart';
 
 class PostCard extends StatelessWidget {
   final List<Map<String, String>> imagesWithAltText;
@@ -185,41 +184,30 @@ class PostCard extends StatelessWidget {
       String firstname, String lastname, String timeAgo) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
-          );
-        },
-        child: Row(
-          children: [
-            avatarUrl.isNotEmpty
-                ? CircleAvatar(
-                    radius: 10,
-                    backgroundImage: CachedNetworkImageProvider(avatarUrl),
-                    onBackgroundImageError: (_, __) {
-                      // Handle image load error
-                    },
-                    backgroundColor: Colors.transparent,
-                  )
-                : CircleAvatar(
-                    radius: 10,
-                    backgroundImage:
-                        AssetImage('assets/images/sampleProfile.png'),
-                  ),
-            SizedBox(width: 8),
-            Text(
-              'Posted by $firstname $lastname $timeAgo',
-              style: TextStyle(
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.secondaryLabel, context),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+      child: Row(
+        children: [
+          avatarUrl.isNotEmpty
+              ? CircleAvatar(
+                  radius: 10,
+                  backgroundImage: CachedNetworkImageProvider(avatarUrl),
+                  backgroundColor: Colors.transparent,
+                )
+              : CircleAvatar(
+                  radius: 10,
+                  backgroundImage:
+                      AssetImage('assets/images/sampleProfile.png'),
+                ),
+          SizedBox(width: 8),
+          Text(
+            'Posted by $firstname $lastname $timeAgo',
+            style: TextStyle(
+              color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.secondaryLabel, context),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

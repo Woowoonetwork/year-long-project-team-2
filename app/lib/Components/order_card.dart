@@ -15,9 +15,9 @@ const double _defaultTitleFontSize = 18.0;
 const double _defaultTagFontSize = 10.0;
 const double _defaultOrderInfoFontSize = 12.0;
 const double _defaultStatusFontSize = 13.0;
-const double imageHeight = 140;
+const double imageHeight = 120;
 
-enum OrderState { reserved, confirmed, delivering, readyToPickUp, pending }
+enum OrderState { reserved, confirmed, delivering, readyToPickUp, pending, notReserved}
 
 // ignore: must_be_immutable
 class OrderCard extends StatelessWidget {
@@ -254,6 +254,10 @@ class OrderCard extends StatelessWidget {
       case OrderState.pending:
         statusText = 'Pending';
         statusColor = CupertinoColors.systemOrange;
+        break;
+      case OrderState.notReserved:
+        statusText = 'Not Reserved';
+        statusColor = CupertinoColors.systemGrey;
         break;
     }
 

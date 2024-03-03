@@ -23,40 +23,39 @@ class GoogleMapWidget extends StatefulWidget {
 class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   GoogleMapController? mapController;
   String? _mapStyle;
-  LatLng? currentCenter;
-  Brightness? currentBrightness;
-  bool _isLoading = true; // Add this line
-  LatLng? _lastMapPosition;
+  LatLng _currentCenter = LatLng(37.7749, -122.4194); // Default to SF
+  Marker _centerMarker = Marker(
+    markerId: MarkerId("centerMarker"),
+    position: LatLng(37.7749, -122.4194), // Default position
+    infoWindow: InfoWindow(title: "Center Location"),
+  );
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-
     _determinePosition().then((position) {
-      LatLng initialPosition =
-          widget.initialLocation ?? LatLng(37.7749, -122.4194);
+      LatLng initialPosition = widget.initialLocation ?? LatLng(37.7749, -122.4194);
       if (position != null) {
         initialPosition = LatLng(position.latitude, position.longitude);
+        _centerMarker = _centerMarker.copyWith(positionParam: initialPosition); // Update marker position
       }
       setState(() {
-        currentCenter = initialPosition;
-        _isLoading = false; // Update loading state
+        _currentCenter = initialPosition;
+        _isLoading = false;
       });
     }).catchError((e) {
-      print('Location permission error: $e');
       setState(() {
-        currentCenter = widget.initialLocation ?? LatLng(37.7749, -122.4194);
-        _isLoading = false; // Update loading state
+        _currentCenter = widget.initialLocation ?? LatLng(37.7749, -122.4194);
+        _isLoading = false;
       });
     });
-    currentCenter = widget.initialLocation ?? LatLng(37.7749, -122.4194);
   }
 
   Future<Position?> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return Future.error('Location services are disabled.');
@@ -71,48 +70,43 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    // When we reach here, permissions are granted and we can continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
   void _goToMyLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    LatLng myLocation = LatLng(position.latitude, position.longitude);
-    mapController?.animateCamera(CameraUpdate.newLatLngZoom(myLocation, 14));
-    setState(() => currentCenter = myLocation);
-    widget.onLocationSelected
-        .call(myLocation); // Call the callback with the new center
+    try {
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      LatLng myLocation = LatLng(position.latitude, position.longitude);
+      mapController?.animateCamera(CameraUpdate.newLatLngZoom(myLocation, 14));
+      setState(() {
+        _currentCenter = myLocation;
+        _centerMarker = _centerMarker.copyWith(positionParam: myLocation);
+      });
+    } catch (e) {
+      print("Error getting location: $e");
+    }
   }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
-    _setMapStyle();
-    mapController!.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(target: currentCenter!, zoom: 16.0),
-      ),
-    );
+    _setMapStyle().then((_) {
+      mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: _currentCenter, zoom: 16.0),
+        ),
+      );
+    });
   }
 
   void _onCameraMove(CameraPosition position) {
-    currentCenter = position.target;
-  }
-
-  void _onCameraIdle() {
-    if (_lastMapPosition != null) {
-      setState(() {
-        // When the camera stops moving, update the marker position.
-        currentCenter = _lastMapPosition;
-      });
-      widget.onLocationSelected(_lastMapPosition!);
-    }
+    setState(() {
+      _currentCenter = position.target;
+      _centerMarker = _centerMarker.copyWith(positionParam: _currentCenter);
+    });
+    widget.onLocationSelected(_currentCenter);
   }
 
   Future<void> _setMapStyle() async {
@@ -137,31 +131,13 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
       children: [
         GoogleMap(
           onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
-            target: currentCenter ?? LatLng(37.7749, -122.4194),
-            zoom: 12.0,
-          ),
-          onCameraMove: (CameraPosition position) {
-            _onCameraMove(position);
-            widget.onLocationSelected(position
-                .target); // This will send the new position back to the parent widget
-          },
-          onCameraIdle:
-              _onCameraIdle, // Update the marker position when the camera is idle.
-
-          markers: {
-            Marker(
-              markerId: MarkerId("centerMarker"),
-              position:
-                  currentCenter!, // Marker is now always at the current center
-              infoWindow: InfoWindow(title: "Center Location"),
-            ),
-          },
+          initialCameraPosition: CameraPosition(target: _currentCenter, zoom: 12.0),
+          onCameraMove: _onCameraMove,
+          markers: {_centerMarker},
           myLocationEnabled: true,
           myLocationButtonEnabled: false,
           gestureRecognizers: Set()
-            ..add(Factory<OneSequenceGestureRecognizer>(
-                () => EagerGestureRecognizer())),
+            ..add(Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())),
         ),
         Positioned(
           bottom: 10,
@@ -171,30 +147,16 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
             color: CupertinoColors.tertiarySystemBackground,
             borderRadius: BorderRadius.circular(100.0),
             padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 14.0),
-            child: Icon(CupertinoIcons.location_fill,
-                size: 18, color: CupertinoColors.activeBlue),
+            child: Icon(CupertinoIcons.location_fill, size: 18, color: CupertinoColors.activeBlue),
           ),
         ),
       ],
     );
   }
 
-  void _checkAndUpdateMapStyle() async {
-    String style = await rootBundle.loadString(
-        MediaQuery.of(context).platformBrightness == Brightness.dark
-            ? 'assets/map_style_dark.json'
-            : 'assets/map_style_light.json');
-    if (_mapStyle != style) {
-      setState(() => _mapStyle = style);
-      mapController?.setMapStyle(_mapStyle);
-    }
-  }
-
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Now it's safe to access MediaQuery and other inherited widgets
-    currentBrightness = MediaQuery.of(context).platformBrightness;
-    _checkAndUpdateMapStyle(); // Now you can call this method
+  void dispose() {
+    mapController?.dispose();
+    super.dispose();
   }
 }

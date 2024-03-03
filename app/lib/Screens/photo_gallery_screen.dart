@@ -124,7 +124,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                       type: WormType.underground,
                       dotColor:
                           CupertinoColors.systemGrey2.resolveFrom(context),
-                      activeDotColor: accentColor),
+                      activeDotColor: CupertinoColors.white),
                 ),
               )),
         ),

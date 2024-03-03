@@ -141,9 +141,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       style: TextStyle(color: CupertinoColors.label)),
                 ]))
           : SafeArea(
-              child: SingleChildScrollView(
-                  padding: EdgeInsets.all(8),
-                  child: _buildProfileForm(context))),
+              child: SingleChildScrollView(child: _buildProfileForm(context))),
     );
   }
 

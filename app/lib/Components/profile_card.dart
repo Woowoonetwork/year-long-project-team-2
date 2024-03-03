@@ -83,11 +83,11 @@ class _ProfileCardState extends State<ProfileCard> {
       },
       child: Container(
         margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.tertiarySystemBackground, context),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: isLoading
             ? Center(child: CupertinoActivityIndicator())

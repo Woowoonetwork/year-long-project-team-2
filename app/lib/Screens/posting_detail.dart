@@ -40,14 +40,13 @@ class _PostDetailViewState extends State<PostDetailView> {
   @override
   void initState() {
     super.initState();
-
     initializeUserId();
-
     viewModel = PostDetailViewModel(widget.postId);
 
     viewModel.fetchData(widget.postId).then((_) {
       setState(() {
         isLoading = false;
+        isReserved = viewModel.isReserved;
       });
     });
   }
@@ -313,14 +312,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     List<String> allergenList = viewModel.allergens.split(', ');
     return AllergensSection(allergens: allergenList);
   }
-
-  // Widget _buildReserveButton() {
-  //   return ReserveButton(isReserved: false); // Placeholder, update as needed
-  // }
 }
-
-// The remaining widget classes like `AvailabilityIndicator`, `InfoRow`, etc., would follow.
-// AvailabilityIndicator, InfoRow, and other supporting widgets
 
 class AvailabilityIndicator extends StatelessWidget {
   final bool isReserved;
@@ -413,8 +405,7 @@ class InfoRow extends StatelessWidget {
 }
 
 class IconPlaceholder extends StatelessWidget {
-  final String imageUrl; // Parameter for the image URL
-
+  final String imageUrl;
   IconPlaceholder({Key? key, required this.imageUrl}) : super(key: key);
 
   @override
@@ -423,19 +414,15 @@ class IconPlaceholder extends StatelessWidget {
       width: 20,
       height: 20,
       child: ClipOval(
-        child:
-            // You shouldn't be creating a CachedNetworkImage at all if you don't have an image to load.
-            // check if imageurl is a valid http url
-
-            imageUrl.isNotEmpty && imageUrl.startsWith('http')
-                ? CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover,
-                  )
-                : Image.asset(
-                    'assets/images/sampleProfile.png',
-                    fit: BoxFit.cover,
-                  ),
+        child: imageUrl.isNotEmpty && imageUrl.startsWith('http')
+            ? CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+              )
+            : Image.asset(
+                'assets/images/sampleProfile.png',
+                fit: BoxFit.cover,
+              ),
       ),
     );
   }
@@ -445,7 +432,7 @@ class CombinedTexts extends StatelessWidget {
   final String firstName;
   final String lastName;
   final DateTime postTimestamp;
-  final PostDetailViewModel viewModel; // Add the viewModel here
+  final PostDetailViewModel viewModel;
 
   const CombinedTexts({
     Key? key,
@@ -460,7 +447,7 @@ class CombinedTexts extends StatelessWidget {
     return Row(
       children: [
         Text(
-          'Made by $firstName $lastName  Posted ${viewModel.timeAgoSinceDate(postTimestamp)}',
+          'Posted by $firstName $lastName  ${viewModel.timeAgoSinceDate(postTimestamp)}',
           style: TextStyle(
             color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
             fontSize: 12,
@@ -838,7 +825,7 @@ class PickupInformation extends StatelessWidget {
               text: 'Navigate Here',
               icon: FeatherIcons.arrowUpRight,
               iconColor: CupertinoColors.label.resolveFrom(context),
-              onPressed: () => _launchMapUrl(viewModel.pickupLatLng!),
+              onPressed: () => _launchMapUrl(viewModel.pickupLatLng),
             ),
           ),
         ],
