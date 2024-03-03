@@ -4,13 +4,35 @@ import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:palette_generator/palette_generator.dart';
+import 'package:FoodHood/Components/post_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:FoodHood/Components/profileAppBar.dart';
+import 'package:FoodHood/Components/colors.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'dart:async';
+import 'dart:math' as math;
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Components/post_card.dart';
+import 'package:FoodHood/Screens/create_post.dart';
+import 'package:FoodHood/firestore_service.dart';
+import 'package:feather_icons/feather_icons.dart';
+import '../components.dart';
+// import gesture
+import 'package:flutter/services.dart';
 
 class ProfileAppBar extends StatefulWidget {
   final String postId;
   final VoidCallback onBlockPressed;
   final bool isBlocked;
-  final bool isCurrentUser; // New parameter to determine if the profile belongs to the current user
+  final bool
+      isCurrentUser; // New parameter to determine if the profile belongs to the current user
   final String imageUrl;
+  final String? userId;
 
   const ProfileAppBar({
     Key? key,
@@ -19,6 +41,7 @@ class ProfileAppBar extends StatefulWidget {
     required this.isBlocked,
     required this.isCurrentUser, // Initialize in the constructor
     required this.imageUrl,
+    this.userId,
   }) : super(key: key);
 
   @override
@@ -26,13 +49,28 @@ class ProfileAppBar extends StatefulWidget {
 }
 
 class _ProfileAppBarState extends State<ProfileAppBar> {
-  Color?
-      _backgroundColor; // Holds the background color extracted from the image
+  Color? _backgroundColor;
+  String? _firstName; // Variable to store the first name
+  String? _lastName; // Holds the background color extracted from the image
 
   @override
   void initState() {
     super.initState();
     _updatePaletteGenerator();
+    if (widget.userId != null) {
+      _fetchUserDetails(widget.userId!);
+    }
+  }
+
+  Future<void> _fetchUserDetails(String userId) async {
+    final userData =
+        await FirebaseFirestore.instance.collection('user').doc(userId).get();
+    if (userData.exists) {
+      setState(() {
+        _firstName = userData.data()?['firstName'] as String?;
+        _lastName = userData.data()?['lastName'] as String?;
+      });
+    }
   }
 
   Future<void> _updatePaletteGenerator() async {
@@ -128,6 +166,10 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   Widget _buildUserInfoRow() {
+    String displayName = 'User'; // Default display name
+    if (_firstName != null && _lastName != null) {
+      displayName = '$_firstName $_lastName';
+    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +187,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Harry Styles',
+                    displayName,
                     style: TextStyle(
                         fontSize: 24,
                         letterSpacing: -1.0,
@@ -202,11 +244,15 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   void _showBlockMenu(BuildContext context) {
+    String displayName = 'User'; // Default display name
+    if (_firstName != null && _lastName != null) {
+      displayName = '$_firstName $_lastName';
+    }
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text(
-          'Block Harry Styles?',
+          'Block $displayName',
           style: TextStyle(
             fontWeight: FontWeight.w500,
             color: CupertinoColors.label.resolveFrom(context),

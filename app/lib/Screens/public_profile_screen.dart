@@ -102,6 +102,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             isCurrentUser: false,
             isBlocked: isFavorite,
             imageUrl: imageUrl,
+            userId: effectiveUserId,
           ),
           SliverToBoxAdapter(
             child: SafeArea(
