@@ -1,18 +1,91 @@
 import 'package:FoodHood/Components/post_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/profileAppBar.dart';
 import 'package:FoodHood/Components/colors.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'dart:async';
+import 'dart:math' as math;
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Components/post_card.dart';
+import 'package:FoodHood/Screens/create_post.dart';
+import 'package:FoodHood/firestore_service.dart';
+import 'package:feather_icons/feather_icons.dart';
+import '../components.dart';
+// import gesture
+import 'package:flutter/services.dart';
 
 class PublicProfileScreen extends StatefulWidget {
+  final String? userId; // Make userId optional
+
+  PublicProfileScreen({Key? key, this.userId})
+      : super(key: key); // Adjust constructor
+
   @override
   _PublicProfileScreenState createState() => _PublicProfileScreenState();
 }
 
 class _PublicProfileScreenState extends State<PublicProfileScreen> {
   final String postId = "examplePostId";
+  String? firstName;
+  String? lastName;
   final bool isFavorite = false;
   final String imageUrl = "";
+  bool isLoading = true;
+
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  String? effectiveUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    determineUserId();
+  }
+
+  void determineUserId() {
+    // If widget.userId is provided, use it; otherwise, get the current user's userId
+    effectiveUserId = widget.userId ?? FirebaseAuth.instance.currentUser?.uid;
+
+    if (effectiveUserId != null) {
+      setUpStreamListener(effectiveUserId!);
+    } else {
+      // Handle case where there is no user logged in and no userId provided
+      setState(() => isLoading = false);
+    }
+  }
+
+  void setUpStreamListener(String userId) {
+    firestore.collection('user').doc(userId).snapshots().listen(
+      (snapshot) {
+        if (mounted && snapshot.exists) {
+          updateProfileData(snapshot.data()!);
+        } else {
+          if (mounted) setState(() => isLoading = false);
+        }
+      },
+      onError: (e) {
+        if (mounted) {
+          print('Error listening to user data changes: $e');
+          setState(() => isLoading = false);
+        }
+      },
+    );
+  }
+
+  void updateProfileData(Map<String, dynamic> documentData) {
+    if (mounted) {
+      setState(() {
+        firstName = documentData['firstName'] as String? ?? '';
+        lastName = documentData['lastName'] as String? ?? '';
+        // Update other user details as necessary
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +109,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
               top: false,
               child: Column(
                 children: <Widget>[
-                  AboutSection(),
+                  AboutSection(firstName: firstName),
                   RecentPostSection(),
                   ReviewSection(),
                 ],
@@ -96,6 +169,9 @@ class ReviewSection extends StatelessWidget {
 }
 
 class AboutSection extends StatelessWidget {
+  final String? firstName;
+
+  const AboutSection({Key? key, this.firstName}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -104,7 +180,7 @@ class AboutSection extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Text(
-            'About Harry',
+            'About ${firstName ?? "User"}',
             style: TextStyle(
               color:
                   CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
