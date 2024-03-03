@@ -51,7 +51,9 @@ class ProfileAppBar extends StatefulWidget {
 class _ProfileAppBarState extends State<ProfileAppBar> {
   Color? _backgroundColor;
   String? _firstName; // Variable to store the first name
-  String? _lastName; // Holds the background color extracted from the image
+  String? _lastName;
+  String? _city;
+  String? _province; // Holds the background color extracted from the image
 
   @override
   void initState() {
@@ -69,6 +71,8 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       setState(() {
         _firstName = userData.data()?['firstName'] as String?;
         _lastName = userData.data()?['lastName'] as String?;
+        _city = userData.data()?['city'] as String?;
+        _province = userData.data()?['province'] as String?;
       });
     }
   }
@@ -166,9 +170,13 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   Widget _buildUserInfoRow() {
+    String location = 'unknown';
     String displayName = 'User'; // Default display name
     if (_firstName != null && _lastName != null) {
       displayName = '$_firstName $_lastName';
+    }
+    if (_city != null && _province != null) {
+      location = '$_city, $_province';
     }
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -196,7 +204,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                   ),
                   SizedBox(height: 2),
                   Text(
-                    'Kelowna, British Columbia',
+                    location,
                     style: TextStyle(
                         fontSize: 13,
                         letterSpacing: -0.3,
