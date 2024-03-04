@@ -34,6 +34,7 @@ class _DonorScreenState extends State<DonorScreen> {
   double rating = 0.0;
   String pickupLocation = '';
   String photo = '';
+  String? reservedByUserId = '';
   OrderState orderState = OrderState.reserved;
   late double _textScaleFactor;
   late double adjustedFontSize;
@@ -66,7 +67,7 @@ class _DonorScreenState extends State<DonorScreen> {
 
       if (postSnapshot.exists) {
         // Extract the reserved_by user ID from the post details
-        final String? reservedByUserId = postSnapshot['reserved_by'];
+        reservedByUserId = postSnapshot['reserved_by'];
         pickupLocation = postSnapshot['pickup_location'];
 
         if (postSnapshot['post_location'] is GeoPoint) {
@@ -527,8 +528,7 @@ class _DonorScreenState extends State<DonorScreen> {
             CupertinoDialogAction(
               child: Text("Cancel"),
               onPressed: () {
-                Navigator.pop(
-                    context, false); // Return false to indicate cancel
+                Navigator.pop(context, false); // Return false to indicate cancel
               },
             ),
             CupertinoDialogAction(
@@ -546,6 +546,29 @@ class _DonorScreenState extends State<DonorScreen> {
     // If the user confirms the cancelation, proceed with canceling the order
     if (confirmCancel == true) {
       try {
+        // Get the user document
+        DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(reservedByUserId)
+            .get();
+
+        // Check if data exists
+        if (userSnapshot.exists) {
+          // Get the current reserved posts of the user
+          List<String> reservedPosts =
+              List<String>.from(userSnapshot.data()?['reserved_posts'] ?? []);
+
+          // Remove the postId of the canceled order
+          reservedPosts.remove(widget.postId);
+
+          // Update the user document with the updated reserved_posts list
+          await FirebaseFirestore.instance
+              .collection('user')
+              .doc(reservedByUserId)
+              .update({'reserved_posts': reservedPosts});
+        }
+
+        // Update the reserved_by and post_status fields in the post_details document 
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
