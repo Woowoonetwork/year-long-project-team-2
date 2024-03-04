@@ -150,29 +150,38 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
 
 // ReviewSection
 class ReviewSection extends StatelessWidget {
-  // Example reviews data
-  final List<Map<String, dynamic>> reviews = [
-    {'text': 'Harry is so nice! He kept the food protected in pouring rain!!'},
-    {'text': 'I had a great experience with harry, and would recommend him!'},
-    {'text': 'The food was great, and Harry is a sweetheart.'},
-    {'text': 'Would recommend!'},
-    {'text': 'Harry is the best!'},
-    {'text': 'I love Harry!'},
-    {'text': 'Harry is so nice! He kept the food protected in pouring rain!!'},
-    {'text': 'I had a great experience with harry, and would recommend him!'},
-    {'text': 'The food was great, and Harry is a sweetheart.'},
-    {'text': 'Would recommend!'},
-    {'text': 'Harry is the best!'},
-    {'text': 'I love Harry!'},
-  ];
+  final String? userId;
+
+  ReviewSection({this.userId});
+
+  Future<List<String>> fetchComments(String userId) async {
+    try {
+      final DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('user').doc(userId).get();
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>?;
+        if (userData != null && userData.containsKey('comments')) {
+          final List<dynamic> comments = userData['comments'];
+          return comments.cast<String>();
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching comments: $e');
+      return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final String effectiveUserId =
+        userId ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
+      children: [
         Padding(
-          padding: EdgeInsets.only(left: 20, bottom: 16),
+          padding: EdgeInsets.only(left: 20, top: 16, bottom: 8),
           child: Text(
             'Reviews',
             style: TextStyle(
@@ -180,14 +189,35 @@ class ReviewSection extends StatelessWidget {
                   CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              letterSpacing: -0.70,
             ),
           ),
         ),
-        Column(
-          children: reviews
-              .map((review) => ReviewItem(review: review['text']))
-              .toList(),
+        FutureBuilder<List<String>>(
+          future: fetchComments(effectiveUserId),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Padding(
+                padding: EdgeInsets.only(left: 20, top: 8),
+                child: Text(
+                  "No reviews available",
+                  style: TextStyle(
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    fontSize: 16,
+                  ),
+                ),
+              );
+            }
+
+            List<String> comments = snapshot.data!;
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: comments
+                    .map((comment) => ReviewItem(review: comment))
+                    .toList(),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -261,35 +291,27 @@ class ReviewItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            // Replace with your actual asset or network image
             backgroundImage: AssetImage('assets/images/sampleProfile.png'),
             radius: 20,
           ),
           SizedBox(width: 12),
           Expanded(
-            // Wrap the Container in an Expanded widget to take up remaining space
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color:
-                    CupertinoColors.quaternarySystemFill.resolveFrom(context),
+                color: CupertinoColors.systemGrey5,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 review,
                 style: TextStyle(
-                  color: CupertinoColors.label
-                      .resolveFrom(context)
-                      .withOpacity(0.8),
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.40,
+                  color: CupertinoColors.label.resolveFrom(context),
                 ),
               ),
             ),
