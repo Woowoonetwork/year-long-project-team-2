@@ -61,6 +61,7 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: Colors.white,
@@ -83,7 +84,6 @@ class _DoneePathState extends State<DoneePath> {
                 ),
               ),
         border: null,
-        // middle: Text('Reservation'),
       ),
       child: SafeArea(
         child: isLoading
@@ -145,18 +145,20 @@ class _DoneePathState extends State<DoneePath> {
                       ],
                     ),
                     SizedBox(height: 50),
-                    PendingConfirmationWithTimer(
-                        durationInSeconds: 120, postId: widget.postId),
-                    SizedBox(height: 40),
-                    if (postStatus == "picked up")
+                    if (postStatus == "confirmed")
                       CupertinoButton.filled(
-                        onPressed: _navigateToRatingPage,
-                        child: Text('Leave a Review'),
+                        onPressed: () {
+                          //still have to figure out where this will go
+                        },
+                        child: Text('Navigate'),
                         padding: EdgeInsets.symmetric(
                             horizontal: 36.0, vertical: 16.0),
                         borderRadius: BorderRadius.circular(18.0),
                       ),
                     SizedBox(height: 0),
+                    PendingConfirmationWithTimer(
+                        durationInSeconds: 120, postId: widget.postId),
+                    SizedBox(height: 40),
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30.0),
