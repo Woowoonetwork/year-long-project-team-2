@@ -15,6 +15,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
+import 'package:flutter/services.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -40,14 +41,13 @@ class _PostDetailViewState extends State<PostDetailView> {
   @override
   void initState() {
     super.initState();
-
     initializeUserId();
-
     viewModel = PostDetailViewModel(widget.postId);
 
     viewModel.fetchData(widget.postId).then((_) {
       setState(() {
         isLoading = false;
+        isReserved = viewModel.isReserved;
       });
     });
   }
@@ -141,6 +141,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     setState(() {
       viewModel.isFavorite = !viewModel.isFavorite;
     });
+    HapticFeedback.lightImpact(); // Add this line
 
     if (viewModel.isFavorite) {
       await viewModel.savePost(widget.postId);
@@ -313,14 +314,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     List<String> allergenList = viewModel.allergens.split(', ');
     return AllergensSection(allergens: allergenList);
   }
-
-  // Widget _buildReserveButton() {
-  //   return ReserveButton(isReserved: false); // Placeholder, update as needed
-  // }
 }
-
-// The remaining widget classes like `AvailabilityIndicator`, `InfoRow`, etc., would follow.
-// AvailabilityIndicator, InfoRow, and other supporting widgets
 
 class AvailabilityIndicator extends StatelessWidget {
   final bool isReserved;
@@ -413,8 +407,7 @@ class InfoRow extends StatelessWidget {
 }
 
 class IconPlaceholder extends StatelessWidget {
-  final String imageUrl; // Parameter for the image URL
-
+  final String imageUrl;
   IconPlaceholder({Key? key, required this.imageUrl}) : super(key: key);
 
   @override
@@ -423,19 +416,15 @@ class IconPlaceholder extends StatelessWidget {
       width: 20,
       height: 20,
       child: ClipOval(
-        child:
-            // You shouldn't be creating a CachedNetworkImage at all if you don't have an image to load.
-            // check if imageurl is a valid http url
-
-            imageUrl.isNotEmpty && imageUrl.startsWith('http')
-                ? CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover,
-                  )
-                : Image.asset(
-                    'assets/images/sampleProfile.png',
-                    fit: BoxFit.cover,
-                  ),
+        child: imageUrl.isNotEmpty && imageUrl.startsWith('http')
+            ? CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+              )
+            : Image.asset(
+                'assets/images/sampleProfile.png',
+                fit: BoxFit.cover,
+              ),
       ),
     );
   }
@@ -445,7 +434,7 @@ class CombinedTexts extends StatelessWidget {
   final String firstName;
   final String lastName;
   final DateTime postTimestamp;
-  final PostDetailViewModel viewModel; // Add the viewModel here
+  final PostDetailViewModel viewModel;
 
   const CombinedTexts({
     Key? key,
@@ -460,7 +449,7 @@ class CombinedTexts extends StatelessWidget {
     return Row(
       children: [
         Text(
-          'Made by $firstName $lastName  Posted ${viewModel.timeAgoSinceDate(postTimestamp)}',
+          'Posted by $firstName $lastName  ${viewModel.timeAgoSinceDate(postTimestamp)}',
           style: TextStyle(
             color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
             fontSize: 12,
@@ -815,27 +804,31 @@ class PickupInformation extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          InfoButton(
-            context: context,
-            text: 'Ask for more info',
-            icon: FeatherIcons.messageCircle,
-            iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(
-                    builder: (context) =>
-                        MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
-              );
-            },
+          Expanded(
+            child: InfoButton(
+              context: context,
+              text: 'Ask for more info',
+              icon: FeatherIcons.messageCircle,
+              iconColor: CupertinoColors.label.resolveFrom(context),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) =>
+                          MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
+                );
+              },
+            ),
           ),
-          SizedBox(width: 0),
-          InfoButton(
-            context: context,
-            text: 'Navigate Here',
-            icon: FeatherIcons.arrowUpRight,
-            iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () => _launchMapUrl(viewModel.pickupLatLng),
+          SizedBox(width: 16),
+          Expanded(
+            child: InfoButton(
+              context: context,
+              text: 'Navigate Here',
+              icon: FeatherIcons.arrowUpRight,
+              iconColor: CupertinoColors.label.resolveFrom(context),
+              onPressed: () => _launchMapUrl(viewModel.pickupLatLng),
+            ),
           ),
         ],
       ),
@@ -849,6 +842,7 @@ Future<void> _launchMapUrl(LatLng locationCoordinates) async {
   final String appleMapsUrl =
       'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}';
 
+  HapticFeedback.selectionClick();
   // Check if the device is running on iOS
   if (Platform.isIOS) {
     // Attempt to open Apple Maps
@@ -1094,6 +1088,7 @@ class _ReserveButtonState extends State<ReserveButton> {
 
   void _handleReservation() async {
     if (!_isReserved) {
+      HapticFeedback.mediumImpact();
       try {
         // Add a reserved_by field and update the post status in the post detail document
         await FirebaseFirestore.instance

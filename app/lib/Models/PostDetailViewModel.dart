@@ -1,9 +1,10 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // For JSON decoding
 
 class PostDetailViewModel extends ChangeNotifier {
   late String firstName;
@@ -18,14 +19,16 @@ class PostDetailViewModel extends ChangeNotifier {
   late double rating;
   late String userid;
   late DateTime postTimestamp;
+  late bool isReserved;
   late LatLng pickupLatLng;
   late List<String> tags;
-  late String imageUrl; // Add a field for the image URL
+  late String imageUrl;
   late String profileURL;
   late String postLocation;
   late List<Map<String, String>> imagesWithAltText = [];
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   bool isFavorite = false;
+  final Map<LatLng, String> _geocodeCache = {};
 
   PostDetailViewModel(String postId) {
     _initializeFields();
@@ -47,19 +50,20 @@ class PostDetailViewModel extends ChangeNotifier {
     imageUrl = ''; // Set the image URL
     profileURL = 'null';
     postTimestamp = DateTime.now();
+    isReserved = false;
     pickupLatLng = LatLng(37.7749, -122.4194);
     tags = ['null'];
   }
 
   Future<void> fetchData(String postId) async {
     try {
-      var documentSnapshot =
-          await firestore.collection('post_details').doc(postId).get();
-
+      var documentSnapshot = await firestore.collection('post_details').doc(postId).get();
       if (documentSnapshot.exists) {
         var documentData = documentSnapshot.data() as Map<String, dynamic>;
-        _updatePostDetails(documentData);
-        await _fetchAndUpdateUserDetails(documentData['user_id']);
+        await Future.wait([
+          _updatePostDetails(documentData),
+          _fetchAndUpdateUserDetails(documentData['user_id']),
+        ]);
         await checkIfFavorite(postId);
       }
     } catch (e) {
@@ -69,12 +73,9 @@ class PostDetailViewModel extends ChangeNotifier {
 
   Future<void> _fetchAndUpdateUserDetails(String userId) async {
     try {
-      var userDocumentSnapshot =
-          await firestore.collection('user').doc(userId).get();
-
+      var userDocumentSnapshot = await firestore.collection('user').doc(userId).get();
       if (userDocumentSnapshot.exists) {
-        var userDocumentData =
-            userDocumentSnapshot.data() as Map<String, dynamic>;
+        var userDocumentData = userDocumentSnapshot.data() as Map<String, dynamic>;
         _updateUserDetails(userDocumentData);
       }
     } catch (e) {
@@ -95,17 +96,18 @@ class PostDetailViewModel extends ChangeNotifier {
     }
   }
 
-  void _updatePostDetails(Map<String, dynamic> documentData) {
+  Future<void> _updatePostDetails(Map<String, dynamic> documentData) async {
     allergens = documentData['allergens'] ?? '';
     description = documentData['description'] ?? '';
     title = documentData['title'] ?? '';
     pickupInstructions = documentData['pickup_instructions'] ?? '';
     userid = documentData['user_id'] ?? '';
     rating = documentData['rating'] ?? 0.0;
-    pickupLocation = documentData['pickup_location'] ?? '';
+    isReserved = documentData['post_status'] != 'not reserved';
 
     GeoPoint geoPoint = documentData['post_location'] as GeoPoint;
     pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+    await _reverseGeocodeLatLng(pickupLatLng);
 
     if (documentData.containsKey('images') && documentData['images'] is List) {
       imagesWithAltText = List<Map<String, String>>.from(
@@ -113,21 +115,19 @@ class PostDetailViewModel extends ChangeNotifier {
           Map<String, dynamic> image = imageMap as Map<String, dynamic>;
           return {
             'url': image['url'] as String? ?? '',
-            'alt_text':
-                image['alt_text'] as String? ?? '',
+            'alt_text': image['alt_text'] as String? ?? '',
           };
         }),
       );
     } else {
-      imagesWithAltText =
-          []; // This ensures imagesWithAltText is always initialized.
+      imagesWithAltText = [];
     }
 
     rating = documentData['rating'] ?? 0.0;
     pickupTime = (documentData['pickup_time'] as Timestamp).toDate();
     expirationDate = (documentData['expiration_date'] as Timestamp).toDate();
     postTimestamp = (documentData['post_timestamp'] as Timestamp).toDate();
-    tags = documentData['categories'].split(',');
+    tags = (documentData['categories'] as String?)?.split(',') ?? [];
     notifyListeners();
   }
 
@@ -138,19 +138,44 @@ class PostDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> _reverseGeocodeLatLng(LatLng coordinates) async {
+    if (_geocodeCache.containsKey(coordinates)) {
+      pickupLocation = _geocodeCache[coordinates]!;
+      notifyListeners();
+      return;
+    }
+
+    String googleAPIKey = 'AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A';
+    String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.latitude},${coordinates.longitude}&key=$googleAPIKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        var jsonResponse = json.decode(response.body);
+        if (jsonResponse['results'] != null && jsonResponse['results'].length > 0) {
+          String formattedAddress = jsonResponse['results'][0]['formatted_address'];
+          pickupLocation = formattedAddress; // Update the pickupLocation
+          _geocodeCache[coordinates] = formattedAddress; // Cache the result
+          notifyListeners();
+        }
+      } else {
+        print('Failed to load the address data');
+      }
+    } catch (e) {
+      print('Error occurred while reverse geocoding: $e');
+    }
+  }
+
   Future<void> savePost(String postId) async {
     try {
       String userId = getCurrentUserUID();
       if (userId.isNotEmpty) {
-        // Add postId to the saved_posts array
         await firestore.collection('user').doc(userId).set({
           'saved_posts': FieldValue.arrayUnion([postId]),
         }, SetOptions(merge: true));
 
         isFavorite = true;
         notifyListeners();
-      } else {
-        print('User ID is not available. User might not be logged in.');
       }
     } catch (e) {
       print('Error saving post: $e');
@@ -161,15 +186,12 @@ class PostDetailViewModel extends ChangeNotifier {
     try {
       String userId = getCurrentUserUID();
       if (userId.isNotEmpty) {
-        // Remove postId from the saved_posts array
         await firestore.collection('user').doc(userId).update({
           'saved_posts': FieldValue.arrayRemove([postId]),
         });
 
         isFavorite = false;
         notifyListeners();
-      } else {
-        print("User ID is not available. User might not be logged in.");
       }
     } catch (e) {
       print('Error unsaving post: $e');

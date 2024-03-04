@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:FoodHood/Screens/photo_gallery_screen.dart';
+import 'package:flutter/services.dart';
 
 class FoodAppBar extends StatefulWidget {
   final String postId;
@@ -94,11 +95,11 @@ class _FoodAppBarState extends State<FoodAppBar> {
       CircleAvatar(
         backgroundColor: Colors.transparent,
         child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Icon(FeatherIcons.chevronLeft,
-              size: 20, color: CupertinoColors.label.resolveFrom(context)),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+            padding: EdgeInsets.zero,
+            child: Icon(FeatherIcons.chevronLeft,
+                size: 20, color: CupertinoColors.label.resolveFrom(context)),
+            onPressed: () =>
+                {HapticFeedback.selectionClick(), Navigator.of(context).pop()}),
       ),
       CupertinoColors.secondarySystemBackground
           .resolveFrom(context)
@@ -175,7 +176,10 @@ class _FoodAppBarState extends State<FoodAppBar> {
       CupertinoColors.secondarySystemBackground
           .resolveFrom(context)
           .withOpacity(0.8),
-      widget.onFavoritePressed,
+      () async {
+        HapticFeedback.lightImpact(); // Add haptic feedback here
+        widget.onFavoritePressed();
+      },
     );
   }
 
@@ -186,7 +190,10 @@ class _FoodAppBarState extends State<FoodAppBar> {
       CupertinoColors.secondarySystemBackground
           .resolveFrom(context)
           .withOpacity(0.8),
-      () => Share.share('Check out this food post!'),
+      () async {
+        HapticFeedback.lightImpact(); // Add haptic feedback here
+        Share.share('Check out this food post!');
+      },
     );
   }
 
@@ -240,7 +247,8 @@ class _FoodAppBarState extends State<FoodAppBar> {
                       type: WormType.underground,
                       dotColor:
                           CupertinoColors.systemGrey2.resolveFrom(context),
-                      activeDotColor: accentColor),
+                      activeDotColor: CupertinoColors.systemBackground
+                          .resolveFrom(context)),
                 ),
               )),
         ),

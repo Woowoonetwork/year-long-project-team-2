@@ -29,8 +29,8 @@ const Color detailsBackgroundColor = CupertinoDynamicColor.withBrightness(
 */
 
 final CupertinoDynamicColor accentColor = CupertinoDynamicColor.withBrightness(
-  color: Color.fromARGB(255, 63, 133, 151),
-  darkColor: Color(0xFF1B3C4A),
+  color: Color.fromARGB(255, 69, 146, 165),
+  darkColor: Color.fromARGB(255, 60, 126, 143),
 );
 
 final CupertinoDynamicColor secondaryColor =
@@ -58,7 +58,7 @@ final CupertinoDynamicColor quaternaryColor =
 
 final CupertinoDynamicColor yellow = CupertinoDynamicColor.withBrightness(
   color: Color(0xFFF9CF54),
-  darkColor: Color(0xFF957c32),
+  darkColor: Color(0xFFB8860B),
 );
 
 final CupertinoDynamicColor orange = CupertinoDynamicColor.withBrightness(
