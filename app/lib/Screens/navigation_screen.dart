@@ -6,6 +6,7 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Screens/account_screen.dart';
 import 'package:FoodHood/Screens/browse_screen.dart';
 import 'package:FoodHood/Screens/saved_screen.dart';
+import 'package:flutter/services.dart';
 
 class NavigationScreen extends StatelessWidget {
   final int selectedIndex;
@@ -22,13 +23,19 @@ class NavigationScreen extends StatelessWidget {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
         currentIndex: selectedIndex,
-        onTap: onItemTapped,
+        onTap: (index) {
+          HapticFeedback.selectionClick(); // Adding haptic feedback on tap
+          onItemTapped(index);
+        },
         iconSize: 24,
-        backgroundColor: CupertinoDynamicColor.resolve(
-            groupedBackgroundColor, context).withOpacity(0.8),
+        backgroundColor:
+            CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
+                .withOpacity(0.8),
         border: Border(top: BorderSide.none),
-        activeColor: accentColor.color, // active tab color
-        inactiveColor: CupertinoColors.label.resolveFrom(context).withOpacity(0.8), // inactive tab color
+        activeColor: accentColor.color,
+        inactiveColor: CupertinoColors.label
+            .resolveFrom(context)
+            .withOpacity(0.6), // inactive tab color
         items: [
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.compass),
@@ -36,7 +43,6 @@ class NavigationScreen extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.map),
           ),
-          
           BottomNavigationBarItem(
             icon: Icon(FeatherIcons.bookmark),
           ),
@@ -52,7 +58,7 @@ class NavigationScreen extends StatelessWidget {
           case 1:
             return BrowseScreen();
           case 2:
-            return SavedScreen();  
+            return SavedScreen();
           case 3:
             return AccountScreen();
           default:
