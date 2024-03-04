@@ -205,7 +205,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
           ],
         ),
       );
-   
     }
   }
 
