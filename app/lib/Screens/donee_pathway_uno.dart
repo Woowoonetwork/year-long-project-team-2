@@ -1,4 +1,5 @@
 import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Components/slimProgressBar.dart';
 import 'package:FoodHood/Screens/donor_rating.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:flutter/material.dart';
@@ -92,6 +93,15 @@ class _DoneePathState extends State<DoneePath> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(height: 40),
+                    SlimProgressBar(
+                        currentIndex: 2,
+                        totalSteps: 4,
+                        stepTitles: [
+                          'Confirmed',
+                          'Out for delivery',
+                          'Ready for pickup',
+                          'Complete'
+                        ]),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
