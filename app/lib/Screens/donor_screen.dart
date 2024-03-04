@@ -1,7 +1,6 @@
 //donor_screen.dart
 
 import 'package:FoodHood/Screens/message_screen.dart';
-import 'package:FoodHood/Screens/saved_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -11,6 +10,7 @@ import 'package:FoodHood/Screens/donee_rating.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -33,7 +33,7 @@ class _DonorScreenState extends State<DonorScreen> {
   String? reservedByLastName;
   double rating = 0.0;
   String pickupLocation = '';
-  //bool isConfirmed = false;
+  String photo = '';
   OrderState orderState = OrderState.reserved;
   late double _textScaleFactor;
   late double adjustedFontSize;
@@ -52,6 +52,7 @@ class _DonorScreenState extends State<DonorScreen> {
     _updateAdjustedFontSize();
   }
 
+  // Reading post information
   Future<void> fetchPostInformation() async {
     final CollectionReference postDetailsCollection =
         FirebaseFirestore.instance.collection('post_details');
@@ -93,11 +94,12 @@ class _DonorScreenState extends State<DonorScreen> {
             final userName = userSnapshot['firstName'];
             final userLastName = userSnapshot['lastName'];
             final userRating = userSnapshot['avgRating'];
+
             setState(() {
-              reservedByName =
-                  userName; // Update the reserved by user name in the UI
+              reservedByName = userName; 
               reservedByLastName = userLastName;
               rating = userRating;
+              photo = userSnapshot['profileImagePath'] as String? ?? '';
             });
           } else {
             print(
@@ -140,7 +142,6 @@ class _DonorScreenState extends State<DonorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // double screenWidth = MediaQuery.of(context).size.width;
     return CupertinoPageScaffold(
       backgroundColor: detailsBackgroundColor,
       navigationBar: CupertinoNavigationBar(
@@ -186,11 +187,11 @@ class _DonorScreenState extends State<DonorScreen> {
                   //Only show the order info section if the order has been reserved.
                   if (reservedByName != null)
                     OrderInfoSection(
-                      avatarUrl: '',
                       reservedByName: reservedByName,
                       reservedByLastName: reservedByLastName,
                       adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
                       rating: rating,
+                      photo: photo,
                     ),
 
                   //__buildTextField(text: "Pickup at specified location"),
@@ -592,26 +593,26 @@ class _DonorScreenState extends State<DonorScreen> {
 }
 
 class OrderInfoSection extends StatelessWidget {
-  final String avatarUrl;
   final String? reservedByName;
   final String? reservedByLastName;
   final double adjustedOrderInfoFontSize;
   final double rating;
+  final String photo;
 
   const OrderInfoSection({
     Key? key,
-    required this.avatarUrl,
     required this.reservedByName,
     required this.reservedByLastName,
     required this.adjustedOrderInfoFontSize,
     required this.rating,
+    required this.photo,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // Use a default image if avatarUrl is empty or null
-    String effectiveAvatarUrl =
-        avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
+    // String effectiveAvatarUrl =
+    //     avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
 
     return Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -621,11 +622,25 @@ class OrderInfoSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                backgroundImage: AssetImage(
-                    effectiveAvatarUrl), // Load the image from assets
-                radius: 10,
-              ),
+              // CircleAvatar(
+              //   backgroundImage: AssetImage(
+              //       effectiveAvatarUrl), // Load the image from assets
+              //   radius: 10,
+              // ),
+              photo.isNotEmpty
+                ? CircleAvatar(
+                    radius: 10,
+                    backgroundImage: CachedNetworkImageProvider(photo),
+                    onBackgroundImageError: (_, __) {
+                      // Handle image load error
+                    },
+                    backgroundColor: Colors.transparent,
+                  )
+                : CircleAvatar(
+                    radius: 10,
+                    backgroundImage:
+                        AssetImage('assets/images/sampleProfile.png'),
+                  ),
               SizedBox(width: 8),
               Text(
                 'Reserved by $reservedByName $reservedByLastName',
