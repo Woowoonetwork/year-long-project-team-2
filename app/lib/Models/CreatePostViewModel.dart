@@ -18,9 +18,7 @@ class CreatePostViewModel {
   DateTime selectedDate = DateTime.now();
   DateTime selectedTime = DateTime.now();
   List<String> selectedAllergens = [],
-      selectedCategories = [],
-      selectedPickupLocation = [];
-  LatLng? selectedLocation;
+      selectedCategories = [];
   String? selectedImagePath;
   Set<Marker> markers = {};
 
@@ -99,7 +97,6 @@ class CreatePostViewModel {
     required List<String> allergens,
     required List<String> categories,
     required DateTime expirationDate,
-    required List<String> pickupLocation,
     required String pickupInstructions,
     required DateTime pickupTime,
     required LatLng postLocation,
@@ -127,7 +124,6 @@ class CreatePostViewModel {
         'allergens': allergens.join(', '),
         'categories': categories.join(', '),
         'expiration_date': Timestamp.fromDate(expirationDate),
-        'pickup_location': pickupLocation.join(', '),
         'pickup_instructions': pickupInstructions,
         'pickup_time': Timestamp.fromDate(pickupTime),
         'user_id': userId,

@@ -21,14 +21,12 @@ void main() {
 
   group('Edit Profile Test', () {
     testWidgets('Edit Profile Screen UI Test', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: ChangeNotifierProvider(
+      await tester.pumpWidget(CupertinoApp(
+        home: ChangeNotifierProvider(
           create: (context) => TextScaleProvider(),
-          child: EditProfilePage(),
-          ),
-        )
-      );
+          child: EditProfileScreen(),
+        ),
+      ));
 
       expect(find.text('Save'), findsOneWidget);
       expect(find.byType(CupertinoTextField), findsNWidgets(4));
@@ -39,7 +37,7 @@ void main() {
 
       //await tester.tap(find.byIcon(FeatherIcons.x));
       //await tester.pumpAndSettle();
-      
+
       //expect(find.byType(EditProfilePage), findsNothing);
     });
 

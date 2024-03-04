@@ -1,10 +1,10 @@
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/googleMapsWidget.dart';
 import 'package:FoodHood/Models/CreatePostViewModel.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:FoodHood/Components/search_bar.dart' as CustomSearchBar;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:FoodHood/Components/imageTile.dart';
+import 'package:flutter/services.dart';
 
 enum SectionType { date, time }
 
@@ -30,14 +31,9 @@ class _CreatePostPageState extends State<CreatePostScreen>
 
   DateTime selectedDate = DateTime.now().add(Duration(days: 1));
   DateTime selectedTime = DateTime.now().add(Duration(hours: 1));
-  List<String> allergensList = [],
-      categoriesList = [],
-      pickupLocationsList = [];
-  List<String> selectedAllergens = [],
-      selectedCategories = [],
-      selectedPickupLocation = [];
+  List<String> allergensList = [], categoriesList = [];
+  List<String> selectedAllergens = [], selectedCategories = [];
   LatLng? selectedLocation;
-  Set<Marker> _markers = {};
   Map<String, String> _selectedImagesWithAltText = {};
   CreatePostViewModel viewModel = CreatePostViewModel();
   double _defaultFontSize = 16.0;
@@ -45,7 +41,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
   double adjustedFontSize = 16.0;
   LatLng? initialLocation;
   GoogleMapController? mapController;
-  bool _isSaving = false;
 
   @override
   void initState() {
@@ -63,9 +58,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
           await viewModel.fetchDocumentData('Allergens', 'allergens');
       categoriesList =
           await viewModel.fetchDocumentData('Categories', 'categories');
-
-      pickupLocationsList =
-          await viewModel.fetchDocumentData('Pickup Locations', 'items');
       setState(
           () {}); // Call setState to update the UI after the data is fetched
     } catch (e) {
@@ -83,11 +75,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
         () => initialLocation = LatLng(position.latitude, position.longitude));
   }
 
-  void _updateMarker(LatLng position) {
-    setState(() => _markers = {
-          Marker(markerId: MarkerId('centerMarker'), position: position)
-        });
-  }
+  void _updateMarker(LatLng position) {}
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -145,7 +133,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
       return;
     }
 
-    setState(() => _isSaving = true); // Start loading
+// Start loading
     showLoadingDialog(context); // Show loading indicator
 
     try {
@@ -165,7 +153,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
         allergens: selectedAllergens,
         categories: selectedCategories,
         expirationDate: selectedDate,
-        pickupLocation: selectedPickupLocation,
         pickupInstructions: pickupInstrController.text,
         pickupTime: selectedTime,
         postLocation: selectedLocation!,
@@ -173,15 +160,14 @@ class _CreatePostPageState extends State<CreatePostScreen>
       );
       if (success) {
         if (mounted) {
-          setState(() => _isSaving = false); // Stop loading
           Navigator.pop(context); // Close loading indicator
         }
         Navigator.pop(context); // Close the create post screen
         showCupertinoDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: Text("Success"),
-            content: Text("Post saved successfully."),
+            title: Text("Post published"),
+            content: Text("Your post has been posted successfully."),
             actions: [
               CupertinoDialogAction(
                 child: Text('OK'),
@@ -227,15 +213,23 @@ class _CreatePostPageState extends State<CreatePostScreen>
                 SliverToBoxAdapter(child: SizedBox(height: 20.0)),
                 buildTextField('Title'),
                 buildTextInputField(
-                    context, titleController, 'What\'s cooking?'),
+                  context,
+                  titleController,
+                  'What\'s cooking?',
+                  capitalize: true,
+                ),
                 SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 buildTextField('Description'),
-                buildTextInputField(context, descController,
-                    'Is there anything special about your dish?',
-                    height: 160.0),
+                buildTextInputField(
+                  context,
+                  descController,
+                  'Is there anything special about your dish?',
+                  height: 160.0,
+                  capitalize: true,
+                ),
                 buildImageSection(
                     context, _selectedImagesWithAltText.keys.toList()),
-                _buildBottomSection(context),
+                _buildPhotoSection(context),
                 SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 buildDateTimeSection(
                   context: context,
@@ -245,11 +239,16 @@ class _CreatePostPageState extends State<CreatePostScreen>
                 ),
                 SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 buildTextField('Allergens'),
-                buildSearchBar(allergensList, selectedAllergens),
+                buildCupertinoChipSelection(
+                  allergensList,
+                  selectedAllergens,
+                ),
                 buildTextField('Category'),
-                buildSearchBar(categoriesList, selectedCategories),
+                buildCupertinoChipSelection(
+                  categoriesList,
+                  selectedCategories,
+                ),
                 buildTextField('Pickup Location'),
-                buildSearchBar(pickupLocationsList, selectedPickupLocation),
                 buildMapSection(),
                 buildDateTimeSection(
                   context: context,
@@ -262,7 +261,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                   context,
                   pickupInstrController,
                   'Provide pickup instructions here so they can find you',
-                  height: 100.0,
+                  height: 120.0,
                 ),
               ],
             ),
@@ -270,10 +269,79 @@ class _CreatePostPageState extends State<CreatePostScreen>
         )));
   }
 
+  SliverToBoxAdapter buildCupertinoChipSelection(
+    List<String> itemList,
+    List<String> selectedItems,
+  ) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+        child: DottedBorder(
+          borderType: BorderType.RRect, // Rounded rectangle border
+          radius: Radius.circular(12), // Border corner radius
+          padding: EdgeInsets.all(10), // Padding inside the border
+          dashPattern: [6, 4], // Pattern of dashes and gaps
+          strokeWidth: 2, // Width of the dashes
+          color: CupertinoColors.systemGrey, // Color of the dashes
+          child: Wrap(
+            spacing: 8.0, // gap between adjacent chips
+            runSpacing: 4.0, // gap between lines
+            children: itemList.map((item) {
+              final isSelected = selectedItems.contains(item);
+              return CupertinoButton(
+                  onPressed: () {
+                    setState(() {
+                      if (isSelected) {
+                        selectedItems.remove(item);
+                      } else {
+                        selectedItems.add(item);
+                      }
+                    });
+                  },
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? accentColor.resolveFrom(context)
+                            : CupertinoColors.tertiarySystemBackground
+                                .resolveFrom(context),
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            item, // Capitalize the first letter of each word
+                            style: TextStyle(
+                              color: isSelected
+                                  ? CupertinoColors.white
+                                  : CupertinoColors.label.resolveFrom(context),
+                              fontSize:
+                                  adjustedFontSize, // Ensure this variable is defined and passed
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      )));
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
   CupertinoNavigationBar _buildNavigationBar(BuildContext context) {
     return CupertinoNavigationBar(
       transitionBetweenRoutes: false,
       backgroundColor: groupedBackgroundColor,
+      middle: Text('New Post',
+          style:
+              _textStyle(CupertinoColors.label.resolveFrom(context)).copyWith(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          )),
       leading: GestureDetector(
         onTap: () => Navigator.of(context).pop(),
         child: Column(
@@ -360,25 +428,29 @@ class _CreatePostPageState extends State<CreatePostScreen>
         _selectedImagesWithAltText[imagePath]!.isNotEmpty;
   }
 
-  Widget _buildBottomSection(BuildContext context) {
+  Widget _buildPhotoSection(BuildContext context) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: CupertinoButton(
-          onPressed: () => _pickImage(),
+          onPressed: () => {
+            _pickImage(),
+            HapticFeedback.selectionClick()
+
+          },
           padding: EdgeInsets.zero,
           child: Container(
-            padding: EdgeInsets.symmetric(vertical: 16.0),
+            padding: EdgeInsets.symmetric(vertical: 14.0),
             decoration: BoxDecoration(
               color: accentColor,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.add_photo_alternate_rounded,
-                  size: 30,
+                  size: 28,
                   color: CupertinoColors.white,
                 ),
                 SizedBox(width: 10),
@@ -452,13 +524,13 @@ class _CreatePostPageState extends State<CreatePostScreen>
 
   SliverToBoxAdapter buildTextInputField(BuildContext context,
       TextEditingController controller, String placeholder,
-      {double? height}) {
+      {double? height, bool capitalize = false}) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.only(left: 16.0, top: 5.0, right: 16.0),
         child: Container(
           height:
-              height, // This will be null by default, allowing the container to auto-size.
+              height, // This allows the container to auto-size if height is null.
           child: CupertinoTextField(
             controller: controller,
             maxLines: height != null ? null : 1,
@@ -483,28 +555,12 @@ class _CreatePostPageState extends State<CreatePostScreen>
                   CupertinoColors.tertiarySystemBackground, context),
               borderRadius: BorderRadius.circular(16),
             ),
+            textCapitalization: capitalize
+                ? TextCapitalization.sentences
+                : TextCapitalization.none,
           ),
         ),
       ),
-    );
-  }
-
-  SliverToBoxAdapter buildSearchBar(
-      List<String> itemList, List<String> selectedItems) {
-    return SliverToBoxAdapter(
-      child: CustomSearchBar.SearchBar(
-          itemList: itemList,
-          onItemsSelected: (List<String> items) {
-            setState(() {
-              if (itemList == allergensList) {
-                selectedAllergens = items;
-              } else if (itemList == categoriesList) {
-                selectedCategories = items;
-              } else if (itemList == pickupLocationsList) {
-                selectedPickupLocation = items;
-              }
-            });
-          }),
     );
   }
 
@@ -597,7 +653,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                     child: Text('Cancel',
                         style: TextStyle(
                             color: CupertinoDynamicColor.resolve(
-                                CupertinoColors.label, context))),
+                                CupertinoColors.secondaryLabel, context))),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   CupertinoButton(

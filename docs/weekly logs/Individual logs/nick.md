@@ -158,7 +158,6 @@ N/A
 - Attended weekly meetings and completed individual log.
 - Presented the demo for the app.
 
-
 ## Tasks in progress (from Project Board)
 
 N/A
@@ -200,7 +199,6 @@ N/A
 
 N/A
 
-
 ## Week 11 & 12: Monday 13th Oct 2023 - Sunday 26th Nov 2023
 
 ![Peer Evaluation](./images/nickWeek11&12.png)
@@ -235,7 +233,6 @@ N/A
 
 N/A
 
-
 ## Week 13: Monday 27th Oct 2023 - Sunday 3rd Dec 2023
 
 ![Peer Evaluation](./images/nickWeek13.png)
@@ -256,7 +253,7 @@ N/A
 - Helped with the presentation slides and demo.
 - Helped with writing up the design document.
 
-## Tasks completed 
+## Tasks completed
 
 - The profile card has been updated to synchronize with Firebase changes.
 - Orders are now retrieved from Firebase.
@@ -272,7 +269,6 @@ N/A
 - Assisted in creating presentation slides and preparing the demo.
 - Contributed to the development of the design document.
 
-
 ## Tasks in progress (from Project Board)
 
 N/A
@@ -280,8 +276,6 @@ N/A
 ## Additional Information
 
 N/A
-
-
 
 ## Term 2 Week 1: Monday 8th Jan 2024 - Sunday 14th Dec 2024
 
@@ -298,7 +292,6 @@ N/A
 - Seperated out multiple pages into viewmodels and widgets.
 - Completed the weekly logs.
 - Assisted in assigning and prioritizing the tasks for the upcoming milestone.
-
 
 ### Tasks completed (from Project Board)
 
@@ -318,8 +311,6 @@ N/A
 ### Additional Information
 
 N/A.
-
-
 
 ## Term 2 Week 2: Monday 15th Jan 2024 - Sunday 21th Dec 2024
 
@@ -361,7 +352,6 @@ N/A.
 ### Additional Information
 
 N/A.
-
 
 ## Term 2 Week 3: Monday 22th Jan 2024 - Sunday 28th Dec 2024
 
@@ -441,7 +431,6 @@ N/A.
 
 N/A.
 
-
 ## Term 2 Week 5: Monday 5th Feb 2024 - Sunday 11th Feb 2024
 
 ### Tasks Worked On During the Week
@@ -476,7 +465,6 @@ N/A.
 
 N/A.
 
-
 ## Term 2 Week 6: Monday 12th Feb 2024 - Sunday 18th Feb 2024
 
 ![Peer Evaluation](./images/nickT2W6.png)
@@ -500,6 +488,36 @@ N/A.
 - fixed refresh issues on the account screen.
 - Refractor screens to cohere MVVM model, and added more modularization to the code.
 
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
+
+## Term 2 Week 8: Monday 26th Feb 2024 - Sunday 3rd Mar 2024
+
+![Peer Evaluation](./images/nickT2W8.png)
+
+### Tasks completed (from Project Board)
+
+- Added features and prepared the app for the upcoming peer testings.
+- Attended weekly meeting and started preparing for the plans for the workstation in next week.
+- Reviewed the Peer Evaluation and provided feedback to the team
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+
+### Recap of personal goals
+
+- Improved the UI on the Settings page whichis now sectioned correctly with coloured icons.
+- Improved the loading speed of the app using QuerySnapshot.
+- Minor adjustment to the UI from the peer review feedbacks.
+- Haptic feedback of the buttons are now added to different part of the screen
+- Added choice chips for the allergen and category selection (from the peer review feedbacks)
+- Added reverse geocoding for pickup locations and ditched the manual selection of the pickup address.
+- Completed the weekly log and contributed to the team log.
 
 ### Tasks in progress (from Project Board)
 
