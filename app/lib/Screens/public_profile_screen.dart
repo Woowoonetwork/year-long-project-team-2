@@ -376,7 +376,7 @@ class RecentPostSection extends StatelessWidget {
             height: 220,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.only(left: 20),
+              padding: EdgeInsets.only(left: 5, right: 20),
               itemCount: recentPosts.length,
               itemBuilder: (context, index) {
                 final post = recentPosts[index];
@@ -430,6 +430,7 @@ class RecentPostSection extends StatelessWidget {
                       onTap: (postId) {},
                       postId: '7cc0e4f5-076d-4802-b4bf-07ee1f017d5f',
                       profileURL: user['profileImagePath'] ?? '',
+
                       showTags: true,
                       imageHeight: 100.0,
                       showShadow: true,
