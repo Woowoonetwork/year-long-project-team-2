@@ -66,12 +66,16 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   @override
   void initState() {
     super.initState();
-
     if (widget.userId != null) {
-      _fetchUserDetails(widget.userId!);
-      _fetchPostsSoldCount(widget.userId!); // Fetch posts sold count
+      _fetchUserDetails(widget.userId!).then((_) {
+        // Ensure palette is updated after user details are fetched
+        _updatePaletteGenerator();
+      });
+      _fetchPostsSoldCount(widget.userId!);
+    } else {
+      // If there's no userId, update the palette generator with the default or passed imageUrl
+      _updatePaletteGenerator();
     }
-    _updatePaletteGenerator();
   }
 
   Future<void> _blockUser(String userIdToBlock) async {
@@ -131,14 +135,17 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   Future<void> _updatePaletteGenerator() async {
+    if (_imageUrl == null || _imageUrl!.isEmpty) {
+      _imageUrl =
+          'assets/images/sampleProfile.png'; // Fallback image URL or asset
+    }
+
     ImageProvider imageProvider;
-    print("Updating palette generator with imageUrl: ${_imageUrl}");
-    //if (_imageUrl != null) {
-    imageProvider = CachedNetworkImageProvider(
-        "https://firebasestorage.googleapis.com/v0/b/cosc499-9a063.appspot.com/o/profile_images%2Fprofile_99F8gvUKvRd1HFAyh9toLcwl7792.jpg?alt=media&token=858fb36d-945d-4e47-b1a2-00ba855dede2");
-    //} else {
-    // Fallback to a local asset if imageUrl is not available
-    //  imageProvider = AssetImage('assets/images/sampleProfile.png');
+    if (_imageUrl!.startsWith('http')) {
+      imageProvider = CachedNetworkImageProvider(_imageUrl!);
+    } else {
+      imageProvider = AssetImage(_imageUrl!);
+    }
 
     final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
       imageProvider,
@@ -147,7 +154,6 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
 
     if (mounted) {
       setState(() {
-        // Use vibrant color as background, or fallback to a default color
         _backgroundColor =
             generator.vibrantColor?.color ?? CupertinoColors.systemGrey;
       });
