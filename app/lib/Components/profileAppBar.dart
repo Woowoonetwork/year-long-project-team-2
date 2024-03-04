@@ -33,6 +33,8 @@ class ProfileAppBar extends StatefulWidget {
       isCurrentUser; // New parameter to determine if the profile belongs to the current user
   final String imageUrl;
   final String? userId;
+  final String? firstName;
+  final String? lastName;
 
   const ProfileAppBar({
     Key? key,
@@ -41,6 +43,8 @@ class ProfileAppBar extends StatefulWidget {
     required this.isBlocked,
     required this.isCurrentUser, // Initialize in the constructor
     required this.imageUrl,
+    this.firstName,
+    this.lastName,
     this.userId,
   }) : super(key: key);
 
@@ -76,7 +80,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         _lastName = userData.data()?['lastName'] as String?;
         _city = userData.data()?['city'] as String?;
         _province = userData.data()?['province'] as String?;
-        _rating = userData.data()?['ratings']?.toDouble();
+        _rating = userData.data()?['avgRating']?.toDouble();
       });
     }
   }
@@ -146,7 +150,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
 
   Widget _buildCollapsedUserInfo() {
     return Text(
-      'Harry Styles',
+      '${_firstName ?? "Loading..."} ${_lastName ?? ""}',
       style: TextStyle(
           fontSize: 20,
           letterSpacing: -0.6,
