@@ -52,9 +52,7 @@ class _PendingConfirmationWithTimerState
       if (mounted) {
         Navigator.of(context).pop();
       }
-    }).catchError((error) {
-      // Handle errors, perhaps log them or show a Snackbar
-    });
+    }).catchError((error) {});
   }
 
   @override
@@ -97,6 +95,17 @@ class _PendingConfirmationWithTimerState
                       color: accentColor.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(30),
                     ),
+                    //alignment: Alignment.centerRight,
+                    //child: Padding(
+                    //  padding: EdgeInsets.only(right: 8.0),
+                    //child: Text(
+                    //  '${(_controller.value * widget.durationInSeconds).ceil()}s',
+                    //  style: TextStyle(
+                    //    color: Colors.black87,
+                    //     fontSize: 16,
+                    //    ),
+                    //    ),
+                    //   ),
                   ),
                 );
               },
