@@ -398,6 +398,16 @@ class RecentPostSection extends StatelessWidget {
                     var createdAt =
                         (post['post_timestamp'] as Timestamp?)?.toDate() ??
                             DateTime.now();
+                    List<String> tags = (post['categories'] as String?)
+                            ?.split(',')
+                            .map((tag) => tag.trim())
+                            .toList() ??
+                        [];
+                    Map<String, Color> tagColors = {};
+                    List<Color> assignedColors = tags
+                        .map((tag) =>
+                            tagColors.putIfAbsent(tag, () => _getRandomColor()))
+                        .toList();
 
                     return PostCard(
                       imagesWithAltText: firstImage != null
@@ -409,10 +419,9 @@ class RecentPostSection extends StatelessWidget {
                             ]
                           : [],
                       title: post['title'],
-                      tags: [post['allergens'], post['category']]
-                          .whereType<String>()
-                          .toList(),
-                      tagColors: [Colors.red], // Simplified for demonstration
+                      tags: tags,
+
+                      tagColors: assignedColors, // Simplified for demonstration
                       firstname: user['firstName'],
                       lastname: user['lastName'],
 
