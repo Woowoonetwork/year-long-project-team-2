@@ -53,7 +53,8 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   String? _firstName; // Variable to store the first name
   String? _lastName;
   String? _city;
-  String? _province; // Holds the background color extracted from the image
+  String? _province;
+  double? _rating; // Holds the background color extracted from the image
 
   @override
   void initState() {
@@ -73,6 +74,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         _lastName = userData.data()?['lastName'] as String?;
         _city = userData.data()?['city'] as String?;
         _province = userData.data()?['province'] as String?;
+        _rating = userData.data()?['ratings']?.toDouble();
       });
     }
   }
@@ -178,6 +180,24 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
     if (_city != null && _province != null) {
       location = '$_city, $_province';
     }
+    List<Widget> stars = [];
+    Color starColor = _backgroundColor ?? CupertinoColors.systemOrange;
+    // Generate star icons based on rating
+    for (int i = 0; i < 5; i++) {
+      stars.add(Icon(
+        // Always use CupertinoIcons.star for unfilled stars to ensure they appear completely unfilled
+        _rating != null && i < _rating!
+            ? CupertinoIcons.star_fill
+            : CupertinoIcons.star,
+        color: starColor, // Use the extracted photo icon color for all stars
+        size: 14,
+      ));
+    }
+
+    String ratingText = _rating != null
+        ? '  ${_rating!.toStringAsFixed(1)} Ratings'
+        : '  No rating available';
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,33 +234,17 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                   ),
                   SizedBox(height: 2),
                   Row(
-                    children: [
-                      Icon(CupertinoIcons.star_fill,
-                          color: _backgroundColor, size: 14),
-                      Icon(CupertinoIcons.star_fill,
-                          color: _backgroundColor, size: 14),
-                      Icon(CupertinoIcons.star_fill,
-                          color: _backgroundColor, size: 14),
-                      Icon(CupertinoIcons.star_fill,
-                          color: _backgroundColor,
-                          size: 14), // Use system colors for consistency
-                      Icon(CupertinoIcons.star_fill,
-                          color: _backgroundColor, size: 14),
-                      Text('  5.0 Ratings',
-                          style: TextStyle(
-                              color: CupertinoColors.secondaryLabel
-                                  .resolveFrom(context),
-                              fontWeight: FontWeight.w400,
-                              fontSize: 12,
-                              letterSpacing: -0.4)),
-                      Text('  10 items sold',
-                          style: TextStyle(
-                              color: CupertinoColors.secondaryLabel
-                                  .resolveFrom(context),
-                              fontWeight: FontWeight.w400,
-                              fontSize: 12,
-                              letterSpacing: -0.4)),
-                    ],
+                    children: stars.followedBy([
+                      Text(
+                        ratingText,
+                        style: TextStyle(
+                            color: CupertinoColors.secondaryLabel
+                                .resolveFrom(context),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 12,
+                            letterSpacing: -0.4),
+                      ),
+                    ]).toList(),
                   ),
                 ],
               ),
