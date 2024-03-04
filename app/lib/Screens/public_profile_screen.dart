@@ -137,7 +137,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                   RecentPostSection(
                     recentPosts: recentPosts,
                   ),
-                  ReviewSection(),
+                  ReviewSection(userId: effectiveUserId),
                 ],
               ),
             ),
