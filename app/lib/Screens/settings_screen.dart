@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:FoodHood/Screens/edit_profile_screen.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 
 // Constants for styling
 const double _defaultPadding = 20.0;
@@ -78,7 +79,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _navigateToPage(context, AccessibilityScreen());
           }, CupertinoColors.activeGreen),
           SizedBox(height: 14),
-          _buildSettingButton('Help', FeatherIcons.helpCircle, () {}, CupertinoColors.systemCyan),
+          _buildSettingButton('Help', FeatherIcons.helpCircle, () {},
+              CupertinoColors.systemCyan),
           SizedBox(height: 16),
           Container(
             margin: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
@@ -144,7 +146,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: accentColor,
         borderRadius: BorderRadius.circular(12),
         padding: EdgeInsets.symmetric(vertical: 16),
-        onPressed: () => _navigateToPage(context, EditProfileScreen()),
+        onPressed: () => {
+          HapticFeedback.selectionClick(),
+          _navigateToPage(context, EditProfileScreen()),
+        },
         child: Text(
           'Edit FoodHood Profile',
           style: TextStyle(
@@ -260,41 +265,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
     IconData icon,
     VoidCallback onPressed,
     Color? color, // Make color optional
-) {
-  return Container(
-    margin: EdgeInsets.symmetric(horizontal: _defaultMargin),
-    child: CupertinoButton(
-      onPressed: onPressed,
-      color: CupertinoColors.tertiarySystemBackground,
-      borderRadius: BorderRadius.circular(_buttonBorderRadius),
-      padding: EdgeInsets.symmetric(
-          horizontal: _defaultPadding, vertical: _defaultPadding / 1.25),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Icon(icon,
-                  size: _iconSize,
-                  color: color ?? CupertinoColors.label.resolveFrom(context)), // Use color if provided, else default
-              SizedBox(width: _spacing),
-              Text(
-                title,
-                style: TextStyle(
-                    fontSize: adjustedFontSize,
-                    fontWeight: FontWeight.w500,
-                    color: CupertinoColors.label.resolveFrom(context)),
-              ),
-            ],
-          ),
-          Icon(FeatherIcons.chevronRight,
-              color: CupertinoColors.label.resolveFrom(context)),
-        ],
+  ) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: _defaultMargin),
+      child: CupertinoButton(
+        onPressed: () {
+          HapticFeedback.selectionClick();
+          onPressed();
+        },
+        color: CupertinoColors.tertiarySystemBackground,
+        borderRadius: BorderRadius.circular(_buttonBorderRadius),
+        padding: EdgeInsets.symmetric(
+            horizontal: _defaultPadding, vertical: _defaultPadding / 1.25),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(icon,
+                    size: _iconSize,
+                    color: color ??
+                        CupertinoColors.label.resolveFrom(
+                            context)), // Use color if provided, else default
+                SizedBox(width: _spacing),
+                Text(
+                  title,
+                  style: TextStyle(
+                      fontSize: adjustedFontSize,
+                      fontWeight: FontWeight.w500,
+                      color: CupertinoColors.label.resolveFrom(context)),
+                ),
+              ],
+            ),
+            Icon(FeatherIcons.chevronRight,
+                color: CupertinoColors.label.resolveFrom(context)),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _buildActionButtons(
       String title, Color color, VoidCallback onPressed) {

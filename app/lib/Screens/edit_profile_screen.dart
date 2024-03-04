@@ -365,6 +365,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Center(
                         child: Icon(
@@ -374,7 +375,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               CupertinoColors.label, context),
                         ),
                       ),
-                      SizedBox(width: 8),
+                      SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           'Upload Profile Picture',

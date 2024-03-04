@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:FoodHood/Components/imageTile.dart';
+import 'package:flutter/services.dart';
 
 enum SectionType { date, time }
 
@@ -432,7 +433,11 @@ class _CreatePostPageState extends State<CreatePostScreen>
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: CupertinoButton(
-          onPressed: () => _pickImage(),
+          onPressed: () => {
+            _pickImage(),
+            HapticFeedback.selectionClick()
+
+          },
           padding: EdgeInsets.zero,
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 14.0),

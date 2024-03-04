@@ -7,6 +7,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'dart:ui';
 import 'package:FoodHood/Components/colors.dart';
+import 'package:flutter/services.dart';
 
 class PhotoGalleryScreen extends StatefulWidget {
   final List<Map<String, String>> imagesWithAltText;
@@ -148,6 +149,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
             child: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: () {
+                HapticFeedback.selectionClick();
                 setState(() {
                   _showAltText = !_showAltText;
                 });

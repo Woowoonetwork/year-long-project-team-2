@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 const double _defaultTextFontSize = 16.0;
 const double _defaultTabTextFontSize = 14.0;
@@ -39,6 +40,7 @@ class _AccountScreenState extends State<AccountScreen> {
     final String currentUserUID = FirebaseAuth.instance.currentUser?.uid ?? '';
     FirebaseFirestore.instance
         .collection('post_details')
+        .orderBy('post_timestamp', descending: true)
         .where('user_id', isEqualTo: currentUserUID)
         .snapshots()
         .listen((snapshot) {
@@ -124,7 +126,8 @@ class _AccountScreenState extends State<AccountScreen> {
     };
     return CupertinoPageScaffold(
         backgroundColor: groupedBackgroundColor,
-        child: SafeArea(child: CustomScrollView(slivers: <Widget>[
+        child: SafeArea(
+            child: CustomScrollView(slivers: <Widget>[
           _buildNavigationBar(),
           SliverToBoxAdapter(child: ProfileCard()),
           _buildSegmentControl(myTabs),
@@ -146,8 +149,11 @@ class _AccountScreenState extends State<AccountScreen> {
                     fontWeight: FontWeight.w500,
                     color: accentColor,
                     letterSpacing: -0.6)),
-            onPressed: () => Navigator.of(context).push(
-                CupertinoPageRoute(builder: (context) => SettingsScreen()))),
+            onPressed: () => {
+                  HapticFeedback.selectionClick(),
+                  Navigator.of(context).push(CupertinoPageRoute(
+                      builder: (context) => SettingsScreen()))
+                }),
         border: Border(bottom: BorderSide.none),
         stretch: true);
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/services.dart';
 
 class PostCard extends StatelessWidget {
   final List<Map<String, String>> imagesWithAltText;
@@ -44,6 +45,7 @@ class PostCard extends StatelessWidget {
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: () {
+          HapticFeedback.selectionClick(); 
           onTap(postId);
           Navigator.push(
             context,

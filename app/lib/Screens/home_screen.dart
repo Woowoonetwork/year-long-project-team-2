@@ -467,17 +467,23 @@ class _HomeScreenState extends State<HomeScreen> {
       bottom: 100.0,
       right: 16.0,
       child: GestureDetector(
+        onTap: () => {
+           HapticFeedback.selectionClick(),
+          _openCreatePostScreen(context),
+        },
         onTapDown: (_) {
-          setState(() => _scale = 0.85); // Shrink the button a bit when pressed
-          HapticFeedback.lightImpact(); // Provide haptic feedback
+          setState(() => _scale = 0.85); 
+          HapticFeedback.selectionClick();
         },
         onTapUp: (_) {
-          setState(() => _scale = 1.0); // Revert the button size on release
-          _openCreatePostScreen(context); // Your original onPressed function
+          setState(() => _scale = 1.0); 
+          HapticFeedback.selectionClick(); 
+          _openCreatePostScreen(context);
         },
         onTapCancel: () {
           setState(() =>
               _scale = 1.0); // Ensure button size reverts if tap is canceled
+          HapticFeedback.selectionClick(); // Add haptic feedback here
         },
         child: Transform.scale(
           scale: _scale,
@@ -507,7 +513,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _openCreatePostScreen(BuildContext context) {
     Navigator.of(context).push(
-     CupertinoModalPopupRoute(
+      CupertinoModalPopupRoute(
         builder: (context) => CreatePostScreen(),
       ),
     );

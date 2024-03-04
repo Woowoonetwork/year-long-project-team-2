@@ -15,6 +15,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
+import 'package:flutter/services.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -140,6 +141,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     setState(() {
       viewModel.isFavorite = !viewModel.isFavorite;
     });
+    HapticFeedback.lightImpact(); // Add this line
 
     if (viewModel.isFavorite) {
       await viewModel.savePost(widget.postId);
@@ -840,6 +842,7 @@ Future<void> _launchMapUrl(LatLng locationCoordinates) async {
   final String appleMapsUrl =
       'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}';
 
+  HapticFeedback.selectionClick();
   // Check if the device is running on iOS
   if (Platform.isIOS) {
     // Attempt to open Apple Maps
@@ -1085,6 +1088,7 @@ class _ReserveButtonState extends State<ReserveButton> {
 
   void _handleReservation() async {
     if (!_isReserved) {
+      HapticFeedback.mediumImpact();
       try {
         await FirebaseFirestore.instance
             .collection('post_details')

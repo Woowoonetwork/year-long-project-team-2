@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart'; 
-import 'package:palette_generator/palette_generator.dart';
+import 'package:flutter/services.dart';
 
 
 class ProfileCard extends StatefulWidget {
@@ -79,6 +79,7 @@ class _ProfileCardState extends State<ProfileCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        HapticFeedback.selectionClick();
         Navigator.push(
           context,
           CupertinoPageRoute(builder: (context) => PublicProfileScreen()),

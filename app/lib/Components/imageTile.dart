@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'dart:ui';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'altTextEditor.dart';
+import 'package:flutter/services.dart';
 
 class ImageTile extends StatelessWidget {
   final String imagePath;
@@ -24,22 +25,22 @@ class ImageTile extends StatelessWidget {
   }) : super(key: key);
 
   void _showAltTextModal(BuildContext context) {
-  showCupertinoModalBottomSheet(
-    context: context,
-    isDismissible: true,
-    enableDrag: true,
-    builder: (BuildContext context) {
-      return AltTextEditor(
-        imagePath: imagePath,
-        existingAltText: altText,
-        onAltTextSaved: (altText) {
-          onAltTextChanged(altText);
-        },
-      );
-    },
-  );
-}
-
+    HapticFeedback.mediumImpact(); // Add haptic feedback here
+    showCupertinoModalBottomSheet(
+      context: context,
+      isDismissible: true,
+      enableDrag: true,
+      builder: (BuildContext context) {
+        return AltTextEditor(
+          imagePath: imagePath,
+          existingAltText: altText,
+          onAltTextSaved: (newAltText) {
+            onAltTextChanged(newAltText);
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +79,11 @@ class ImageTile extends StatelessWidget {
                             .resolveFrom(context)
                             .withOpacity(0.9),
                       ),
-                      onTap: onRemove,
+                      onTap: () {
+                        HapticFeedback
+                            .mediumImpact(); // Add haptic feedback here
+                        onRemove();
+                      },
                     ),
                   )),
             ),
