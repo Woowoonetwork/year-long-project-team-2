@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
-import 'package:cached_network_image/cached_network_image.dart'; // Add this import
+import 'package:cached_network_image/cached_network_image.dart'; 
+import 'package:palette_generator/palette_generator.dart';
+
 
 class ProfileCard extends StatefulWidget {
   ProfileCard({Key? key}) : super(key: key);
@@ -22,6 +24,7 @@ class _ProfileCardState extends State<ProfileCard> {
   double? rating;
   List<String>? reviews;
   bool isLoading = true;
+  
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 

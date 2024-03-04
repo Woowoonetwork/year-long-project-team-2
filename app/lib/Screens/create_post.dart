@@ -5,7 +5,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:FoodHood/Components/search_bar.dart' as CustomSearchBar;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
@@ -45,21 +44,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
   @override
   void initState() {
     super.initState();
-    titleController.addListener(() {
-      final text = titleController.text;
-      titleController.value = titleController.value.copyWith(
-        text: text.capitalize(),
-        selection: TextSelection.collapsed(offset: text.length),
-      );
-    });
-
-    descController.addListener(() {
-      final text = descController.text;
-      descController.value = descController.value.copyWith(
-        text: text.capitalize(),
-        selection: TextSelection.collapsed(offset: text.length),
-      );
-    });
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
@@ -228,12 +212,20 @@ class _CreatePostPageState extends State<CreatePostScreen>
                 SliverToBoxAdapter(child: SizedBox(height: 20.0)),
                 buildTextField('Title'),
                 buildTextInputField(
-                    context, titleController, 'What\'s cooking?'),
+                  context,
+                  titleController,
+                  'What\'s cooking?',
+                  capitalize: true,
+                ),
                 SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 buildTextField('Description'),
-                buildTextInputField(context, descController,
-                    'Is there anything special about your dish?',
-                    height: 160.0),
+                buildTextInputField(
+                  context,
+                  descController,
+                  'Is there anything special about your dish?',
+                  height: 160.0,
+                  capitalize: true,
+                ),
                 buildImageSection(
                     context, _selectedImagesWithAltText.keys.toList()),
                 _buildPhotoSection(context),
@@ -320,7 +312,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            item.capitalize(), // Capitalize the first letter of each word
+                            item, // Capitalize the first letter of each word
                             style: TextStyle(
                               color: isSelected
                                   ? CupertinoColors.white
@@ -527,13 +519,13 @@ class _CreatePostPageState extends State<CreatePostScreen>
 
   SliverToBoxAdapter buildTextInputField(BuildContext context,
       TextEditingController controller, String placeholder,
-      {double? height}) {
+      {double? height, bool capitalize = false}) {
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.only(left: 16.0, top: 5.0, right: 16.0),
         child: Container(
           height:
-              height, // This will be null by default, allowing the container to auto-size.
+              height, // This allows the container to auto-size if height is null.
           child: CupertinoTextField(
             controller: controller,
             maxLines: height != null ? null : 1,
@@ -558,37 +550,13 @@ class _CreatePostPageState extends State<CreatePostScreen>
                   CupertinoColors.tertiarySystemBackground, context),
               borderRadius: BorderRadius.circular(16),
             ),
+            textCapitalization: capitalize
+                ? TextCapitalization.sentences
+                : TextCapitalization.none,
           ),
         ),
       ),
     );
-  }
-
-  SliverToBoxAdapter buildSearchBar(
-      List<String> itemList, List<String> selectedItems) {
-    return SliverToBoxAdapter(
-        child: Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-      child: DottedBorder(
-        borderType: BorderType.RRect, // Rounded rectangle border
-        radius: Radius.circular(12), // Border corner radius
-        padding: EdgeInsets.all(4), // Padding inside the border
-        dashPattern: [6, 4], // Pattern of dashes and gaps
-        strokeWidth: 2, // Width of the dashes
-        color: Colors.grey, // Color of the dashes
-        child: CustomSearchBar.SearchBar(
-            itemList: itemList,
-            onItemsSelected: (List<String> items) {
-              setState(() {
-                if (itemList == allergensList) {
-                  selectedAllergens = items;
-                } else if (itemList == categoriesList) {
-                  selectedCategories = items;
-                }
-              });
-            }),
-      ),
-    ));
   }
 
   SliverToBoxAdapter buildDateSection(
@@ -737,13 +705,5 @@ class _CreatePostPageState extends State<CreatePostScreen>
         ),
       ),
     );
-  }
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return split(' ')
-        .map((str) => str[0].toUpperCase() + str.substring(1))
-        .join(' ');
   }
 }

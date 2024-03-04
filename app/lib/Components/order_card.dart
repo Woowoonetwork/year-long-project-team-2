@@ -17,7 +17,14 @@ const double _defaultOrderInfoFontSize = 12.0;
 const double _defaultStatusFontSize = 13.0;
 const double imageHeight = 120;
 
-enum OrderState { reserved, confirmed, delivering, readyToPickUp, pending, notReserved}
+enum OrderState {
+  reserved,
+  confirmed,
+  delivering,
+  readyToPickUp,
+  pending,
+  notReserved
+}
 
 // ignore: must_be_immutable
 class OrderCard extends StatelessWidget {
@@ -216,15 +223,20 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusRow(BuildContext context) {
+  Widget _buildStatusRow(BuildContext context, {bool editMode = false}) {
     return Container(
-      height: 48,
+      height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildStatusText(context),
-          _buildStatusButton(context),
+          Row(
+            children: [
+              _buildStatusButton(context, editMode: editMode),
+            ],
+          ),
         ],
       ),
     );
@@ -267,9 +279,7 @@ class OrderCard extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          color: CupertinoColors.tertiarySystemBackground
-              .resolveFrom(context)
-              .withOpacity(0.9),
+          color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
           child: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () => _handleStatusPress(context),
@@ -294,22 +304,34 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusButton(BuildContext context) {
+  Widget _buildStatusButton(BuildContext context, {bool editMode = false}) {
+    // Determine button text based on edit mode
+    final buttonText = editMode ? "Edit" : "Status";
+
+    // Determine the icon based on edit mode
+    final buttonIcon = editMode ? FeatherIcons.edit : FeatherIcons.chevronRight;
+
+    // Determine the action based on edit mode
+    final buttonAction = editMode ? onEdit : () => _handleStatusPress(context);
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
-        filter:
-            ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur filter
+        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
           child: CupertinoButton(
             padding: EdgeInsets.zero,
-            onPressed: () => _handleStatusPress(context),
+            onPressed: buttonAction,
             child: Row(
+              mainAxisAlignment:
+                  MainAxisAlignment.center, // Center items horizontally.
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Center items vertically.
               children: [
                 Text(
-                  'Status',
+                  buttonText,
                   style: TextStyle(
                       color: CupertinoDynamicColor.resolve(
                           CupertinoColors.label, context),
@@ -318,10 +340,12 @@ class OrderCard extends StatelessWidget {
                   overflow: TextOverflow.visible,
                 ),
                 const SizedBox(width: 4),
-                Icon(FeatherIcons.chevronRight,
-                    color: CupertinoDynamicColor.resolve(
-                        CupertinoColors.label, context),
-                    size: 14),
+                Icon(
+                  buttonIcon,
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context),
+                  size: 14,
+                ),
               ],
             ),
           ),

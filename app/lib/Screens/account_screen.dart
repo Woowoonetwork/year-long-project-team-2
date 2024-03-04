@@ -124,8 +124,7 @@ class _AccountScreenState extends State<AccountScreen> {
     };
     return CupertinoPageScaffold(
         backgroundColor: groupedBackgroundColor,
-        child: SafeArea(
-            child: CustomScrollView(slivers: <Widget>[
+        child: SafeArea(child: CustomScrollView(slivers: <Widget>[
           _buildNavigationBar(),
           SliverToBoxAdapter(child: ProfileCard()),
           _buildSegmentControl(myTabs),

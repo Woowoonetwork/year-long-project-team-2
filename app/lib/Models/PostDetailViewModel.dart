@@ -103,7 +103,7 @@ class PostDetailViewModel extends ChangeNotifier {
     pickupInstructions = documentData['pickup_instructions'] ?? '';
     userid = documentData['user_id'] ?? '';
     rating = documentData['rating'] ?? 0.0;
-    isReserved = documentData['post_status'] != 'pending';
+    isReserved = documentData['post_status'] != 'not reserved';
 
     GeoPoint geoPoint = documentData['post_location'] as GeoPoint;
     pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
