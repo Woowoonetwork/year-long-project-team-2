@@ -1,4 +1,5 @@
 import 'package:FoodHood/Components/appBarVisibilityController.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
@@ -59,16 +60,18 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   String? _city;
   String? _province;
   double? _rating;
+  String? _imageUrl;
   int _postsSold = 0; // Holds the background color extracted from the image
 
   @override
   void initState() {
     super.initState();
-    _updatePaletteGenerator();
+
     if (widget.userId != null) {
       _fetchUserDetails(widget.userId!);
       _fetchPostsSoldCount(widget.userId!); // Fetch posts sold count
     }
+    _updatePaletteGenerator();
   }
 
   Future<void> _blockUser(String userIdToBlock) async {
@@ -107,6 +110,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         _city = userData.data()?['city'] as String?;
         _province = userData.data()?['province'] as String?;
         _rating = userData.data()?['avgRating']?.toDouble();
+        _imageUrl = userData.data()?['profileImagePath'] as String?;
       });
     }
   }
@@ -127,15 +131,25 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   Future<void> _updatePaletteGenerator() async {
+    ImageProvider imageProvider;
+    print("Updating palette generator with imageUrl: ${_imageUrl}");
+    //if (_imageUrl != null) {
+    imageProvider = CachedNetworkImageProvider(
+        "https://firebasestorage.googleapis.com/v0/b/cosc499-9a063.appspot.com/o/profile_images%2Fprofile_99F8gvUKvRd1HFAyh9toLcwl7792.jpg?alt=media&token=858fb36d-945d-4e47-b1a2-00ba855dede2");
+    //} else {
+    // Fallback to a local asset if imageUrl is not available
+    //  imageProvider = AssetImage('assets/images/sampleProfile.png');
+
     final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
-      AssetImage('assets/images/sampleProfile.png'), // Use your image asset
-      size: Size(200, 100), // Size of the area from which to pick colors
+      imageProvider,
+      size: Size(200, 100), // Adjust the size according to your needs
     );
+
     if (mounted) {
       setState(() {
         // Use vibrant color as background, or fallback to a default color
         _backgroundColor =
-            generator.vibrantColor?.color ?? CupertinoColors.systemOrange;
+            generator.vibrantColor?.color ?? CupertinoColors.systemGrey;
       });
     }
   }
@@ -227,6 +241,16 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
     if (_city != null && _province != null) {
       location = '$_city, $_province';
     }
+    ImageProvider<Object> _getAvatarImageProvider() {
+      // Check if imageUrl is not null and not empty
+      if (widget.imageUrl.isNotEmpty) {
+        return CachedNetworkImageProvider(widget.imageUrl);
+      } else {
+        // Fallback to a local asset if imageUrl is not available
+        return AssetImage('assets/images/sampleProfile.png');
+      }
+    }
+
     List<Widget> stars = [];
     Color starColor = _backgroundColor ?? CupertinoColors.systemOrange;
     // Generate star icons based on rating
@@ -253,8 +277,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         Row(
           children: [
             CircleAvatar(
-              backgroundImage:
-                  Image.asset('assets/images/sampleProfile.png').image,
+              backgroundImage: _getAvatarImageProvider(),
               radius: 34,
             ),
             SizedBox(width: 16),

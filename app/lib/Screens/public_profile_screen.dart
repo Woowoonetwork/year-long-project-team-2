@@ -1,4 +1,5 @@
 import 'package:FoodHood/Components/post_card.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -35,7 +36,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   String? lastName;
   String? aboutMe;
   final bool isFavorite = false;
-  final String imageUrl = "";
+  String imageUrl = "";
   bool isLoading = true;
 
   bool isLoadingPosts = true;
@@ -101,6 +102,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
         firstName = documentData['firstName'] as String? ?? '';
         lastName = documentData['lastName'] as String?;
         aboutMe = documentData['aboutMe'] as String? ?? '';
+        imageUrl = documentData['profileImagePath'] as String? ?? '';
         if (aboutMe == null || aboutMe!.trim().isEmpty) {
           aboutMe = "No description available"; // Default message
         }
@@ -139,7 +141,10 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
                   RecentPostSection(
                     recentPosts: recentPosts,
                   ),
-                  ReviewSection(userId: effectiveUserId),
+                  ReviewSection(
+                    userId: effectiveUserId,
+                    imageUrl: imageUrl,
+                  ),
                 ],
               ),
             ),
@@ -153,8 +158,9 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
 // ReviewSection
 class ReviewSection extends StatelessWidget {
   final String? userId;
+  final String imageUrl;
 
-  ReviewSection({this.userId});
+  ReviewSection({this.userId, required this.imageUrl});
 
   Future<List<String>> fetchComments(String userId) async {
     try {
@@ -215,7 +221,8 @@ class ReviewSection extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: comments
-                    .map((comment) => ReviewItem(review: comment))
+                    .map((comment) =>
+                        ReviewItem(review: comment, avatarUrl: imageUrl))
                     .toList(),
               ),
             );
@@ -287,8 +294,22 @@ class AboutSection extends StatelessWidget {
 
 class ReviewItem extends StatelessWidget {
   final String review;
+  final String avatarUrl;
 
-  const ReviewItem({Key? key, required this.review}) : super(key: key);
+  const ReviewItem(
+      {Key? key,
+      required this.review,
+      required this.avatarUrl}) // Make avatarUrl required
+      : super(key: key);
+  ImageProvider<Object> _getAvatarImageProvider() {
+    // Check if imageUrl is not null and not empty
+    if (avatarUrl != null) {
+      return CachedNetworkImageProvider(avatarUrl);
+    } else {
+      // Fallback to a local asset if imageUrl is not available
+      return AssetImage('assets/images/sampleProfile.png');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -298,8 +319,8 @@ class ReviewItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            backgroundImage: AssetImage('assets/images/sampleProfile.png'),
-            radius: 20,
+            backgroundImage: _getAvatarImageProvider(),
+            radius: 34,
           ),
           SizedBox(width: 12),
           Expanded(
