@@ -13,6 +13,9 @@ import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/services.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -27,6 +30,7 @@ class _PostDetailViewState extends State<PostDetailView> {
   AnimationController? _animationController;
   bool isLoading = true; // Added to track loading status
   late String userID;
+  bool isReserved = false;
 
   // Method to initialize userID
   void initializeUserId() {
@@ -37,14 +41,13 @@ class _PostDetailViewState extends State<PostDetailView> {
   @override
   void initState() {
     super.initState();
-
     initializeUserId();
-
     viewModel = PostDetailViewModel(widget.postId);
 
     viewModel.fetchData(widget.postId).then((_) {
       setState(() {
         isLoading = false;
+        isReserved = viewModel.isReserved;
       });
     });
   }
@@ -80,41 +83,39 @@ class _PostDetailViewState extends State<PostDetailView> {
         return Column(
           children: [
             Expanded(
-              child: RefreshIndicator(
-                  child: CustomScrollView(
-                    physics: BouncingScrollPhysics(),
-                    slivers: [
-                      FoodAppBar(
-                        postId: widget.postId, // Pass postId to the FoodAppBar
-                        isFavorite: viewModel.isFavorite,
-                        onFavoritePressed: _handleFavoritePressed,
-                        imageUrl: viewModel.imageUrl, // Pass the imageUrl here
-// Pass the callback function
-                      ),
-                      SliverList(
-                        delegate: SliverChildListDelegate(
-                          [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildPostTitleSection(),
-                                const SizedBox(height: 16),
-                                _buildDescription(),
-                                const SizedBox(height: 16),
-                                _buildInfoCards(),
-                                _buildPickupInformation(),
-                                const SizedBox(height: 16),
-                                _buildAllergensSection(),
-                                const SizedBox(height: 16),
-                                const SizedBox(height: 16),
-                              ],
-                            ),
+              child: CustomScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  FoodAppBar(
+                    postId: widget.postId,
+                    isFavorite: viewModel.isFavorite,
+                    onFavoritePressed: _handleFavoritePressed,
+                    imagesWithAltText: viewModel
+                        .imagesWithAltText, // Pass the images with alt text
+                  ),
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                      [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildPostTitleSection(),
+                            const SizedBox(height: 16),
+                            _buildDescription(),
+                            const SizedBox(height: 16),
+                            _buildInfoCards(),
+                            _buildPickupInformation(),
+                            const SizedBox(height: 16),
+                            _buildAllergensSection(),
+                            const SizedBox(height: 16),
+                            const SizedBox(height: 16),
                           ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  onRefresh: () => Future.value(true)),
+                ],
+              ),
             ),
             Container(
               padding: EdgeInsets.fromLTRB(16, 12, 16, 32),
@@ -122,7 +123,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                 children: [
                   Expanded(
                     child: ReserveButton(
-                      isReserved: false,
+                      isReserved: isReserved,
                       postId: widget.postId,
                       userId: userID,
                     ),
@@ -140,6 +141,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     setState(() {
       viewModel.isFavorite = !viewModel.isFavorite;
     });
+    HapticFeedback.lightImpact(); // Add this line
 
     if (viewModel.isFavorite) {
       await viewModel.savePost(widget.postId);
@@ -209,7 +211,7 @@ class _PostDetailViewState extends State<PostDetailView> {
             ),
           ),
           AvailabilityIndicator(
-              isReserved: false), // Placeholder, update as needed
+              isReserved: isReserved), // Placeholder, update as needed
         ],
       ),
     );
@@ -312,14 +314,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     List<String> allergenList = viewModel.allergens.split(', ');
     return AllergensSection(allergens: allergenList);
   }
-
-  // Widget _buildReserveButton() {
-  //   return ReserveButton(isReserved: false); // Placeholder, update as needed
-  // }
 }
-
-// The remaining widget classes like `AvailabilityIndicator`, `InfoRow`, etc., would follow.
-// AvailabilityIndicator, InfoRow, and other supporting widgets
 
 class AvailabilityIndicator extends StatelessWidget {
   final bool isReserved;
@@ -412,8 +407,7 @@ class InfoRow extends StatelessWidget {
 }
 
 class IconPlaceholder extends StatelessWidget {
-  final String imageUrl; // Parameter for the image URL
-
+  final String imageUrl;
   IconPlaceholder({Key? key, required this.imageUrl}) : super(key: key);
 
   @override
@@ -421,24 +415,16 @@ class IconPlaceholder extends StatelessWidget {
     return Container(
       width: 20,
       height: 20,
-      // decoration: BoxDecoration(
-      //   shape: BoxShape.circle,
-      //   image: DecorationImage(
-      //     fit: BoxFit.cover,
-      //     // Dynamically load image from assets or network
-      //     image: _loadImage(imageUrl),
-      //   ),
-      // ),
       child: ClipOval(
-        child: // use cached network image to load the image
-            CachedNetworkImage(
-          imageUrl: imageUrl,
-          fit: BoxFit.cover,
-          placeholder: (context, url) => CupertinoActivityIndicator(),
-          errorWidget: (context, url, error) =>
-              //AssetImage('assets/images/sampleProfile.png');
-              Image.asset('assets/images/sampleProfile.png'),
-        ),
+        child: imageUrl.isNotEmpty && imageUrl.startsWith('http')
+            ? CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+              )
+            : Image.asset(
+                'assets/images/sampleProfile.png',
+                fit: BoxFit.cover,
+              ),
       ),
     );
   }
@@ -448,7 +434,7 @@ class CombinedTexts extends StatelessWidget {
   final String firstName;
   final String lastName;
   final DateTime postTimestamp;
-  final PostDetailViewModel viewModel; // Add the viewModel here
+  final PostDetailViewModel viewModel;
 
   const CombinedTexts({
     Key? key,
@@ -463,7 +449,7 @@ class CombinedTexts extends StatelessWidget {
     return Row(
       children: [
         Text(
-          'Made by $firstName $lastName  Posted ${viewModel.timeAgoSinceDate(postTimestamp)}',
+          'Posted by $firstName $lastName  ${viewModel.timeAgoSinceDate(postTimestamp)}',
           style: TextStyle(
             color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
             fontSize: 12,
@@ -802,25 +788,7 @@ class PickupInformation extends StatelessWidget {
             height: 30.0,
             // use cached network image to load the image
             child: //clipoval
-                //   CachedNetworkImage(
-                // imageUrl: viewModel.profileURL,
-                // fit: BoxFit.cover,
-                // placeholder: (context, url) => CupertinoActivityIndicator(),
-                // errorWidget: (context, url, error) => Image.asset(
-                //   'assets/images/sampleProfile.png',
-                //   fit: BoxFit.cover,
-                // ),
-                ClipOval(
-              child: CachedNetworkImage(
-                imageUrl: viewModel.profileURL,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => CupertinoActivityIndicator(),
-                errorWidget: (context, url, error) => Image.asset(
-                  'assets/images/sampleProfile.png',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+                IconPlaceholder(imageUrl: viewModel.profileURL),
           ),
         ),
         Expanded(
@@ -834,33 +802,62 @@ class PickupInformation extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          InfoButton(
-            context: context,
-            text: 'Ask for more info',
-            icon: FeatherIcons.messageCircle,
-            iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(
-                    builder: (context) =>
-                        MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
-              );
-            },
+          Expanded(
+            child: InfoButton(
+              context: context,
+              text: 'Ask for more info',
+              icon: FeatherIcons.messageCircle,
+              iconColor: CupertinoColors.label.resolveFrom(context),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) =>
+                          MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
+                );
+              },
+            ),
           ),
-          SizedBox(width: 10),
-          InfoButton(
-            context: context,
-            text: 'Navigate to this Place',
-            icon: FeatherIcons.arrowUpRight,
-            iconColor: CupertinoColors.label.resolveFrom(context),
-            onPressed: () {},
+          SizedBox(width: 16),
+          Expanded(
+            child: InfoButton(
+              context: context,
+              text: 'Navigate Here',
+              icon: FeatherIcons.arrowUpRight,
+              iconColor: CupertinoColors.label.resolveFrom(context),
+              onPressed: () => _launchMapUrl(viewModel.pickupLatLng),
+            ),
           ),
         ],
       ),
     );
+  }
+}
+
+Future<void> _launchMapUrl(LatLng locationCoordinates) async {
+  final String googleMapsUrl =
+      'https://www.google.com/maps/search/?api=1&query=${locationCoordinates.latitude},${locationCoordinates.longitude}';
+  final String appleMapsUrl =
+      'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}';
+
+  HapticFeedback.selectionClick();
+  // Check if the device is running on iOS
+  if (Platform.isIOS) {
+    // Attempt to open Apple Maps
+    if (await canLaunch(appleMapsUrl)) {
+      await launch(appleMapsUrl);
+    } else {
+      throw 'Could not launch $appleMapsUrl';
+    }
+  } else {
+    // Attempt to open Google Maps or the default map application on other devices
+    if (await canLaunch(googleMapsUrl)) {
+      await launch(googleMapsUrl);
+    } else {
+      throw 'Could not launch $googleMapsUrl';
+    }
   }
 }
 
@@ -1081,7 +1078,7 @@ class ReserveButton extends StatefulWidget {
 }
 
 class _ReserveButtonState extends State<ReserveButton> {
-  bool _isReserved = false;
+  late bool _isReserved;
 
   @override
   void initState() {
@@ -1091,11 +1088,12 @@ class _ReserveButtonState extends State<ReserveButton> {
 
   void _handleReservation() async {
     if (!_isReserved) {
+      HapticFeedback.mediumImpact();
       try {
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
-            .update({'reserved_by': widget.userId});
+            .update({'reserved_by': widget.userId, 'post_status': "pending"});
         setState(() {
           _isReserved = true;
         });
@@ -1129,18 +1127,18 @@ class _ReserveButtonState extends State<ReserveButton> {
             letterSpacing: -0.90,
           ),
         ),
-        onPressed: _isReserved
-            ? null
-            : () {
-                _handleReservation();
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                      builder: (context) => DoneePath(
-                            postId: widget.postId,
-                          )),
-                );
-              },
+        onPressed: () {
+          if (!_isReserved) {
+            _handleReservation();
+          }
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+                builder: (context) => DoneePath(
+                      postId: widget.postId,
+                    )),
+          );
+        },
       ),
     );
   }

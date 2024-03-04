@@ -1,12 +1,13 @@
+import 'package:FoodHood/components.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:flutter/services.dart';
 
 class PostCard extends StatelessWidget {
-  final String imageLocation;
+  final List<Map<String, String>> imagesWithAltText;
   final String firstname;
   final String lastname;
   final String title;
@@ -22,7 +23,7 @@ class PostCard extends StatelessWidget {
 
   PostCard({
     Key? key,
-    required this.imageLocation,
+    required this.imagesWithAltText,
     required this.title,
     required this.tags,
     required this.tagColors,
@@ -44,6 +45,7 @@ class PostCard extends StatelessWidget {
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: () {
+          HapticFeedback.selectionClick(); 
           onTap(postId);
           Navigator.push(
             context,
@@ -65,7 +67,8 @@ class PostCard extends StatelessWidget {
                 ] else ...[
                   SizedBox(height: 10),
                 ],
-                _buildOrderInfoSection(context, profileURL),
+                _buildOrderInfoSection(context, profileURL, firstname, lastname,
+                    timeAgo), // Add the order info section
               ],
             ),
           ),
@@ -75,30 +78,22 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildImageSection(BuildContext context) {
-    bool isImageLocationValid = imageLocation.isNotEmpty;
+    // Use the first image URL if available, otherwise a placeholder
+    final String imageToShow = imagesWithAltText.isNotEmpty
+        ? imagesWithAltText[0]['url'] ?? ''
+        : 'assets/images/sampleFoodPic.jpg';
 
     return ClipRRect(
       borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      child: isImageLocationValid
-          ? CachedNetworkImage(
-              imageUrl: imageLocation,
-              width: MediaQuery.of(context).size.width,
-              height: imageHeight, // Use the configurable height
-              fit: BoxFit.cover,
-              placeholder: (context, url) => CupertinoActivityIndicator(),
-              errorWidget: (context, url, error) => Image.asset(
-                'assets/images/sampleFoodPic.png',
-                width: MediaQuery.of(context).size.width,
-                height: imageHeight, // Use the configurable height
-                fit: BoxFit.cover,
-              ),
-            )
-          : Image.asset(
-              'assets/images/sampleFoodPic.png',
-              width: MediaQuery.of(context).size.width,
-              height: imageHeight, // Use the configurable height
-              fit: BoxFit.cover,
-            ),
+      child: CachedNetworkImage(
+        imageUrl: imageToShow,
+        width: MediaQuery.of(context).size.width,
+        height: imageHeight,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => CupertinoActivityIndicator(),
+        errorWidget: (context, url, error) =>
+            buildImageFailedPlaceHolder(context, true),
+      ),
     );
   }
 
@@ -175,51 +170,47 @@ class PostCard extends StatelessWidget {
     return availableColors[index % availableColors.length];
   }
 
-  Widget _buildOrderInfoSection(BuildContext context, String avatarUrl) {
-    // Use a default image if avatarUrl is empty or null
-    String effectiveAvatarUrl = avatarUrl.isEmpty
-        ? 'assets/images/sampleProfile.png' // Default image
-        : avatarUrl;
+  ImageProvider<Object> _getAvatarImageProvider(String avatarUrl) {
+    if (avatarUrl.isEmpty) {
+      return AssetImage('assets/images/sampleProfile.png');
+    } else {
+      try {
+        return CachedNetworkImageProvider(avatarUrl);
+      } catch (e) {
+        return AssetImage('assets/images/sampleProfile.png');
+      }
+    }
+  }
 
+  Widget _buildOrderInfoSection(BuildContext context, String avatarUrl,
+      String firstname, String lastname, String timeAgo) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
-            );
-          },
-          child: Row(
-            children: [
-              ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: effectiveAvatarUrl,
-                  width: 18,
-                  height: 18,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      CupertinoActivityIndicator(), // Placeholder widget
-                  errorWidget: (context, url, error) => Image.asset(
-                    'assets/images/sampleProfile.png', // Fallback image on error
-                    width: 18,
-                    height: 18,
-                    fit: BoxFit.cover,
-                  ),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Row(
+        children: [
+          avatarUrl.isNotEmpty
+              ? CircleAvatar(
+                  radius: 10,
+                  backgroundImage: CachedNetworkImageProvider(avatarUrl),
+                  backgroundColor: Colors.transparent,
+                )
+              : CircleAvatar(
+                  radius: 10,
+                  backgroundImage:
+                      AssetImage('assets/images/sampleProfile.png'),
                 ),
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Posted by $firstname $lastname $timeAgo',
-                style: TextStyle(
-                  color: CupertinoDynamicColor.resolve(
-                      CupertinoColors.secondaryLabel, context),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+          SizedBox(width: 8),
+          Text(
+            'Posted by $firstname $lastname $timeAgo',
+            style: TextStyle(
+              color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.secondaryLabel, context),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ));
+        ],
+      ),
+    );
   }
 }

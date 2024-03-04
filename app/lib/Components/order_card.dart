@@ -1,27 +1,34 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/donor_pathway_1.dart';
+import 'package:FoodHood/Screens/donor_screen.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
-import 'dart:ui'; // Import this for ImageFilter.blur
+import 'dart:ui';
+import 'package:FoodHood/components.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-import 'package:palette_generator/palette_generator.dart';
-
-//Constants for styling
 const double _defaultTextFontSize = 16.0;
 const double _defaultTitleFontSize = 18.0;
 const double _defaultTagFontSize = 10.0;
 const double _defaultOrderInfoFontSize = 12.0;
 const double _defaultStatusFontSize = 13.0;
+const double imageHeight = 120;
 
-enum OrderState { reserved, confirmed, delivering, readyToPickUp }
+enum OrderState {
+  reserved,
+  confirmed,
+  delivering,
+  readyToPickUp,
+  pending,
+  notReserved
+}
 
-// ignore: must_be_immutable
 class OrderCard extends StatelessWidget {
-  final String imageLocation;
+  final List<Map<String, String>> imagesWithAltText;
   final String title;
   final List<String> tags;
   final String orderInfo;
@@ -30,17 +37,11 @@ class OrderCard extends StatelessWidget {
   final Function(String) onTap;
   final String postId;
   final VoidCallback? onStatusPressed;
-  late double _textScaleFactor;
-  late double adjustedTextFontSize;
-  late double adjustedTitleFontSize;
-  late double adjustedTagFontSize;
-  late double adjustedOrderInfoFontSize;
-  late double adjustedStatusFontSize;
   final OrderState orderState;
 
   OrderCard({
     Key? key,
-    required this.imageLocation,
+    required this.imagesWithAltText,
     required this.title,
     required this.tags,
     required this.orderInfo,
@@ -52,183 +53,193 @@ class OrderCard extends StatelessWidget {
     required this.orderState,
   }) : super(key: key);
 
-  void _updateAdjustedFontSize() {
-    adjustedTextFontSize = _defaultTextFontSize * _textScaleFactor;
-    adjustedTitleFontSize = _defaultTitleFontSize * _textScaleFactor;
-    adjustedTagFontSize = _defaultTagFontSize * _textScaleFactor;
-    adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
-    adjustedStatusFontSize = _defaultStatusFontSize * _textScaleFactor;
-  }
-
   @override
   Widget build(BuildContext context) {
-    _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
-    _updateAdjustedFontSize();
+    double _textScaleFactor =
+        Provider.of<TextScaleProvider>(context).textScaleFactor;
+
+    double adjustedTextFontSize = _defaultTextFontSize * _textScaleFactor;
+    double adjustedTitleFontSize = _defaultTitleFontSize * _textScaleFactor;
+    double adjustedTagFontSize = _defaultTagFontSize * _textScaleFactor;
+    double adjustedOrderInfoFontSize =
+        _defaultOrderInfoFontSize * _textScaleFactor;
+    double adjustedStatusFontSize = _defaultStatusFontSize * _textScaleFactor;
 
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: CupertinoButton(
         padding: EdgeInsets.zero,
-        onPressed: () => _onCardTap(context),
-        child: _buildCardBody(context),
-      ),
-    );
-  }
-
-  void _handleMenuAction(BuildContext context, VoidCallback action) {
-    action();
-    Navigator.pop(context);
-  }
-
-  Future<PaletteGenerator> _updatePaletteGenerator(String imageLocation) async {
-    final PaletteGenerator paletteGenerator =
-        await PaletteGenerator.fromImageProvider(
-      CachedNetworkImageProvider(imageLocation),
-      size: Size(200, 100), // Adjust according to your image size
-    );
-    return paletteGenerator;
-  }
-
-  void _onCardTap(BuildContext context) {
-    onTap(postId);
-    Navigator.push(
-        context,
-        CupertinoPageRoute(
-          builder: (context) => PostDetailView(postId: postId),
-        ));
-  }
-
-  Widget _buildCardBody(BuildContext context) {
-    return Container(
-      decoration: _buildBoxDecoration(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
+        onPressed: () => _onCardTap(context, postId),
+        child: Container(
+          decoration: BoxDecoration(
+            color: CupertinoDynamicColor.resolve(
+                CupertinoColors.tertiarySystemBackground, context),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildImageSection(context, imageLocation),
-              _buildStatusRow(context),
+              Stack(
+                children: [
+                  _buildImageSection(context, imagesWithAltText),
+                  _buildStatusRow(context, adjustedStatusFontSize, orderState,
+                      onStatusPressed, postId),
+                ],
+              ),
+              _buildTitleSection(context, title, adjustedTitleFontSize),
+              _buildTagSection(context, tags, adjustedTagFontSize),
+              _buildOrderInfoSection(
+                  context, orderInfo, adjustedOrderInfoFontSize),
             ],
           ),
-          _buildTitleSection(context),
-          _buildTagSection(context),
-          _buildOrderInfoSection(context),
-        ],
+        ),
       ),
     );
   }
 
-  BoxDecoration _buildBoxDecoration(BuildContext context) {
-    return BoxDecoration(
-      color: CupertinoDynamicColor.resolve(
-          CupertinoColors.tertiarySystemBackground, context),
-      borderRadius: BorderRadius.circular(14),
+  void _onCardTap(BuildContext context, String postId) {
+    HapticFeedback.selectionClick();
+    onTap(postId);
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => PostDetailView(postId: postId),
+      ),
     );
   }
 
-  Widget _buildImageSection(BuildContext context, String imageLocation) {
-    final isNetworkImage = imageLocation.startsWith('http');
+  static Widget _buildImageSection(
+      BuildContext context, List<Map<String, String>> imagesWithAltText) {
+    final String imageToShow = imagesWithAltText.isNotEmpty
+        ? imagesWithAltText[0]['url'] ?? ''
+        : 'assets/images/sampleFoodPic.jpg';
 
-    return ClipRRect(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      child: isNetworkImage
-          ? CachedNetworkImage(
-              imageUrl: imageLocation,
-              width: MediaQuery.of(context).size.width,
-              height: 112,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => CupertinoActivityIndicator(),
-              errorWidget: (context, url, error) => Image.asset(
-                'assets/images/sampleFoodPic.png',
-                width: MediaQuery.of(context).size.width,
-                height: 112,
-                fit: BoxFit.cover,
-              ),
-            )
-          : Image.asset(
-              'assets/images/sampleFoodPic.png',
-              width: MediaQuery.of(context).size.width,
-              height: 112,
-              fit: BoxFit.cover,
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+          child: CachedNetworkImage(
+            imageUrl: imageToShow,
+            width: MediaQuery.of(context).size.width,
+            height: imageHeight,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => CupertinoActivityIndicator(),
+            errorWidget: (context, url, error) =>
+                buildImageFailedPlaceHolder(context, true),
+          ),
+        ),
+        Container(
+          height: imageHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.grey.withOpacity(0.4),
+                Colors.transparent,
+              ],
+              stops: [0.0, 0.5],
             ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildTitleSection(BuildContext context) {
+  static Widget _buildTitleSection(
+      BuildContext context, String title, double adjustedTitleFontSize) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Text(title,
-          style: TextStyle(
-              color:
-                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: adjustedTitleFontSize,
-              letterSpacing: -0.8,
-              fontWeight: FontWeight.w600)),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+          fontSize: adjustedTitleFontSize,
+          letterSpacing: -0.8,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
-  Widget _buildTagSection(BuildContext context) {
+  static Widget _buildTagSection(
+      BuildContext context, List<String> tags, double adjustedTagFontSize) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Wrap(
         spacing: 7,
         children: tags
-            .map((tag) =>
-                _buildTag(tag, _generateTagColor(tags.indexOf(tag)), context))
+            .map((tag) => _buildTag(tag, _generateTagColor(tags.indexOf(tag)),
+                context, adjustedTagFontSize))
             .toList(),
       ),
     );
   }
 
-  Color _generateTagColor(int index) {
+  static Color _generateTagColor(int index) {
     List<Color> availableColors = [yellow, orange, blue, babyPink, Cyan];
     return availableColors[index % availableColors.length];
   }
 
-  Widget _buildTag(String text, Color color, BuildContext context) {
+  static Widget _buildTag(String text, Color color, BuildContext context,
+      double adjustedTagFontSize) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
+      decoration:
+          BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
       child: Text(
         text,
         style: TextStyle(
           color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
           fontSize: adjustedTagFontSize,
           letterSpacing: -0.40,
-          fontWeight: FontWeight.w600
+          fontWeight: FontWeight.w600,
         ),
         overflow: TextOverflow.visible,
       ),
     );
   }
 
-  Widget _buildOrderInfoSection(BuildContext context) {
+  static Widget _buildOrderInfoSection(BuildContext context, String orderInfo,
+      double adjustedOrderInfoFontSize) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Text(orderInfo,
-          style: TextStyle(
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.secondaryLabel, context),
-              fontSize: adjustedOrderInfoFontSize,
-              fontWeight: FontWeight.w500)),
+      child: Text(
+        orderInfo,
+        style: TextStyle(
+          color: CupertinoDynamicColor.resolve(
+              CupertinoColors.secondaryLabel, context),
+          fontSize: adjustedOrderInfoFontSize,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 
-  Widget _buildStatusRow(BuildContext context) {
+  static Widget _buildStatusRow(
+      BuildContext context,
+      double adjustedStatusFontSize,
+      OrderState orderState,
+      VoidCallback? onStatusPressed,
+      String postId) {
     return Container(
-      height: 48,
+      height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _buildStatusText(context),
-          _buildStatusButton(context),
+          _buildStatusText(context, adjustedStatusFontSize, orderState),
+          _buildStatusButton(
+              context, adjustedStatusFontSize, onStatusPressed, postId),
         ],
       ),
     );
   }
 
-  Widget _buildStatusText(BuildContext context) {
+  static Widget _buildStatusText(BuildContext context,
+      double adjustedStatusFontSize, OrderState orderState) {
     String statusText = '';
     Color statusColor = CupertinoColors.systemGreen; // Default color
 
@@ -243,96 +254,96 @@ class OrderCard extends StatelessWidget {
         break;
       case OrderState.delivering:
         statusText = 'Delivering';
-        statusColor = CupertinoColors.systemOrange;
+        statusColor = CupertinoColors.systemBlue;
         break;
       case OrderState.readyToPickUp:
         statusText = 'Ready to Pick Up';
-        statusColor = CupertinoColors.systemCyan;
+        statusColor = CupertinoColors.systemGreen;
+        break;
+      case OrderState.pending:
+        statusText = 'Pending';
+        statusColor = CupertinoColors.systemOrange;
+        break;
+      case OrderState.notReserved:
+        statusText = 'Not Reserved';
+        statusColor = CupertinoColors.systemGrey;
         break;
     }
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter:
-            ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur filter
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12, 
-            vertical: 6
-            //vertical: verticalPadding
-          ),
-          color: CupertinoColors.tertiarySystemBackground
-              .resolveFrom(context)
-              .withOpacity(0.9), // Semi-transparent white background
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => _handleStatusPress(context),
-            child: Row(
-              children: [
-                Icon(CupertinoIcons.circle_fill, color: statusColor, size: 12),
-                const SizedBox(width: 6),
-                Text(
-                  statusText,
-                  style: TextStyle(
-                    color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-                    fontWeight: FontWeight.w500,
-                    fontSize: adjustedStatusFontSize
-                  ),
-                  overflow: TextOverflow.visible,
-                ),
-              ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        child: Row(
+          children: [
+            Icon(CupertinoIcons.circle_fill, color: statusColor, size: 12),
+            const SizedBox(width: 6),
+            Text(
+              statusText,
+              style: TextStyle(
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
+                fontWeight: FontWeight.w500,
+                fontSize: adjustedStatusFontSize,
+              ),
+              overflow: TextOverflow.visible,
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStatusButton(BuildContext context) {
+  static Widget _buildStatusButton(
+      BuildContext context,
+      double adjustedStatusFontSize,
+      VoidCallback? onStatusPressed,
+      String postId) {
+    final buttonText = "Status";
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter:
-            ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur filter
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          color: CupertinoColors.tertiarySystemBackground
-              .resolveFrom(context)
-              .withOpacity(0.9), // Semi-transparent white background
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => _handleStatusPress(context),
-            child: Row(
-              children: [
-                Text(
-                  'Status',
-                  style: TextStyle(
-                    color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-                    fontWeight: FontWeight.w500,
-                    fontSize: adjustedStatusFontSize
-                  ),
-                  overflow: TextOverflow.visible,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            onStatusPressed?.call();
+            Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (context) => DonorScreen(postId: postId),
+              ),
+            );
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                buttonText,
+                style: TextStyle(
+                  color: CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context),
+                  fontWeight: FontWeight.w500,
+                  fontSize: adjustedStatusFontSize,
                 ),
-                const SizedBox(width: 4),
-                Icon(FeatherIcons.chevronRight,
-                    color: CupertinoDynamicColor.resolve(
-                        CupertinoColors.label, context),
-                    size: 14),
-              ],
-            ),
+                overflow: TextOverflow.visible,
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                FeatherIcons.chevronRight,
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
+                size: 14,
+              ),
+            ],
           ),
         ),
       ),
     );
-  }
-
-  void _handleStatusPress(BuildContext context) {
-    onStatusPressed?.call();
-    Navigator.push(
-        context,
-        CupertinoPageRoute(
-          builder: (context) => DonorScreen(postId: postId),
-        ));
   }
 }
