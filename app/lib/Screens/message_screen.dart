@@ -20,6 +20,8 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
   final ScrollController _scrollController = ScrollController();
   late List<Map<String, dynamic>> messages = [];
   late String userId;
+  final List<String> recommendedMessages = ["Sure, see you then!", "On my way.", "Can we reschedule?", "Let me check my calendar.", "Running late, sorry!"];
+  late String concatenatedString;
 
   @override
   void initState() {
@@ -43,7 +45,7 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
     // Concatenate userId and uid2 alphabetically
 List<String> userIDs = [userId, widget.uid2].toList();
 userIDs.sort();
-    String concatenatedString = userIDs.join();
+    concatenatedString = userIDs.join();
 
     // Create a new document in 'messaging' collection
     FirebaseFirestore.instance.collection('messaging').doc(concatenatedString).set({});
@@ -334,7 +336,7 @@ userIDs.sort();
       // Step 4: Add new message to Firestore
       FirebaseFirestore.instance
           .collection('messaging')
-          .doc([userId, widget.uid2].toList()..sort().join())
+          .doc(concatenatedString)
           .update({
         'messages': FieldValue.arrayUnion([
           {
