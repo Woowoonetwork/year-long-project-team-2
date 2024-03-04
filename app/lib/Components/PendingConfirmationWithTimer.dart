@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -51,9 +52,7 @@ class _PendingConfirmationWithTimerState
       if (mounted) {
         Navigator.of(context).pop();
       }
-    }).catchError((error) {
-      // Handle errors, perhaps log them or show a Snackbar
-    });
+    }).catchError((error) {});
   }
 
   @override
@@ -93,9 +92,20 @@ class _PendingConfirmationWithTimerState
                   child: Container(
                     height: 48,
                     decoration: BoxDecoration(
-                      color: CupertinoColors.activeGreen.withOpacity(0.5),
+                      color: accentColor.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(30),
                     ),
+                    //alignment: Alignment.centerRight,
+                    //child: Padding(
+                    //  padding: EdgeInsets.only(right: 8.0),
+                    //child: Text(
+                    //  '${(_controller.value * widget.durationInSeconds).ceil()}s',
+                    //  style: TextStyle(
+                    //    color: Colors.black87,
+                    //     fontSize: 16,
+                    //    ),
+                    //    ),
+                    //   ),
                   ),
                 );
               },
