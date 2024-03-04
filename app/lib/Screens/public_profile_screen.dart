@@ -321,6 +321,24 @@ class RecentPostSection extends StatelessWidget {
     }
   }
 
+  String timeAgoSinceDate(DateTime dateTime) {
+    final duration = DateTime.now().difference(dateTime);
+    if (duration.inDays > 7)
+      return DateFormat('MMMM dd, yyyy').format(dateTime);
+    if (duration.inDays >= 1)
+      return '${duration.inDays} day${duration.inDays > 1 ? "s" : ""} ago';
+    if (duration.inHours >= 1)
+      return '${duration.inHours} hour${duration.inHours > 1 ? "s" : ""} ago';
+    if (duration.inMinutes >= 1)
+      return '${duration.inMinutes} minute${duration.inMinutes > 1 ? "s" : ""} ago';
+    return 'just now';
+  }
+
+  Color _getRandomColor() {
+    var colors = [yellow, orange, blue, babyPink, Cyan];
+    return colors[math.Random().nextInt(colors.length)];
+  }
+
   final List<Map<String, dynamic>> recentPosts;
 
   RecentPostSection({Key? key, required this.recentPosts}) : super(key: key);
@@ -377,6 +395,10 @@ class RecentPostSection extends StatelessWidget {
                         ? imagesWithAltText[0]
                         : null;
 
+                    var createdAt =
+                        (post['post_timestamp'] as Timestamp?)?.toDate() ??
+                            DateTime.now();
+
                     return PostCard(
                       imagesWithAltText: firstImage != null
                           ? [
@@ -393,8 +415,9 @@ class RecentPostSection extends StatelessWidget {
                       tagColors: [Colors.red], // Simplified for demonstration
                       firstname: user['firstName'],
                       lastname: user['lastName'],
-                      timeAgo:
-                          "Time Ago", // Implement a method to convert timestamp to "time ago" format
+
+                      timeAgo: timeAgoSinceDate(
+                          createdAt), // Implement a method to convert timestamp to "time ago" format
                       onTap: (postId) {},
                       postId: '7cc0e4f5-076d-4802-b4bf-07ee1f017d5f',
                       profileURL: user['profileImagePath'] ?? '',
