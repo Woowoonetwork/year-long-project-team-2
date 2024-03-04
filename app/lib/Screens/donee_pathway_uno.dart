@@ -94,14 +94,16 @@ class _DoneePathState extends State<DoneePath> {
                   children: [
                     SizedBox(height: 40),
                     SlimProgressBar(
-                        currentIndex: 2,
-                        totalSteps: 4,
-                        stepTitles: [
-                          'Confirmed',
-                          'Out for delivery',
-                          'Ready for pickup',
-                          'Complete'
-                        ]),
+                      currentIndex: 2,
+                      totalSteps: 4,
+                      stepTitles: [
+                        'Confirmed',
+                        'Out for delivery',
+                        'Ready for pickup',
+                        'Complete'
+                      ],
+                      postStatus: postStatus,
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
@@ -214,6 +216,8 @@ class _DoneePathState extends State<DoneePath> {
         'reserved_by': FieldValue.delete(),
         'post_status': "not reserved",
       });
+
+      postStatus = "not reserved";
 
       setState(() {
         isReserved = false;

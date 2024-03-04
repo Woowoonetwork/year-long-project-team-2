@@ -5,12 +5,13 @@ class SlimProgressBar extends StatelessWidget {
   final int currentIndex;
   final int totalSteps;
   final List<String> stepTitles;
+  final String postStatus;
 
-  SlimProgressBar({
-    required this.currentIndex,
-    required this.totalSteps,
-    required this.stepTitles,
-  });
+  SlimProgressBar(
+      {required this.currentIndex,
+      required this.totalSteps,
+      required this.stepTitles,
+      required this.postStatus});
 
   @override
   Widget build(BuildContext context) {
