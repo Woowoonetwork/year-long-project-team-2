@@ -1090,10 +1090,34 @@ class _ReserveButtonState extends State<ReserveButton> {
     if (!_isReserved) {
       HapticFeedback.mediumImpact();
       try {
+        // Add a reserved_by field and update the post status in the post detail document
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
-            .update({'reserved_by': widget.userId, 'post_status': "pending"});
+            .update({'reserved_by': widget.userId, 'post_status': "pending"});  
+
+        // Get the current reserved posts of the user
+        DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(widget.userId)
+            .get();
+
+        Map<String, dynamic>? userData = userSnapshot.data() as Map<String, dynamic>?;
+
+        if (userData != null) {
+          // Initialize reserved_posts as an empty list if it doesn't exist
+          List<String> reservedPosts = List<String>.from(userData['reserved_posts'] ?? []);
+
+          // Append the postId to the reserved_posts list
+          reservedPosts.add(widget.postId);
+
+          // Update the user document with the new reserved_posts list
+          await FirebaseFirestore.instance
+              .collection('user')
+              .doc(widget.userId)
+              .set({'reserved_posts': reservedPosts}, SetOptions(merge: true));
+        }
+
         setState(() {
           _isReserved = true;
         });

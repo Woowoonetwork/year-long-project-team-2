@@ -1,7 +1,6 @@
 //donor_screen.dart
 
 import 'package:FoodHood/Screens/message_screen.dart';
-import 'package:FoodHood/Screens/saved_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -11,6 +10,8 @@ import 'package:FoodHood/Screens/donee_rating.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+//import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -33,7 +34,8 @@ class _DonorScreenState extends State<DonorScreen> {
   String? reservedByLastName;
   double rating = 0.0;
   String pickupLocation = '';
-  //bool isConfirmed = false;
+  String photo = '';
+  String? reservedByUserId = '';
   OrderState orderState = OrderState.reserved;
   late double _textScaleFactor;
   late double adjustedFontSize;
@@ -52,6 +54,7 @@ class _DonorScreenState extends State<DonorScreen> {
     _updateAdjustedFontSize();
   }
 
+  // Reading post information
   Future<void> fetchPostInformation() async {
     final CollectionReference postDetailsCollection =
         FirebaseFirestore.instance.collection('post_details');
@@ -65,7 +68,7 @@ class _DonorScreenState extends State<DonorScreen> {
 
       if (postSnapshot.exists) {
         // Extract the reserved_by user ID from the post details
-        final String? reservedByUserId = postSnapshot['reserved_by'];
+        reservedByUserId = postSnapshot['reserved_by'];
         pickupLocation = postSnapshot['pickup_location'];
 
         if (postSnapshot['post_location'] is GeoPoint) {
@@ -93,11 +96,12 @@ class _DonorScreenState extends State<DonorScreen> {
             final userName = userSnapshot['firstName'];
             final userLastName = userSnapshot['lastName'];
             final userRating = userSnapshot['avgRating'];
+
             setState(() {
-              reservedByName =
-                  userName; // Update the reserved by user name in the UI
+              reservedByName = userName; 
               reservedByLastName = userLastName;
               rating = userRating;
+              photo = userSnapshot['profileImagePath'] as String? ?? '';
             });
           } else {
             print(
@@ -140,7 +144,6 @@ class _DonorScreenState extends State<DonorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // double screenWidth = MediaQuery.of(context).size.width;
     return CupertinoPageScaffold(
       backgroundColor: detailsBackgroundColor,
       navigationBar: CupertinoNavigationBar(
@@ -186,19 +189,74 @@ class _DonorScreenState extends State<DonorScreen> {
                   //Only show the order info section if the order has been reserved.
                   if (reservedByName != null)
                     OrderInfoSection(
-                      avatarUrl: '',
                       reservedByName: reservedByName,
                       reservedByLastName: reservedByLastName,
                       adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
                       rating: rating,
+                      photo: photo,
+                    ),
+                    
+                  SizedBox(height: 10.0),
+
+                  //Progress Bar
+                  if (reservedByName != null)
+                    Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        // Linear progress indicator
+                        LinearProgressIndicator(
+                          value: _calculateProgress(),
+                          minHeight: 5.0, // Adjust the height as needed
+                          backgroundColor: groupedBackgroundColor,
+                          valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                        ),
+                        // Circles
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            for (int i = 1; i <= 4; i++)
+                              Expanded(
+                                child: Container(
+                                  width: 12.0,
+                                  height: 12.0,
+                                  margin: EdgeInsets.only(left: i < 4 ? 8.0 : 0.0, right: i > 1 ? 8.0 : 0.0),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: i <= _calculateProgress() * 4 ? accentColor : Colors.transparent,
+                                    border: Border.all(color: accentColor, width: 2.0),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  
+                  if (reservedByName != null)
+                    SizedBox(height: 8.0),
+                  
+                  if (reservedByName != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildProgressText("Reserved", OrderState.reserved),
+                        _buildProgressText("Confirmed", OrderState.confirmed),
+                        _buildProgressText("Delivering", OrderState.delivering),
+                        _buildProgressText("Ready to Pick Up", OrderState.readyToPickUp),
+                      ],
                     ),
 
-                  //__buildTextField(text: "Pickup at specified location"),
-                  //print(pickupLatLng),
-                  _buildMap(context),
+                  SizedBox(height: 25,),
 
-                  // Replace the placeholder with the chat bubble in the future, placeholder for now
+                  //__buildTextField(text: "Pickup at specified location"),
+                  _buildMap(context),
+                  
+                  // PendingConfirmationWithTimer(
+                  //       durationInSeconds: 120, postId: widget.postId),
+
+                  // Replace the placeholder with the chat bubble in the future
                   SizedBox(height: 200.0),
+
                 ],
               ),
 
@@ -207,6 +265,34 @@ class _DonorScreenState extends State<DonorScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // Method to calculate progress based on order state
+  double _calculateProgress() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return 0.25; // Progress for reserved state
+      case OrderState.confirmed:
+        return 0.5; // Progress for confirmed state
+      case OrderState.delivering:
+        return 0.75; // Progress for delivering state
+      case OrderState.readyToPickUp:
+        return 1.0; // Progress for readyToPickUp state
+      default:
+        return 0.0; // Default progress
+    }
+  }
+
+  // Method to build progress text widget
+  Widget _buildProgressText(String text, OrderState state) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 14.0,
+        fontWeight: FontWeight.bold,
+        color: orderState == state ? CupertinoColors.label : CupertinoColors.secondaryLabel,
       ),
     );
   }
@@ -526,8 +612,7 @@ class _DonorScreenState extends State<DonorScreen> {
             CupertinoDialogAction(
               child: Text("Cancel"),
               onPressed: () {
-                Navigator.pop(
-                    context, false); // Return false to indicate cancel
+                Navigator.pop(context, false); // Return false to indicate cancel
               },
             ),
             CupertinoDialogAction(
@@ -545,6 +630,29 @@ class _DonorScreenState extends State<DonorScreen> {
     // If the user confirms the cancelation, proceed with canceling the order
     if (confirmCancel == true) {
       try {
+        // Get the user document
+        DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(reservedByUserId)
+            .get();
+
+        // Check if data exists
+        if (userSnapshot.exists) {
+          // Get the current reserved posts of the user
+          List<String> reservedPosts =
+              List<String>.from(userSnapshot.data()?['reserved_posts'] ?? []);
+
+          // Remove the postId of the canceled order
+          reservedPosts.remove(widget.postId);
+
+          // Update the user document with the updated reserved_posts list
+          await FirebaseFirestore.instance
+              .collection('user')
+              .doc(reservedByUserId)
+              .update({'reserved_posts': reservedPosts});
+        }
+
+        // Update the reserved_by and post_status fields in the post_details document 
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
@@ -592,26 +700,26 @@ class _DonorScreenState extends State<DonorScreen> {
 }
 
 class OrderInfoSection extends StatelessWidget {
-  final String avatarUrl;
   final String? reservedByName;
   final String? reservedByLastName;
   final double adjustedOrderInfoFontSize;
   final double rating;
+  final String photo;
 
   const OrderInfoSection({
     Key? key,
-    required this.avatarUrl,
     required this.reservedByName,
     required this.reservedByLastName,
     required this.adjustedOrderInfoFontSize,
     required this.rating,
+    required this.photo,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // Use a default image if avatarUrl is empty or null
-    String effectiveAvatarUrl =
-        avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
+    // String effectiveAvatarUrl =
+    //     avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
 
     return Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -621,11 +729,25 @@ class OrderInfoSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                backgroundImage: AssetImage(
-                    effectiveAvatarUrl), // Load the image from assets
-                radius: 10,
-              ),
+              // CircleAvatar(
+              //   backgroundImage: AssetImage(
+              //       effectiveAvatarUrl), // Load the image from assets
+              //   radius: 10,
+              // ),
+              photo.isNotEmpty
+                ? CircleAvatar(
+                    radius: 10,
+                    backgroundImage: CachedNetworkImageProvider(photo),
+                    onBackgroundImageError: (_, __) {
+                      // Handle image load error
+                    },
+                    backgroundColor: Colors.transparent,
+                  )
+                : CircleAvatar(
+                    radius: 10,
+                    backgroundImage:
+                        AssetImage('assets/images/sampleProfile.png'),
+                  ),
               SizedBox(width: 8),
               Text(
                 'Reserved by $reservedByName $reservedByLastName',
