@@ -11,6 +11,7 @@ import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+//import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -196,54 +197,62 @@ class _DonorScreenState extends State<DonorScreen> {
                     ),
                     
                   SizedBox(height: 10.0),
+
                   //Progress Bar
-                  Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      // Linear progress indicator
-                      LinearProgressIndicator(
-                        value: _calculateProgress(),
-                        minHeight: 5.0, // Adjust the height as needed
-                        backgroundColor: groupedBackgroundColor,
-                        valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-                      ),
-                      // Circles
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          for (int i = 1; i <= 4; i++)
-                            Expanded(
-                              child: Container(
-                                width: 12.0,
-                                height: 12.0,
-                                margin: EdgeInsets.only(left: i < 4 ? 8.0 : 0.0, right: i > 1 ? 8.0 : 0.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: i <= _calculateProgress() * 4 ? accentColor : Colors.transparent,
-                                  border: Border.all(color: accentColor, width: 2.0),
+                  if (reservedByName != null)
+                    Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        // Linear progress indicator
+                        LinearProgressIndicator(
+                          value: _calculateProgress(),
+                          minHeight: 5.0, // Adjust the height as needed
+                          backgroundColor: groupedBackgroundColor,
+                          valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                        ),
+                        // Circles
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            for (int i = 1; i <= 4; i++)
+                              Expanded(
+                                child: Container(
+                                  width: 12.0,
+                                  height: 12.0,
+                                  margin: EdgeInsets.only(left: i < 4 ? 8.0 : 0.0, right: i > 1 ? 8.0 : 0.0),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: i <= _calculateProgress() * 4 ? accentColor : Colors.transparent,
+                                    border: Border.all(color: accentColor, width: 2.0),
+                                  ),
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 8.0),
+                          ],
+                        ),
+                      ],
+                    ),
                   
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildProgressText("Reserved", OrderState.reserved),
-                      _buildProgressText("Confirmed", OrderState.confirmed),
-                      _buildProgressText("Delivering", OrderState.delivering),
-                      _buildProgressText("Ready to Pick Up", OrderState.readyToPickUp),
-                    ],
-                  ),
+                  if (reservedByName != null)
+                    SizedBox(height: 8.0),
+                  
+                  if (reservedByName != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildProgressText("Reserved", OrderState.reserved),
+                        _buildProgressText("Confirmed", OrderState.confirmed),
+                        _buildProgressText("Delivering", OrderState.delivering),
+                        _buildProgressText("Ready to Pick Up", OrderState.readyToPickUp),
+                      ],
+                    ),
 
                   SizedBox(height: 25,),
 
                   //__buildTextField(text: "Pickup at specified location"),
                   _buildMap(context),
+                  
+                  // PendingConfirmationWithTimer(
+                  //       durationInSeconds: 120, postId: widget.postId),
 
                   // Replace the placeholder with the chat bubble in the future
                   SizedBox(height: 200.0),

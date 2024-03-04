@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -196,7 +197,31 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   void _handleCancelReservation() async {
+    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     try {
+      // Get the user document
+      DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore.instance
+          .collection('user')
+          .doc(userId)
+          .get();
+
+      // Check if data exists
+      if (userSnapshot.exists) {
+        // Get the current reserved posts of the user
+        List<String> reservedPosts =
+            List<String>.from(userSnapshot.data()?['reserved_posts'] ?? []);
+
+        // Remove the postId of the canceled order
+        reservedPosts.remove(widget.postId);
+
+        // Update the user document with the updated reserved_posts list
+        await FirebaseFirestore.instance
+            .collection('user')
+            .doc(userId)
+            .update({'reserved_posts': reservedPosts});
+      }
+
+      // Update the post details document
       await FirebaseFirestore.instance
           .collection('post_details')
           .doc(widget.postId)
