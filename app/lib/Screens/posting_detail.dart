@@ -388,12 +388,7 @@ class InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         child: GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
-        );
-      },
+      onTap: () => _navigateToPublicProfile(context),
       child: Row(
         children: [
           IconPlaceholder(imageUrl: viewModel.profileURL),
@@ -409,6 +404,15 @@ class InfoRow extends StatelessWidget {
         ],
       ),
     ));
+  }
+
+  void _navigateToPublicProfile(BuildContext context) {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => PublicProfileScreen(userId: viewModel.userid),
+      ),
+    );
   }
 }
 
