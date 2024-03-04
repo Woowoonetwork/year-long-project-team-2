@@ -2,29 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:FoodHood/Components/colors.dart';
 
 class SlimProgressBar extends StatelessWidget {
-  final int currentIndex;
-  final int totalSteps;
   final List<String> stepTitles;
   final String postStatus;
 
-  SlimProgressBar(
-      {required this.currentIndex,
-      required this.totalSteps,
-      required this.stepTitles,
-      required this.postStatus});
+  SlimProgressBar({required this.stepTitles, required this.postStatus});
 
   @override
   Widget build(BuildContext context) {
+    int currentIndex = _getCurrentIndex();
+    int totalSteps = stepTitles.length;
+
     return Container(
       height: 100,
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(totalSteps, (index) {
-              return _buildStepIndicator(index);
-            }),
+          SizedBox(
+            height: 50,
+            child: Container(
+              width: double.infinity,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 2,
+                    color: Color.fromARGB(255, 133, 210, 175),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(totalSteps, (index) {
+                        return _buildStepIndicator(index, currentIndex);
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           SizedBox(height: 8),
           Row(
@@ -44,28 +61,31 @@ class SlimProgressBar extends StatelessWidget {
     );
   }
 
-  Widget _buildStepIndicator(int index) {
+  Widget _buildStepIndicator(int index, int currentIndex) {
     bool isActive = index <= currentIndex;
-    return Column(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive ? accentColor : Colors.grey[300],
-            border: Border.all(color: accentColor, width: 2),
-          ),
-        ),
-        if (index != totalSteps - 1)
-          SizedBox(
-            width: 20,
-            height: 2,
-            child: Container(
-              color: isActive ? accentColor : Colors.grey[300],
-            ),
-          ),
-      ],
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isActive ? accentColor : Colors.white,
+        border: Border.all(color: accentColor, width: 2),
+      ),
     );
+  }
+
+  int _getCurrentIndex() {
+    switch (postStatus) {
+      case 'confirmed':
+        return 0;
+      case 'out_for_delivery':
+        return 1;
+      case 'ready_for_pickup':
+        return 2;
+      case 'complete':
+        return 3;
+      default:
+        return 0;
+    }
   }
 }

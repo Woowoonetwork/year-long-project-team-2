@@ -94,8 +94,6 @@ class _DoneePathState extends State<DoneePath> {
                   children: [
                     SizedBox(height: 40),
                     SlimProgressBar(
-                      currentIndex: 2,
-                      totalSteps: 4,
                       stepTitles: [
                         'Confirmed',
                         'Out for delivery',
