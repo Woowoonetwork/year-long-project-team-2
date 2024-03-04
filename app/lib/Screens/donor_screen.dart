@@ -194,13 +194,60 @@ class _DonorScreenState extends State<DonorScreen> {
                       rating: rating,
                       photo: photo,
                     ),
+                    
+                  SizedBox(height: 10.0),
+                  //Progress Bar
+                  Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      // Linear progress indicator
+                      LinearProgressIndicator(
+                        value: _calculateProgress(),
+                        minHeight: 5.0, // Adjust the height as needed
+                        backgroundColor: groupedBackgroundColor,
+                        valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+                      ),
+                      // Circles
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          for (int i = 1; i <= 4; i++)
+                            Expanded(
+                              child: Container(
+                                width: 12.0,
+                                height: 12.0,
+                                margin: EdgeInsets.only(left: i < 4 ? 8.0 : 0.0, right: i > 1 ? 8.0 : 0.0),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: i <= _calculateProgress() * 4 ? accentColor : Colors.transparent,
+                                  border: Border.all(color: accentColor, width: 2.0),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8.0),
+                  
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildProgressText("Reserved", OrderState.reserved),
+                      _buildProgressText("Confirmed", OrderState.confirmed),
+                      _buildProgressText("Delivering", OrderState.delivering),
+                      _buildProgressText("Ready to Pick Up", OrderState.readyToPickUp),
+                    ],
+                  ),
+
+                  SizedBox(height: 25,),
 
                   //__buildTextField(text: "Pickup at specified location"),
-                  //print(pickupLatLng),
                   _buildMap(context),
 
-                  // Replace the placeholder with the chat bubble in the future, placeholder for now
+                  // Replace the placeholder with the chat bubble in the future
                   SizedBox(height: 200.0),
+
                 ],
               ),
 
@@ -209,6 +256,34 @@ class _DonorScreenState extends State<DonorScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // Method to calculate progress based on order state
+  double _calculateProgress() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return 0.25; // Progress for reserved state
+      case OrderState.confirmed:
+        return 0.5; // Progress for confirmed state
+      case OrderState.delivering:
+        return 0.75; // Progress for delivering state
+      case OrderState.readyToPickUp:
+        return 1.0; // Progress for readyToPickUp state
+      default:
+        return 0.0; // Default progress
+    }
+  }
+
+  // Method to build progress text widget
+  Widget _buildProgressText(String text, OrderState state) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 14.0,
+        fontWeight: FontWeight.bold,
+        color: orderState == state ? CupertinoColors.label : CupertinoColors.secondaryLabel,
       ),
     );
   }
