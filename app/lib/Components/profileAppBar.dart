@@ -54,7 +54,8 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   String? _lastName;
   String? _city;
   String? _province;
-  double? _rating; // Holds the background color extracted from the image
+  double? _rating;
+  int _postsSold = 0; // Holds the background color extracted from the image
 
   @override
   void initState() {
@@ -62,6 +63,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
     _updatePaletteGenerator();
     if (widget.userId != null) {
       _fetchUserDetails(widget.userId!);
+      _fetchPostsSoldCount(widget.userId!); // Fetch posts sold count
     }
   }
 
@@ -75,6 +77,21 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         _city = userData.data()?['city'] as String?;
         _province = userData.data()?['province'] as String?;
         _rating = userData.data()?['ratings']?.toDouble();
+      });
+    }
+  }
+
+  Future<void> _fetchPostsSoldCount(String userId) async {
+    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('post_details')
+        .where('user_id', isEqualTo: userId)
+        .where('post_status', isEqualTo: "completed")
+        .get();
+
+    if (mounted) {
+      setState(() {
+        _postsSold = querySnapshot
+            .docs.length; // Count of documents with "completed" status
       });
     }
   }
@@ -195,8 +212,9 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
     }
 
     String ratingText = _rating != null
-        ? '  ${_rating!.toStringAsFixed(1)} Ratings'
-        : '  No rating available';
+        ? '  ${_rating!.toStringAsFixed(1)} Ratings, '
+        : '  No rating available, ';
+    String postsSoldText = '$_postsSold items sold';
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -237,6 +255,15 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                     children: stars.followedBy([
                       Text(
                         ratingText,
+                        style: TextStyle(
+                            color: CupertinoColors.secondaryLabel
+                                .resolveFrom(context),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 12,
+                            letterSpacing: -0.4),
+                      ),
+                      Text(
+                        postsSoldText, // Add the posts sold text here
                         style: TextStyle(
                             color: CupertinoColors.secondaryLabel
                                 .resolveFrom(context),
