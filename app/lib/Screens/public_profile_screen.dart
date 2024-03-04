@@ -38,6 +38,9 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   final String imageUrl = "";
   bool isLoading = true;
 
+  bool isLoadingPosts = true;
+  List<Map<String, dynamic>> recentPosts = [];
+
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   String? effectiveUserId;
 
@@ -47,14 +50,29 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     determineUserId();
   }
 
-  void determineUserId() {
-    // If widget.userId is provided, use it; otherwise, get the current user's userId
-    effectiveUserId = widget.userId ?? FirebaseAuth.instance.currentUser?.uid;
+  void fetchRecentPosts() async {
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('post_details')
+        .where('user_id', isEqualTo: effectiveUserId)
+        .get();
+    print(effectiveUserId);
 
+    if (mounted) {
+      setState(() {
+        recentPosts = snapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
+        isLoading = false;
+      });
+    }
+  }
+
+  void determineUserId() {
+    effectiveUserId = widget.userId ?? FirebaseAuth.instance.currentUser?.uid;
     if (effectiveUserId != null) {
       setUpStreamListener(effectiveUserId!);
+      fetchRecentPosts(); // Fetch recent posts
     } else {
-      // Handle case where there is no user logged in and no userId provided
       setState(() => isLoading = false);
     }
   }
@@ -81,8 +99,11 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     if (mounted) {
       setState(() {
         firstName = documentData['firstName'] as String? ?? '';
-        lastName = documentData['lastName'] as String? ?? '';
+        lastName = documentData['lastName'] as String?;
         aboutMe = documentData['aboutMe'] as String? ?? '';
+        if (aboutMe == null || aboutMe!.trim().isEmpty) {
+          aboutMe = "No description available"; // Default message
+        }
         // Update other user details as necessary
         isLoading = false;
       });
@@ -113,7 +134,9 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
               child: Column(
                 children: <Widget>[
                   AboutSection(firstName: firstName, aboutMe: aboutMe),
-                  RecentPostSection(),
+                  RecentPostSection(
+                    recentPosts: recentPosts,
+                  ),
                   ReviewSection(),
                 ],
               ),
@@ -278,13 +301,37 @@ class ReviewItem extends StatelessWidget {
 }
 
 class RecentPostSection extends StatelessWidget {
+  Future<Map<String, dynamic>> fetchUserDetails(String userId) async {
+    try {
+      // Attempt to fetch the user document from Firestore
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('user').doc(userId).get();
+
+      if (userDoc.exists) {
+        // If the document exists, return the user data
+        return userDoc.data() as Map<String, dynamic>;
+      } else {
+        // If the user document does not exist, return an empty map or default values
+        return {'firstName': 'Unknown', 'lastName': '', 'profileImagePath': ''};
+      }
+    } catch (e) {
+      // In case of any errors, log the error and return default values
+      print('Error fetching user details: $e');
+      return {'firstName': 'Error', 'lastName': '', 'profileImagePath': ''};
+    }
+  }
+
+  final List<Map<String, dynamic>> recentPosts;
+
+  RecentPostSection({Key? key, required this.recentPosts}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(left: 20, top: 16),
+          padding: EdgeInsets.only(left: 20, top: 16, bottom: 8),
           child: Text(
             'Recent Posts',
             style: TextStyle(
@@ -292,50 +339,74 @@ class RecentPostSection extends StatelessWidget {
                   CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              letterSpacing: -0.70,
             ),
           ),
         ),
-        Container(
-          height: 220,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 5,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                width: 300,
-                height: 150,
-                margin: EdgeInsets.only(left: 4.0, top: 24, bottom: 24.0),
-                child: PostCard(
-                  imagesWithAltText: [
-                    {
-                      'image':
-                          'https://images.unsplash.com/photo-1556912173-65b6f4f4f6f0',
-                      'alt_text': 'Strawberry Sugar High'
-                    },
-                  ],
-                  title: 'Strawberry Sugar High',
-                  tags: ['Dessert', 'Strawberry', 'Sweet'],
-                  tagColors: [
-                    CupertinoColors.systemRed,
-                    CupertinoColors.systemGreen,
-                    CupertinoColors.systemYellow,
-                  ],
-                  firstname: 'Harry',
-                  lastname: 'Potter',
-                  timeAgo: '2 hours ago',
-                  onTap: (postid) {
-                    print('Post tapped');
+        if (recentPosts.isEmpty)
+          Padding(
+            padding: EdgeInsets.only(left: 20),
+            child: Text(
+              "No posts are available",
+              style: TextStyle(
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                fontSize: 16,
+              ),
+            ),
+          )
+        else
+          Container(
+            height: 220,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.only(left: 20),
+              itemCount: recentPosts.length,
+              itemBuilder: (context, index) {
+                final post = recentPosts[index];
+                return FutureBuilder<Map<String, dynamic>>(
+                  future: fetchUserDetails(
+                      post['user_id']), // Implement this method
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return SizedBox(
+                          width: 300, child: CupertinoActivityIndicator());
+                    }
+                    final user = snapshot.data!;
+                    final imagesWithAltText =
+                        post['images'] as List<dynamic>? ?? [];
+                    final firstImage = imagesWithAltText.isNotEmpty
+                        ? imagesWithAltText[0]
+                        : null;
+
+                    return PostCard(
+                      imagesWithAltText: firstImage != null
+                          ? [
+                              {
+                                'url': firstImage['url'],
+                                'alt_text': firstImage['alt_text'] ?? ''
+                              }
+                            ]
+                          : [],
+                      title: post['title'],
+                      tags: [post['allergens'], post['category']]
+                          .whereType<String>()
+                          .toList(),
+                      tagColors: [Colors.red], // Simplified for demonstration
+                      firstname: user['firstName'],
+                      lastname: user['lastName'],
+                      timeAgo:
+                          "Time Ago", // Implement a method to convert timestamp to "time ago" format
+                      onTap: (postId) {},
+                      postId: '7cc0e4f5-076d-4802-b4bf-07ee1f017d5f',
+                      profileURL: user['profileImagePath'] ?? '',
+                      showTags: true,
+                      imageHeight: 100.0,
+                      showShadow: true,
+                    );
                   },
-                  showShadow: true,
-                  imageHeight: 60,
-                  postId: 'examplePostId',
-                  profileURL: '',
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
       ],
     );
   }
