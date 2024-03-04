@@ -71,6 +71,32 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
     }
   }
 
+  Future<void> _blockUser(String userIdToBlock) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return; // Ensure there is a logged-in user
+
+    final userRef =
+        FirebaseFirestore.instance.collection('user').doc(currentUser.uid);
+
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final userDoc = await transaction.get(userRef);
+        if (userDoc.exists) {
+          List<dynamic> blockedUsers = userDoc.data()?['blocked'] ?? [];
+          // Check if the user is already blocked to prevent duplicates
+          if (!blockedUsers.contains(userIdToBlock)) {
+            blockedUsers.add(userIdToBlock);
+            transaction.update(userRef, {'blocked': blockedUsers});
+          }
+        }
+      });
+
+      print("User successfully blocked.");
+    } catch (e) {
+      print("Failed to block user: $e");
+    }
+  }
+
   Future<void> _fetchUserDetails(String userId) async {
     final userData =
         await FirebaseFirestore.instance.collection('user').doc(userId).get();
@@ -320,7 +346,12 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                 letterSpacing: -0.80,
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pop(context); // Close the action sheet
+              if (widget.userId != null) {
+                _blockUser(widget.userId!); // Block the user
+              }
+            },
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
