@@ -33,6 +33,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   final String postId = "examplePostId";
   String? firstName;
   String? lastName;
+  String? aboutMe;
   final bool isFavorite = false;
   final String imageUrl = "";
   bool isLoading = true;
@@ -81,6 +82,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
       setState(() {
         firstName = documentData['firstName'] as String? ?? '';
         lastName = documentData['lastName'] as String? ?? '';
+        aboutMe = documentData['aboutMe'] as String? ?? '';
         // Update other user details as necessary
         isLoading = false;
       });
@@ -110,7 +112,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
               top: false,
               child: Column(
                 children: <Widget>[
-                  AboutSection(firstName: firstName),
+                  AboutSection(firstName: firstName, aboutMe: aboutMe),
                   RecentPostSection(),
                   ReviewSection(),
                 ],
@@ -171,8 +173,10 @@ class ReviewSection extends StatelessWidget {
 
 class AboutSection extends StatelessWidget {
   final String? firstName;
+  final String? aboutMe;
 
-  const AboutSection({Key? key, this.firstName}) : super(key: key);
+  const AboutSection({Key? key, this.firstName, this.aboutMe})
+      : super(key: key); // Include aboutMe in the constructor
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -210,7 +214,7 @@ class AboutSection extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.0),
             child: Text(
-              'Strawberry sugar high!!!',
+              '${aboutMe ?? "No description Available"}',
               style: TextStyle(
                 color:
                     CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
