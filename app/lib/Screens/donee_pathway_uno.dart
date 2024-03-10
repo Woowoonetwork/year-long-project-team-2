@@ -10,6 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart';
 import 'dart:async';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -50,6 +51,7 @@ class _DoneePathState extends State<DoneePath> {
       setState(() {
         isLoading = false;
         postStatus = docSnapshot.data()?['post_status'] ?? "";
+        print("teeheehee" + postStatus);
       });
     }
   }
@@ -70,6 +72,34 @@ class _DoneePathState extends State<DoneePath> {
         radius: 16,
       ),
     );
+  }
+
+  Widget _buildMap() {
+    return postStatus == "confirmed"
+        ? GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: LatLng(49.8862, -119.4971),
+              zoom: 14.4746,
+            ),
+            markers: {
+              Marker(
+                markerId: MarkerId("pickupLocation"),
+                position: LatLng(49.8862, -119.4971),
+                infoWindow: InfoWindow(title: "Pickup Location"),
+              ),
+            },
+            onMapCreated: (GoogleMapController controller) {},
+          )
+        : Image.network(
+            viewModel.imagesWithAltText[0]['url']!,
+            fit: BoxFit.cover,
+            height: 200,
+            width: double.infinity,
+            errorBuilder: (BuildContext context, Object exception,
+                StackTrace? stackTrace) {
+              return const Icon(Icons.error);
+            },
+          );
   }
 
   Widget build(BuildContext context) {
@@ -125,23 +155,26 @@ class _DoneePathState extends State<DoneePath> {
                       postStatus: postStatus,
                     ),
                     SizedBox(height: 0),
-                    if (viewModel.imagesWithAltText.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15.0),
-                          child: Image.network(
-                            viewModel.imagesWithAltText[0]['url']!,
-                            fit: BoxFit.cover,
-                            height: 200,
-                            width: double.infinity,
-                            errorBuilder: (BuildContext context,
-                                Object exception, StackTrace? stackTrace) {
-                              return const Icon(Icons.error);
-                            },
+                    if (postStatus == "confirmed")
+                      _buildMap()
+                    else if (postStatus == "not reserved")
+                      if (viewModel.imagesWithAltText.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15.0),
+                            child: Image.network(
+                              viewModel.imagesWithAltText[0]['url']!,
+                              fit: BoxFit.cover,
+                              height: 200,
+                              width: double.infinity,
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
+                                return const Icon(Icons.error);
+                              },
+                            ),
                           ),
                         ),
-                      ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
