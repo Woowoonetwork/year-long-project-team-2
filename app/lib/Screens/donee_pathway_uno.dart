@@ -8,6 +8,7 @@ import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -62,7 +63,14 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   @override
-  @override
+  Widget _buildLoadingScreen() {
+    return Center(
+      child: CupertinoActivityIndicator(
+        radius: 16,
+      ),
+    );
+  }
+
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: Colors.white,
@@ -88,7 +96,7 @@ class _DoneePathState extends State<DoneePath> {
       ),
       child: SafeArea(
         child: isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? _buildLoadingScreen()
             : SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -116,16 +124,17 @@ class _DoneePathState extends State<DoneePath> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Image.network(
-                      viewModel.imageUrl,
-                      fit: BoxFit.cover,
-                      height: 200,
-                      width: double.infinity,
-                      errorBuilder: (BuildContext context, Object exception,
-                          StackTrace? stackTrace) {
-                        return const Icon(Icons.error);
-                      },
-                    ),
+                    if (viewModel.imagesWithAltText.isNotEmpty)
+                      Image.network(
+                        viewModel.imagesWithAltText[0]['url']!,
+                        fit: BoxFit.cover,
+                        height: 200,
+                        width: double.infinity,
+                        errorBuilder: (BuildContext context, Object exception,
+                            StackTrace? stackTrace) {
+                          return const Icon(Icons.error);
+                        },
+                      ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -153,14 +162,15 @@ class _DoneePathState extends State<DoneePath> {
                         },
                         child: Text('Navigate'),
                         padding: EdgeInsets.symmetric(
-                            horizontal: 36.0, vertical: 16.0),
+                            horizontal: 24.0, vertical: 8.0),
                         borderRadius: BorderRadius.circular(18.0),
                       ),
                     SizedBox(height: 0),
                     PendingConfirmationWithTimer(
-                        durationInSeconds: 120, postId: widget.postId),
+                        durationInSeconds: 150, postId: widget.postId),
                     SizedBox(height: 40),
                     Container(
+                      width: 350,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30.0),
                         boxShadow: [
@@ -178,7 +188,7 @@ class _DoneePathState extends State<DoneePath> {
                         },
                         color: CupertinoColors.white,
                         padding: EdgeInsets.symmetric(
-                            horizontal: 36.0, vertical: 16.0),
+                            horizontal: 24.0, vertical: 8.0),
                         borderRadius: BorderRadius.circular(30.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -200,44 +210,47 @@ class _DoneePathState extends State<DoneePath> {
                         ),
                       ),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: CupertinoButton(
-                        onPressed: _navigateToRatingPage,
-                        color: CupertinoColors.white,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 36.0, vertical: 16.0),
-                        borderRadius: BorderRadius.circular(30.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              CupertinoIcons.star_fill,
-                              color: CupertinoColors.systemYellow,
-                              size: 24.0,
-                            ),
-                            SizedBox(width: 8.0),
-                            Text(
-                              'Leave a Review',
-                              style: TextStyle(
-                                  color: CupertinoColors.black,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w500),
+                    SizedBox(height: 20.0),
+                    if (postStatus == "readyToPickUp")
+                      Container(
+                        width: 350,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
+                        child: CupertinoButton(
+                          onPressed: _navigateToRatingPage,
+                          color: CupertinoColors.white,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24.0, vertical: 8.0),
+                          borderRadius: BorderRadius.circular(30.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                CupertinoIcons.star_fill,
+                                color: CupertinoColors.systemYellow,
+                                size: 24.0,
+                              ),
+                              SizedBox(width: 8.0),
+                              Text(
+                                'Leave a Review',
+                                style: TextStyle(
+                                    color: CupertinoColors.black,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
                     SizedBox(height: 50),
                   ],
                 ),
