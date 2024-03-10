@@ -67,6 +67,26 @@ class _AccountScreenState extends State<AccountScreen> {
         print('Error listening to post changes: $error');
       }
     });
+    
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .where('reserved_by', isEqualTo: currentUserUID) // Include posts reserved by the user
+        .snapshots()
+        .listen((snapshot) {
+      if (mounted) {
+        if (snapshot.docs.isNotEmpty) {
+          // Merge reserved orders into active orders
+          List<QueryDocumentSnapshot> reservedPosts = snapshot.docs;
+          mergeReservedOrders(reservedPosts);
+        }
+      }
+    }, onError: (error) {
+      if (error is FirebaseException && error.code == 'failed-precondition') {
+        print('No Post Details index found.');
+      } else {
+        print('Error listening to post changes: $error');
+      }
+    });
 
     // // Subscribe to changes in the entire collection to refresh the page when any new post is added
     // FirebaseFirestore.instance
@@ -81,6 +101,23 @@ class _AccountScreenState extends State<AccountScreen> {
     //     }
     //   }
     // });
+  }
+
+  // Merge Reserved Orders into active orders
+  void mergeReservedOrders(List<QueryDocumentSnapshot> reservedPosts) {
+    setState(() {
+      // Merge reserved posts into active orders
+      activeOrders.addAll(reservedPosts.map((doc) {
+        var data = doc.data();
+        var postId = doc.id;
+        if (data is Map<String, dynamic>) {
+          return createOrderCard(data, postId);
+        } else {
+          print('Document data is not a Map<String, dynamic>');
+          return SizedBox.shrink();
+        }
+      }));
+    });
   }
 
   void _updateAdjustedFontSize() {

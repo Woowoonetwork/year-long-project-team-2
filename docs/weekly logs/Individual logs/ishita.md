@@ -549,3 +549,88 @@ N/A.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Term 2 Week 6: Monday 12th Feb 2024 - Sunday 18th Feb 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W6.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Added the backend functionality to the donor screen - saving post status and updating the state on the page.
+- Added the cancel reservation button and logic.
+- Added the map to display the pin location of the post on the donor screen.
+- Made UI changes to make it more cohesive.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Complete the donor screen backend by saving the status of the orders.
+    - Added the map to display the pin location of the post on the donor screen.
+    - Added the cancel reservation button and logic.
+    - Added backend - saving post status and updating the state on the page.
+    - Updated the UI of some components to make it more similar to the Figma design.
+- Complete the T2 W6 team log.
+- Complete the T2 W6 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Term 2 Week 8: Monday 26th Feb 2024 - Sunday 03rd Mar 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W8.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Assisted in discussing the tasks for Peer Testing #2.
+- Modified the backend functionality to the donor screen - modifying the way data is stored to firestore.
+- Added profile photo reading to the donor screen.
+- Added a progress bar on the donor screen.
+- Displayed the user's reserved posts.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Display the reserved posts
+- Modify the donor screen frontend + backend.
+    - Added the progress bar to display the post status on the donor screen.
+    - Modified the data storage for post reservation.
+    - Modifed the cancel button logic.
+    - Added to the category list
+
+- Complete the T2 W8 team log.
+- Complete the T2 W8 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.

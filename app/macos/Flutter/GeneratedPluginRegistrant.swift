@@ -15,6 +15,7 @@ import flutter_image_compress_macos
 import flutter_local_notifications
 import geolocator_apple
 import google_sign_in_ios
+import maps_launcher
 import path_provider_foundation
 import share_plus
 import sign_in_with_apple
@@ -32,6 +33,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FlutterLocalNotificationsPlugin.register(with: registry.registrar(forPlugin: "FlutterLocalNotificationsPlugin"))
   GeolocatorPlugin.register(with: registry.registrar(forPlugin: "GeolocatorPlugin"))
   FLTGoogleSignInPlugin.register(with: registry.registrar(forPlugin: "FLTGoogleSignInPlugin"))
+  MapsLauncherPlugin.register(with: registry.registrar(forPlugin: "MapsLauncherPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
   SharePlusMacosPlugin.register(with: registry.registrar(forPlugin: "SharePlusMacosPlugin"))
   SignInWithApplePlugin.register(with: registry.registrar(forPlugin: "SignInWithApplePlugin"))

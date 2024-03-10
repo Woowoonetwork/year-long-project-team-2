@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/public_profile_screen.dart';
-import 'package:cached_network_image/cached_network_image.dart'; // Add this import
+import 'package:cached_network_image/cached_network_image.dart'; 
+import 'package:flutter/services.dart';
+
 
 class ProfileCard extends StatefulWidget {
   ProfileCard({Key? key}) : super(key: key);
@@ -22,6 +24,7 @@ class _ProfileCardState extends State<ProfileCard> {
   double? rating;
   List<String>? reviews;
   bool isLoading = true;
+  
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -76,6 +79,7 @@ class _ProfileCardState extends State<ProfileCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        HapticFeedback.selectionClick();
         Navigator.push(
           context,
           CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
@@ -83,11 +87,11 @@ class _ProfileCardState extends State<ProfileCard> {
       },
       child: Container(
         margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.tertiarySystemBackground, context),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: isLoading
             ? Center(child: CupertinoActivityIndicator())
@@ -115,13 +119,13 @@ class _ProfileCardState extends State<ProfileCard> {
   Widget profileImage() {
     return CachedNetworkImage(
       imageUrl: photo,
-      width: 60,
-      height: 60,
+      width: 80,
+      height: 80,
       placeholder: (context, url) => CupertinoActivityIndicator(),
       errorWidget: (context, url, error) => Image.asset(
         'assets/images/sampleProfile.png',
-        width: 60,
-        height: 60,
+        width: 70,
+        height: 70,
       ),
     );
   }

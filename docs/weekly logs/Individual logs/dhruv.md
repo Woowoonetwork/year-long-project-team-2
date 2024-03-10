@@ -377,3 +377,66 @@ N/A.
 
 N/A.
 
+-----
+-----
+
+## Term 2 Week 6: Monday 12th Feb 2024 - Sunday 18th Feb 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week6.png)
+### Recap of personal goals
+- Helped plan out the feature to work on this week
+- Team meating to prioritise and assign tasks for people 
+- Removed reserve post from browse screen
+- Removed reserve post from saved screen 
+- Contributed to team log
+- Completed individual log
+
+
+### Tasks completed (from Project Board)
+- Remove the posts from browse and saved screen if they have been reserved
+- Complete the T2 W6 individual logs
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+- I was not well this week and I have already given my doctor's note to the Professor
+
+-----
+-----
+
+## Term 2 Week 7 and 8: Monday 19 Feb 2024 - Sunday 3rd March 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week8.png)
+### Recap of personal goals
+- Helped plan out the feature to work on this week
+- Team meating to prioritise and assign tasks for people 
+- Worked on the backend implementation of the public profile
+- Completed blocking feature 
+- Contributed to team log
+- Completed individual log
+
+
+### Tasks completed (from Project Board)
+- Complete the public profile backend
+   - Extraction of various components from firebase
+   - Blocking feature
+   - Display ratings and comments from firebase
+   - Edit profileAppBar based on infromation from firebase
+   - Changed circle avatar 
+
+- Complete the T2 W6 individual logs
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+
+-----
+-----
