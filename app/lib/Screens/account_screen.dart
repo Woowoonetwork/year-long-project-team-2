@@ -45,78 +45,45 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   void setUpPostStreamListener() {
-    String currentUserUID = getCurrentUserUID();
+    final String currentUserUID = FirebaseAuth.instance.currentUser?.uid ?? '';
     FirebaseFirestore.instance
         .collection('post_details')
-        .where('user_id', isEqualTo: currentUserUID)
         .orderBy('post_timestamp', descending: true)
+        .where('user_id', isEqualTo: currentUserUID)
         .snapshots()
         .listen((snapshot) {
-      if (mounted) {
-        if (snapshot.docs.isEmpty) {
-          print('No posts found for the current user.');
-        } else {
-          // Update the active orders if posts are available
-          updateActiveOrders(snapshot.docs);
+      if (snapshot.docs.isNotEmpty) {
+        var activeDocs = snapshot.docs
+            .where((doc) => doc['post_status'] != 'delivered')
+            .toList();
+        var pastDocs = snapshot.docs
+            .where((doc) => doc['post_status'] == 'delivered')
+            .toList();
+        if (mounted) {
+          updateActiveOrders(activeDocs);
+          updatePastOrders(pastDocs);
         }
       }
-    }, onError: (error) {
-      if (error is FirebaseException && error.code == 'failed-precondition') {
-        print('No Post Details index found.');
-      } else {
-        print('Error listening to post changes: $error');
-      }
     });
-    
+
     FirebaseFirestore.instance
         .collection('post_details')
         .where('reserved_by', isEqualTo: currentUserUID) // Include posts reserved by the user
         .snapshots()
         .listen((snapshot) {
+      var reservedDocs = snapshot.docs;
       if (mounted) {
-        if (snapshot.docs.isNotEmpty) {
-          // Merge reserved orders into active orders
-          List<QueryDocumentSnapshot> reservedPosts = snapshot.docs;
-          mergeReservedOrders(reservedPosts);
-        }
-      }
-    }, onError: (error) {
-      if (error is FirebaseException && error.code == 'failed-precondition') {
-        print('No Post Details index found.');
-      } else {
-        print('Error listening to post changes: $error');
+        mergeReservedOrders(reservedDocs); // Handling reserved orders
       }
     });
-
-    // // Subscribe to changes in the entire collection to refresh the page when any new post is added
-    // FirebaseFirestore.instance
-    //     .collection('post_details')
-    //     .orderBy('post_timestamp', descending: true)
-    //     .snapshots()
-    //     .listen((snapshot) {
-    //   if (mounted) {
-    //     // Refresh the page when any new post is added but the UI will only be updated for the current user's posts
-    //     if (snapshot.docs.isNotEmpty) {
-    //       updateActiveOrders(snapshot.docs);
-    //     }
-    //   }
-    // });
   }
 
-  // Merge Reserved Orders into active orders
-  void mergeReservedOrders(List<QueryDocumentSnapshot> reservedPosts) {
+  void updatePastOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
-      // Merge reserved posts into active orders
-      activeOrders.addAll(reservedPosts.map((doc) {
-        var data = doc.data();
-        var postId = doc.id;
-        if (data is Map<String, dynamic>) {
-          return createOrderCard(data, postId);
-        } else {
-          print('Document data is not a Map<String, dynamic>');
-          return SizedBox.shrink();
-        }
-      }));
+      pastOrders = documents
+          .map((doc) =>
+              createOrderCard(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
     });
   }
 
@@ -125,31 +92,34 @@ class _AccountScreenState extends State<AccountScreen> {
     adjustedTabTextFontSize = _defaultTabTextFontSize * _textScaleFactor;
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  void updateActiveOrders(List<QueryDocumentSnapshot> documents) {
+    setState(() {
+      activeOrders = documents.map((doc) {
+        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id);
+      }).toList();
+    });
   }
+
+
+  // Merge Reserved Orders into active orders
+  void mergeReservedOrders(List<QueryDocumentSnapshot> reservedDocs) {
+    setState(() {
+      // Add reserved orders under the active orders tab
+      var mergedOrders = reservedDocs.map((doc) => createOrderCard(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      activeOrders.addAll(mergedOrders);
+    });
+  }
+
+  // @override
+  // void dispose() {
+  //   super.dispose();
+  // }
 
   void _onOrderCardTap(String postId) {
     setState(() {
       postId = postId;
     });
     print(postId + 'accountscreen');
-  }
-
-  void updateActiveOrders(List<QueryDocumentSnapshot> documents) {
-    setState(() {
-      activeOrders = documents.map((doc) {
-        var data = doc.data();
-        var postId = doc.id;
-        if (data is Map<String, dynamic>) {
-          return createOrderCard(data, postId);
-        } else {
-          print('Document data is not a Map<String, dynamic>');
-          return SizedBox.shrink();
-        }
-      }).toList();
-    });
   }
 
   OrderCard createOrderCard(Map<String, dynamic> documentData, String postId) {
