@@ -69,7 +69,7 @@ class _DonorScreenState extends State<DonorScreen> {
       if (postSnapshot.exists) {
         // Extract the reserved_by user ID from the post details
         reservedByUserId = postSnapshot['reserved_by'];
-        pickupLocation = postSnapshot['pickup_location'];
+        //pickupLocation = postSnapshot['pickup_location'];
 
         if (postSnapshot['post_location'] is GeoPoint) {
           GeoPoint geoPoint = postSnapshot['post_location'] as GeoPoint;

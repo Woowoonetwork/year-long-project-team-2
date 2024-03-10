@@ -341,7 +341,11 @@ if (_passwordController.text.length < 8 ||
           'email',
           'itemsSold',
           'description',
-          'posts'
+          'posts',
+          'avgRating',
+          'ratings',
+          'comments',
+          'profileImagePath'
         ],
         fieldValues: [
           _firstNameController.text,
@@ -351,7 +355,11 @@ if (_passwordController.text.length < 8 ||
           _emailController.text,
           [],
           '',
-          []
+          [],
+          0.0,
+          [0],
+          [],
+          ''
         ],
       );
 
