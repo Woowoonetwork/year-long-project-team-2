@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -199,6 +200,44 @@ class _DoneePathState extends State<DoneePath> {
                         ),
                       ),
                     ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: CupertinoButton(
+                        onPressed: _navigateToRatingPage,
+                        color: CupertinoColors.white,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 36.0, vertical: 16.0),
+                        borderRadius: BorderRadius.circular(30.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.star_fill,
+                              color: CupertinoColors.systemYellow,
+                              size: 24.0,
+                            ),
+                            SizedBox(width: 8.0),
+                            Text(
+                              'Leave a Review',
+                              style: TextStyle(
+                                  color: CupertinoColors.black,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     SizedBox(height: 50),
                   ],
                 ),
@@ -208,7 +247,29 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   void _handleCancelReservation() async {
+    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     try {
+      // Get the user document
+      DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+          await FirebaseFirestore.instance.collection('user').doc(userId).get();
+
+      // Check if data exists
+      if (userSnapshot.exists) {
+        // Get the current reserved posts of the user
+        List<String> reservedPosts =
+            List<String>.from(userSnapshot.data()?['reserved_posts'] ?? []);
+
+        // Remove the postId of the canceled order
+        reservedPosts.remove(widget.postId);
+
+        // Update the user document with the updated reserved_posts list
+        await FirebaseFirestore.instance
+            .collection('user')
+            .doc(userId)
+            .update({'reserved_posts': reservedPosts});
+      }
+
+      // Update the post details document
       await FirebaseFirestore.instance
           .collection('post_details')
           .doc(widget.postId)
