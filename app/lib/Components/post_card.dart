@@ -45,7 +45,7 @@ class PostCard extends StatelessWidget {
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: () {
-          HapticFeedback.selectionClick(); 
+          HapticFeedback.selectionClick();
           onTap(postId);
           Navigator.push(
             context,
@@ -130,18 +130,23 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildTagSection(BuildContext context) {
-    const double horizontalSpacing = 7.0;
+    const double spacing = 7.0; // Spacing between tags horizontally
+    const double runSpacing = 8.0; // Spacing between lines of tags
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: List.generate(tags.length, (index) {
-          return Row(
-            children: [
-              _buildTag(tags[index], _generateTagColor(index), context),
-              SizedBox(width: horizontalSpacing),
-            ],
+      child: Wrap(
+        spacing: spacing, // Horizontal spacing between tags
+        runSpacing: runSpacing, // Vertical spacing between lines of tags
+        children: tags.asMap().entries.map((entry) {
+          int idx = entry.key;
+          String tag = entry.value;
+          return Container(
+            margin:
+                const EdgeInsets.only(top: 4), // Add margin to top if needed
+            child: _buildTag(tag, _generateTagColor(idx), context),
           );
-        }),
+        }).toList(),
       ),
     );
   }
@@ -156,7 +161,10 @@ class PostCard extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+          color: color.computeLuminance() > 0.5
+              ? CupertinoDynamicColor.resolve(CupertinoColors.black, context)
+              : CupertinoDynamicColor.resolve(
+                  CupertinoColors.white, context),
           fontSize: 10,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,

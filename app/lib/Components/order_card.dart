@@ -168,7 +168,8 @@ class OrderCard extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Wrap(
-        spacing: 7,
+        spacing: 8, // Adjust spacing between tags if needed
+        runSpacing: 8, // Space between lines
         children: tags
             .map((tag) => _buildTag(tag, _generateTagColor(tags.indexOf(tag)),
                 context, adjustedTagFontSize))
@@ -185,18 +186,22 @@ class OrderCard extends StatelessWidget {
   static Widget _buildTag(String text, Color color, BuildContext context,
       double adjustedTagFontSize) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 10, vertical: 4), // Adjusted padding
       decoration:
           BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+          color: color.computeLuminance() > 0.5
+              ? CupertinoDynamicColor.resolve(CupertinoColors.black, context)
+              : CupertinoDynamicColor.resolve(CupertinoColors.white, context),
           fontSize: adjustedTagFontSize,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
         ),
-        overflow: TextOverflow.visible,
+        overflow: TextOverflow
+            .ellipsis, // Changed to ellipsis to handle very long text
       ),
     );
   }

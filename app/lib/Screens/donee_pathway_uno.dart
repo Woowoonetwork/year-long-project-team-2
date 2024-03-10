@@ -142,7 +142,7 @@ class _DoneePathState extends State<DoneePath> {
                           ),
                         ),
                         Text(""),
-                        RatingText(),
+                       RatingText(viewModel: viewModel),
                       ],
                     ),
                     SizedBox(height: 50),

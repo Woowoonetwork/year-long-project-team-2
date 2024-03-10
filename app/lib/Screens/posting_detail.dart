@@ -31,6 +31,8 @@ class _PostDetailViewState extends State<PostDetailView> {
   bool isLoading = true; // Added to track loading status
   late String userID;
   bool isReserved = false;
+  final GlobalKey _pickupInfoKey = GlobalKey();
+  final GlobalKey _allergensSectionKey = GlobalKey();
 
   // Method to initialize userID
   void initializeUserId() {
@@ -255,14 +257,19 @@ class _PostDetailViewState extends State<PostDetailView> {
   }
 
   Widget _buildTagSection(BuildContext context) {
-    const double horizontalSpacing = 7.0;
-    return Row(
-      children: List.generate(viewModel.tags.length, (index) {
-        return Row(
-          children: [
-            _buildTag(viewModel.tags[index], _generateTagColor(index), context),
-            SizedBox(width: horizontalSpacing),
-          ],
+    const double horizontalSpacing = 7.0; // Spacing between tags horizontally
+    const double runSpacing = 8.0; // Spacing between lines of tags
+
+    return Wrap(
+      spacing: horizontalSpacing, // Horizontal spacing between tags
+      runSpacing: runSpacing, // Vertical spacing between lines of tags
+      children: List<Widget>.generate(viewModel.tags.length, (index) {
+        return Container(
+          margin: const EdgeInsets.only(
+              top:
+                  4), // Optional: adds margin to the top of each tag for better spacing
+          child: _buildTag(
+              viewModel.tags[index], _generateTagColor(index), context),
         );
       }),
     );
@@ -294,25 +301,39 @@ class _PostDetailViewState extends State<PostDetailView> {
       expirationDate: viewModel.expirationDate,
       pickupTime: viewModel.pickupTime,
       allergens: viewModel.allergens,
+      onTapPickupTime: () => _scrollToKey(_pickupInfoKey),
+      onTapAllergens: () => _scrollToKey(_allergensSectionKey),
     );
+  }
+
+  void _scrollToKey(GlobalKey key) {
+    final context = key.currentContext;
+    if (context != null) {
+      Scrollable.ensureVisible(context,
+          duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+    }
   }
 
   Widget _buildPickupInformation() {
     LatLng? pickupCoordinates = viewModel.pickupLatLng;
-    return PickupInformation(
-      pickupTime:
-          DateFormat('EEE, MMM d, ' 'h:mm a').format(viewModel.pickupTime),
-      pickupLocation: viewModel.pickupLocation,
-      meetingPoint: '330, 1130 Trello Way\nKelowna, BC\nV1V 5E0',
-      additionalInfo: viewModel.pickupInstructions,
-      locationCoordinates: pickupCoordinates,
-      viewModel: viewModel,
-    );
+    return Container(
+        key: _pickupInfoKey,
+        child: PickupInformation(
+          pickupTime:
+              DateFormat('EEE, MMM d, ' 'h:mm a').format(viewModel.pickupTime),
+          pickupLocation: viewModel.pickupLocation,
+          meetingPoint: '330, 1130 Trello Way\nKelowna, BC\nV1V 5E0',
+          additionalInfo: viewModel.pickupInstructions,
+          locationCoordinates: pickupCoordinates,
+          viewModel: viewModel,
+        ));
   }
 
   Widget _buildAllergensSection() {
     List<String> allergenList = viewModel.allergens.split(', ');
-    return AllergensSection(allergens: allergenList);
+    return Container(
+        key: _allergensSectionKey,
+        child: AllergensSection(allergens: allergenList));
   }
 }
 
@@ -462,7 +483,7 @@ class CombinedTexts extends StatelessWidget {
           ),
         ),
         Text("  "),
-        RatingText(),
+        RatingText(viewModel: viewModel),
       ],
     );
   }
@@ -507,7 +528,9 @@ class InfoText extends StatelessWidget {
 }
 
 class RatingText extends StatelessWidget {
-  final PostDetailViewModel viewModel = PostDetailViewModel('default');
+  final PostDetailViewModel viewModel;
+
+  const RatingText({Key? key, required this.viewModel}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -539,18 +562,23 @@ class InfoCardsRow extends StatelessWidget {
   final DateTime expirationDate;
   final DateTime pickupTime;
   final String allergens;
+  final VoidCallback? onTapPickupTime;
+  final VoidCallback? onTapAllergens;
 
-  const InfoCardsRow(
-      {Key? key,
-      required this.expirationDate,
-      required this.pickupTime,
-      required this.allergens})
-      : super(key: key);
+  const InfoCardsRow({
+    Key? key,
+    required this.expirationDate,
+    required this.pickupTime,
+    required this.allergens,
+    this.onTapPickupTime,
+    this.onTapAllergens,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     String formattedExp = DateFormat('d MMM yyyy').format(expirationDate);
     String formattedPick = DateFormat('h:mm a').format(pickupTime);
+    int allergenCount = allergens.isEmpty ? 0 : allergens.split(',').length;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -566,20 +594,26 @@ class InfoCardsRow extends StatelessWidget {
             color: CupertinoColors.systemRed,
           ),
           const SizedBox(width: 16),
-          buildInfoCard(
-            icon: FeatherIcons.shoppingBag,
-            title: 'Pickup Time',
-            subtitle: formattedPick,
-            context: context,
-            color: blue,
+          GestureDetector(
+            onTap: onTapPickupTime, // Use the callback here
+            child: buildInfoCard(
+              icon: FeatherIcons.shoppingBag,
+              title: 'Pickup Time',
+              subtitle: formattedPick,
+              context: context,
+              color: blue,
+            ),
           ),
           const SizedBox(width: 16),
-          buildInfoCard(
-            icon: FeatherIcons.alertCircle,
-            title: 'Allergens',
-            subtitle: allergens.isEmpty ? 'None' : allergens,
-            context: context,
-            color: yellow,
+          GestureDetector(
+            onTap: onTapAllergens, // Use the callback here
+            child: buildInfoCard(
+              icon: FeatherIcons.alertCircle,
+              title: 'Allergens',
+              subtitle: allergenCount == 0 ? 'None' : '$allergenCount Total',
+              context: context,
+              color: yellow,
+            ),
           ),
         ],
       ),
@@ -1098,7 +1132,7 @@ class _ReserveButtonState extends State<ReserveButton> {
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
-            .update({'reserved_by': widget.userId, 'post_status': "pending"});  
+            .update({'reserved_by': widget.userId, 'post_status': "pending"});
 
         // Get the current reserved posts of the user
         DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
@@ -1106,11 +1140,13 @@ class _ReserveButtonState extends State<ReserveButton> {
             .doc(widget.userId)
             .get();
 
-        Map<String, dynamic>? userData = userSnapshot.data() as Map<String, dynamic>?;
+        Map<String, dynamic>? userData =
+            userSnapshot.data() as Map<String, dynamic>?;
 
         if (userData != null) {
           // Initialize reserved_posts as an empty list if it doesn't exist
-          List<String> reservedPosts = List<String>.from(userData['reserved_posts'] ?? []);
+          List<String> reservedPosts =
+              List<String>.from(userData['reserved_posts'] ?? []);
 
           // Append the postId to the reserved_posts list
           reservedPosts.add(widget.postId);
