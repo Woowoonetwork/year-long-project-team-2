@@ -131,22 +131,38 @@ class PostCard extends StatelessWidget {
 
   Widget _buildTagSection(BuildContext context) {
     const double spacing = 7.0; // Spacing between tags horizontally
-    const double runSpacing = 8.0; // Spacing between lines of tags
+    int tagCount = tags.length;
+    int displayedTags = tagCount > 4 ? 4 : tagCount; // Display up to 4 tags
+    int truncatedTags = tagCount - displayedTags; // Calculate remaining tags
+
+    List<Widget> tagWidgets =
+        tags.take(displayedTags).toList().asMap().entries.map((entry) {
+      int idx = entry.key;
+      String tag = entry.value;
+      return Container(
+        child: _buildTag(tag, _generateTagColor(idx), context),
+      );
+    }).toList();
+
+    // If there are truncated tags, add a "+X" tag
+    if (truncatedTags > 0) {
+      tagWidgets.add(_buildTag(
+          '+$truncatedTags', _generateTagColor(displayedTags), context));
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Wrap(
-        spacing: spacing, // Horizontal spacing between tags
-        runSpacing: runSpacing, // Vertical spacing between lines of tags
-        children: tags.asMap().entries.map((entry) {
-          int idx = entry.key;
-          String tag = entry.value;
-          return Container(
-            margin:
-                const EdgeInsets.only(top: 4), // Add margin to top if needed
-            child: _buildTag(tag, _generateTagColor(idx), context),
-          );
-        }).toList(),
+      child: Row(
+        children: [
+          Expanded(
+            child: Wrap(
+              alignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: spacing, 
+              children: tagWidgets,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -155,7 +171,7 @@ class PostCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color,
+        color: CupertinoDynamicColor.resolve(color, context),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -163,9 +179,8 @@ class PostCard extends StatelessWidget {
         style: TextStyle(
           color: color.computeLuminance() > 0.5
               ? CupertinoDynamicColor.resolve(CupertinoColors.black, context)
-              : CupertinoDynamicColor.resolve(
-                  CupertinoColors.white, context),
-          fontSize: 10,
+              : CupertinoDynamicColor.resolve(CupertinoColors.white, context),
+          fontSize: 11,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
         ),

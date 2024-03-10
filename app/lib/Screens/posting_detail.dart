@@ -279,7 +279,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color,
+        color: CupertinoDynamicColor.resolve(color, context),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -438,8 +438,8 @@ class IconPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 20,
-      height: 20,
+      width: 24,
+      height: 24,
       child: ClipOval(
         child: imageUrl.isNotEmpty && imageUrl.startsWith('http')
             ? CachedNetworkImage(

@@ -165,15 +165,29 @@ class OrderCard extends StatelessWidget {
 
   static Widget _buildTagSection(
       BuildContext context, List<String> tags, double adjustedTagFontSize) {
+    const int maxDisplayTags = 4;
+    List<Widget> tagWidgets = [];
+    int displayedTagsCount =
+        tags.length > maxDisplayTags ? maxDisplayTags : tags.length;
+    int truncatedTags = tags.length - displayedTagsCount;
+
+    for (int i = 0; i < displayedTagsCount; i++) {
+      tagWidgets.add(
+        _buildTag(tags[i], _generateTagColor(i), context, adjustedTagFontSize),
+      );
+    }
+    if (truncatedTags > 0) {
+      tagWidgets.add(
+        _buildTag('+$truncatedTags', _generateTagColor(displayedTagsCount),
+            context, adjustedTagFontSize),
+      );
+    }
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Wrap(
         spacing: 8, // Adjust spacing between tags if needed
-        runSpacing: 8, // Space between lines
-        children: tags
-            .map((tag) => _buildTag(tag, _generateTagColor(tags.indexOf(tag)),
-                context, adjustedTagFontSize))
-            .toList(),
+        runSpacing: 0, // Removed the runSpacing as per your recent request
+        children: tagWidgets,
       ),
     );
   }
@@ -189,7 +203,8 @@ class OrderCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: 10, vertical: 4), // Adjusted padding
       decoration:
-          BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
+          BoxDecoration(color: CupertinoDynamicColor.resolve(color, context)
+          , borderRadius: BorderRadius.circular(20)),
       child: Text(
         text,
         style: TextStyle(

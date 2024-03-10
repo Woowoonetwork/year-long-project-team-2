@@ -215,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Stack(
         children: [
           CustomScrollView(slivers: <Widget>[
-            buildMainNavigationBar(context, 'Discover'),
+            buildMainNavigationBar(context, 'Home'),
             SliverToBoxAdapter(
                 child: Column(children: <Widget>[
               _buildSearchBar(context),
