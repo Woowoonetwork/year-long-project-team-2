@@ -31,11 +31,9 @@ class _PendingConfirmationWithTimerState
 
     String formattedTimeLeft = "";
     if (totalSeconds ~/ 60 > 0) {
-      // If there's one or more minutes remaining
       formattedTimeLeft += "$twoDigitMinutes mins ";
     }
     if (totalSeconds % 60 > 0 || totalSeconds ~/ 60 == 0) {
-      // If there are seconds remaining, or no minutes
       formattedTimeLeft += "$twoDigitSeconds secs";
     }
 

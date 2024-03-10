@@ -9,6 +9,7 @@ import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart';
+import 'dart:async';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -101,7 +102,19 @@ class _DoneePathState extends State<DoneePath> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: 40),
+                    SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'You have reserved the ${viewModel.title} from ${viewModel.firstName}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                     SlimProgressBar(
                       stepTitles: [
                         'Confirmed',
@@ -111,29 +124,23 @@ class _DoneePathState extends State<DoneePath> {
                       ],
                       postStatus: postStatus,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'You have reserved the ${viewModel.title} from ${viewModel.firstName}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 34,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 0),
                     if (viewModel.imagesWithAltText.isNotEmpty)
-                      Image.network(
-                        viewModel.imagesWithAltText[0]['url']!,
-                        fit: BoxFit.cover,
-                        height: 200,
-                        width: double.infinity,
-                        errorBuilder: (BuildContext context, Object exception,
-                            StackTrace? stackTrace) {
-                          return const Icon(Icons.error);
-                        },
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15.0),
+                          child: Image.network(
+                            viewModel.imagesWithAltText[0]['url']!,
+                            fit: BoxFit.cover,
+                            height: 200,
+                            width: double.infinity,
+                            errorBuilder: (BuildContext context,
+                                Object exception, StackTrace? stackTrace) {
+                              return const Icon(Icons.error);
+                            },
+                          ),
+                        ),
                       ),
                     SizedBox(height: 20),
                     Row(
@@ -154,7 +161,7 @@ class _DoneePathState extends State<DoneePath> {
                         RatingText(),
                       ],
                     ),
-                    SizedBox(height: 50),
+                    SizedBox(height: 20),
                     if (postStatus == "confirmed")
                       CupertinoButton.filled(
                         onPressed: () {
@@ -167,8 +174,8 @@ class _DoneePathState extends State<DoneePath> {
                       ),
                     SizedBox(height: 0),
                     PendingConfirmationWithTimer(
-                        durationInSeconds: 150, postId: widget.postId),
-                    SizedBox(height: 40),
+                        durationInSeconds: 500, postId: widget.postId),
+                    SizedBox(height: 15),
                     Container(
                       width: 350,
                       decoration: BoxDecoration(
