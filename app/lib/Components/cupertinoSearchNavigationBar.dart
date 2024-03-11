@@ -83,7 +83,7 @@ class _CupertinoSearchNavigationBarState
               .withOpacity(0.4),
         ),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: SafeArea(
             bottom: false,
             child: Padding(
@@ -113,14 +113,13 @@ class _CupertinoSearchNavigationBarState
               padding: EdgeInsets.zero,
               onPressed: () => _showFeelingLuckyModal(context),
               child: Text(
-                "Feeling Lucky?",
+                'Feeling Lucky?',
                 style: TextStyle(
                   color: accentColor,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.6,
                   fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
-              ),
+              )
             ),
           ],
         ),
@@ -131,7 +130,7 @@ class _CupertinoSearchNavigationBarState
               child: Text(
                 widget.title,
                 style: TextStyle(
-                  fontSize: 36,
+                  fontSize: 34,
                   letterSpacing: -1.3,
                   fontWeight: FontWeight.bold,
                   color: CupertinoColors.label.resolveFrom(context),

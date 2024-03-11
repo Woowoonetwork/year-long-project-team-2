@@ -45,7 +45,7 @@ class PostCard extends StatelessWidget {
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: () {
-          HapticFeedback.selectionClick(); 
+          HapticFeedback.selectionClick();
           onTap(postId);
           Navigator.push(
             context,
@@ -64,6 +64,7 @@ class PostCard extends StatelessWidget {
                 _buildTitleSection(context),
                 if (showTags) ...[
                   _buildTagSection(context),
+                   SizedBox(height: 2),
                 ] else ...[
                   SizedBox(height: 10),
                 ],
@@ -130,18 +131,39 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildTagSection(BuildContext context) {
-    const double horizontalSpacing = 7.0;
+    const double spacing = 7.0; // Spacing between tags horizontally
+    int tagCount = tags.length;
+    int displayedTags = tagCount > 4 ? 4 : tagCount; // Display up to 4 tags
+    int truncatedTags = tagCount - displayedTags; // Calculate remaining tags
+
+    List<Widget> tagWidgets =
+        tags.take(displayedTags).toList().asMap().entries.map((entry) {
+      int idx = entry.key;
+      String tag = entry.value;
+      return Container(
+        child: _buildTag(tag, _generateTagColor(idx), context),
+      );
+    }).toList();
+
+    // If there are truncated tags, add a "+X" tag
+    if (truncatedTags > 0) {
+      tagWidgets.add(_buildTag(
+          '+$truncatedTags', _generateTagColor(displayedTags), context));
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
-        children: List.generate(tags.length, (index) {
-          return Row(
-            children: [
-              _buildTag(tags[index], _generateTagColor(index), context),
-              SizedBox(width: horizontalSpacing),
-            ],
-          );
-        }),
+        children: [
+          Expanded(
+            child: Wrap(
+              alignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: spacing, 
+              children: tagWidgets,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -150,13 +172,15 @@ class PostCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color,
+        color: CupertinoDynamicColor.resolve(color, context),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+          color: color.computeLuminance() > 0.5
+              ? CupertinoDynamicColor.resolve(CupertinoColors.black, context)
+              : CupertinoDynamicColor.resolve(CupertinoColors.white, context),
           fontSize: 10,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
@@ -190,18 +214,18 @@ class PostCard extends StatelessWidget {
         children: [
           avatarUrl.isNotEmpty
               ? CircleAvatar(
-                  radius: 10,
+                  radius: 8,
                   backgroundImage: CachedNetworkImageProvider(avatarUrl),
                   backgroundColor: Colors.transparent,
                 )
               : CircleAvatar(
-                  radius: 10,
+                  radius: 8,
                   backgroundImage:
                       AssetImage('assets/images/sampleProfile.png'),
                 ),
           SizedBox(width: 8),
           Text(
-            'Posted by $firstname $lastname $timeAgo',
+            'Posted by $firstname $lastname  $timeAgo',
             style: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.secondaryLabel, context),

@@ -8,6 +8,7 @@ import 'package:FoodHood/Components/slimProgressBar.dart';
 import 'package:FoodHood/Screens/donor_rating.dart';
 import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:FoodHood/Screens/posting_detail.dart';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -157,20 +158,8 @@ class _DoneePathState extends State<DoneePath> {
                             letterSpacing: -0.48,
                           ),
                         ),
-                        SizedBox(width: 5),
-                        Icon(
-                          CupertinoIcons.star_fill,
-                          color: Colors.amber,
-                          size: 14,
-                        ),
-                        SizedBox(width: 5),
-                        Text(
-                          '${viewModel.rating}',
-                          style: TextStyle(
-                            color: CupertinoColors.systemGrey,
-                            fontSize: 14,
-                          ),
-                        ),
+                        Text(""),
+                        RatingText(viewModel: viewModel)
                       ],
                     ),
                     SizedBox(height: 20),

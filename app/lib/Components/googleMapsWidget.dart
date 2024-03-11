@@ -23,7 +23,7 @@ class GoogleMapWidget extends StatefulWidget {
 class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   GoogleMapController? mapController;
   String? _mapStyle;
-  LatLng _currentCenter = LatLng(37.7749, -122.4194); // Default to SF
+  LatLng _currentCenter =  LatLng(49.8875, -119.4961);
   Marker _centerMarker = Marker(
     markerId: MarkerId("centerMarker"),
     position: LatLng(37.7749, -122.4194), // Default position
