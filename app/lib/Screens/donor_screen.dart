@@ -98,7 +98,7 @@ class _DonorScreenState extends State<DonorScreen> {
             final userRating = userSnapshot['avgRating'];
 
             setState(() {
-              reservedByName = userName;
+              reservedByName = userName; 
               reservedByLastName = userLastName;
               rating = userRating;
               photo = userSnapshot['profileImagePath'] as String? ?? '';
@@ -195,7 +195,7 @@ class _DonorScreenState extends State<DonorScreen> {
                       rating: rating,
                       photo: photo,
                     ),
-
+                    
                   SizedBox(height: 10.0),
 
                   //Progress Bar
@@ -208,8 +208,7 @@ class _DonorScreenState extends State<DonorScreen> {
                           value: _calculateProgress(),
                           minHeight: 5.0, // Adjust the height as needed
                           backgroundColor: groupedBackgroundColor,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(accentColor),
+                          valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                         ),
                         // Circles
                         Row(
@@ -220,16 +219,11 @@ class _DonorScreenState extends State<DonorScreen> {
                                 child: Container(
                                   width: 12.0,
                                   height: 12.0,
-                                  margin: EdgeInsets.only(
-                                      left: i < 4 ? 8.0 : 0.0,
-                                      right: i > 1 ? 8.0 : 0.0),
+                                  margin: EdgeInsets.only(left: i < 4 ? 8.0 : 0.0, right: i > 1 ? 8.0 : 0.0),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: i <= _calculateProgress() * 4
-                                        ? accentColor
-                                        : Colors.transparent,
-                                    border: Border.all(
-                                        color: accentColor, width: 2.0),
+                                    color: i <= _calculateProgress() * 4 ? accentColor : Colors.transparent,
+                                    border: Border.all(color: accentColor, width: 2.0),
                                   ),
                                 ),
                               ),
@@ -237,9 +231,10 @@ class _DonorScreenState extends State<DonorScreen> {
                         ),
                       ],
                     ),
-
-                  if (reservedByName != null) SizedBox(height: 8.0),
-
+                  
+                  if (reservedByName != null)
+                    SizedBox(height: 8.0),
+                  
                   if (reservedByName != null)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -247,23 +242,21 @@ class _DonorScreenState extends State<DonorScreen> {
                         _buildProgressText("Reserved", OrderState.reserved),
                         _buildProgressText("Confirmed", OrderState.confirmed),
                         _buildProgressText("Delivering", OrderState.delivering),
-                        _buildProgressText(
-                            "Ready to Pick Up", OrderState.readyToPickUp),
+                        _buildProgressText("Ready to Pick Up", OrderState.readyToPickUp),
                       ],
                     ),
 
-                  SizedBox(
-                    height: 25,
-                  ),
+                  SizedBox(height: 25,),
 
                   //__buildTextField(text: "Pickup at specified location"),
                   _buildMap(context),
-
+                  
                   // PendingConfirmationWithTimer(
                   //       durationInSeconds: 120, postId: widget.postId),
 
                   // Replace the placeholder with the chat bubble in the future
                   SizedBox(height: 200.0),
+
                 ],
               ),
 
@@ -299,9 +292,7 @@ class _DonorScreenState extends State<DonorScreen> {
       style: TextStyle(
         fontSize: 14.0,
         fontWeight: FontWeight.bold,
-        color: orderState == state
-            ? CupertinoColors.label
-            : CupertinoColors.secondaryLabel,
+        color: orderState == state ? CupertinoColors.label : CupertinoColors.secondaryLabel,
       ),
     );
   }
@@ -376,34 +367,34 @@ class _DonorScreenState extends State<DonorScreen> {
     final LatLng? locationCoordinates = pickupLatLng;
 
     if (locationCoordinates != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16), bottom: Radius.circular(15)),
-        child: SizedBox(
-          width: double.infinity,
-          height: 250.0,
-          child: GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: locationCoordinates,
-              zoom: 12.0,
-            ),
-            markers: Set.from([
-              Marker(
-                markerId: MarkerId('pickupLocation'),
-                position: locationCoordinates,
+      return  ClipRRect(
+          borderRadius: BorderRadius.vertical(
+              top: Radius.circular(16), bottom: Radius.circular(15)),
+          child: SizedBox(
+            width: double.infinity,
+            height: 250.0,
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: locationCoordinates,
+                zoom: 12.0,
               ),
-            ]),
-            zoomControlsEnabled: false,
-            scrollGesturesEnabled: true,
-            rotateGesturesEnabled: false,
-            tiltGesturesEnabled: false,
-            zoomGesturesEnabled: true,
-            myLocationEnabled: false,
-            mapType: MapType.normal,
-            myLocationButtonEnabled: false,
+              markers: Set.from([
+                Marker(
+                  markerId: MarkerId('pickupLocation'),
+                  position: locationCoordinates,
+                ),
+              ]),
+              zoomControlsEnabled: false,
+              scrollGesturesEnabled: true,
+              rotateGesturesEnabled: false,
+              tiltGesturesEnabled: false,
+              zoomGesturesEnabled: true,
+              myLocationEnabled: false,
+              mapType: MapType.normal,
+              myLocationButtonEnabled: false,
+            ),
           ),
-        ),
-      );
+        );
     } else {
       return Container(
         width: double.infinity,
@@ -621,8 +612,7 @@ class _DonorScreenState extends State<DonorScreen> {
             CupertinoDialogAction(
               child: Text("Cancel"),
               onPressed: () {
-                Navigator.pop(
-                    context, false); // Return false to indicate cancel
+                Navigator.pop(context, false); // Return false to indicate cancel
               },
             ),
             CupertinoDialogAction(
@@ -641,11 +631,10 @@ class _DonorScreenState extends State<DonorScreen> {
     if (confirmCancel == true) {
       try {
         // Get the user document
-        DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-            await FirebaseFirestore.instance
-                .collection('user')
-                .doc(reservedByUserId)
-                .get();
+        DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(reservedByUserId)
+            .get();
 
         // Check if data exists
         if (userSnapshot.exists) {
@@ -663,7 +652,7 @@ class _DonorScreenState extends State<DonorScreen> {
               .update({'reserved_posts': reservedPosts});
         }
 
-        // Update the reserved_by and post_status fields in the post_details document
+        // Update the reserved_by and post_status fields in the post_details document 
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
@@ -746,19 +735,19 @@ class OrderInfoSection extends StatelessWidget {
               //   radius: 10,
               // ),
               photo.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 10,
-                      backgroundImage: CachedNetworkImageProvider(photo),
-                      onBackgroundImageError: (_, __) {
-                        // Handle image load error
-                      },
-                      backgroundColor: Colors.transparent,
-                    )
-                  : CircleAvatar(
-                      radius: 10,
-                      backgroundImage:
-                          AssetImage('assets/images/sampleProfile.png'),
-                    ),
+                ? CircleAvatar(
+                    radius: 10,
+                    backgroundImage: CachedNetworkImageProvider(photo),
+                    onBackgroundImageError: (_, __) {
+                      // Handle image load error
+                    },
+                    backgroundColor: Colors.transparent,
+                  )
+                : CircleAvatar(
+                    radius: 10,
+                    backgroundImage:
+                        AssetImage('assets/images/sampleProfile.png'),
+                  ),
               SizedBox(width: 8),
               Text(
                 'Reserved by $reservedByName $reservedByLastName',
