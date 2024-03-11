@@ -479,4 +479,34 @@ Nick accidentally pulled my branch into his branch and it got merged so all my c
 
 Additional Information 
 
+# Individual Log: Monday 4th Mar 2024 - Sunday 10th Mar 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati16.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed
+* Added more functionality for progress bar that works based off of status of post
+* Confirmed status now adds a navigate button
+* Added map functionality for the page but didn't finish testing it
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+
+* Added more functionality for progress bar that works based off of status of post
+* Confirmed status now adds a navigate button
+* Added map functionality for the page but didn't finish testing it
+* Completed the weekly individual log
+* Created team log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+
+
+Additional Information 
+
 
