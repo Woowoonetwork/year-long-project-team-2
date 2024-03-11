@@ -327,8 +327,8 @@ class ReviewItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            backgroundImage: _getAvatarImageProvider(),
-            radius: 34,
+            radius: 20,
+            backgroundImage: AssetImage('assets/images/sampleProfile.png'),
           ),
           SizedBox(width: 12),
           Expanded(
