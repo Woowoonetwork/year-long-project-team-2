@@ -349,7 +349,7 @@ Widget _buildProfileImageUploader(BuildContext context) {
                   height: 120, // Adjust the size as needed
                   padding: EdgeInsets.all(4), // Padding for the border effect
                   decoration: BoxDecoration(
-                    color: CupertinoColors.white, // Border color
+                    color: CupertinoColors.tertiarySystemBackground.resolveFrom(context), // Background color
                     borderRadius: BorderRadius.circular(70), // Makes it circular
                   ),
                   child: ClipOval(

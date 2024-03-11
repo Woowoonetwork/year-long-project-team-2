@@ -13,6 +13,8 @@ import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:FoodHood/Components/imageTile.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 enum SectionType { date, time }
 
@@ -41,6 +43,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
   double adjustedFontSize = 16.0;
   LatLng? initialLocation;
   GoogleMapController? mapController;
+  String instructionText = 'Move the map to select a location';
 
   @override
   void initState() {
@@ -250,6 +253,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
                 ),
                 buildTextField('Pickup Location'),
                 buildMapSection(),
+                // add an instruction to say "move the map to select a location"
+                buildInstructionText(),
                 buildDateTimeSection(
                   context: context,
                   sectionType: SectionType.time,
@@ -269,6 +274,29 @@ class _CreatePostPageState extends State<CreatePostScreen>
         )));
   }
 
+  SliverToBoxAdapter buildInstructionText() {
+    // Assuming instructionText holds the text you want to display
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+          decoration: BoxDecoration(
+            color: CupertinoDynamicColor.resolve(
+                CupertinoColors.tertiarySystemBackground, context),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            instructionText, // Use the variable that holds the address or default instruction
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: adjustedFontSize - 2, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ),
+    );
+  }
+
   SliverToBoxAdapter buildCupertinoChipSelection(
     List<String> itemList,
     List<String> selectedItems,
@@ -282,7 +310,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
           padding: EdgeInsets.all(10), // Padding inside the border
           dashPattern: [6, 4], // Pattern of dashes and gaps
           strokeWidth: 2, // Width of the dashes
-          color: CupertinoColors.systemGrey.withOpacity(0.4), // Color of the dashes
+          color: CupertinoColors.systemGrey
+              .withOpacity(0.4), // Color of the dashes
           child: Wrap(
             spacing: 8.0, // gap between adjacent chips
             runSpacing: 4.0, // gap between lines
@@ -318,8 +347,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                               color: isSelected
                                   ? CupertinoColors.white
                                   : CupertinoColors.label.resolveFrom(context),
-                              fontSize:
-                                  adjustedFontSize, // Ensure this variable is defined and passed
+                              fontSize: adjustedFontSize - 2,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -351,7 +379,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
             Text('Cancel',
                 style: _textStyle(CupertinoColors.label.resolveFrom(context))
                     .copyWith(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                 )),
           ],
@@ -433,11 +461,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: CupertinoButton(
-          onPressed: () => {
-            _pickImage(),
-            HapticFeedback.selectionClick()
-
-          },
+          onPressed: () => {_pickImage(), HapticFeedback.selectionClick()},
           padding: EdgeInsets.zero,
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 14.0),
@@ -688,11 +712,31 @@ class _CreatePostPageState extends State<CreatePostScreen>
     );
   }
 
-  void _onLocationSelected(LatLng location) {
+  void _onLocationSelected(LatLng location) async {
+    String address = await getAddressFromLatLng(location);
     setState(() {
-      selectedLocation =
-          location; // This updates the selectedLocation with the new position from the map
+      selectedLocation = location;
+      instructionText = address;
     });
+  }
+
+  Future<String> getAddressFromLatLng(LatLng position) async {
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      if (jsonResponse['results'] != null &&
+          jsonResponse['results'].length > 0) {
+        String address = jsonResponse['results'][0]['formatted_address'];
+        return address;
+      } else {
+        return 'Location not found';
+      }
+    } else {
+      throw Exception('Failed to fetch address');
+    }
   }
 
   Widget buildMapSection() {
