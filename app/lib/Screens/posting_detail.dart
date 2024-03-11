@@ -1183,7 +1183,7 @@ class _ReserveButtonState extends State<ReserveButton> {
         padding: const EdgeInsets.all(16),
         borderRadius: BorderRadius.circular(14),
         child: Text(
-          _isReserved ? 'Reserved' : 'Reserve',
+          _isReserved ? 'Reserve' : 'Reserve',
           style: TextStyle(
             color: _isReserved ? accentColor : CupertinoColors.white,
             fontSize: 18,
