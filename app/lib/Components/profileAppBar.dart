@@ -358,13 +358,15 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
             letterSpacing: -0.60,
           ),
         ),
-        message: Text('You will no longer see any posts from Harry Styles.',
-            style: TextStyle(
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              fontSize: 14,
-              letterSpacing: -0.40,
-              fontWeight: FontWeight.w500,
-            )),
+        message: Text(
+          'You will no longer see any posts from $displayName.',
+          style: TextStyle(
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            fontSize: 14,
+            letterSpacing: -0.40,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         actions: <Widget>[
           CupertinoActionSheetAction(
             child: Text(
@@ -375,10 +377,17 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                 letterSpacing: -0.80,
               ),
             ),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context); // Close the action sheet
               if (widget.userId != null) {
-                _blockUser(widget.userId!); // Block the user
+                try {
+                  await _blockUser(widget.userId!);
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _showSuccessDialog(context);
+                  });
+                } catch (error) {
+                  print("Error blocking user: $error");
+                }
               }
             },
           ),
@@ -390,6 +399,22 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
           },
         ),
       ),
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Dialog is not dismissible by tapping outside
+      builder: (BuildContext context) {
+        // Automatically close the dialog after 3 seconds
+        Future.delayed(Duration(seconds: 3), () {
+          Navigator.of(context).pop(true);
+        });
+        return AlertDialog(
+          content: Text('You have successfully blocked this user'),
+        );
+      },
     );
   }
 }
