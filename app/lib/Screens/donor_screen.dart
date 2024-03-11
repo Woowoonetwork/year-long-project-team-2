@@ -183,7 +183,7 @@ class _DonorScreenState extends State<DonorScreen> {
             alignment: Alignment.bottomCenter,
             children: <Widget>[
               Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   __buildHeadingTextField(text: _buildHeadingText()),
