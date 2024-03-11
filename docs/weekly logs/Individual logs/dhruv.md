@@ -440,3 +440,36 @@ N/A.
 
 -----
 -----
+
+## Term 2 Week 9: Monday 4th march 2024 - Sunday 10th March 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week9.png)
+### Recap of personal goals
+- Meeting with team to decide what task to give during peer testing
+- Peer testing in class
+- Taking feedback and issues related to the app
+- resolve all the fix in public profile
+- Making necessary changes like navigation , circle avatar and blocking in the public profile
+- Contributed to team log
+- Completed individual log
+
+
+### Tasks completed (from Project Board)
+- Fix public profile bugs
+   - Fixed navigation to the correct post detail from recent post section
+   - Fixed the alignment of review and recent post when none is available
+   - Set the avatar to default for review
+   - After blocking is done it goes back to public profile screen
+
+- Complete the T2 W9 individual logs
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+- My flutter stopped working this week for some reason , so It took me around 3 days to fix that issue
+
+-----
+-----
