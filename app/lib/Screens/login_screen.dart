@@ -15,6 +15,7 @@ class LogInScreen extends StatefulWidget {
 class _LogInScreenState extends State<LogInScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _showPassword = false;
 
   String? _emailErrorText;
   String? _passwordErrorText;
@@ -59,10 +60,18 @@ class _LogInScreenState extends State<LogInScreen> {
         buildCupertinoTextField(
           'Password',
           passwordController,
-          true,
+          !_showPassword,
           context,
           [AutofillHints.password],
           errorText: _passwordErrorText,
+        ),
+        CupertinoButton(
+          onPressed: () {
+            setState(() {
+              _showPassword = !_showPassword; // Toggle the boolean variable
+            });
+          },
+          child: Text(_showPassword ? 'Hide Password' : 'Show Password'),
         ),
         const SizedBox(height: 16),
         GestureDetector(
