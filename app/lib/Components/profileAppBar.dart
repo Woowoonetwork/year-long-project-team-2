@@ -342,49 +342,25 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   void _showBlockMenu(BuildContext context) {
-    String displayName = 'User'; // Default display name
-    if (_firstName != null && _lastName != null) {
-      displayName = '$_firstName $_lastName';
-    }
+    String displayName = _firstName ?? 'User'; // Use a default name if null
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text(
-          'Block $displayName',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: CupertinoColors.label.resolveFrom(context),
-            fontSize: 18,
-            letterSpacing: -0.60,
-          ),
-        ),
-        message: Text(
-          'You will no longer see any posts from $displayName.',
-          style: TextStyle(
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            fontSize: 14,
-            letterSpacing: -0.40,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        title: Text('Block $displayName'),
+        message: Text('You will no longer see any posts from $displayName.'),
         actions: <Widget>[
           CupertinoActionSheetAction(
-            child: Text(
-              'Confirm',
-              style: TextStyle(
-                color: CupertinoColors.destructiveRed,
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.80,
-              ),
-            ),
+            child: Text('Confirm',
+                style: TextStyle(color: CupertinoColors.destructiveRed)),
             onPressed: () async {
-              Navigator.pop(context); // Close the action sheet
+              Navigator.pop(context); // Dismiss the action sheet
               if (widget.userId != null) {
                 try {
                   await _blockUser(widget.userId!);
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                  // Check if the widget is still mounted before showing the dialog
+                  if (mounted) {
                     _showSuccessDialog(context);
-                  });
+                  }
                 } catch (error) {
                   print("Error blocking user: $error");
                 }
@@ -395,7 +371,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         cancelButton: CupertinoActionSheetAction(
           child: Text('Cancel'),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context); // Dismiss the action sheet
           },
         ),
       ),
@@ -405,11 +381,14 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   void _showSuccessDialog(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Dialog is not dismissible by tapping outside
+      barrierDismissible:
+          false, // Prevents closing the dialog by tapping outside
       builder: (BuildContext context) {
-        // Automatically close the dialog after 3 seconds
+        // Schedule the dialog to close after 3 seconds
         Future.delayed(Duration(seconds: 3), () {
-          Navigator.of(context).pop(true);
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop(true); // Closes the dialog
+          }
         });
         return AlertDialog(
           content: Text('You have successfully blocked this user'),
