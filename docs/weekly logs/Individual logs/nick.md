@@ -526,3 +526,35 @@ N/A.
 ### Additional Information
 
 N/A.
+
+
+## Term 2 Week 9: Monday 4th Mar 2024 - Sunday 10th Mar 2024
+
+![Peer Evaluation](./images/nickT2W9.png)
+
+### Tasks completed (from Project Board)
+
+- Attended peer evaluations and provided feedback to the team.
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+- Resolved the bugs in the app and compiled feedback from the peer evaluations.
+- Assisted in preparing for the instructions for the peer evaluations.
+
+### Recap of personal goals
+
+- Enhanced the create post screen by incorporating instructional text urging users to navigate the map. Upon positioning the marker, it displays the chosen address.
+- Improved the browse screen's marker interaction, reflecting changes when selected.
+- Relocated the edit button to the profile page for better accessibility.
+- Redesigned the edit profile screen, featuring a prominently larger profile photo avatar for easier interaction.
+- Enriched the tab bar by adding labels for improved navigation clarity.
+- Addressed and resolved the issue where selecting multiple tags led to overflow on cards and the profile page.
+- Optimized the detail page by ensuring tapping on info cards navigates users directly to the respective section, enhancing user experience.
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
