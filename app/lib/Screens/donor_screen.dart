@@ -212,7 +212,7 @@ class _DonorScreenState extends State<DonorScreen> {
                   //       durationInSeconds: 120, postId: widget.postId),
                 
                   // Replace the placeholder with the chat bubble in the future
-                  SizedBox(height: 200.0),
+                  //SizedBox(height: 200.0),
 
                 ],
               ),
