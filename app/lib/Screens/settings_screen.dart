@@ -185,7 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: EdgeInsets.symmetric(
           horizontal: _defaultPadding, vertical: _defaultPadding / 1.25),
       decoration: BoxDecoration(
-        color: CupertinoColors.tertiarySystemBackground,
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
         borderRadius: BorderRadius.circular(_buttonBorderRadius),
       ),
       child: Row(
