@@ -363,7 +363,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           'email',
           'itemsSold',
           'description',
-          'posts'
+          'posts',
+          'avgRating',
+          'ratings',
+          'comments',
+          'profileImagePath'
         ],
         fieldValues: [
           _firstNameController.text,
@@ -373,7 +377,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           _emailController.text,
           [],
           '',
-          []
+          [],
+          0.0,
+          [0],
+          [],
+          ''
         ],
       );
 
