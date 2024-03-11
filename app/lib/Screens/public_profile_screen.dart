@@ -190,13 +190,16 @@ class ReviewSection extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.only(left: 20, top: 16, bottom: 8),
-          child: Text(
-            'Reviews',
-            style: TextStyle(
-              color:
-                  CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Reviews',
+              style: TextStyle(
+                color:
+                    CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -206,11 +209,15 @@ class ReviewSection extends StatelessWidget {
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return Padding(
                 padding: EdgeInsets.only(left: 20, top: 8),
-                child: Text(
-                  "No reviews available",
-                  style: TextStyle(
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    fontSize: 16,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "No reviews available",
+                    style: TextStyle(
+                      color:
+                          CupertinoColors.secondaryLabel.resolveFrom(context),
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               );
@@ -220,6 +227,7 @@ class ReviewSection extends StatelessWidget {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: comments
                     .map((comment) =>
                         ReviewItem(review: comment, avatarUrl: imageUrl))
