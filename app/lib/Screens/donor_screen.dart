@@ -271,6 +271,12 @@ class _DonorScreenState extends State<DonorScreen> {
           },
 
           indicatorBuilder: (_, index) {
+            if (reservedByName == null){
+              return OutlinedDotIndicator(
+                borderWidth: 2.0,
+                color: accentColor,
+              );
+            }
             if (index < (_calculateProgress() * 4).toInt()) {
               return DotIndicator(
                 color: accentColor,
@@ -284,12 +290,14 @@ class _DonorScreenState extends State<DonorScreen> {
           },
 
           connectorBuilder: (_, index, type) {
-            if (index > 0) {
+            if (index < (_calculateProgress() * 4).toInt()) {
               return SolidLineConnector(
-                  color: accentColor,
-                );
+                color: accentColor,
+              );
             } else {
-              return null;
+              return DashedLineConnector(
+                color:  accentColor,
+              );
             }
           },
         ),
@@ -299,21 +307,31 @@ class _DonorScreenState extends State<DonorScreen> {
 
   // Widget to build each progress point
   Widget _buildProgressPoint(String text, OrderState state) {
+    final bool isReserved = reservedByName != null;
+    final bool isCurrentState = orderState == state;
+
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Text(
         text,
-        textAlign: TextAlign.center, // Center align the text horizontally
+        textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 14.0,
           fontWeight: FontWeight.bold,
-          color: orderState == state 
-              ? CupertinoDynamicColor.resolve(CupertinoColors.label, context) 
-              : CupertinoDynamicColor.resolve(CupertinoColors.secondaryLabel, context),
+          color: isReserved
+              ? isCurrentState
+                  ? CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context)
+                  : CupertinoDynamicColor.resolve(
+                      CupertinoColors.secondaryLabel, context)
+              :
+                  CupertinoDynamicColor.resolve(
+                      CupertinoColors.secondaryLabel, context)
         ),
       ),
     );
   }
+
 
   // Method to calculate progress based on order state
   double _calculateProgress() {
