@@ -133,6 +133,15 @@ class CreatePostViewModel {
         'images': imagesWithAltTextList,
         'post_status': "not reserved",
       });
+
+      // Update corresponding user document by adding the post id to it
+      await FirebaseFirestore.instance
+          .collection('user')
+          .doc(userId)
+          .update({
+        'posts': FieldValue.arrayUnion([documentId]),
+      });
+
       return true;
     } catch (e) {
       print("Error saving post: $e");
