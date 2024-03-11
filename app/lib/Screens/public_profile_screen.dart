@@ -436,10 +436,11 @@ class RecentPostSection extends StatelessWidget {
           )
         else
           Container(
-            height: 220,
+            height: 150,
+            width: 300,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.only(left: 5, right: 20),
+              padding: EdgeInsets.only(left: 4, top: 24, bottom: 24),
               itemCount: recentPosts.length,
               itemBuilder: (context, index) {
                 final post = recentPosts[index];
