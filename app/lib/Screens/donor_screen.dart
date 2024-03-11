@@ -316,7 +316,7 @@ class _DonorScreenState extends State<DonorScreen> {
         text,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: 14.0,
+          fontSize: adjustedFontSize - 2.0,
           fontWeight: FontWeight.bold,
           color: isReserved
               ? isCurrentState
