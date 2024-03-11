@@ -361,6 +361,30 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   void _showBlockMenu(BuildContext context) {
+<<<<<<< HEAD
+    String displayName = _firstName ?? 'User'; // Use a default name if null
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text('Block $displayName'),
+        message: Text('You will no longer see any posts from $displayName.'),
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            child: Text('Confirm',
+                style: TextStyle(color: CupertinoColors.destructiveRed)),
+            onPressed: () async {
+              Navigator.pop(context); // Dismiss the action sheet
+              if (widget.userId != null) {
+                try {
+                  await _blockUser(widget.userId!);
+                  // Check if the widget is still mounted before showing the dialog
+                  if (mounted) {
+                    _showSuccessDialog(context);
+                  }
+                } catch (error) {
+                  print("Error blocking user: $error");
+                }
+=======
     String displayName = 'User';
     if (_firstName != null && _lastName != null) {
       displayName = '$_firstName $_lastName';
@@ -400,6 +424,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
               Navigator.pop(context);
               if (widget.userId != null) {
                 _blockUser(widget.userId!);
+>>>>>>> 452cc2ed809bd8a80fa544d5d47a2f0f0f6b8b1e
               }
             },
           ),
@@ -407,10 +432,29 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         cancelButton: CupertinoActionSheetAction(
           child: Text('Cancel'),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context); // Dismiss the action sheet
           },
         ),
       ),
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible:
+          false, // Prevents closing the dialog by tapping outside
+      builder: (BuildContext context) {
+        // Schedule the dialog to close after 3 seconds
+        Future.delayed(Duration(seconds: 3), () {
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop(true); // Closes the dialog
+          }
+        });
+        return AlertDialog(
+          content: Text('You have successfully blocked this user'),
+        );
+      },
     );
   }
 }

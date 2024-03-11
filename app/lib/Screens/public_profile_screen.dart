@@ -1,4 +1,5 @@
 import 'package:FoodHood/Components/post_card.dart';
+import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -56,12 +57,15 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
         .collection('post_details')
         .where('user_id', isEqualTo: effectiveUserId)
         .get();
-    print(effectiveUserId);
 
     if (mounted) {
       setState(() {
         recentPosts = snapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
+            .map((doc) => {
+                  ...doc.data() as Map<String,
+                      dynamic>, // Spread operator to copy all key-value pairs
+                  'postId': doc.id, // Add postId
+                })
             .toList();
         isLoading = false;
       });
@@ -190,13 +194,16 @@ class ReviewSection extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.only(left: 20, top: 16, bottom: 8),
-          child: Text(
-            'Reviews',
-            style: TextStyle(
-              color:
-                  CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Reviews',
+              style: TextStyle(
+                color:
+                    CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -206,11 +213,15 @@ class ReviewSection extends StatelessWidget {
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return Padding(
                 padding: EdgeInsets.only(left: 20, top: 8),
-                child: Text(
-                  "No reviews available",
-                  style: TextStyle(
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    fontSize: 16,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "No reviews available",
+                    style: TextStyle(
+                      color:
+                          CupertinoColors.secondaryLabel.resolveFrom(context),
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               );
@@ -220,6 +231,7 @@ class ReviewSection extends StatelessWidget {
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: comments
                     .map((comment) =>
                         ReviewItem(review: comment, avatarUrl: imageUrl))
@@ -319,8 +331,8 @@ class ReviewItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            backgroundImage: _getAvatarImageProvider(),
-            radius: 34,
+            radius: 20,
+            backgroundImage: AssetImage('assets/images/sampleProfile.png'),
           ),
           SizedBox(width: 12),
           Expanded(
@@ -395,24 +407,30 @@ class RecentPostSection extends StatelessWidget {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: 20, top: 16, bottom: 8),
-          child: Text(
-            'Recent Posts',
-            style: TextStyle(
-              color:
-                  CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Recent Posts',
+              style: TextStyle(
+                color:
+                    CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
         if (recentPosts.isEmpty)
           Padding(
             padding: EdgeInsets.only(left: 20),
-            child: Text(
-              "No posts are available",
-              style: TextStyle(
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                fontSize: 16,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "No posts available",
+                style: TextStyle(
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  fontSize: 16,
+                ),
               ),
             ),
           )
@@ -425,62 +443,68 @@ class RecentPostSection extends StatelessWidget {
               itemCount: recentPosts.length,
               itemBuilder: (context, index) {
                 final post = recentPosts[index];
-                return FutureBuilder<Map<String, dynamic>>(
-                  future: fetchUserDetails(
-                      post['user_id']), // Implement this method
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return SizedBox(
-                          width: 300, child: CupertinoActivityIndicator());
-                    }
-                    final user = snapshot.data!;
-                    final imagesWithAltText =
-                        post['images'] as List<dynamic>? ?? [];
-                    final firstImage = imagesWithAltText.isNotEmpty
-                        ? imagesWithAltText[0]
-                        : null;
-
-                    var createdAt =
-                        (post['post_timestamp'] as Timestamp?)?.toDate() ??
-                            DateTime.now();
-                    List<String> tags = (post['categories'] as String?)
-                            ?.split(',')
-                            .map((tag) => tag.trim())
-                            .toList() ??
-                        [];
-                    Map<String, Color> tagColors = {};
-                    List<Color> assignedColors = tags
-                        .map((tag) =>
-                            tagColors.putIfAbsent(tag, () => _getRandomColor()))
-                        .toList();
-
-                    return PostCard(
-                      imagesWithAltText: firstImage != null
-                          ? [
-                              {
-                                'url': firstImage['url'],
-                                'alt_text': firstImage['alt_text'] ?? ''
-                              }
-                            ]
-                          : [],
-                      title: post['title'],
-                      tags: tags,
-
-                      tagColors: assignedColors, // Simplified for demonstration
-                      firstname: user['firstName'],
-                      lastname: user['lastName'],
-
-                      timeAgo: timeAgoSinceDate(
-                          createdAt), // Implement a method to convert timestamp to "time ago" format
-                      onTap: (postId) {},
-                      postId: '7cc0e4f5-076d-4802-b4bf-07ee1f017d5f',
-                      profileURL: user['profileImagePath'] ?? '',
-
-                      showTags: true,
-                      imageHeight: 100.0,
-                      showShadow: true,
-                    );
+                return GestureDetector(
+                  onTap: () {
+                    // Use the document ID as postId to navigate to PostDetailView
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          PostDetailView(postId: post['postId']),
+                    ));
                   },
+                  child: FutureBuilder<Map<String, dynamic>>(
+                    future: fetchUserDetails(post['user_id']),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return SizedBox(
+                            width: 300, child: CupertinoActivityIndicator());
+                      }
+                      final user = snapshot.data!;
+                      final imagesWithAltText =
+                          post['images'] as List<dynamic>? ?? [];
+                      final firstImage = imagesWithAltText.isNotEmpty
+                          ? imagesWithAltText[0]
+                          : null;
+
+                      var createdAt =
+                          (post['post_timestamp'] as Timestamp?)?.toDate() ??
+                              DateTime.now();
+                      List<String> tags = (post['categories'] as String?)
+                              ?.split(',')
+                              .map((tag) => tag.trim())
+                              .toList() ??
+                          [];
+                      Map<String, Color> tagColors = {};
+                      List<Color> assignedColors = tags
+                          .map((tag) => tagColors.putIfAbsent(
+                              tag, () => _getRandomColor()))
+                          .toList();
+
+                      // Assuming 'postId' is correctly populated when creating the post card
+                      return PostCard(
+                        imagesWithAltText: firstImage != null
+                            ? [
+                                {
+                                  'url': firstImage['url'],
+                                  'alt_text': firstImage['alt_text'] ?? ''
+                                }
+                              ]
+                            : [],
+                        title: post['title'],
+                        tags: tags,
+                        tagColors: assignedColors,
+                        firstname: user['firstName'],
+                        lastname: user['lastName'],
+                        timeAgo: timeAgoSinceDate(createdAt),
+                        onTap: (postId) {},
+                        postId:
+                            post['postId'], // This should be the document ID
+                        profileURL: user['profileImagePath'] ?? '',
+                        showTags: true,
+                        imageHeight: 100.0,
+                        showShadow: true,
+                      );
+                    },
+                  ),
                 );
               },
             ),
