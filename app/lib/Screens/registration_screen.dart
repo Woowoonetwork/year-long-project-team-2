@@ -30,6 +30,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _confPasswordController = TextEditingController();
   final _provinceController = TextEditingController();
   final _cityController = TextEditingController();
+  bool _showPassword = false;
 
   String _selectedProvince = '';
   String _selectedCity = '';
@@ -109,13 +110,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             context, [AutofillHints.email],
             errorText: _emailErrorText),
         const SizedBox(height: 16),
-        buildCupertinoTextField('Password', _passwordController, true, context,
+        buildCupertinoTextField('Password', _passwordController, !_showPassword, context,
             [AutofillHints.password],
             errorText: _passwordErrorText),
         const SizedBox(height: 16),
 
         buildCupertinoTextField('Confirm Password', _confPasswordController,
-            true, context, [AutofillHints.password],
+            !_showPassword, context, [AutofillHints.password],
             errorText: _confPasswordErrorText), // Confirm password text field
 
         const SizedBox(height: 16),
@@ -128,6 +129,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               )),
+        ),
+        // Show/Hide Password button
+        CupertinoButton(
+          onPressed: () {
+            setState(() {
+              _showPassword = !_showPassword; // Toggle the boolean variable
+            });
+          },
+          child: Text(_showPassword ? 'Hide Password' : 'Show Password'),
         ),
         const SizedBox(height: 16),
         buildTwoPickerFieldsRow(
