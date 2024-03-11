@@ -395,24 +395,30 @@ class RecentPostSection extends StatelessWidget {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: 20, top: 16, bottom: 8),
-          child: Text(
-            'Recent Posts',
-            style: TextStyle(
-              color:
-                  CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Recent Posts',
+              style: TextStyle(
+                color:
+                    CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
         if (recentPosts.isEmpty)
           Padding(
             padding: EdgeInsets.only(left: 20),
-            child: Text(
-              "No posts are available",
-              style: TextStyle(
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                fontSize: 16,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "No posts available",
+                style: TextStyle(
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  fontSize: 16,
+                ),
               ),
             ),
           )
