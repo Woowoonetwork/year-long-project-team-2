@@ -136,7 +136,7 @@ class OrderCard extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.grey.withOpacity(0.4),
+                Colors.black.withOpacity(0.1),
                 Colors.transparent,
               ],
               stops: [0.0, 0.5],

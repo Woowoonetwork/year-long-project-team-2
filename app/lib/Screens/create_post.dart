@@ -282,7 +282,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
           padding: EdgeInsets.all(10), // Padding inside the border
           dashPattern: [6, 4], // Pattern of dashes and gaps
           strokeWidth: 2, // Width of the dashes
-          color: CupertinoColors.systemGrey, // Color of the dashes
+          color: CupertinoColors.systemGrey.withOpacity(0.4), // Color of the dashes
           child: Wrap(
             spacing: 8.0, // gap between adjacent chips
             runSpacing: 4.0, // gap between lines

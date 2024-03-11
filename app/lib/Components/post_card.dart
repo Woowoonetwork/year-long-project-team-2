@@ -64,6 +64,7 @@ class PostCard extends StatelessWidget {
                 _buildTitleSection(context),
                 if (showTags) ...[
                   _buildTagSection(context),
+                   SizedBox(height: 2),
                 ] else ...[
                   SizedBox(height: 10),
                 ],
@@ -180,7 +181,7 @@ class PostCard extends StatelessWidget {
           color: color.computeLuminance() > 0.5
               ? CupertinoDynamicColor.resolve(CupertinoColors.black, context)
               : CupertinoDynamicColor.resolve(CupertinoColors.white, context),
-          fontSize: 11,
+          fontSize: 10,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
         ),
@@ -213,18 +214,18 @@ class PostCard extends StatelessWidget {
         children: [
           avatarUrl.isNotEmpty
               ? CircleAvatar(
-                  radius: 10,
+                  radius: 8,
                   backgroundImage: CachedNetworkImageProvider(avatarUrl),
                   backgroundColor: Colors.transparent,
                 )
               : CircleAvatar(
-                  radius: 10,
+                  radius: 8,
                   backgroundImage:
                       AssetImage('assets/images/sampleProfile.png'),
                 ),
           SizedBox(width: 8),
           Text(
-            'Posted by $firstname $lastname $timeAgo',
+            'Posted by $firstname $lastname  $timeAgo',
             style: TextStyle(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.secondaryLabel, context),

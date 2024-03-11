@@ -1,13 +1,10 @@
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:feather_icons/feather_icons.dart';
-//import 'package:FoodHood/Screens/browse_screen.dart';
+import 'package:flutter/services.dart';
 import 'package:FoodHood/Screens/account_screen.dart';
 import 'package:FoodHood/Screens/browse_screen.dart';
 import 'package:FoodHood/Screens/saved_screen.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_sfsymbols/flutter_sfsymbols.dart';
 
 class NavigationScreen extends StatelessWidget {
   final int selectedIndex;
@@ -28,31 +25,59 @@ class NavigationScreen extends StatelessWidget {
           HapticFeedback.selectionClick(); // Adding haptic feedback on tap
           onItemTapped(index);
         },
-        iconSize: 26,
+        iconSize: 24,
         backgroundColor:
             CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
-                .withOpacity(0.98),
+                .withOpacity(0.8),
         border: Border(top: BorderSide.none),
-        activeColor: accentColor.color,
-        inactiveColor: CupertinoColors.label
-            .resolveFrom(context)
-            .withOpacity(0.6), // inactive tab color
+        activeColor: accentColor.resolveFrom(context),
+        inactiveColor:
+            CupertinoColors.label.resolveFrom(context).withOpacity(0.6),
         items: [
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.rectangle_stack),
-            activeIcon: Icon(CupertinoIcons.rectangle_stack_fill),
+            icon: Semantics(
+              label: "Home",
+              child: Icon(CupertinoIcons.rectangle_stack),
+            ),
+            activeIcon: Semantics(
+              label: "Home Active",
+              child: Icon(CupertinoIcons.rectangle_stack_fill),
+            ),
+            label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.map),
-            activeIcon: Icon(CupertinoIcons.map_fill),
+            icon: Semantics(
+              label: "Browse",
+              child: Icon(CupertinoIcons.compass),
+            ),
+            activeIcon: Semantics(
+              label:
+                  "Browse Active", // Screen reader label for active browse icon
+              child: Icon(CupertinoIcons.compass_fill),
+            ),
+            label: "Browse",
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.bookmark),
-            activeIcon: Icon(CupertinoIcons.bookmark_fill),
-          ),
+            icon: Semantics(
+              label: "Bookmarks",
+              child: Icon(CupertinoIcons.bookmark),
+            ),
+            activeIcon: Semantics(
+              label: "Bookmarks Active",
+              child: Icon(CupertinoIcons.bookmark_fill),
+            ),
+            label: "Bookmarks",
+          ),          
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.person),
-            activeIcon: Icon(CupertinoIcons.person_fill),
+            icon: Semantics(
+              label: "Account",
+              child: Icon(CupertinoIcons.person),
+            ),
+            activeIcon: Semantics(
+              label: "Account Active",
+              child: Icon(CupertinoIcons.person_fill),
+            ),
+            label: "Account",
           ),
         ],
       ),
