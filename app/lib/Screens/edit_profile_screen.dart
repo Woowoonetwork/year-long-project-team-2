@@ -138,7 +138,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   CupertinoActivityIndicator(),
                   SizedBox(height: 8),
                   Text('Uploading Profile Image...',
-                      style: TextStyle(color: CupertinoColors.label)),
+                      style: TextStyle(
+                          color: CupertinoColors.label.resolveFrom(context)))
                 ]))
           : SafeArea(
               child: SingleChildScrollView(child: _buildProfileForm(context))),
@@ -147,6 +148,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   ObstructingPreferredSizeWidget buildNavigationBar(BuildContext context) {
     return CupertinoNavigationBar(
+      middle: Text('Edit Profile',
+          style: TextStyle(
+              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+              fontWeight: FontWeight.w500)),
       leading: GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Icon(FeatherIcons.x,
@@ -158,7 +163,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: Text(
           'Save',
           style: TextStyle(
-            color: accentColor,
+            color: CupertinoColors.label.resolveFrom(context),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -325,83 +330,67 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     ]);
   }
 
-  Widget _buildProfileImageUploader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipOval(
-            child: Container(
-              width: 85,
-              height: 85,
-              decoration: BoxDecoration(
-                color: CupertinoColors
-                    .tertiarySystemFill, // Background color for loading state
-                image: _isLoading
-                    ? null
-                    : DecorationImage(
-                        // Conditional image loading
-                        image: _getProfileImage(),
-                        fit: BoxFit.cover,
-                      ),
-              ),
-              child: _isLoading
-                  ? Center(
-                      child:
-                          CupertinoActivityIndicator()) // Show loading indicator if loading
-                  : null, // No additional content if not loading
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: CupertinoButton(
-                color: CupertinoColors.tertiarySystemBackground,
-                padding: EdgeInsets.zero,
+Widget _buildProfileImageUploader(BuildContext context) {
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: () async {
+            await _uploadImage();
+          },
+          child: Stack(
+            alignment: Alignment.bottomRight, // Aligns the pen icon to the bottom right
+            children: [
+              ClipOval(
                 child: Container(
-                  height: 80,
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Center(
-                        child: Icon(
-                          FeatherIcons.uploadCloud,
-                          size: 22,
-                          color: CupertinoDynamicColor.resolve(
-                              CupertinoColors.label, context),
-                        ),
+                  width: 120, // Adjust the size as needed
+                  height: 120, // Adjust the size as needed
+                  padding: EdgeInsets.all(4), // Padding for the border effect
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.tertiarySystemBackground.resolveFrom(context), // Background color
+                    borderRadius: BorderRadius.circular(70), // Makes it circular
+                  ),
+                  child: ClipOval(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.tertiarySystemFill, // Background color
+                        image: _isLoading
+                            ? null
+                            : DecorationImage(
+                                image: _getProfileImage(), // Fetches the profile image
+                                fit: BoxFit.cover,
+                              ),
                       ),
-                      SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          'Upload Profile Picture',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: adjustedFontSize,
-                              color: CupertinoDynamicColor.resolve(
-                                  CupertinoColors.label, context),
-                              letterSpacing: -0.60,
-                              fontWeight: FontWeight.w500),
-                          overflow: TextOverflow.visible,
-                        ),
-                      ),
-                    ],
+                      child: _isLoading
+                          ? Center(child: CupertinoActivityIndicator()) // Shows loading indicator
+                          : null, // No child when not loading
+                    ),
                   ),
                 ),
-                onPressed: () async {
-                  await _uploadImage();
-                },
               ),
-            ),
+              Container(
+                width: 36, // Size of the pen icon container
+                height: 36, // Size of the pen icon container
+                decoration: BoxDecoration(
+                  color: accentColor.resolveFrom(context), // Background color
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  FeatherIcons.edit2, 
+                  color: CupertinoColors.white,
+                  size: 20, // Size of the pen icon
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   ImageProvider _getProfileImage() {
     if (_profileImagePath.isNotEmpty) {

@@ -2,7 +2,6 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/accessibility_screen.dart';
 import 'package:FoodHood/Screens/reset_pwd_screen.dart';
 import 'package:flutter/cupertino.dart';
-import '../components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
@@ -68,10 +67,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: SafeArea(
         bottom: false,
         child: ListView(children: [
-          SizedBox(height: 10),
-          ProfileCard(),
-          SizedBox(height: 10),
-          _buildEditProfileButton(),
           SizedBox(height: 16),
           _buildSettingOption('Push Notifications', _buildSwitch()),
           SizedBox(height: 16),
@@ -185,18 +180,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSettingOption(String title, Widget trailing) {
-    return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: _defaultPadding, vertical: 10.0),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: _defaultMargin),
+      padding: EdgeInsets.symmetric(
+          horizontal: _defaultPadding, vertical: _defaultPadding / 1.25),
+      decoration: BoxDecoration(
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(_buttonBorderRadius),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title,
-              style: TextStyle(
-                  fontSize: adjustedFontSize,
-                  letterSpacing: -0.8,
-                  fontWeight: FontWeight.w600)),
-          trailing
+          Row(
+            children: [
+              Icon(FeatherIcons.bell,
+                  size: _iconSize,
+                  color: CupertinoColors.systemOrange.resolveFrom(context)),
+              SizedBox(width: _spacing),
+              Text(
+                title,
+                style: TextStyle(
+                    fontSize: adjustedFontSize,
+                    fontWeight: FontWeight.w500,
+                    color: CupertinoColors.label.resolveFrom(context)),
+              ),
+            ],
+          ),
+          trailing,
         ],
       ),
     );

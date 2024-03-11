@@ -76,6 +76,7 @@ dependencies:
   maps_launcher: ^2.2.0
   http: ^1.2.0
   dotted_border: ^2.1.0
+  flutter_sfsymbols: ^2.0.0
 
 dev_dependencies:
   flutter_test:

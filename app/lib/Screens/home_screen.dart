@@ -215,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Stack(
         children: [
           CustomScrollView(slivers: <Widget>[
-            buildMainNavigationBar(context, 'Discover'),
+            buildMainNavigationBar(context, 'Home'),
             SliverToBoxAdapter(
                 child: Column(children: <Widget>[
               _buildSearchBar(context),
@@ -450,7 +450,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: CupertinoButton(
         child: Text(title,
             style: TextStyle(
-                color: CupertinoColors.white,
+                color: color.computeLuminance() > 0.5
+                    ? CupertinoColors.black
+                    : CupertinoColors.white,
                 fontSize: 16,
                 letterSpacing: -0.6,
                 fontWeight: FontWeight.w600)),

@@ -1,37 +1,21 @@
 import 'package:FoodHood/Components/appBarVisibilityController.dart';
+import 'package:FoodHood/Screens/edit_profile_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:palette_generator/palette_generator.dart';
-import 'package:FoodHood/Components/post_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:FoodHood/Components/profileAppBar.dart';
-import 'package:FoodHood/Components/colors.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 import 'dart:async';
-import 'dart:math' as math;
-import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Components/post_card.dart';
-import 'package:FoodHood/Screens/create_post.dart';
-import 'package:FoodHood/firestore_service.dart';
-import 'package:feather_icons/feather_icons.dart';
-import '../components.dart';
-// import gesture
 import 'package:flutter/services.dart';
 
 class ProfileAppBar extends StatefulWidget {
   final String postId;
   final VoidCallback onBlockPressed;
   final bool isBlocked;
-  final bool
-      isCurrentUser; // New parameter to determine if the profile belongs to the current user
+  final bool isCurrentUser;
   final String imageUrl;
   final String? userId;
   final String? firstName;
@@ -42,7 +26,7 @@ class ProfileAppBar extends StatefulWidget {
     required this.postId,
     required this.onBlockPressed,
     required this.isBlocked,
-    required this.isCurrentUser, // Initialize in the constructor
+    required this.isCurrentUser,
     required this.imageUrl,
     this.firstName,
     this.lastName,
@@ -55,32 +39,33 @@ class ProfileAppBar extends StatefulWidget {
 
 class _ProfileAppBarState extends State<ProfileAppBar> {
   Color? _backgroundColor;
-  String? _firstName; // Variable to store the first name
+  String? _firstName;
   String? _lastName;
   String? _city;
   String? _province;
   double? _rating;
   String? _imageUrl;
-  int _postsSold = 0; // Holds the background color extracted from the image
+  int _postsSold = 0;
+  bool isCurrentUser = false;
 
   @override
   void initState() {
     super.initState();
+    final currentUser = FirebaseAuth.instance.currentUser;
+    isCurrentUser = widget.userId == currentUser?.uid;
     if (widget.userId != null) {
       _fetchUserDetails(widget.userId!).then((_) {
-        // Ensure palette is updated after user details are fetched
         _updatePaletteGenerator();
       });
       _fetchPostsSoldCount(widget.userId!);
     } else {
-      // If there's no userId, update the palette generator with the default or passed imageUrl
       _updatePaletteGenerator();
     }
   }
 
   Future<void> _blockUser(String userIdToBlock) async {
     final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return; // Ensure there is a logged-in user
+    if (currentUser == null) return;
 
     final userRef =
         FirebaseFirestore.instance.collection('user').doc(currentUser.uid);
@@ -90,18 +75,13 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         final userDoc = await transaction.get(userRef);
         if (userDoc.exists) {
           List<dynamic> blockedUsers = userDoc.data()?['blocked'] ?? [];
-          // Check if the user is already blocked to prevent duplicates
           if (!blockedUsers.contains(userIdToBlock)) {
             blockedUsers.add(userIdToBlock);
             transaction.update(userRef, {'blocked': blockedUsers});
           }
         }
       });
-
-      print("User successfully blocked.");
-    } catch (e) {
-      print("Failed to block user: $e");
-    }
+    } catch (e) {}
   }
 
   Future<void> _fetchUserDetails(String userId) async {
@@ -128,16 +108,14 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
 
     if (mounted) {
       setState(() {
-        _postsSold = querySnapshot
-            .docs.length; // Count of documents with "completed" status
+        _postsSold = querySnapshot.docs.length;
       });
     }
   }
 
   Future<void> _updatePaletteGenerator() async {
     if (_imageUrl == null || _imageUrl!.isEmpty) {
-      _imageUrl =
-          'assets/images/sampleProfile.png'; // Fallback image URL or asset
+      _imageUrl = 'assets/images/sampleProfile.png';
     }
 
     ImageProvider imageProvider;
@@ -149,7 +127,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
 
     final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
       imageProvider,
-      size: Size(200, 100), // Adjust the size according to your needs
+      size: Size(200, 100),
     );
 
     if (mounted) {
@@ -158,11 +136,6 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
             generator.vibrantColor?.color ?? CupertinoColors.systemGrey;
       });
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -189,7 +162,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       ),
       leading: _buildLeading(context),
       actions: [
-        if (!widget.isCurrentUser) buildBlockButton(context),
+        if (!isCurrentUser) buildBlockButton(context),
       ],
     );
   }
@@ -214,7 +187,6 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   Widget _buildGradientBackground() {
-    // Fallback to a default color if _backgroundColor is null
     final backgroundColor = _backgroundColor ?? CupertinoColors.systemOrange;
     return Container(
       decoration: BoxDecoration(
@@ -222,7 +194,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            backgroundColor, // Dynamically extracted color
+            backgroundColor,
             CupertinoDynamicColor.resolve(detailsBackgroundColor, context),
           ],
         ),
@@ -240,7 +212,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
 
   Widget _buildUserInfoRow() {
     String location = 'unknown';
-    String displayName = 'User'; // Default display name
+    String displayName = 'User';
     if (_firstName != null && _lastName != null) {
       displayName = '$_firstName $_lastName';
     }
@@ -248,25 +220,21 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       location = '$_city, $_province';
     }
     ImageProvider<Object> _getAvatarImageProvider() {
-      // Check if imageUrl is not null and not empty
       if (widget.imageUrl.isNotEmpty) {
         return CachedNetworkImageProvider(widget.imageUrl);
       } else {
-        // Fallback to a local asset if imageUrl is not available
         return AssetImage('assets/images/sampleProfile.png');
       }
     }
 
     List<Widget> stars = [];
     Color starColor = _backgroundColor ?? CupertinoColors.systemOrange;
-    // Generate star icons based on rating
     for (int i = 0; i < 5; i++) {
       stars.add(Icon(
-        // Always use CupertinoIcons.star for unfilled stars to ensure they appear completely unfilled
         _rating != null && i < _rating!
             ? CupertinoIcons.star_fill
             : CupertinoIcons.star,
-        color: starColor, // Use the extracted photo icon color for all stars
+        color: starColor,
         size: 14,
       ));
     }
@@ -283,8 +251,23 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         Row(
           children: [
             CircleAvatar(
-              backgroundImage: _getAvatarImageProvider(),
               radius: 34,
+              backgroundColor: CupertinoColors.systemGrey, // Background color
+              child: ClipOval(
+                child: widget.imageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: widget.imageUrl,
+                        placeholder: (context, url) => Center(
+                          child: CupertinoActivityIndicator(),
+                        ),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
+                        fit: BoxFit.cover,
+                        width: 68,
+                        height: 68,
+                      )
+                    : Image.asset('assets/images/sampleProfile.png',
+                        width: 68, height: 68, fit: BoxFit.cover),
+              ),
             ),
             SizedBox(width: 16),
             Expanded(
@@ -322,7 +305,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                             letterSpacing: -0.4),
                       ),
                       Text(
-                        postsSoldText, // Add the posts sold text here
+                        postsSoldText,
                         style: TextStyle(
                             color: CupertinoColors.secondaryLabel
                                 .resolveFrom(context),
@@ -335,6 +318,42 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                 ],
               ),
             ),
+            if (isCurrentUser)
+              Container(
+                margin: EdgeInsets.only(right: 16),
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _backgroundColor ??
+                          CupertinoColors
+                              .systemGrey, // Use _backgroundColor or a fallback
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Edit',
+                      style: TextStyle(
+                        color: _backgroundColor != null &&
+                                _backgroundColor!.computeLuminance() < 0.5
+                            ? CupertinoColors.white
+                            : CupertinoColors.black,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: -0.4,
+                      ),
+                    ),
+                  ),
+                  onPressed: () {
+                    //navigate to edit profile
+                    Navigator.of(context).push( 
+                      CupertinoPageRoute(
+                        builder: (context) => EditProfileScreen()
+                      ),
+                    );
+                  },
+                ),
+              ),
           ],
         )
       ],
@@ -342,7 +361,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   void _showBlockMenu(BuildContext context) {
-    String displayName = 'User'; // Default display name
+    String displayName = 'User';
     if (_firstName != null && _lastName != null) {
       displayName = '$_firstName $_lastName';
     }
@@ -358,13 +377,15 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
             letterSpacing: -0.60,
           ),
         ),
-        message: Text('You will no longer see any posts from Harry Styles.',
-            style: TextStyle(
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              fontSize: 14,
-              letterSpacing: -0.40,
-              fontWeight: FontWeight.w500,
-            )),
+        message: Text(
+          'You will no longer see any posts from Harry Styles.',
+          style: TextStyle(
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            fontSize: 14,
+            letterSpacing: -0.40,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         actions: <Widget>[
           CupertinoActionSheetAction(
             child: Text(
@@ -376,9 +397,9 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
               ),
             ),
             onPressed: () {
-              Navigator.pop(context); // Close the action sheet
+              Navigator.pop(context);
               if (widget.userId != null) {
-                _blockUser(widget.userId!); // Block the user
+                _blockUser(widget.userId!);
               }
             },
           ),
