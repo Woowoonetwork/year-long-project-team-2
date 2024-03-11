@@ -203,9 +203,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
       padding: const EdgeInsets.all(8.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: CupertinoButton(
+        child:  CupertinoButton(
             padding: EdgeInsets.zero,
             child: Container(
               decoration: BoxDecoration(
@@ -220,7 +218,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
             onPressed: onPressed,
           ),
         ),
-      ),
+      
     );
   }
 
