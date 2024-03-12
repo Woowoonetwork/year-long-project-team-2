@@ -1,48 +1,47 @@
 import 'package:FoodHood/Components/post_card.dart';
-import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/profileAppBar.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 import 'dart:async';
-import 'dart:math' as math;
-import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Components/post_card.dart';
-import 'package:FoodHood/Screens/create_post.dart';
-import 'package:FoodHood/firestore_service.dart';
-import 'package:feather_icons/feather_icons.dart';
-import '../components.dart';
-// import gesture
 import 'package:flutter/services.dart';
 
 class PublicProfileScreen extends StatefulWidget {
-  final String? userId; // Make userId optional
+  final String? userId;
 
-  PublicProfileScreen({Key? key, this.userId})
-      : super(key: key); // Adjust constructor
+  PublicProfileScreen({Key? key, this.userId}) : super(key: key);
 
   @override
   _PublicProfileScreenState createState() => _PublicProfileScreenState();
 }
 
 class _PublicProfileScreenState extends State<PublicProfileScreen> {
-  final String postId = "examplePostId";
   String? firstName;
   String? lastName;
   String? aboutMe;
-  final bool isFavorite = false;
   String imageUrl = "";
   bool isLoading = true;
-
-  bool isLoadingPosts = true;
   List<Map<String, dynamic>> recentPosts = [];
-
+  int segmentedControlGroupValue = 0;
+  final Map<int, Widget> segmentedControlChildren = const {
+    0: Text(
+      "Recent Posts",
+      style: TextStyle(
+        fontSize: 14,
+        letterSpacing: -0.6,
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+    1: Text("Reviews",
+        style: TextStyle(
+          fontSize: 14,
+          letterSpacing: -0.6,
+          fontWeight: FontWeight.w500,
+        )),
+  };
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   String? effectiveUserId;
 
@@ -57,14 +56,12 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
         .collection('post_details')
         .where('user_id', isEqualTo: effectiveUserId)
         .get();
-
     if (mounted) {
       setState(() {
         recentPosts = snapshot.docs
             .map((doc) => {
-                  ...doc.data() as Map<String,
-                      dynamic>, // Spread operator to copy all key-value pairs
-                  'postId': doc.id, // Add postId
+                  ...doc.data() as Map<String, dynamic>,
+                  'postId': doc.id,
                 })
             .toList();
         isLoading = false;
@@ -76,28 +73,24 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
     effectiveUserId = widget.userId ?? FirebaseAuth.instance.currentUser?.uid;
     if (effectiveUserId != null) {
       setUpStreamListener(effectiveUserId!);
-      fetchRecentPosts(); // Fetch recent posts
+      fetchRecentPosts();
     } else {
       setState(() => isLoading = false);
     }
   }
 
   void setUpStreamListener(String userId) {
-    firestore.collection('user').doc(userId).snapshots().listen(
-      (snapshot) {
-        if (mounted && snapshot.exists) {
-          updateProfileData(snapshot.data()!);
-        } else {
-          if (mounted) setState(() => isLoading = false);
-        }
-      },
-      onError: (e) {
-        if (mounted) {
-          print('Error listening to user data changes: $e');
-          setState(() => isLoading = false);
-        }
-      },
-    );
+    firestore.collection('user').doc(userId).snapshots().listen((snapshot) {
+      if (mounted && snapshot.exists) {
+        updateProfileData(snapshot.data()!);
+      } else {
+        if (mounted) setState(() => isLoading = false);
+      }
+    }, onError: (e) {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    });
   }
 
   void updateProfileData(Map<String, dynamic> documentData) {
@@ -108,9 +101,8 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
         aboutMe = documentData['aboutMe'] as String? ?? '';
         imageUrl = documentData['profileImagePath'] as String? ?? '';
         if (aboutMe == null || aboutMe!.trim().isEmpty) {
-          aboutMe = "No description available"; // Default message
+          aboutMe = "No description available";
         }
-        // Update other user details as necessary
         isLoading = false;
       });
     }
@@ -118,23 +110,31 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget contentWidget;
+    switch (segmentedControlGroupValue) {
+      case 0:
+        contentWidget = RecentPostsTab(recentPosts: recentPosts);
+        break;
+      case 1:
+        contentWidget = ReviewsTab(userId: effectiveUserId, imageUrl: imageUrl);
+        break;
+      default:
+        contentWidget = SizedBox.shrink(); // Fallback to an empty widget
+    }
+
     return Scaffold(
       backgroundColor:
           CupertinoDynamicColor.resolve(detailsBackgroundColor, context),
       body: CustomScrollView(
         slivers: <Widget>[
           ProfileAppBar(
-            postId: postId,
-            onBlockPressed: () {
-              // Block user here
-            },
-            isCurrentUser: false,
-            isBlocked: isFavorite,
-            imageUrl: imageUrl,
-            userId: effectiveUserId,
-            firstName: firstName, // Pass the fetched firstName
-            lastName: lastName,
-          ),
+              isCurrentUser: false,
+              isBlocked: false,
+              imageUrl: imageUrl,
+              userId: effectiveUserId,
+              firstName: firstName,
+              lastName: lastName,
+              onBlockPressed: () {}),
           SliverToBoxAdapter(
             child: SafeArea(
               bottom: true,
@@ -142,13 +142,20 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
               child: Column(
                 children: <Widget>[
                   AboutSection(firstName: firstName, aboutMe: aboutMe),
-                  RecentPostSection(
-                    recentPosts: recentPosts,
+                  Container(
+                    margin: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    width: MediaQuery.of(context).size.width,
+                    child: CupertinoSlidingSegmentedControl<int>(
+                      children: segmentedControlChildren,
+                      onValueChanged: (value) {
+                        setState(() {
+                          segmentedControlGroupValue = value!;
+                        });
+                      },
+                      groupValue: segmentedControlGroupValue,
+                    ),
                   ),
-                  ReviewSection(
-                    userId: effectiveUserId,
-                    imageUrl: imageUrl,
-                  ),
+                  contentWidget,
                 ],
               ),
             ),
@@ -159,12 +166,123 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   }
 }
 
-// ReviewSection
-class ReviewSection extends StatelessWidget {
+class AboutSection extends StatelessWidget {
+  final String? firstName;
+  final String? aboutMe;
+
+  const AboutSection({Key? key, this.firstName, this.aboutMe})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Text('About ${firstName ?? "User"}',
+              style: TextStyle(
+                color:
+                    CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.70,
+              )),
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+          margin: const EdgeInsets.symmetric(horizontal: 20.0),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color:
+                CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x19000000),
+                blurRadius: 10,
+                offset: Offset(0, 0),
+              )
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.0),
+            child: Text('${aboutMe ?? "No description Available"}',
+                style: TextStyle(
+                  color: CupertinoColors.label
+                      .resolveFrom(context)
+                      .withOpacity(0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.40,
+                )),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class RecentPostsTab extends StatelessWidget {
+  final List<Map<String, dynamic>> recentPosts;
+
+  const RecentPostsTab({Key? key, required this.recentPosts}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return recentPosts.isEmpty
+        ? Center(child: Text("No posts available"))
+        : ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: recentPosts.length,
+            itemBuilder: (context, index) {
+              final post = recentPosts[index];
+              // Assuming these are the keys in your post map.
+              final List<Map<String, String>> imagesWithAltText =
+                  (post['imagesWithAltText'] as List<dynamic>?)
+                          ?.map((image) => {
+                                'url': image['url'] as String,
+                                'alt_text': image['alt_text'] as String,
+                              })
+                          .toList() ??
+                      [];
+
+              final String title = post['title'] ?? 'No Title';
+              final List<String> tags = post['tags']?.cast<String>() ?? [];
+              final List<Color> tagColors = tags
+                  .map((_) => Colors.transparent)
+                  .toList(); // Placeholder for actual colors
+              final String firstname = post['firstname'] ?? 'Firstname';
+              final String lastname = post['lastname'] ?? 'Lastname';
+              final String timeAgo = post['timeAgo'] ?? 'Some time ago';
+              final String postId = post['postId'] ?? '';
+              final String profileURL = post['profileURL'] ?? '';
+
+              return PostCard(
+                imagesWithAltText: imagesWithAltText,
+                title: title,
+                tags: tags,
+                tagColors: tagColors,
+                firstname: firstname,
+                lastname: lastname,
+                timeAgo: timeAgo,
+                onTap: (postId) => print(postId),
+                postId: postId,
+                showShadow: true,
+                profileURL: profileURL,
+              );
+            },
+          );
+  }
+}
+
+class ReviewsTab extends StatelessWidget {
   final String? userId;
   final String imageUrl;
 
-  ReviewSection({this.userId, required this.imageUrl});
+  const ReviewsTab({Key? key, this.userId, required this.imageUrl})
+      : super(key: key);
 
   Future<List<String>> fetchComments(String userId) async {
     try {
@@ -179,7 +297,6 @@ class ReviewSection extends StatelessWidget {
       }
       return [];
     } catch (e) {
-      print('Error fetching comments: $e');
       return [];
     }
   }
@@ -188,118 +305,27 @@ class ReviewSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final String effectiveUserId =
         userId ?? FirebaseAuth.instance.currentUser?.uid ?? '';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(left: 20, top: 16, bottom: 8),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Reviews',
-              style: TextStyle(
-                color:
-                    CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-        FutureBuilder<List<String>>(
-          future: fetchComments(effectiveUserId),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Padding(
-                padding: EdgeInsets.only(left: 20, top: 8),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "No reviews available",
-                    style: TextStyle(
-                      color:
-                          CupertinoColors.secondaryLabel.resolveFrom(context),
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              );
-            }
-
-            List<String> comments = snapshot.data!;
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: comments
-                    .map((comment) =>
-                        ReviewItem(review: comment, avatarUrl: imageUrl))
-                    .toList(),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class AboutSection extends StatelessWidget {
-  final String? firstName;
-  final String? aboutMe;
-
-  const AboutSection({Key? key, this.firstName, this.aboutMe})
-      : super(key: key); // Include aboutMe in the constructor
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Text(
-            'About ${firstName ?? "User"}',
-            style: TextStyle(
-              color:
-                  CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.70,
-            ),
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
-          margin: const EdgeInsets.symmetric(horizontal: 20.0),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color:
-                CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Color(0x19000000),
-                blurRadius: 20,
-                offset: Offset(0, 0),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.0),
-            child: Text(
-              '${aboutMe ?? "No description Available"}',
-              style: TextStyle(
-                color:
-                    CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.40,
-              ),
-            ),
-          ),
-        ),
-      ],
+    return FutureBuilder<List<String>>(
+      future: fetchComments(effectiveUserId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text("No reviews available"));
+        } else {
+          List<String> comments = snapshot.data!;
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: comments.length,
+            itemBuilder: (context, index) {
+              final comment = comments[index];
+              return ListTile(
+                  leading:
+                      CircleAvatar(backgroundImage: NetworkImage(imageUrl)),
+                  title: Text(comment));
+            },
+          );
+        }
+      },
     );
   }
 }
@@ -308,20 +334,8 @@ class ReviewItem extends StatelessWidget {
   final String review;
   final String avatarUrl;
 
-  const ReviewItem(
-      {Key? key,
-      required this.review,
-      required this.avatarUrl}) // Make avatarUrl required
+  const ReviewItem({Key? key, required this.review, required this.avatarUrl})
       : super(key: key);
-  ImageProvider<Object> _getAvatarImageProvider() {
-    // Check if imageUrl is not null and not empty
-    if (avatarUrl != null) {
-      return CachedNetworkImageProvider(avatarUrl);
-    } else {
-      // Fallback to a local asset if imageUrl is not available
-      return AssetImage('assets/images/sampleProfile.png');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -331,186 +345,23 @@ class ReviewItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            radius: 20,
-            backgroundImage: AssetImage('assets/images/sampleProfile.png'),
-          ),
+              radius: 20,
+              backgroundImage: CachedNetworkImageProvider(avatarUrl)),
           SizedBox(width: 12),
           Expanded(
             child: Container(
               padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey5,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                review,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-              ),
+                  color: CupertinoColors.systemGrey5,
+                  borderRadius: BorderRadius.circular(12)),
+              child: Text(review,
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: CupertinoColors.label.resolveFrom(context))),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class RecentPostSection extends StatelessWidget {
-  Future<Map<String, dynamic>> fetchUserDetails(String userId) async {
-    try {
-      // Attempt to fetch the user document from Firestore
-      DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection('user').doc(userId).get();
-
-      if (userDoc.exists) {
-        // If the document exists, return the user data
-        return userDoc.data() as Map<String, dynamic>;
-      } else {
-        // If the user document does not exist, return an empty map or default values
-        return {'firstName': 'Unknown', 'lastName': '', 'profileImagePath': ''};
-      }
-    } catch (e) {
-      // In case of any errors, log the error and return default values
-      print('Error fetching user details: $e');
-      return {'firstName': 'Error', 'lastName': '', 'profileImagePath': ''};
-    }
-  }
-
-  String timeAgoSinceDate(DateTime dateTime) {
-    final duration = DateTime.now().difference(dateTime);
-    if (duration.inDays > 7)
-      return DateFormat('MMMM dd, yyyy').format(dateTime);
-    if (duration.inDays >= 1)
-      return '${duration.inDays} day${duration.inDays > 1 ? "s" : ""} ago';
-    if (duration.inHours >= 1)
-      return '${duration.inHours} hour${duration.inHours > 1 ? "s" : ""} ago';
-    if (duration.inMinutes >= 1)
-      return '${duration.inMinutes} minute${duration.inMinutes > 1 ? "s" : ""} ago';
-    return 'just now';
-  }
-
-  Color _getRandomColor() {
-    var colors = [yellow, orange, blue, babyPink, Cyan];
-    return colors[math.Random().nextInt(colors.length)];
-  }
-
-  final List<Map<String, dynamic>> recentPosts;
-
-  RecentPostSection({Key? key, required this.recentPosts}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: 20, top: 16, bottom: 8),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Recent Posts',
-              style: TextStyle(
-                color:
-                    CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-        if (recentPosts.isEmpty)
-          Padding(
-            padding: EdgeInsets.only(left: 20),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "No posts available",
-                style: TextStyle(
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          )
-        else
-          Container(
-            height: 150,
-            width: 300,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.only(left: 4, top: 24, bottom: 24),
-              itemCount: recentPosts.length,
-              itemBuilder: (context, index) {
-                final post = recentPosts[index];
-                return GestureDetector(
-                  onTap: () {
-                    // Use the document ID as postId to navigate to PostDetailView
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          PostDetailView(postId: post['postId']),
-                    ));
-                  },
-                  child: FutureBuilder<Map<String, dynamic>>(
-                    future: fetchUserDetails(post['user_id']),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return SizedBox(
-                            width: 300, child: CupertinoActivityIndicator());
-                      }
-                      final user = snapshot.data!;
-                      final imagesWithAltText =
-                          post['images'] as List<dynamic>? ?? [];
-                      final firstImage = imagesWithAltText.isNotEmpty
-                          ? imagesWithAltText[0]
-                          : null;
-
-                      var createdAt =
-                          (post['post_timestamp'] as Timestamp?)?.toDate() ??
-                              DateTime.now();
-                      List<String> tags = (post['categories'] as String?)
-                              ?.split(',')
-                              .map((tag) => tag.trim())
-                              .toList() ??
-                          [];
-                      Map<String, Color> tagColors = {};
-                      List<Color> assignedColors = tags
-                          .map((tag) => tagColors.putIfAbsent(
-                              tag, () => _getRandomColor()))
-                          .toList();
-
-                      // Assuming 'postId' is correctly populated when creating the post card
-                      return PostCard(
-                        imagesWithAltText: firstImage != null
-                            ? [
-                                {
-                                  'url': firstImage['url'],
-                                  'alt_text': firstImage['alt_text'] ?? ''
-                                }
-                              ]
-                            : [],
-                        title: post['title'],
-                        tags: tags,
-                        tagColors: assignedColors,
-                        firstname: user['firstName'],
-                        lastname: user['lastName'],
-                        timeAgo: timeAgoSinceDate(createdAt),
-                        onTap: (postId) {},
-                        postId:
-                            post['postId'], // This should be the document ID
-                        profileURL: user['profileImagePath'] ?? '',
-                        showTags: true,
-                        imageHeight: 100.0,
-                        showShadow: true,
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-      ],
     );
   }
 }

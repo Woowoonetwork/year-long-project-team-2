@@ -12,7 +12,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 class ProfileAppBar extends StatefulWidget {
-  final String postId;
   final VoidCallback onBlockPressed;
   final bool isBlocked;
   final bool isCurrentUser;
@@ -23,7 +22,6 @@ class ProfileAppBar extends StatefulWidget {
 
   const ProfileAppBar({
     Key? key,
-    required this.postId,
     required this.onBlockPressed,
     required this.isBlocked,
     required this.isCurrentUser,
@@ -172,7 +170,6 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       '${_firstName ?? "Loading..."} ${_lastName ?? ""}',
       style: TextStyle(
           fontSize: 20,
-          letterSpacing: -0.6,
           fontWeight: FontWeight.w500,
           color: CupertinoColors.label.resolveFrom(context)),
     );
@@ -278,7 +275,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                     displayName,
                     style: TextStyle(
                         fontSize: 24,
-                        letterSpacing: -1.0,
+                        letterSpacing: -0.4,
                         fontWeight: FontWeight.w600,
                         color: CupertinoColors.label.resolveFrom(context)),
                   ),
@@ -287,7 +284,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                     location,
                     style: TextStyle(
                         fontSize: 13,
-                        letterSpacing: -0.3,
+         
                         fontWeight: FontWeight.w500,
                         color: CupertinoColors.secondaryLabel
                             .resolveFrom(context)),
@@ -298,11 +295,11 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                       Text(
                         ratingText,
                         style: TextStyle(
-                            color: CupertinoColors.secondaryLabel
-                                .resolveFrom(context),
-                            fontWeight: FontWeight.w400,
-                            fontSize: 12,
-                            letterSpacing: -0.4),
+                          color: CupertinoColors.secondaryLabel
+                              .resolveFrom(context),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                        ),
                       ),
                       Text(
                         postsSoldText,
@@ -311,7 +308,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                                 .resolveFrom(context),
                             fontWeight: FontWeight.w400,
                             fontSize: 12,
-                            letterSpacing: -0.4),
+                           ),
                       ),
                     ]).toList(),
                   ),
@@ -346,10 +343,9 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                   ),
                   onPressed: () {
                     //navigate to edit profile
-                    Navigator.of(context).push( 
+                    Navigator.of(context).push(
                       CupertinoPageRoute(
-                        builder: (context) => EditProfileScreen()
-                      ),
+                          builder: (context) => EditProfileScreen()),
                     );
                   },
                 ),
@@ -361,71 +357,70 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   void _showBlockMenu(BuildContext context) {
-  String displayName = _firstName ?? 'User';
-  if (_firstName != null && _lastName != null) {
-    displayName = '$_firstName $_lastName';
-  }
-  showCupertinoModalPopup(
-    context: context,
-    builder: (BuildContext context) => CupertinoActionSheet(
-      title: Text(
-        'Block $displayName',
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          color: CupertinoColors.label.resolveFrom(context),
-          fontSize: 18,
-          letterSpacing: -0.60,
-        ),
-      ),
-      message: Text(
-        'You will no longer see any posts from $displayName.',
-        style: TextStyle(
-          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          fontSize: 14,
-          letterSpacing: -0.40,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      actions: <Widget>[
-        CupertinoActionSheetAction(
-          child: Text(
-            'Confirm',
-            style: TextStyle(
-              color: CupertinoColors.destructiveRed,
-              fontWeight: FontWeight.w500,
-              letterSpacing: -0.80,
-            ),
+    String displayName = _firstName ?? 'User';
+    if (_firstName != null && _lastName != null) {
+      displayName = '$_firstName $_lastName';
+    }
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(
+          'Block $displayName',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: CupertinoColors.label.resolveFrom(context),
+            fontSize: 18,
+            letterSpacing: -0.60,
           ),
-          onPressed: () async {
-            Navigator.pop(context);
-            if (widget.userId != null) {
-              try {
-                await _blockUser(widget.userId!);
-                if (mounted) {
-                  _showSuccessDialog(context);
+        ),
+        message: Text(
+          'You will no longer see any posts from $displayName.',
+          style: TextStyle(
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            fontSize: 14,
+            letterSpacing: -0.40,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        actions: <Widget>[
+          CupertinoActionSheetAction(
+            child: Text(
+              'Confirm',
+              style: TextStyle(
+                color: CupertinoColors.destructiveRed,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.80,
+              ),
+            ),
+            onPressed: () async {
+              Navigator.pop(context);
+              if (widget.userId != null) {
+                try {
+                  await _blockUser(widget.userId!);
+                  if (mounted) {
+                    _showSuccessDialog(context);
+                  }
+                } catch (error) {
+                  print("Error blocking user: $error");
                 }
-              } catch (error) {
-                print("Error blocking user: $error");
               }
-            }
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context);
           },
         ),
-      ],
-      cancelButton: CupertinoActionSheetAction(
-        child: Text('Cancel'),
-        onPressed: () {
-          Navigator.pop(context);
-        },
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _showSuccessDialog(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible:
-          false,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         Future.delayed(Duration(seconds: 3), () {
           if (Navigator.canPop(context)) {
