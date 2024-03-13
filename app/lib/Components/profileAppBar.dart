@@ -257,6 +257,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
               child: ClipOval(
                 child: CupertinoContextMenu.builder(
                   enableHapticFeedback: true,
+                  actions: [],
                   builder: (BuildContext context, Animation<double> animation) {
                     final Animation<BorderRadius?> borderRadiusAnimation =
                         BorderRadiusTween(
@@ -291,28 +292,41 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                       ),
                     ));
 
-                    return Container(
-                      decoration: animation.value <
-                              CupertinoContextMenu.animationOpensAt
-                          ? boxDecorationAnimation.value
-                          : null,
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: ClipRRect(
-                          borderRadius: borderRadiusAnimation.value ??
-                              BorderRadius.circular(0.0),
-                          child: widget.imageUrl.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: widget.imageUrl,
-                                  placeholder: (context, url) => Center(
-                                    child: CupertinoActivityIndicator(),
-                                  ),
-                                  fit: BoxFit.cover,
-                                  width: 240,
-                                  height: 240,
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (context) => EditProfileScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        decoration: animation.value <
+                                CupertinoContextMenu.animationOpensAt
+                            ? boxDecorationAnimation.value
+                            : null,
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          child: ClipRRect(
+                            borderRadius: borderRadiusAnimation.value ??
+                                BorderRadius.circular(0.0),
+                            child: widget.imageUrl.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: widget.imageUrl,
+                                    placeholder: (context, url) => Center(
+                                      child: CupertinoActivityIndicator(),
+                                    ),
+                                    fit: BoxFit.cover,
+                                    width: MediaQuery.of(context).size.width /2,
+                                    height: MediaQuery.of(context).size.width /2,
+                                  )
+                                : Image.asset('assets/images/sampleProfile.png',
+                                    width: MediaQuery.of(context).size.width /2,
+                                    height: MediaQuery.of(context).size.width /2,
+                                    fit: BoxFit.cover,
                                 )
-                              : Image.asset('assets/images/sampleProfile.png',
-                                  width: 240, height: 240, fit: BoxFit.cover),
+                          ),
                         ),
                       ),
                     );
