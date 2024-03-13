@@ -2,7 +2,7 @@ import 'package:FoodHood/Components/post_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:FoodHood/Components/profileAppBar.dart';
+import 'package:FoodHood/Components/profile_appbar.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';

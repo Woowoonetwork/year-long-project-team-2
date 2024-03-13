@@ -8,7 +8,7 @@ import 'package:flutter_switch/flutter_switch.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:FoodHood/Screens/edit_profile_screen.dart';
+import 'package:FoodHood/Screens/profile_edit_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 

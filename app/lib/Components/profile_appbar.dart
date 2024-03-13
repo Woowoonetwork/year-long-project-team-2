@@ -1,5 +1,5 @@
-import 'package:FoodHood/Components/appBarVisibilityController.dart';
-import 'package:FoodHood/Screens/edit_profile_screen.dart';
+import 'package:FoodHood/Models/AppBarVisibilityController.dart';
+import 'package:FoodHood/Screens/profile_edit_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';

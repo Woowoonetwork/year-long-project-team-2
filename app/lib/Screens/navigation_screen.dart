@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:FoodHood/Screens/account_screen.dart';
 import 'package:FoodHood/Screens/browse_screen.dart';
-import 'package:FoodHood/Screens/saved_screen.dart';
+import 'package:FoodHood/Screens/bookmark_screen.dart';
 
 class NavigationScreen extends StatelessWidget {
   final int selectedIndex;
@@ -67,7 +67,7 @@ class NavigationScreen extends StatelessWidget {
               child: Icon(CupertinoIcons.bookmark_fill),
             ),
             label: "Bookmarks",
-          ),          
+          ),
           BottomNavigationBarItem(
             icon: Semantics(
               label: "Account",
@@ -88,7 +88,7 @@ class NavigationScreen extends StatelessWidget {
           case 1:
             return BrowseScreen();
           case 2:
-            return SavedScreen();
+            return BookmarkScreen();
           case 3:
             return AccountScreen();
           default:
