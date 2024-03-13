@@ -200,8 +200,8 @@ class _SavedScreenState extends State<SavedScreen> {
                     .map((tag) => tag.trim())
                     .toList(),
                 tagColors: _assignedColors(),
-                firstname: userData['firstName'] ?? 'Unknown',
-                lastname: userData['lastName'] ?? 'Unknown',
+                firstName: userData['firstName'] ?? 'Unknown',
+                lastName: userData['lastName'] ?? 'Unknown',
                 timeAgo: timeAgoSinceDate(
                     (postData['post_timestamp'] as Timestamp).toDate()),
                 onTap: (postId) => _onPostCardTap(postId),

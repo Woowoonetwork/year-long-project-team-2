@@ -112,8 +112,8 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   Future<void> _updatePaletteGenerator() async {
-    if (_imageUrl == null || _imageUrl!.isEmpty) {
-      _imageUrl = 'assets/images/sampleProfile.png';
+    if (_imageUrl == null || _imageUrl!.isEmpty || _backgroundColor != null) {
+      return;
     }
 
     ImageProvider imageProvider;
@@ -123,15 +123,19 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       imageProvider = AssetImage(_imageUrl!);
     }
 
-    final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
+    PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
       imageProvider,
       size: Size(200, 100),
     );
 
+// Attempt to choose the best color based on availability
+    Color? chosenColor = generator.vibrantColor?.color ??
+        generator.lightVibrantColor?.color ??
+        CupertinoColors.systemGrey; // Fallback color
+
     if (mounted) {
       setState(() {
-        _backgroundColor =
-            generator.vibrantColor?.color ?? CupertinoColors.systemGrey;
+        _backgroundColor = chosenColor;
       });
     }
   }
@@ -247,23 +251,87 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       children: [
         Row(
           children: [
-            CircleAvatar(
-              radius: 34,
-              backgroundColor: CupertinoColors.systemGrey, // Background color
+            SizedBox(
+              width: 68,
+              height: 68,
               child: ClipOval(
-                child: widget.imageUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: widget.imageUrl,
-                        placeholder: (context, url) => Center(
-                          child: CupertinoActivityIndicator(),
+                child: CupertinoContextMenu.builder(
+                  enableHapticFeedback: true,
+                  builder: (BuildContext context, Animation<double> animation) {
+                    final Animation<BorderRadius?> borderRadiusAnimation =
+                        BorderRadiusTween(
+                      begin: BorderRadius.circular(0.0),
+                      end: BorderRadius.circular(
+                          CupertinoContextMenu.kOpenBorderRadius),
+                    ).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Interval(
+                          CupertinoContextMenu.animationOpensAt,
+                          1.0,
                         ),
-                        errorWidget: (context, url, error) => Icon(Icons.error),
+                      ),
+                    );
+
+                    final Animation<Decoration> boxDecorationAnimation =
+                        DecorationTween(
+                      begin: const BoxDecoration(
+                        color: Color(0xFFFFFFFF),
+                        boxShadow: <BoxShadow>[],
+                      ),
+                      end: const BoxDecoration(
+                        color: Color(0xFFFFFFFF),
+                        boxShadow: CupertinoContextMenu.kEndBoxShadow,
+                      ),
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Interval(
+                        0.0,
+                        CupertinoContextMenu.animationOpensAt,
+                      ),
+                    ));
+
+                    return Container(
+                      decoration: animation.value <
+                              CupertinoContextMenu.animationOpensAt
+                          ? boxDecorationAnimation.value
+                          : null,
+                      child: FittedBox(
                         fit: BoxFit.cover,
-                        width: 68,
-                        height: 68,
-                      )
-                    : Image.asset('assets/images/sampleProfile.png',
-                        width: 68, height: 68, fit: BoxFit.cover),
+                        child: ClipRRect(
+                          borderRadius: borderRadiusAnimation.value ??
+                              BorderRadius.circular(0.0),
+                          child: widget.imageUrl.isNotEmpty
+                              ? CachedNetworkImage(
+                                  imageUrl: widget.imageUrl,
+                                  placeholder: (context, url) => Center(
+                                    child: CupertinoActivityIndicator(),
+                                  ),
+                                  fit: BoxFit.cover,
+                                  width: 240,
+                                  height: 240,
+                                )
+                              : Image.asset('assets/images/sampleProfile.png',
+                                  width: 240, height: 240, fit: BoxFit.cover),
+                        ),
+                      ),
+                    );
+                  },
+                  actions: [
+                    CupertinoContextMenuAction(
+                      child: Text('Edit Profile Picture'),
+                      trailingIcon: CupertinoIcons.pencil,
+                      onPressed: () {
+                        //navigate to edit profile
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(
+                              builder: (context) => EditProfileScreen()),
+                        );
+                        Navigator.pop(context); // Close the menu
+                      },
+                    )
+                  ],
+                ),
               ),
             ),
             SizedBox(width: 16),
@@ -284,7 +352,6 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                     location,
                     style: TextStyle(
                         fontSize: 13,
-         
                         fontWeight: FontWeight.w500,
                         color: CupertinoColors.secondaryLabel
                             .resolveFrom(context)),
@@ -304,11 +371,11 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                       Text(
                         postsSoldText,
                         style: TextStyle(
-                            color: CupertinoColors.secondaryLabel
-                                .resolveFrom(context),
-                            fontWeight: FontWeight.w400,
-                            fontSize: 12,
-                           ),
+                          color: CupertinoColors.secondaryLabel
+                              .resolveFrom(context),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                        ),
                       ),
                     ]).toList(),
                   ),
@@ -317,7 +384,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
             ),
             if (isCurrentUser)
               Container(
-                margin: EdgeInsets.only(right: 16),
+                margin: EdgeInsets.only(right: 20),
                 child: CupertinoButton(
                   padding: EdgeInsets.zero,
                   child: Container(

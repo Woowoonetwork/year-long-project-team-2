@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 
@@ -65,8 +65,8 @@ class _ProfileCardState extends State<ProfileCard> {
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
-        Navigator.push(context,
-            CupertinoPageRoute(builder: (context) => PublicProfileScreen()));
+        Navigator.push(
+            context, CupertinoPageRoute(builder: (context) => ProfileScreen()));
       },
       child: Container(
         margin: const EdgeInsets.all(16),

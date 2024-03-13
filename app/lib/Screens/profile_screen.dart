@@ -1,5 +1,4 @@
 import 'package:FoodHood/Components/post_card.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,16 +8,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 
-class PublicProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatefulWidget {
   final String? userId;
-
-  PublicProfileScreen({Key? key, this.userId}) : super(key: key);
-
+  ProfileScreen({Key? key, this.userId}) : super(key: key);
   @override
-  _PublicProfileScreenState createState() => _PublicProfileScreenState();
+  _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _PublicProfileScreenState extends State<PublicProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen> {
   String? firstName;
   String? lastName;
   String? aboutMe;
@@ -26,29 +23,30 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
   bool isLoading = true;
   List<Map<String, dynamic>> recentPosts = [];
   int segmentedControlGroupValue = 0;
-  final Map<int, Widget> segmentedControlChildren = const {
-    0: Text(
-      "Recent Posts",
-      style: TextStyle(
-        fontSize: 14,
-        letterSpacing: -0.6,
-        fontWeight: FontWeight.w500,
-      ),
-    ),
-    1: Text("Reviews",
-        style: TextStyle(
-          fontSize: 14,
-          letterSpacing: -0.6,
-          fontWeight: FontWeight.w500,
-        )),
-  };
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   String? effectiveUserId;
 
   @override
   void initState() {
     super.initState();
-    determineUserId();
+    _initializeData();
+  }
+
+  void _initializeData() {
+    determineUserId().then((_) {
+      if (effectiveUserId != null) {
+        setUpStreamListener(effectiveUserId!);
+        fetchRecentPosts();
+      } else {
+        if (mounted) {
+          setState(() => isLoading = false);
+        }
+      }
+    });
+  }
+
+  Future<void> determineUserId() async {
+    effectiveUserId = widget.userId ?? FirebaseAuth.instance.currentUser?.uid;
   }
 
   void fetchRecentPosts() async {
@@ -66,16 +64,6 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
             .toList();
         isLoading = false;
       });
-    }
-  }
-
-  void determineUserId() {
-    effectiveUserId = widget.userId ?? FirebaseAuth.instance.currentUser?.uid;
-    if (effectiveUserId != null) {
-      setUpStreamListener(effectiveUserId!);
-      fetchRecentPosts();
-    } else {
-      setState(() => isLoading = false);
     }
   }
 
@@ -119,8 +107,27 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
         contentWidget = ReviewsTab(userId: effectiveUserId, imageUrl: imageUrl);
         break;
       default:
-        contentWidget = SizedBox.shrink(); // Fallback to an empty widget
+        contentWidget = Container();
     }
+
+    Map<int, Widget> segmentedControlChildren = {
+      0: Text(
+        "Recent Posts",
+        style: TextStyle(
+          color: CupertinoColors.label.resolveFrom(context),
+          fontSize: 14,
+          letterSpacing: -0.6,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      1: Text("Reviews",
+          style: TextStyle(
+            color: CupertinoColors.label.resolveFrom(context),
+            fontSize: 14,
+            letterSpacing: -0.6,
+            fontWeight: FontWeight.w500,
+          )),
+    };
 
     return Scaffold(
       backgroundColor:
@@ -136,28 +143,24 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
               lastName: lastName,
               onBlockPressed: () {}),
           SliverToBoxAdapter(
-            child: SafeArea(
-              bottom: true,
-              top: false,
-              child: Column(
-                children: <Widget>[
-                  AboutSection(firstName: firstName, aboutMe: aboutMe),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    width: MediaQuery.of(context).size.width,
-                    child: CupertinoSlidingSegmentedControl<int>(
-                      children: segmentedControlChildren,
-                      onValueChanged: (value) {
-                        setState(() {
-                          segmentedControlGroupValue = value!;
-                        });
-                      },
-                      groupValue: segmentedControlGroupValue,
-                    ),
+            child: Column(
+              children: <Widget>[
+                AboutSection(firstName: firstName, aboutMe: aboutMe),
+                Container(
+                  margin: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  width: MediaQuery.of(context).size.width,
+                  child: CupertinoSlidingSegmentedControl<int>(
+                    children: segmentedControlChildren,
+                    onValueChanged: (value) {
+                      setState(() {
+                        segmentedControlGroupValue = value!;
+                      });
+                    },
+                    groupValue: segmentedControlGroupValue,
                   ),
-                  contentWidget,
-                ],
-              ),
+                ),
+                contentWidget,
+              ],
             ),
           ),
         ],
@@ -170,8 +173,7 @@ class AboutSection extends StatelessWidget {
   final String? firstName;
   final String? aboutMe;
 
-  const AboutSection({Key? key, this.firstName, this.aboutMe})
-      : super(key: key);
+  AboutSection({Key? key, this.firstName, this.aboutMe}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +193,7 @@ class AboutSection extends StatelessWidget {
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
-          margin: const EdgeInsets.symmetric(horizontal: 20.0),
+          margin: EdgeInsets.symmetric(horizontal: 20.0),
           width: double.infinity,
           decoration: BoxDecoration(
             color:
@@ -231,14 +233,17 @@ class RecentPostsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return recentPosts.isEmpty
-        ? Center(child: Text("No posts available"))
-        : ListView.builder(
+        ? const Center(child: Text("No posts available"))
+        : ListView.separated(
+            separatorBuilder: (context, index) =>
+                const SizedBox(height: 20), // Consistent spacing between items
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(
+                vertical: 20), // Padding at the start and end of the list
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: recentPosts.length,
             itemBuilder: (context, index) {
               final post = recentPosts[index];
-              // Assuming these are the keys in your post map.
               final List<Map<String, String>> imagesWithAltText =
                   (post['imagesWithAltText'] as List<dynamic>?)
                           ?.map((image) => {
@@ -247,14 +252,10 @@ class RecentPostsTab extends StatelessWidget {
                               })
                           .toList() ??
                       [];
-
               final String title = post['title'] ?? 'No Title';
               final List<String> tags = post['tags']?.cast<String>() ?? [];
-              final List<Color> tagColors = tags
-                  .map((_) => Colors.transparent)
-                  .toList(); // Placeholder for actual colors
-              final String firstname = post['firstname'] ?? 'Firstname';
-              final String lastname = post['lastname'] ?? 'Lastname';
+              final String firstName = post['firstName'] ?? 'Firstname';
+              final String lastName = post['lastName'] ?? 'Lastname';
               final String timeAgo = post['timeAgo'] ?? 'Some time ago';
               final String postId = post['postId'] ?? '';
               final String profileURL = post['profileURL'] ?? '';
@@ -263,11 +264,11 @@ class RecentPostsTab extends StatelessWidget {
                 imagesWithAltText: imagesWithAltText,
                 title: title,
                 tags: tags,
-                tagColors: tagColors,
-                firstname: firstname,
-                lastname: lastname,
+                tagColors: tags.map((_) => Colors.transparent).toList(),
+                firstName: firstName,
+                lastName: lastName,
                 timeAgo: timeAgo,
-                onTap: (postId) => print(postId),
+                onTap: (postId) => print('Tapped on post: $postId'),
                 postId: postId,
                 showShadow: true,
                 profileURL: profileURL,
@@ -281,22 +282,16 @@ class ReviewsTab extends StatelessWidget {
   final String? userId;
   final String imageUrl;
 
-  const ReviewsTab({Key? key, this.userId, required this.imageUrl})
-      : super(key: key);
+  ReviewsTab({Key? key, this.userId, required this.imageUrl}) : super(key: key);
 
   Future<List<String>> fetchComments(String userId) async {
     try {
       final DocumentSnapshot userDoc =
           await FirebaseFirestore.instance.collection('user').doc(userId).get();
-      if (userDoc.exists) {
-        final userData = userDoc.data() as Map<String, dynamic>?;
-        if (userData != null && userData.containsKey('comments')) {
-          final List<dynamic> comments = userData['comments'];
-          return comments.cast<String>();
-        }
-      }
-      return [];
+      return List<String>.from(userDoc['comments'] ?? []);
     } catch (e) {
+      print(
+          e); // Ideally, use a logging framework or handle the error appropriately.
       return [];
     }
   }
@@ -308,20 +303,24 @@ class ReviewsTab extends StatelessWidget {
     return FutureBuilder<List<String>>(
       future: fetchComments(effectiveUserId),
       builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text("No reviews available"));
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return const Center(child: Text('Error loading reviews'));
+        } else if (snapshot.data!.isEmpty) {
+          return const Center(child: Text("No reviews available"));
         } else {
-          List<String> comments = snapshot.data!;
-          return ListView.builder(
+          return ListView.separated(
+            separatorBuilder: (_, __) =>
+                const SizedBox(height: 10), // Spacing between items
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: comments.length,
+            padding: const EdgeInsets.symmetric(
+                vertical: 20), // Padding at the start and end of the list
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
-              final comment = comments[index];
-              return ListTile(
-                  leading:
-                      CircleAvatar(backgroundImage: NetworkImage(imageUrl)),
-                  title: Text(comment));
+              final comment = snapshot.data![index];
+              return ReviewItem(review: comment);
             },
           );
         }
@@ -332,35 +331,28 @@ class ReviewsTab extends StatelessWidget {
 
 class ReviewItem extends StatelessWidget {
   final String review;
-  final String avatarUrl;
-
-  const ReviewItem({Key? key, required this.review, required this.avatarUrl})
-      : super(key: key);
-
+  ReviewItem({Key? key, required this.review}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-              radius: 20,
-              backgroundImage: CachedNetworkImageProvider(avatarUrl)),
-          SizedBox(width: 12),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey5,
-                  borderRadius: BorderRadius.circular(12)),
-              child: Text(review,
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: CupertinoColors.label.resolveFrom(context))),
-            ),
-          ),
-        ],
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x19000000),
+                blurRadius: 10,
+                offset: Offset(0, 0),
+              )
+            ],
+            color:
+                CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+            borderRadius: BorderRadius.circular(12)),
+        child: Text(review,
+            style: TextStyle(
+                fontSize: 14,
+                color: CupertinoColors.label.resolveFrom(context))),
       ),
     );
   }

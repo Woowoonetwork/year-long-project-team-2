@@ -12,7 +12,7 @@ import 'package:FoodHood/Components/cupertinosnackbar.dart';
 import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
@@ -425,7 +425,7 @@ class InfoRow extends StatelessWidget {
     Navigator.push(
       context,
       CupertinoPageRoute(
-        builder: (context) => PublicProfileScreen(userId: viewModel.userid),
+        builder: (context) => ProfileScreen(userId: viewModel.userid),
       ),
     );
   }

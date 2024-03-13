@@ -1,4 +1,4 @@
-import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
@@ -155,7 +155,7 @@ class CompactPostCard extends StatelessWidget {
           Navigator.push(
             context,
             CupertinoPageRoute(
-              builder: (context) => PublicProfileScreen(),
+              builder: (context) => ProfileScreen(),
             ),
           );
         },
