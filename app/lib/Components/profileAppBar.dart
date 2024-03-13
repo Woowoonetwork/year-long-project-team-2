@@ -262,6 +262,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                       child: Text('Edit Profile'),
                       onPressed: () {
                         HapticFeedback.mediumImpact();
+                         Navigator.pop(context);
                         Navigator.of(context).push(
                           CupertinoPageRoute(
                             builder: (context) => EditProfileScreen(),
@@ -304,23 +305,14 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                       ),
                     ));
 
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        Navigator.of(context).push(
-                          CupertinoPageRoute(
-                            builder: (context) => EditProfileScreen(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        decoration: animation.value <
-                                CupertinoContextMenu.animationOpensAt
-                            ? boxDecorationAnimation.value
-                            : null,
-                        child: FittedBox(
-                          fit: BoxFit.cover,
-                          child: ClipRRect(
+                    return Container(
+                      decoration: animation.value <
+                              CupertinoContextMenu.animationOpensAt
+                          ? boxDecorationAnimation.value
+                          : null,
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: ClipRRect(
                             borderRadius: borderRadiusAnimation.value ??
                                 BorderRadius.circular(0.0),
                             child: widget.imageUrl.isNotEmpty
@@ -330,16 +322,19 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                                       child: CupertinoActivityIndicator(),
                                     ),
                                     fit: BoxFit.cover,
-                                    width: MediaQuery.of(context).size.width /2,
-                                    height: MediaQuery.of(context).size.width /2,
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.4,
+                                    height:
+                                        MediaQuery.of(context).size.width / 1.4,
                                   )
-                                : Image.asset('assets/images/sampleProfile.png',
-                                    width: MediaQuery.of(context).size.width /2,
-                                    height: MediaQuery.of(context).size.width /2,
+                                : Image.asset(
+                                    'assets/images/sampleProfile.png',
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.4,
+                                    height:
+                                        MediaQuery.of(context).size.width / 1.4,
                                     fit: BoxFit.cover,
-                                )
-                          ),
-                        ),
+                                  )),
                       ),
                     );
                   },
