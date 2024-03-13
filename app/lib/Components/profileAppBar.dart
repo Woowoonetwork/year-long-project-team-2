@@ -317,20 +317,6 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                       ),
                     );
                   },
-                  actions: [
-                    CupertinoContextMenuAction(
-                      child: Text('Edit Profile Picture'),
-                      trailingIcon: CupertinoIcons.pencil,
-                      onPressed: () {
-                        //navigate to edit profile
-                        Navigator.of(context).push(
-                          CupertinoPageRoute(
-                              builder: (context) => EditProfileScreen()),
-                        );
-                        Navigator.pop(context); // Close the menu
-                      },
-                    )
-                  ],
                 ),
               ),
             ),
