@@ -257,7 +257,19 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
               child: ClipOval(
                 child: CupertinoContextMenu.builder(
                   enableHapticFeedback: true,
-                  actions: [],
+                  actions: [
+                    CupertinoContextMenuAction(
+                      child: Text('Edit Profile'),
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (context) => EditProfileScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                   builder: (BuildContext context, Animation<double> animation) {
                     final Animation<BorderRadius?> borderRadiusAnimation =
                         BorderRadiusTween(
