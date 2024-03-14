@@ -1,5 +1,5 @@
-import 'package:FoodHood/Components/appBarVisibilityController.dart';
-import 'package:FoodHood/Screens/edit_profile_screen.dart';
+import 'package:FoodHood/Models/AppBarVisibilityController.dart';
+import 'package:FoodHood/Screens/profile_edit_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,7 +12,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 class ProfileAppBar extends StatefulWidget {
-  final String postId;
   final VoidCallback onBlockPressed;
   final bool isBlocked;
   final bool isCurrentUser;
@@ -23,7 +22,6 @@ class ProfileAppBar extends StatefulWidget {
 
   const ProfileAppBar({
     Key? key,
-    required this.postId,
     required this.onBlockPressed,
     required this.isBlocked,
     required this.isCurrentUser,
@@ -114,8 +112,8 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   Future<void> _updatePaletteGenerator() async {
-    if (_imageUrl == null || _imageUrl!.isEmpty) {
-      _imageUrl = 'assets/images/sampleProfile.png';
+    if (_imageUrl == null || _imageUrl!.isEmpty || _backgroundColor != null) {
+      return;
     }
 
     ImageProvider imageProvider;
@@ -125,15 +123,19 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       imageProvider = AssetImage(_imageUrl!);
     }
 
-    final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
+    PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
       imageProvider,
       size: Size(200, 100),
     );
 
+// Attempt to choose the best color based on availability
+    Color? chosenColor = generator.vibrantColor?.color ??
+        generator.lightVibrantColor?.color ??
+        CupertinoColors.systemGrey; // Fallback color
+
     if (mounted) {
       setState(() {
-        _backgroundColor =
-            generator.vibrantColor?.color ?? CupertinoColors.systemGrey;
+        _backgroundColor = chosenColor;
       });
     }
   }
@@ -172,7 +174,6 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       '${_firstName ?? "Loading..."} ${_lastName ?? ""}',
       style: TextStyle(
           fontSize: 20,
-          letterSpacing: -0.6,
           fontWeight: FontWeight.w500,
           color: CupertinoColors.label.resolveFrom(context)),
     );
@@ -250,23 +251,94 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       children: [
         Row(
           children: [
-            CircleAvatar(
-              radius: 34,
-              backgroundColor: CupertinoColors.systemGrey, // Background color
+            SizedBox(
+              width: 68,
+              height: 68,
               child: ClipOval(
-                child: widget.imageUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: widget.imageUrl,
-                        placeholder: (context, url) => Center(
-                          child: CupertinoActivityIndicator(),
+                child: CupertinoContextMenu.builder(
+                  enableHapticFeedback: true,
+                  actions: [
+                    CupertinoContextMenuAction(
+                      child: Text('Edit Profile'),
+                      onPressed: () {
+                        HapticFeedback.mediumImpact();
+                         Navigator.pop(context);
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (context) => EditProfileScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                  builder: (BuildContext context, Animation<double> animation) {
+                    final Animation<BorderRadius?> borderRadiusAnimation =
+                        BorderRadiusTween(
+                      begin: BorderRadius.circular(0.0),
+                      end: BorderRadius.circular(
+                          CupertinoContextMenu.kOpenBorderRadius),
+                    ).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Interval(
+                          CupertinoContextMenu.animationOpensAt,
+                          1.0,
                         ),
-                        errorWidget: (context, url, error) => Icon(Icons.error),
+                      ),
+                    );
+
+                    final Animation<Decoration> boxDecorationAnimation =
+                        DecorationTween(
+                      begin: const BoxDecoration(
+                        color: Color(0xFFFFFFFF),
+                        boxShadow: <BoxShadow>[],
+                      ),
+                      end: const BoxDecoration(
+                        color: Color(0xFFFFFFFF),
+                        boxShadow: CupertinoContextMenu.kEndBoxShadow,
+                      ),
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Interval(
+                        0.0,
+                        CupertinoContextMenu.animationOpensAt,
+                      ),
+                    ));
+
+                    return Container(
+                      decoration: animation.value <
+                              CupertinoContextMenu.animationOpensAt
+                          ? boxDecorationAnimation.value
+                          : null,
+                      child: FittedBox(
                         fit: BoxFit.cover,
-                        width: 68,
-                        height: 68,
-                      )
-                    : Image.asset('assets/images/sampleProfile.png',
-                        width: 68, height: 68, fit: BoxFit.cover),
+                        child: ClipRRect(
+                            borderRadius: borderRadiusAnimation.value ??
+                                BorderRadius.circular(0.0),
+                            child: widget.imageUrl.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: widget.imageUrl,
+                                    placeholder: (context, url) => Center(
+                                      child: CupertinoActivityIndicator(),
+                                    ),
+                                    fit: BoxFit.cover,
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.4,
+                                    height:
+                                        MediaQuery.of(context).size.width / 1.4,
+                                  )
+                                : Image.asset(
+                                    'assets/images/sampleProfile.png',
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.4,
+                                    height:
+                                        MediaQuery.of(context).size.width / 1.4,
+                                    fit: BoxFit.cover,
+                                  )),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
             SizedBox(width: 16),
@@ -278,7 +350,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                     displayName,
                     style: TextStyle(
                         fontSize: 24,
-                        letterSpacing: -1.0,
+                        letterSpacing: -0.4,
                         fontWeight: FontWeight.w600,
                         color: CupertinoColors.label.resolveFrom(context)),
                   ),
@@ -287,7 +359,6 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                     location,
                     style: TextStyle(
                         fontSize: 13,
-                        letterSpacing: -0.3,
                         fontWeight: FontWeight.w500,
                         color: CupertinoColors.secondaryLabel
                             .resolveFrom(context)),
@@ -298,20 +369,20 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                       Text(
                         ratingText,
                         style: TextStyle(
-                            color: CupertinoColors.secondaryLabel
-                                .resolveFrom(context),
-                            fontWeight: FontWeight.w400,
-                            fontSize: 12,
-                            letterSpacing: -0.4),
+                          color: CupertinoColors.secondaryLabel
+                              .resolveFrom(context),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                        ),
                       ),
                       Text(
                         postsSoldText,
                         style: TextStyle(
-                            color: CupertinoColors.secondaryLabel
-                                .resolveFrom(context),
-                            fontWeight: FontWeight.w400,
-                            fontSize: 12,
-                            letterSpacing: -0.4),
+                          color: CupertinoColors.secondaryLabel
+                              .resolveFrom(context),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 12,
+                        ),
                       ),
                     ]).toList(),
                   ),
@@ -320,7 +391,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
             ),
             if (isCurrentUser)
               Container(
-                margin: EdgeInsets.only(right: 16),
+                margin: EdgeInsets.only(right: 20),
                 child: CupertinoButton(
                   padding: EdgeInsets.zero,
                   child: Container(
@@ -346,10 +417,9 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                   ),
                   onPressed: () {
                     //navigate to edit profile
-                    Navigator.of(context).push( 
+                    Navigator.of(context).push(
                       CupertinoPageRoute(
-                        builder: (context) => EditProfileScreen()
-                      ),
+                          builder: (context) => EditProfileScreen()),
                     );
                   },
                 ),
@@ -361,31 +431,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   void _showBlockMenu(BuildContext context) {
-<<<<<<< HEAD
-    String displayName = _firstName ?? 'User'; // Use a default name if null
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text('Block $displayName'),
-        message: Text('You will no longer see any posts from $displayName.'),
-        actions: <Widget>[
-          CupertinoActionSheetAction(
-            child: Text('Confirm',
-                style: TextStyle(color: CupertinoColors.destructiveRed)),
-            onPressed: () async {
-              Navigator.pop(context); // Dismiss the action sheet
-              if (widget.userId != null) {
-                try {
-                  await _blockUser(widget.userId!);
-                  // Check if the widget is still mounted before showing the dialog
-                  if (mounted) {
-                    _showSuccessDialog(context);
-                  }
-                } catch (error) {
-                  print("Error blocking user: $error");
-                }
-=======
-    String displayName = 'User';
+    String displayName = _firstName ?? 'User';
     if (_firstName != null && _lastName != null) {
       displayName = '$_firstName $_lastName';
     }
@@ -402,7 +448,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
           ),
         ),
         message: Text(
-          'You will no longer see any posts from Harry Styles.',
+          'You will no longer see any posts from $displayName.',
           style: TextStyle(
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
             fontSize: 14,
@@ -420,11 +466,17 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                 letterSpacing: -0.80,
               ),
             ),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
               if (widget.userId != null) {
-                _blockUser(widget.userId!);
->>>>>>> 452cc2ed809bd8a80fa544d5d47a2f0f0f6b8b1e
+                try {
+                  await _blockUser(widget.userId!);
+                  if (mounted) {
+                    _showSuccessDialog(context);
+                  }
+                } catch (error) {
+                  print("Error blocking user: $error");
+                }
               }
             },
           ),
@@ -432,7 +484,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
         cancelButton: CupertinoActionSheetAction(
           child: Text('Cancel'),
           onPressed: () {
-            Navigator.pop(context); // Dismiss the action sheet
+            Navigator.pop(context);
           },
         ),
       ),
@@ -442,10 +494,8 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   void _showSuccessDialog(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible:
-          false, // Prevents closing the dialog by tapping outside
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        // Schedule the dialog to close after 3 seconds
         Future.delayed(Duration(seconds: 3), () {
           if (Navigator.canPop(context)) {
             Navigator.of(context).pop(true); // Closes the dialog

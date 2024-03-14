@@ -345,13 +345,8 @@ Widget _buildProfileImageUploader(BuildContext context) {
             children: [
               ClipOval(
                 child: Container(
-                  width: 120, // Adjust the size as needed
-                  height: 120, // Adjust the size as needed
-                  padding: EdgeInsets.all(4), // Padding for the border effect
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.tertiarySystemBackground.resolveFrom(context), // Background color
-                    borderRadius: BorderRadius.circular(70), // Makes it circular
-                  ),
+                  width: 100, // Adjust the size as needed
+                  height: 100, // Adjust the size as needed
                   child: ClipOval(
                     child: Container(
                       decoration: BoxDecoration(
@@ -371,8 +366,8 @@ Widget _buildProfileImageUploader(BuildContext context) {
                 ),
               ),
               Container(
-                width: 36, // Size of the pen icon container
-                height: 36, // Size of the pen icon container
+                width: 32, // Size of the pen icon container
+                height: 32, // Size of the pen icon container
                 decoration: BoxDecoration(
                   color: accentColor.resolveFrom(context), // Background color
                   shape: BoxShape.circle,
@@ -380,7 +375,7 @@ Widget _buildProfileImageUploader(BuildContext context) {
                 child: Icon(
                   FeatherIcons.edit2, 
                   color: CupertinoColors.white,
-                  size: 20, // Size of the pen icon
+                  size: 18, // Size of the pen icon
                 ),
               ),
             ],

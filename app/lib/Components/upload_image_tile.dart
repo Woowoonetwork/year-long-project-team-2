@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:ui';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'altTextEditor.dart';
+import 'alt_text_editor.dart';
 import 'package:flutter/services.dart';
 
 class ImageTile extends StatelessWidget {
