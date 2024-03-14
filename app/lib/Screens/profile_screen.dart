@@ -259,13 +259,7 @@ class RecentPostsTab extends StatelessWidget {
   }
 
   Color _getRandomColor() {
-    List<Color> colors = [
-      Colors.yellow,
-      Colors.orange,
-      Colors.blue,
-      Colors.pink,
-      Colors.cyan
-    ];
+    var colors = [yellow, orange, blue, babyPink, Cyan];
     return colors[math.Random().nextInt(colors.length)];
   }
 
@@ -303,10 +297,16 @@ class RecentPostsTab extends StatelessWidget {
                   final createdAt =
                       (post['post_timestamp'] as Timestamp?)?.toDate() ??
                           DateTime.now();
-                  List<String> tags = post['tags']?.cast<String>() ?? [];
-                  List<Color> tagColors =
-                      tags.map((_) => _getRandomColor()).toList();
-
+                  List<String> tags = (post['categories'] as String?)
+                          ?.split(',')
+                          .map((tag) => tag.trim())
+                          .toList() ??
+                      [];
+                  Map<String, Color> tagColors = {};
+                  List<Color> assignedColors = tags
+                      .map((tag) =>
+                          tagColors.putIfAbsent(tag, () => _getRandomColor()))
+                      .toList();
                   return PostCard(
                     imagesWithAltText: firstImage != null
                         ? [
@@ -318,7 +318,7 @@ class RecentPostsTab extends StatelessWidget {
                         : [],
                     title: post['title'] ?? 'No Title',
                     tags: tags,
-                    tagColors: tagColors,
+                    tagColors: assignedColors,
                     firstName: user['firstName'] ?? 'Firstname',
                     lastName: user['lastName'] ?? 'Lastname',
                     timeAgo: timeAgoSinceDate(createdAt),
