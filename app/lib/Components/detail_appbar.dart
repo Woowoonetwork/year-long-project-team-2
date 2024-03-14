@@ -9,13 +9,13 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:FoodHood/Screens/photo_gallery_screen.dart';
 import 'package:flutter/services.dart';
 
-class FoodAppBar extends StatefulWidget {
+class DetailAppBar extends StatefulWidget {
   final String postId;
   final bool isFavorite;
   final VoidCallback onFavoritePressed;
   final List<Map<String, String>> imagesWithAltText;
 
-  const FoodAppBar({
+  const DetailAppBar({
     Key? key,
     required this.postId,
     required this.isFavorite,
@@ -24,10 +24,10 @@ class FoodAppBar extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FoodAppBarState createState() => _FoodAppBarState();
+  _DetailAppBarState createState() => _DetailAppBarState();
 }
 
-class _FoodAppBarState extends State<FoodAppBar> {
+class _DetailAppBarState extends State<DetailAppBar> {
   final PageController _pageController = PageController();
 
   bool _showIndicator = false;
@@ -203,22 +203,21 @@ class _FoodAppBarState extends State<FoodAppBar> {
       padding: const EdgeInsets.all(8.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
-        child:  CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: backgroundColor,
-              ),
-              child: CircleAvatar(
-                backgroundColor: Colors.transparent,
-                child: child,
-              ),
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: backgroundColor,
             ),
-            onPressed: onPressed,
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              child: child,
+            ),
           ),
+          onPressed: onPressed,
         ),
-      
+      ),
     );
   }
 

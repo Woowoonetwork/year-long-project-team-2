@@ -1,5 +1,5 @@
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Components/googleMapsWidget.dart';
+import 'package:FoodHood/Components/maps_marker_widget.dart';
 import 'package:FoodHood/Models/CreatePostViewModel.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,7 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:FoodHood/Components/imageTile.dart';
+import 'package:FoodHood/Components/upload_image_tile.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

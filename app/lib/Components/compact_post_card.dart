@@ -1,4 +1,4 @@
-import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
@@ -150,45 +150,35 @@ class CompactPostCard extends StatelessWidget {
   Widget _buildOrderInfoSection(BuildContext context, String avatarUrl) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            CupertinoPageRoute(
-              builder: (context) => PublicProfileScreen(),
-            ),
-          );
-        },
-        child: Row(
-          children: [
-            ClipOval(
-                child: CachedNetworkImage(
-              imageUrl: avatarUrl,
-              width: 20,
-              height: 20,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => CircularProgressIndicator(),
-              errorWidget: (context, url, error) => Image.asset(
-                  'assets/images/sampleProfile.png',
-                  width: 20,
-                  height: 20,
-                  fit: BoxFit.cover),
-            )),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Posted by $firstname $lastname $timeAgo', // Ensure variables `firstname`, `lastname`, and `timeAgo` are defined and accessible
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: CupertinoDynamicColor.resolve(
-                      CupertinoColors.secondaryLabel, context),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
+      child: Row(
+        children: [
+          ClipOval(
+              child: CachedNetworkImage(
+            imageUrl: avatarUrl,
+            width: 20,
+            height: 20,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Image.asset(
+                'assets/images/sampleProfile.png',
+                width: 20,
+                height: 20,
+                fit: BoxFit.cover),
+          )),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Posted by $firstname $lastname $timeAgo', // Ensure variables `firstname`, `lastname`, and `timeAgo` are defined and accessible
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.secondaryLabel, context),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

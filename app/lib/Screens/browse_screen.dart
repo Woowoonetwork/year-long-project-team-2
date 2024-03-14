@@ -18,9 +18,9 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Components/cupertinoSearchNavigationBar.dart';
+import 'package:FoodHood/Components/cupertino_search_navigationBar.dart';
 import 'package:FoodHood/firestore_service.dart';
-import 'package:FoodHood/Components/filtersheet.dart';
+import 'package:FoodHood/Components/filter_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class BrowseScreen extends StatefulWidget {
@@ -140,7 +140,6 @@ class _BrowseScreenState extends State<BrowseScreen>
       }
     });
   }
-
 
   void _debounceKeyboardHandling(bool visible) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();

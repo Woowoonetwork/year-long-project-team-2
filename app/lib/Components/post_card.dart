@@ -8,8 +8,8 @@ import 'package:flutter/services.dart';
 
 class PostCard extends StatelessWidget {
   final List<Map<String, String>> imagesWithAltText;
-  final String firstname;
-  final String lastname;
+  final String firstName;
+  final String lastName;
   final String title;
   final List<String> tags;
   final List<Color> tagColors;
@@ -27,8 +27,8 @@ class PostCard extends StatelessWidget {
     required this.title,
     required this.tags,
     required this.tagColors,
-    required this.firstname,
-    required this.lastname,
+    required this.firstName,
+    required this.lastName,
     required this.timeAgo,
     required this.onTap,
     required this.postId,
@@ -64,11 +64,11 @@ class PostCard extends StatelessWidget {
                 _buildTitleSection(context),
                 if (showTags) ...[
                   _buildTagSection(context),
-                   SizedBox(height: 2),
+                  SizedBox(height: 2),
                 ] else ...[
                   SizedBox(height: 10),
                 ],
-                _buildOrderInfoSection(context, profileURL, firstname, lastname,
+                _buildOrderInfoSection(context, profileURL, firstName, lastName,
                     timeAgo), // Add the order info section
               ],
             ),
@@ -159,7 +159,7 @@ class PostCard extends StatelessWidget {
             child: Wrap(
               alignment: WrapAlignment.start,
               crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: spacing, 
+              spacing: spacing,
               children: tagWidgets,
             ),
           ),

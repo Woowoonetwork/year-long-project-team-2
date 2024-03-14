@@ -3,7 +3,7 @@ import 'package:FoodHood/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:FoodHood/Screens/reset_sent_success.dart';
+import 'package:FoodHood/Screens/reset_sent_screen.dart';
 import '../components.dart'; // Assuming this file contains common UI components
 
 class ForgotPasswordScreen extends StatelessWidget {
