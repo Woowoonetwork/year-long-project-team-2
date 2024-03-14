@@ -380,3 +380,29 @@ N/A.
 ### Additional Information
 
 N/A.
+
+## Term 2 Week 9 (March 4-10)
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w9manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- modified code in register_screen
+- edited code in login screen
+-added functionality to show/hide password on both screens, as well as for confirm password screen for registration screen
+- debugging code
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- edited register_screen code
+- updated code in login screen
+- added buttons to hide/show password in both screens
+- Completed Week 21 individual log.
+
+### Tasks in progress (from Project Board)
+
+- none
+
+### Additional Information
+
+N/A.

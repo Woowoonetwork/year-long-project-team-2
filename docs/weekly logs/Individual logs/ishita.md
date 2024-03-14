@@ -634,3 +634,48 @@ N/A.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Term 2 Week 9: Monday 04th Mar 2024 - Sunday 10th Mar 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W9.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Assisted in discussing the tasks for Peer Testing #2.
+- Discussed the feedback received from Peer Testing #2 and prioritized tasks to address them this week.
+- Fixed the order status bug.
+- Modified the way the data is stored for a user in Firestore.
+- Modified the progress bar with better front-end on the donor screen.
+- Assisted in fixing the async issue on the account screen.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Work on the post status functionality from donor's POV with Jayati and fix donor screen bugs
+    - Modified the progress bar to display the post status on the donor screen.
+    - Modified the data storage for post reservation.
+    - Modified the storage of information in the documents of the user collection to fix the order status bug.
+    - Made a minor change to the category list.
+    - Fixed the data reading on the donor screen to fix the order status bug.
+
+- Complete the T2 W9 team log.
+- Complete the T2 W8=9 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
