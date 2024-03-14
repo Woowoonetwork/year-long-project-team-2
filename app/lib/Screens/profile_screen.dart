@@ -7,7 +7,6 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'dart:async';
 import 'dart:math' as math;
 import 'package:intl/intl.dart';
 
@@ -162,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     groupValue: segmentedControlGroupValue,
                   ),
                 ),
-                contentWidget,
+                SafeArea(top: false, child: contentWidget),
               ],
             ),
           ),

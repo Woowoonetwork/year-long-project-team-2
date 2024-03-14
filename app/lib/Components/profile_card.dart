@@ -116,6 +116,7 @@ class _ProfileCardState extends State<ProfileCard> {
   Widget _profileImage() {
     return CachedNetworkImage(
       imageUrl: photo,
+      fit: BoxFit.fill,
       width: 64,
       height: 64,
       placeholder: (context, url) => const CupertinoActivityIndicator(),
