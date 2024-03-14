@@ -244,14 +244,10 @@ class RecentPostsTab extends StatelessWidget {
             itemCount: recentPosts.length,
             itemBuilder: (context, index) {
               final post = recentPosts[index];
-              final List<Map<String, String>> imagesWithAltText =
-                  (post['imagesWithAltText'] as List<dynamic>?)
-                          ?.map((image) => {
-                                'url': image['url'] as String,
-                                'alt_text': image['alt_text'] as String,
-                              })
-                          .toList() ??
-                      [];
+              final imagesWithAltText = post['images'] as List<dynamic>? ?? [];
+              final firstImage =
+                  imagesWithAltText.isNotEmpty ? imagesWithAltText[0] : null;
+
               final String title = post['title'] ?? 'No Title';
               final List<String> tags = post['tags']?.cast<String>() ?? [];
               final String firstName = post['firstName'] ?? 'Firstname';
@@ -261,7 +257,14 @@ class RecentPostsTab extends StatelessWidget {
               final String profileURL = post['profileURL'] ?? '';
 
               return PostCard(
-                imagesWithAltText: imagesWithAltText,
+                imagesWithAltText: firstImage != null
+                    ? [
+                        {
+                          'url': firstImage['url'],
+                          'alt_text': firstImage['alt_text'] ?? ''
+                        }
+                      ]
+                    : [],
                 title: title,
                 tags: tags,
                 tagColors: tags.map((_) => Colors.transparent).toList(),
