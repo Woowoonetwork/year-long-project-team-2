@@ -7,6 +7,9 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'dart:async';
+import 'dart:math' as math;
+import 'package:intl/intl.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String? userId;
@@ -226,6 +229,46 @@ class AboutSection extends StatelessWidget {
 }
 
 class RecentPostsTab extends StatelessWidget {
+  Future<Map<String, dynamic>> fetchUserDetails(String userId) async {
+    try {
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('user').doc(userId).get();
+      if (userDoc.exists) {
+        return userDoc.data() as Map<String, dynamic>;
+      } else {
+        return {'firstName': 'Unknown', 'lastName': '', 'profileImagePath': ''};
+      }
+    } catch (e) {
+      print('Error fetching user details: $e');
+      return {'firstName': 'Error', 'lastName': '', 'profileImagePath': ''};
+    }
+  }
+
+  String timeAgoSinceDate(DateTime dateTime) {
+    final duration = DateTime.now().difference(dateTime);
+    if (duration.inDays > 7) {
+      return DateFormat('MMMM dd, yyyy').format(dateTime);
+    } else if (duration.inDays >= 1)
+      return '${duration.inDays} day${duration.inDays > 1 ? "s" : ""} ago';
+    else if (duration.inHours >= 1)
+      return '${duration.inHours} hour${duration.inHours > 1 ? "s" : ""} ago';
+    else if (duration.inMinutes >= 1)
+      return '${duration.inMinutes} minute${duration.inMinutes > 1 ? "s" : ""} ago';
+    else
+      return 'just now';
+  }
+
+  Color _getRandomColor() {
+    List<Color> colors = [
+      Colors.yellow,
+      Colors.orange,
+      Colors.blue,
+      Colors.pink,
+      Colors.cyan
+    ];
+    return colors[math.Random().nextInt(colors.length)];
+  }
+
   final List<Map<String, dynamic>> recentPosts;
 
   const RecentPostsTab({Key? key, required this.recentPosts}) : super(key: key);
@@ -244,37 +287,50 @@ class RecentPostsTab extends StatelessWidget {
             itemCount: recentPosts.length,
             itemBuilder: (context, index) {
               final post = recentPosts[index];
-              final imagesWithAltText = post['images'] as List<dynamic>? ?? [];
-              final firstImage =
-                  imagesWithAltText.isNotEmpty ? imagesWithAltText[0] : null;
+              return FutureBuilder<Map<String, dynamic>>(
+                future: fetchUserDetails(post['user_id']),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return SizedBox(
+                        width: 300, child: CupertinoActivityIndicator());
+                  }
+                  final user = snapshot.data!;
+                  final imagesWithAltText =
+                      post['images'] as List<dynamic>? ?? [];
+                  final firstImage = imagesWithAltText.isNotEmpty
+                      ? imagesWithAltText[0]
+                      : null;
+                  final createdAt =
+                      (post['post_timestamp'] as Timestamp?)?.toDate() ??
+                          DateTime.now();
+                  List<String> tags = post['tags']?.cast<String>() ?? [];
+                  List<Color> tagColors =
+                      tags.map((_) => _getRandomColor()).toList();
 
-              final String title = post['title'] ?? 'No Title';
-              final List<String> tags = post['tags']?.cast<String>() ?? [];
-              final String firstName = post['firstName'] ?? 'Firstname';
-              final String lastName = post['lastName'] ?? 'Lastname';
-              final String timeAgo = post['timeAgo'] ?? 'Some time ago';
-              final String postId = post['postId'] ?? '';
-              final String profileURL = post['profileURL'] ?? '';
-
-              return PostCard(
-                imagesWithAltText: firstImage != null
-                    ? [
-                        {
-                          'url': firstImage['url'],
-                          'alt_text': firstImage['alt_text'] ?? ''
-                        }
-                      ]
-                    : [],
-                title: title,
-                tags: tags,
-                tagColors: tags.map((_) => Colors.transparent).toList(),
-                firstName: firstName,
-                lastName: lastName,
-                timeAgo: timeAgo,
-                onTap: (postId) => print('Tapped on post: $postId'),
-                postId: postId,
-                showShadow: true,
-                profileURL: profileURL,
+                  return PostCard(
+                    imagesWithAltText: firstImage != null
+                        ? [
+                            {
+                              'url': firstImage['url'],
+                              'alt_text': firstImage['alt_text'] ?? ''
+                            }
+                          ]
+                        : [],
+                    title: post['title'] ?? 'No Title',
+                    tags: tags,
+                    tagColors: tagColors,
+                    firstName: user['firstName'] ?? 'Firstname',
+                    lastName: user['lastName'] ?? 'Lastname',
+                    timeAgo: timeAgoSinceDate(createdAt),
+                    onTap: (postId) {
+                      print('Tapped on post: $postId');
+                      // Add any additional logic you need when a post is tapped
+                    },
+                    postId: post['postId'] ?? '',
+                    showShadow: true,
+                    profileURL: user['profileImagePath'] ?? '',
+                  );
+                },
               );
             },
           );
