@@ -1,4 +1,3 @@
-import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
@@ -17,14 +16,6 @@ class CompactPostCard extends StatelessWidget {
   final String postId;
   final profileURL; // New parameter to store the profile image URL
   final bool showTags; // New parameter to indicate whether to show tags or not
-
-  // Define your colors here
-  final List<Color> colors = [
-    Colors.lightGreenAccent, // Light Green
-    Colors.lightBlueAccent, // Light Blue
-    Colors.pinkAccent[100]!, // Light Pink
-    Colors.yellowAccent[100]! // Light Yellow
-  ];
 
   CompactPostCard({
     Key? key,

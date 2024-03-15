@@ -64,7 +64,7 @@ class _DetailAppBarState extends State<DetailAppBar> {
       scrolledUnderElevation: 0.0,
       backgroundColor:
           CupertinoDynamicColor.resolve(detailsBackgroundColor, context),
-      expandedHeight: 340,
+      expandedHeight: 260,
       elevation: 0,
       pinned: true,
       stretch: true,
@@ -76,7 +76,7 @@ class _DetailAppBarState extends State<DetailAppBar> {
             _buildBackgroundImage(),
             AnimatedOpacity(
               opacity: _showIndicator ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 500),
+              duration: Duration(milliseconds: 400),
               child: _buildPageIndicator(
                   _pageController,
                   CupertinoDynamicColor.resolve(detailsBackgroundColor, context)
@@ -101,9 +101,8 @@ class _DetailAppBarState extends State<DetailAppBar> {
             onPressed: () =>
                 {HapticFeedback.selectionClick(), Navigator.of(context).pop()}),
       ),
-      CupertinoColors.secondarySystemBackground
-          .resolveFrom(context)
-          .withOpacity(0.8),
+      CupertinoDynamicColor.resolve(
+              detailsBackgroundColor, context).withOpacity(0.8),
       () => Navigator.of(context).pop(),
     );
   }
@@ -167,17 +166,16 @@ class _DetailAppBarState extends State<DetailAppBar> {
   Widget _buildFavoriteButton(BuildContext context) {
     return blurEffect(
       Icon(
-        widget.isFavorite ? Icons.bookmark : Icons.bookmark_add_outlined,
+        widget.isFavorite ? Icons.bookmark : Icons.bookmark_outline_outlined,
         size: 18,
         color: widget.isFavorite
             ? CupertinoColors.systemOrange
             : CupertinoColors.label.resolveFrom(context),
       ),
-      CupertinoColors.secondarySystemBackground
-          .resolveFrom(context)
-          .withOpacity(0.8),
+       CupertinoDynamicColor.resolve(
+              detailsBackgroundColor, context).withOpacity(0.8),
       () async {
-        HapticFeedback.lightImpact(); // Add haptic feedback here
+        HapticFeedback.selectionClick(); // Add haptic feedback here
         widget.onFavoritePressed();
       },
     );
@@ -187,11 +185,10 @@ class _DetailAppBarState extends State<DetailAppBar> {
     return blurEffect(
       Icon(FeatherIcons.share,
           size: 18, color: CupertinoColors.label.resolveFrom(context)),
-      CupertinoColors.secondarySystemBackground
-          .resolveFrom(context)
-          .withOpacity(0.8),
+       CupertinoDynamicColor.resolve(
+              detailsBackgroundColor, context).withOpacity(0.8),
       () async {
-        HapticFeedback.lightImpact(); // Add haptic feedback here
+        HapticFeedback.selectionClick(); // Add haptic feedback here
         Share.share('Check out this food post!');
       },
     );
@@ -200,7 +197,7 @@ class _DetailAppBarState extends State<DetailAppBar> {
   Widget blurEffect(
       Widget child, Color backgroundColor, VoidCallback onPressed) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(4.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
         child: CupertinoButton(

@@ -9,6 +9,7 @@ import 'package:FoodHood/Screens/login_screen.dart';
 import 'package:FoodHood/Screens/navigation_screen.dart';
 import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 //import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -59,6 +60,7 @@ class FoodHoodApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
+      builder: FToastBuilder(),
       localizationsDelegates: [
         DefaultCupertinoLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,

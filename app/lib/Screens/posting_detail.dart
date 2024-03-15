@@ -1,25 +1,22 @@
-import 'package:FoodHood/Screens/message_screen.dart';
+import 'package:FoodHood/Components/pickup_info_card.dart';
+import 'package:FoodHood/Components/reserve_button.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/detail_appbar.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:intl/intl.dart';
-import 'package:FoodHood/Components/cupertino_snackbar.dart';
-import 'package:FoodHood/Screens/donee_pathway_uno.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:FoodHood/Components/toaster.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/profile_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'dart:io' show Platform;
-import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
-  const PostDetailView({Key? key, required this.postId}) : super(key: key);
+  PostDetailView({Key? key, required this.postId}) : super(key: key);
 
   @override
   _PostDetailViewState createState() => _PostDetailViewState();
@@ -27,17 +24,16 @@ class PostDetailView extends StatefulWidget {
 
 class _PostDetailViewState extends State<PostDetailView> {
   late PostDetailViewModel viewModel;
-  AnimationController? _animationController;
-  bool isLoading = true; // Added to track loading status
   late String userID;
-  bool isReserved = false;
   final GlobalKey _pickupInfoKey = GlobalKey();
   final GlobalKey _allergensSectionKey = GlobalKey();
-
-  // Method to initialize userID
+  AnimationController? _animationController;
+  bool isLoading = true;
+  bool isReserved = false;
+  BitmapDescriptor? defaultIcon;
   void initializeUserId() {
     final user = FirebaseAuth.instance.currentUser;
-    userID = user?.uid ?? 'default uid'; // Initialize userId here
+    userID = user!.uid;
   }
 
   @override
@@ -45,7 +41,6 @@ class _PostDetailViewState extends State<PostDetailView> {
     super.initState();
     initializeUserId();
     viewModel = PostDetailViewModel(widget.postId);
-
     viewModel.fetchData(widget.postId).then((_) {
       setState(() {
         isLoading = false;
@@ -54,13 +49,6 @@ class _PostDetailViewState extends State<PostDetailView> {
     });
   }
 
-// Define your colors here
-  final List<Color> colors = [
-    Colors.lightGreenAccent, // Light Green
-    Colors.lightBlueAccent, // Light Blue
-    Colors.pinkAccent[100]!, // Light Pink
-    Colors.yellowAccent[100]! // Light Yellow
-  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,7 +79,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                   DetailAppBar(
                     postId: widget.postId,
                     isFavorite: viewModel.isFavorite,
-                    onFavoritePressed: _handleFavoritePressed,
+                    onFavoritePressed: () => _handleFavoritePressed(context),
                     imagesWithAltText: viewModel
                         .imagesWithAltText, // Pass the images with alt text
                   ),
@@ -101,16 +89,15 @@ class _PostDetailViewState extends State<PostDetailView> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildPostTitleSection(),
-                            const SizedBox(height: 16),
-                            _buildDescription(),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 24),
+                            _buildTitleDescription(),
+                            SizedBox(height: 16),
                             _buildInfoCards(),
                             _buildPickupInformation(),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             _buildAllergensSection(),
-                            const SizedBox(height: 16),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
+                            SizedBox(height: 16),
                           ],
                         ),
                       ],
@@ -139,30 +126,18 @@ class _PostDetailViewState extends State<PostDetailView> {
     );
   }
 
-  void _handleFavoritePressed() async {
+  void _handleFavoritePressed(BuildContext context) async {
     setState(() {
       viewModel.isFavorite = !viewModel.isFavorite;
     });
-    HapticFeedback.lightImpact(); // Add this line
+    HapticFeedback.lightImpact();
 
     if (viewModel.isFavorite) {
       await viewModel.savePost(widget.postId);
-      showCupertinoSnackbar(
-        context,
-        '"${viewModel.title}" has been added to your bookmarks',
-        accentColor,
-        Icon(FeatherIcons.check, color: Colors.white),
-        _reverseAnimation, // Pass _reverseAnimation as the callback
-      );
+      Toaster.show(context, 'Saved ${viewModel.title} to bookmarks');
     } else {
       await viewModel.unsavePost(widget.postId);
-      showCupertinoSnackbar(
-        context,
-        '"${viewModel.title}" has been removed from your bookmarks',
-        yellow,
-        Icon(FeatherIcons.x, color: Colors.white),
-        _reverseAnimation,
-      );
+      Toaster.show(context, 'Removed ${viewModel.title} from bookmarks');
     }
   }
 
@@ -170,52 +145,24 @@ class _PostDetailViewState extends State<PostDetailView> {
     _animationController?.reverse();
   }
 
-  void showCupertinoSnackbar(BuildContext context, String message,
-      Color backgroundColor, Icon trailingIcon, VoidCallback onSnackbarClosed) {
-    var overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: 60,
-        left: 0,
-        right: 0,
-        child: CupertinoSnackbar(
-          message: message,
-          backgroundColor: backgroundColor,
-          trailingIcon: trailingIcon,
-        ),
-      ),
-    );
-
-    Overlay.of(context).insert(overlayEntry);
-
-    Future.delayed(Duration(seconds: 2), () {
-      overlayEntry.remove();
-      onSnackbarClosed();
-    });
-  }
-
   Widget _buildPostTitleSection() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Text(
-              viewModel.title, // Updated to use viewModel
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: CupertinoColors.label.resolveFrom(context),
-                height: 1.2,
-                letterSpacing: -1.45,
-                fontSize: 28,
-              ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Text(
+            viewModel.title,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: CupertinoColors.label.resolveFrom(context),
+              letterSpacing: -1.45,
+              fontSize: 28,
             ),
           ),
-          AvailabilityIndicator(
-              isReserved: isReserved), // Placeholder, update as needed
-        ],
-      ),
+        ),
+        AvailabilityIndicator(isReserved: isReserved),
+      ],
     );
   }
 
@@ -224,75 +171,49 @@ class _PostDetailViewState extends State<PostDetailView> {
     return availableColors[index % availableColors.length];
   }
 
-  Widget _buildDescription() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            viewModel.description, // Updated to use viewModel
-            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                  color: CupertinoColors.label
-                      .resolveFrom(context)
-                      .withOpacity(0.6), // Corrected opacity usage
-                  letterSpacing: -0.62,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-
-          const SizedBox(height: 12),
-          _buildTagSection(context), // Updated to use viewModel
-          const SizedBox(height: 12),
-          InfoRow(
-            firstName: viewModel.firstName,
-            lastName: viewModel.lastName,
-            postTimestamp: viewModel.postTimestamp,
-            viewModel: viewModel, // Pass the viewModel to InfoRow
-          ),
-        ],
-      ),
-    );
+  Widget _buildTitleDescription() {
+    return Container(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildPostTitleSection(),
+            SizedBox(height: 12),
+            Text(
+              viewModel.description,
+              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                    color: CupertinoColors.label
+                        .resolveFrom(context)
+                        .withOpacity(0.6),
+                    letterSpacing: -0.62,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            SizedBox(height: 12),
+            _buildTagSection(context),
+            SizedBox(height: 12),
+            InfoRow(
+              firstName: viewModel.firstName,
+              lastName: viewModel.lastName,
+              postTimestamp: viewModel.postTimestamp,
+              viewModel: viewModel,
+            ),
+          ],
+        ));
   }
 
   Widget _buildTagSection(BuildContext context) {
-    const double horizontalSpacing = 7.0; // Spacing between tags horizontally
-    const double runSpacing = 8.0; // Spacing between lines of tags
+    const double horizontalSpacing = 7.0;
+    const double runSpacing = 8.0;
 
     return Wrap(
-      spacing: horizontalSpacing, // Horizontal spacing between tags
-      runSpacing: runSpacing, // Vertical spacing between lines of tags
+      spacing: horizontalSpacing,
+      runSpacing: runSpacing,
       children: List<Widget>.generate(viewModel.tags.length, (index) {
-        return Container(
-          margin: const EdgeInsets.only(
-              top:
-                  4), // Optional: adds margin to the top of each tag for better spacing
-          child: _buildTag(
-              viewModel.tags[index], _generateTagColor(index), context),
-        );
+        return Tag(
+            text: viewModel.tags[index], color: _generateTagColor(index));
       }),
-    );
-  }
-
-  Widget _buildTag(String text, Color color, BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: CupertinoDynamicColor.resolve(color, context),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color.computeLuminance() > 0.5
-              ? CupertinoColors.black
-              : CupertinoColors.white,
-          fontSize: 10,
-          letterSpacing: -0.40,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 
@@ -402,30 +323,177 @@ class InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: GestureDetector(
-      onTap: () => _navigateToPublicProfile(context),
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          CupertinoPageRoute(
+              builder: (context) => ProfileScreen(userId: viewModel.userid)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              child: ClipOval(
+                child: viewModel.profileURL.isNotEmpty &&
+                        viewModel.profileURL.startsWith('http')
+                    ? CachedNetworkImage(
+                        imageUrl: viewModel.profileURL, fit: BoxFit.cover)
+                    : Image.asset('assets/images/sampleProfile.png',
+                        fit: BoxFit.cover),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Row(
+                children: [
+                  Text(
+                    'Posted by $firstName $lastName  ${viewModel.timeAgoSinceDate(postTimestamp)}',
+                    style: TextStyle(
+                      color: CupertinoColors.label
+                          .resolveFrom(context)
+                          .withOpacity(0.8),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.48,
+                    ),
+                  ),
+                  const SizedBox(width: 3),
+                  Icon(Icons.star, color: secondaryColor, size: 14),
+                  Text(
+                    '${viewModel.rating} Rating',
+                    style: TextStyle(
+                      overflow: TextOverflow.fade,
+                      color: CupertinoColors.label
+                          .resolveFrom(context)
+                          .withOpacity(0.8),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.48,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class InfoCardsRow extends StatelessWidget {
+  final DateTime expirationDate;
+  final DateTime pickupTime;
+  final String allergens;
+  final VoidCallback? onTapPickupTime;
+  final VoidCallback? onTapAllergens;
+
+  const InfoCardsRow({
+    Key? key,
+    required this.expirationDate,
+    required this.pickupTime,
+    required this.allergens,
+    this.onTapPickupTime,
+    this.onTapAllergens,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    String formattedExp = DateFormat('d MMM yyyy').format(expirationDate);
+    String formattedPick = DateFormat('h:mm a').format(pickupTime);
+    int allergenCount = allergens.isEmpty ? 0 : allergens.split(',').length;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      scrollDirection: Axis.horizontal,
       child: Row(
-        children: [
-          IconPlaceholder(imageUrl: viewModel.profileURL),
-          const SizedBox(width: 8),
-          Expanded(
-            child: CombinedTexts(
-              firstName: firstName,
-              lastName: lastName,
-              postTimestamp: postTimestamp,
-              viewModel: viewModel,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          buildInfoCard(
+            icon: FeatherIcons.meh,
+            title: 'Expiration Date',
+            subtitle: formattedExp,
+            context: context,
+            color: CupertinoColors.systemRed,
+          ),
+          const SizedBox(width: 16),
+          GestureDetector(
+            onTap: onTapPickupTime, // Use the callback here
+            child: buildInfoCard(
+              icon: FeatherIcons.shoppingBag,
+              title: 'Pickup Time',
+              subtitle: formattedPick,
+              context: context,
+              color: blue,
+            ),
+          ),
+          const SizedBox(width: 16),
+          GestureDetector(
+            onTap: onTapAllergens, // Use the callback here
+            child: buildInfoCard(
+              icon: FeatherIcons.alertCircle,
+              title: 'Allergens',
+              subtitle: allergenCount == 0 ? 'None' : '$allergenCount Total',
+              context: context,
+              color: yellow,
             ),
           ),
         ],
       ),
-    ));
+    );
   }
 
-  void _navigateToPublicProfile(BuildContext context) {
-    Navigator.push(
-      context,
-      CupertinoPageRoute(
-        builder: (context) => ProfileScreen(userId: viewModel.userid),
+  Widget buildInfoCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required BuildContext context,
+    required Color color,
+  }) {
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x19000000),
+            blurRadius: 20,
+            offset: Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(icon, color: color, size: 26),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: CupertinoColors.label.resolveFrom(context),
+                letterSpacing: -0.84,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 14,
+                color: CupertinoColors.systemGrey.resolveFrom(context),
+                letterSpacing: -0.84,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -558,344 +626,33 @@ class RatingText extends StatelessWidget {
   }
 }
 
-class InfoCardsRow extends StatelessWidget {
-  final DateTime expirationDate;
-  final DateTime pickupTime;
-  final String allergens;
-  final VoidCallback? onTapPickupTime;
-  final VoidCallback? onTapAllergens;
+class Tag extends StatelessWidget {
+  final String text;
+  final Color color;
 
-  const InfoCardsRow({
-    Key? key,
-    required this.expirationDate,
-    required this.pickupTime,
-    required this.allergens,
-    this.onTapPickupTime,
-    this.onTapAllergens,
-  }) : super(key: key);
+  const Tag({Key? key, required this.text, required this.color})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    String formattedExp = DateFormat('d MMM yyyy').format(expirationDate);
-    String formattedPick = DateFormat('h:mm a').format(pickupTime);
-    int allergenCount = allergens.isEmpty ? 0 : allergens.split(',').length;
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          buildInfoCard(
-            icon: FeatherIcons.meh,
-            title: 'Expiration Date',
-            subtitle: formattedExp,
-            context: context,
-            color: CupertinoColors.systemRed,
-          ),
-          const SizedBox(width: 16),
-          GestureDetector(
-            onTap: onTapPickupTime, // Use the callback here
-            child: buildInfoCard(
-              icon: FeatherIcons.shoppingBag,
-              title: 'Pickup Time',
-              subtitle: formattedPick,
-              context: context,
-              color: blue,
-            ),
-          ),
-          const SizedBox(width: 16),
-          GestureDetector(
-            onTap: onTapAllergens, // Use the callback here
-            child: buildInfoCard(
-              icon: FeatherIcons.alertCircle,
-              title: 'Allergens',
-              subtitle: allergenCount == 0 ? 'None' : '$allergenCount Total',
-              context: context,
-              color: yellow,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildInfoCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required BuildContext context,
-    required Color color,
-  }) {
     return Container(
-      width: 120,
-      height: 120,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x19000000),
-            blurRadius: 20,
-            offset: Offset(0, 0),
-          ),
-        ],
+        color: CupertinoDynamicColor.resolve(color, context),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Icon(icon, color: color, size: 26),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                color: CupertinoColors.label.resolveFrom(context),
-                letterSpacing: -0.84,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: CupertinoColors.systemGrey.resolveFrom(context),
-                letterSpacing: -0.84,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PickupInformation extends StatelessWidget {
-  final String pickupTime;
-  final String pickupLocation;
-  final String meetingPoint;
-  final String additionalInfo;
-  final LatLng? locationCoordinates;
-  final PostDetailViewModel viewModel;
-
-  const PickupInformation({
-    Key? key,
-    required this.pickupTime,
-    required this.pickupLocation,
-    required this.meetingPoint,
-    required this.additionalInfo,
-    this.locationCoordinates,
-    required this.viewModel,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          _buildHeader(context),
-          _buildInfoCard(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(bottom: 22),
       child: Text(
-        'Pickup Information',
+        text,
         style: TextStyle(
-          color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
-          fontSize: 20,
+          color: color.computeLuminance() > 0.5
+              ? CupertinoColors.black
+              : CupertinoColors.white,
+          fontSize: 10,
+          letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
-          letterSpacing: -0.70,
         ),
       ),
     );
-  }
-
-  Widget _buildInfoCard(BuildContext context) {
-    return Container(
-      decoration: _cardDecoration(context),
-      child: Column(
-        children: [
-          _buildMap(context),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Column(
-              children: [
-                _buildDetails(context),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  BoxDecoration _cardDecoration(BuildContext context) {
-    return BoxDecoration(
-      color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: const Color(0x19000000),
-          blurRadius: 20,
-          offset: const Offset(0, 0),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMap(BuildContext context) {
-    final LatLng? locationCoordinates = viewModel.pickupLatLng;
-
-    if (locationCoordinates != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-        child: SizedBox(
-          width: double.infinity,
-          height: 188.0,
-          child: GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: locationCoordinates,
-              zoom: 16.0,
-            ),
-            markers: Set.from([
-              Marker(
-                markerId: MarkerId('pickupLocation'),
-                position: locationCoordinates,
-              ),
-            ]),
-            zoomControlsEnabled: false,
-            scrollGesturesEnabled: false,
-            rotateGesturesEnabled: false,
-            tiltGesturesEnabled: false,
-            zoomGesturesEnabled: false,
-            myLocationEnabled: false,
-            mapType: MapType.normal,
-            myLocationButtonEnabled: false,
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        width: double.infinity,
-        height: 200.0,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-          color: CupertinoColors.systemGrey4,
-        ),
-        alignment: Alignment.center,
-        child: Text('Map Placeholder'),
-      );
-    }
-  }
-
-  Widget _buildDetails(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomInfoTile(title: 'Pickup Time', subtitle: pickupTime),
-        CustomInfoTile(
-            title: 'Pickup Location', subtitle: viewModel.pickupLocation),
-        const SizedBox(height: 12),
-        _buildAdditionalInfo(context),
-        const SizedBox(height: 12),
-        _buildButtonBar(context),
-      ],
-    );
-  }
-
-  Widget _buildAdditionalInfo(BuildContext context) {
-    return Row(
-      children: [
-        Padding(
-          padding: EdgeInsets.only(right: 8.0),
-          child: Container(
-            width: 30.0,
-            height: 30.0,
-            // use cached network image to load the image
-            child: //clipoval
-                IconPlaceholder(imageUrl: viewModel.profileURL),
-          ),
-        ),
-        Expanded(
-          child: MessageBox(context: context, text: additionalInfo),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildButtonBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Expanded(
-            child: InfoButton(
-              context: context,
-              text: 'Ask for more info',
-              icon: FeatherIcons.messageCircle,
-              iconColor: CupertinoColors.label.resolveFrom(context),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                      builder: (context) =>
-                          MessageScreenPage()), // Adjust according to your MessageScreenPage's constructor
-                );
-              },
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: InfoButton(
-              context: context,
-              text: 'Navigate Here',
-              icon: FeatherIcons.arrowUpRight,
-              iconColor: CupertinoColors.label.resolveFrom(context),
-              onPressed: () => _launchMapUrl(viewModel.pickupLatLng),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-Future<void> _launchMapUrl(LatLng locationCoordinates) async {
-  final String googleMapsUrl =
-      'https://www.google.com/maps/search/?api=1&query=${locationCoordinates.latitude},${locationCoordinates.longitude}';
-  final String appleMapsUrl =
-      'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}';
-
-  HapticFeedback.selectionClick();
-  // Check if the device is running on iOS
-  if (Platform.isIOS) {
-    // Attempt to open Apple Maps
-    if (await canLaunch(appleMapsUrl)) {
-      await launch(appleMapsUrl);
-    } else {
-      throw 'Could not launch $appleMapsUrl';
-    }
-  } else {
-    // Attempt to open Google Maps or the default map application on other devices
-    if (await canLaunch(googleMapsUrl)) {
-      await launch(googleMapsUrl);
-    } else {
-      throw 'Could not launch $googleMapsUrl';
-    }
   }
 }
 
@@ -1002,7 +759,7 @@ class InfoButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: iconColor),
+          Icon(icon, size: 14, color: iconColor),
           SizedBox(width: 8),
           Text(
             text,
@@ -1095,115 +852,6 @@ class AllergensSection extends StatelessWidget {
           ),
         )),
       ],
-    );
-  }
-}
-
-class ReserveButton extends StatefulWidget {
-  final bool isReserved;
-  final String postId;
-  final String userId;
-
-  const ReserveButton({
-    Key? key,
-    required this.isReserved,
-    required this.postId,
-    required this.userId,
-  }) : super(key: key);
-
-  @override
-  _ReserveButtonState createState() => _ReserveButtonState();
-}
-
-class _ReserveButtonState extends State<ReserveButton> {
-  late bool _isReserved;
-
-  @override
-  void initState() {
-    super.initState();
-    _isReserved = widget.isReserved;
-  }
-
-  void _handleReservation() async {
-    if (!_isReserved) {
-      HapticFeedback.mediumImpact();
-      try {
-        // Add a reserved_by field and update the post status in the post detail document
-        await FirebaseFirestore.instance
-            .collection('post_details')
-            .doc(widget.postId)
-            .update({'reserved_by': widget.userId, 'post_status': "pending"});
-
-        // Get the current reserved posts of the user
-        DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-            .collection('user')
-            .doc(widget.userId)
-            .get();
-
-        Map<String, dynamic>? userData =
-            userSnapshot.data() as Map<String, dynamic>?;
-
-        if (userData != null) {
-          // Initialize reserved_posts as an empty list if it doesn't exist
-          List<String> reservedPosts =
-              List<String>.from(userData['reserved_posts'] ?? []);
-
-          // Append the postId to the reserved_posts list
-          reservedPosts.add(widget.postId);
-
-          // Update the user document with the new reserved_posts list
-          await FirebaseFirestore.instance
-              .collection('user')
-              .doc(widget.userId)
-              .set({'reserved_posts': reservedPosts}, SetOptions(merge: true));
-        }
-
-        setState(() {
-          _isReserved = true;
-        });
-      } catch (error) {
-        print('Error reserving post: $error');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to reserve post. Please try again.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: CupertinoButton(
-        color: _isReserved
-            ? accentColor.resolveFrom(context).withOpacity(0.2)
-            : accentColor,
-        padding: const EdgeInsets.all(16),
-        borderRadius: BorderRadius.circular(14),
-        child: Text(
-          _isReserved ? 'Reserve' : 'Reserve',
-          style: TextStyle(
-            color: _isReserved ? accentColor : CupertinoColors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.90,
-          ),
-        ),
-        onPressed: () {
-          if (!_isReserved) {
-            _handleReservation();
-          }
-          Navigator.push(
-            context,
-            CupertinoPageRoute(
-                builder: (context) => DoneePath(
-                      postId: widget.postId,
-                    )),
-          );
-        },
-      ),
     );
   }
 }
