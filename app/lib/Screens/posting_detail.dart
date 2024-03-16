@@ -30,6 +30,7 @@ class _PostDetailViewState extends State<PostDetailView> {
   AnimationController? _animationController;
   bool isLoading = true;
   bool isReserved = false;
+  bool _isTagSectionExpanded = false;
   BitmapDescriptor? defaultIcon;
   void initializeUserId() {
     final user = FirebaseAuth.instance.currentUser;
@@ -54,15 +55,7 @@ class _PostDetailViewState extends State<PostDetailView> {
     return Scaffold(
       backgroundColor:
           CupertinoDynamicColor.resolve(detailsBackgroundColor, context),
-      body: isLoading ? _buildLoadingScreen() : _buildContent(context),
-    );
-  }
-
-  Widget _buildLoadingScreen() {
-    return Center(
-      child: CupertinoActivityIndicator(
-        radius: 16,
-      ),
+      body: _buildContent(context),
     );
   }
 
@@ -191,7 +184,7 @@ class _PostDetailViewState extends State<PostDetailView> {
                   ),
             ),
             SizedBox(height: 12),
-            _buildTagSection(context),
+            buildTagSection(context),
             SizedBox(height: 12),
             InfoRow(
               firstName: viewModel.firstName,
@@ -203,17 +196,66 @@ class _PostDetailViewState extends State<PostDetailView> {
         ));
   }
 
-  Widget _buildTagSection(BuildContext context) {
-    const double horizontalSpacing = 7.0;
-    const double runSpacing = 8.0;
+  List<Widget> buildVisibleTags(BuildContext context) {
+    // Ensure that we don't try to display more tags than we have
+    final int visibleCount = _isTagSectionExpanded
+        ? viewModel.tags.length
+        : (viewModel.tags.length < 4 ? viewModel.tags.length : 4);
 
-    return Wrap(
-      spacing: horizontalSpacing,
-      runSpacing: runSpacing,
-      children: List<Widget>.generate(viewModel.tags.length, (index) {
-        return Tag(
-            text: viewModel.tags[index], color: _generateTagColor(index));
-      }),
+    final List<Widget> visibleTags = List<Widget>.generate(
+      visibleCount,
+      (i) => Padding(
+        padding: EdgeInsets.only(right: i < visibleCount - 1 ? 7.0 : 0),
+        child: Tag(
+          text: viewModel.tags[i],
+          color:
+              _generateTagColor(i), // Assume this method is defined elsewhere
+        ),
+      ),
+    );
+    return visibleTags;
+  }
+
+  Widget buildTagSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: () =>
+              setState(() => _isTagSectionExpanded = !_isTagSectionExpanded),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                  height: _isTagSectionExpanded ? null : 22,
+                  child: Wrap(
+                    spacing: 2.0,
+                    runSpacing: 6.0,
+                    alignment: WrapAlignment.start,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: buildVisibleTags(context),
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: viewModel.tags.length > 4,
+                child: Icon(
+                  _isTagSectionExpanded
+                      ? FeatherIcons.chevronUp
+                      : FeatherIcons.chevronDown,
+                  size: 20,
+                  color: CupertinoColors.systemGrey.resolveFrom(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -338,7 +380,16 @@ class InfoRow extends StatelessWidget {
                 child: viewModel.profileURL.isNotEmpty &&
                         viewModel.profileURL.startsWith('http')
                     ? CachedNetworkImage(
-                        imageUrl: viewModel.profileURL, fit: BoxFit.cover)
+                        imageUrl: viewModel.profileURL,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
+                        maxHeightDiskCache:
+                            200, // Set maximum height for disk caching
+                        maxWidthDiskCache:
+                            200, // Set maximum width for disk caching
+                      )
                     : Image.asset('assets/images/sampleProfile.png',
                         fit: BoxFit.cover),
               ),

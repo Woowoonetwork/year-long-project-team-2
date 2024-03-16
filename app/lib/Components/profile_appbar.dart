@@ -262,7 +262,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                       child: Text('Edit Profile'),
                       onPressed: () {
                         HapticFeedback.mediumImpact();
-                         Navigator.pop(context);
+                        Navigator.pop(context);
                         Navigator.of(context).push(
                           CupertinoPageRoute(
                             builder: (context) => EditProfileScreen(),

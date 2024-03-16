@@ -415,32 +415,3 @@ class RatingText extends StatelessWidget {
 }
 
 
-class Tag extends StatelessWidget {
-  final String text;
-  final Color color;
-
-  const Tag({Key? key, required this.text, required this.color})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: CupertinoDynamicColor.resolve(color, context),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color.computeLuminance() > 0.5
-              ? CupertinoColors.black
-              : CupertinoColors.white,
-          fontSize: 10,
-          letterSpacing: -0.40,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}

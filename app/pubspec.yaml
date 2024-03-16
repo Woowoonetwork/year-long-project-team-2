@@ -82,6 +82,9 @@ dependencies:
   statusbarz: ^1.0.14
   toastification: ^1.2.1
   fluttertoast: ^8.2.4
+  skeletonizer: ^1.1.0
+  ionicons: ^0.2.2
+  sf_symbols: ^0.2.0
 
 dev_dependencies:
   flutter_test:

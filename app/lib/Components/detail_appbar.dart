@@ -64,7 +64,7 @@ class _DetailAppBarState extends State<DetailAppBar> {
       scrolledUnderElevation: 0.0,
       backgroundColor:
           CupertinoDynamicColor.resolve(detailsBackgroundColor, context),
-      expandedHeight: 260,
+      expandedHeight: 280,
       elevation: 0,
       pinned: true,
       stretch: true,
