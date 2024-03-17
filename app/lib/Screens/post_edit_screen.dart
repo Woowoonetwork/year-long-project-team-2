@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/maps_marker_widget.dart';
 import 'package:FoodHood/Models/CreatePostViewModel.dart';
@@ -20,9 +22,7 @@ enum SectionType { date, time }
 
 class EditPostScreen extends StatefulWidget {
   final String postId;
-
   const EditPostScreen({super.key, required this.postId});
-
   @override
   _EditPostScreenState createState() => _EditPostScreenState();
 }
@@ -81,7 +81,7 @@ class _EditPostScreenState extends State<EditPostScreen>
 
         if (postData?.containsKey('images') == true &&
             postData?['images'] is List) {
-          _selectedImagesWithAltText.clear(); // Clear existing entries
+          _selectedImagesWithAltText.clear();
 
           List<dynamic> images = postData!['images'];
           for (var imageMap in images) {
@@ -161,6 +161,17 @@ class _EditPostScreenState extends State<EditPostScreen>
     }
     _showLoadingDialog(context, "Saving Post...");
 
+    Map<String, String> updatedImagesWithAltText = {};
+    for (var entry in _selectedImagesWithAltText.entries) {
+      if (entry.key.startsWith('/')) {
+        String? imageUrl = await viewModel.uploadImage(File(entry.key));
+        if (imageUrl != null) {
+          updatedImagesWithAltText[imageUrl] = entry.value;
+        }
+      } else {
+        updatedImagesWithAltText[entry.key] = entry.value;
+      }
+    }
     try {
       bool success = await viewModel.updatePost(
         postId: widget.postId,
@@ -172,8 +183,7 @@ class _EditPostScreenState extends State<EditPostScreen>
         pickupInstructions: pickupInstrController.text,
         pickupTime: selectedTime,
         postLocation: selectedLocation!,
-        imageUrlsWithAltText:
-            _selectedImagesWithAltText, // Adjust as necessary for image handling
+        imageUrlsWithAltText: updatedImagesWithAltText,
       );
 
       if (success) {
