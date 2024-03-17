@@ -116,9 +116,11 @@ class _ProfileCardState extends State<ProfileCard> {
   Widget _profileImage() {
     return CachedNetworkImage(
       imageUrl: photo,
-      fit: BoxFit.fill,
+      fit: BoxFit.cover,
       width: 64,
       height: 64,
+      maxHeightDiskCache: 200, // Set maximum height for disk caching
+      maxWidthDiskCache: 200, // Set maximum width for disk caching
       placeholder: (context, url) => const CupertinoActivityIndicator(),
       errorWidget: (context, url, error) => Image.asset(
         'assets/images/sampleProfile.png',

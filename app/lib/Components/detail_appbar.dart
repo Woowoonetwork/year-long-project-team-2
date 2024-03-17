@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:FoodHood/Screens/photo_gallery_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 class DetailAppBar extends StatefulWidget {
   final String postId;
@@ -43,6 +44,30 @@ class _DetailAppBarState extends State<DetailAppBar> {
     _pageController.removeListener(_scrollListener);
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> shareDynamicLink() async {
+    final Uri dynamicLink = await createDynamicLink(widget.postId);
+    Share.share(dynamicLink.toString());
+  }
+
+  // Method to create a dynamic link
+  Future<Uri> createDynamicLink(String postId) async {
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      uriPrefix: 'https://foodhood.page.link',
+      link: Uri.parse('https://foodhood.page.link/post/$postId'),
+      androidParameters: AndroidParameters(
+        packageName: 'com.example.foodhood',
+        minimumVersion: 1,
+      ),
+      iosParameters: const IOSParameters(bundleId: 'com.example.foodhood'),
+    );
+
+    final ShortDynamicLink shortDynamicLink =
+        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+    final Uri dynamicUrl = shortDynamicLink.shortUrl;
+
+    return dynamicUrl;
   }
 
   void _scrollListener() {
@@ -101,8 +126,8 @@ class _DetailAppBarState extends State<DetailAppBar> {
             onPressed: () =>
                 {HapticFeedback.selectionClick(), Navigator.of(context).pop()}),
       ),
-      CupertinoDynamicColor.resolve(
-              detailsBackgroundColor, context).withOpacity(0.8),
+      CupertinoDynamicColor.resolve(detailsBackgroundColor, context)
+          .withOpacity(0.8),
       () => Navigator.of(context).pop(),
     );
   }
@@ -172,8 +197,8 @@ class _DetailAppBarState extends State<DetailAppBar> {
             ? CupertinoColors.systemOrange
             : CupertinoColors.label.resolveFrom(context),
       ),
-       CupertinoDynamicColor.resolve(
-              detailsBackgroundColor, context).withOpacity(0.8),
+      CupertinoDynamicColor.resolve(detailsBackgroundColor, context)
+          .withOpacity(0.8),
       () async {
         HapticFeedback.selectionClick(); // Add haptic feedback here
         widget.onFavoritePressed();
@@ -181,18 +206,21 @@ class _DetailAppBarState extends State<DetailAppBar> {
     );
   }
 
-  Widget _buildShareButton(BuildContext context) {
-    return blurEffect(
-      Icon(FeatherIcons.share,
-          size: 18, color: CupertinoColors.label.resolveFrom(context)),
-       CupertinoDynamicColor.resolve(
-              detailsBackgroundColor, context).withOpacity(0.8),
-      () async {
-        HapticFeedback.selectionClick(); // Add haptic feedback here
-        Share.share('Check out this food post!');
-      },
-    );
-  }
+ Widget _buildShareButton(BuildContext context) {
+  return blurEffect(
+    Icon(FeatherIcons.share, size: 18, color: CupertinoColors.label.resolveFrom(context)),
+    CupertinoDynamicColor.resolve(detailsBackgroundColor, context).withOpacity(0.8),
+    () async {
+      HapticFeedback.selectionClick(); // Add haptic feedback here
+      
+      // Assume `widget.postId` is the ID of the post you want to share
+      final Uri dynamicLink = await createDynamicLink(widget.postId);
+
+      // Share the Uri directly
+      Share.shareUri(dynamicLink);
+    },
+  );
+}
 
   Widget blurEffect(
       Widget child, Color backgroundColor, VoidCallback onPressed) {

@@ -32,6 +32,7 @@ class _PostDetailViewState extends State<PostDetailView> {
   bool isReserved = false;
   bool _isTagSectionExpanded = false;
   BitmapDescriptor? defaultIcon;
+  
   void initializeUserId() {
     final user = FirebaseAuth.instance.currentUser;
     userID = user!.uid;
@@ -278,7 +279,6 @@ class _PostDetailViewState extends State<PostDetailView> {
   }
 
   Widget _buildPickupInformation() {
-    LatLng? pickupCoordinates = viewModel.pickupLatLng;
     return Container(
         key: _pickupInfoKey,
         child: PickupInformation(
@@ -287,7 +287,7 @@ class _PostDetailViewState extends State<PostDetailView> {
           pickupLocation: viewModel.pickupLocation,
           meetingPoint: '330, 1130 Trello Way\nKelowna, BC\nV1V 5E0',
           additionalInfo: viewModel.pickupInstructions,
-          locationCoordinates: pickupCoordinates,
+          locationCoordinates:  viewModel.pickupLatLng,
           viewModel: viewModel,
         ));
   }
@@ -386,9 +386,9 @@ class InfoRow extends StatelessWidget {
                             CircularProgressIndicator(),
                         errorWidget: (context, url, error) => Icon(Icons.error),
                         maxHeightDiskCache:
-                            200, // Set maximum height for disk caching
+                            200, 
                         maxWidthDiskCache:
-                            200, // Set maximum width for disk caching
+                            200, 
                       )
                     : Image.asset('assets/images/sampleProfile.png',
                         fit: BoxFit.cover),

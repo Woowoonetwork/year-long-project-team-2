@@ -131,7 +131,7 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildTagSection(BuildContext context) {
-    const double spacing = 7.0; // Spacing between tags horizontally
+    const double spacing = 4;
     int tagCount = tags.length;
     int displayedTags = tagCount > 4 ? 4 : tagCount; // Display up to 4 tags
     int truncatedTags = tagCount - displayedTags; // Calculate remaining tags
@@ -160,6 +160,7 @@ class PostCard extends StatelessWidget {
               alignment: WrapAlignment.start,
               crossAxisAlignment: WrapCrossAlignment.center,
               spacing: spacing,
+              runSpacing: spacing,
               children: tagWidgets,
             ),
           ),

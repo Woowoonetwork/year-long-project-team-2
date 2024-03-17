@@ -60,7 +60,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
       _updatePaletteGenerator();
     }
   }
-
+  
   Future<void> _blockUser(String userIdToBlock) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;

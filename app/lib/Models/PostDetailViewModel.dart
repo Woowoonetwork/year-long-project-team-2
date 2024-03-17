@@ -36,23 +36,23 @@ class PostDetailViewModel extends ChangeNotifier {
   }
 
   void _initializeFields() {
-    firstName = 'John';
-    lastName = 'Doe';
-    allergens = 'null';
-    description = 'null';
+    firstName = '';
+    lastName = '';
+    allergens = '';
+    description = '';
     pickupTime = DateTime.now();
     expirationDate = DateTime.now();
-    pickupLocation = 'null';
-    pickupInstructions = 'null';
-    title = 'null';
+    pickupLocation = '';
+    pickupInstructions = '';
+    title = '';
     rating = 0.0;
-    userid = 'null';
+    userid = '';
     imageUrl = ''; // Set the image URL
-    profileURL = 'null';
+    profileURL = '';
     postTimestamp = DateTime.now();
     isReserved = false;
-    pickupLatLng = LatLng(37.7749, -122.4194);
-    tags = ['null'];
+    pickupLatLng = LatLng(0, 0);
+    tags = [];
   }
 
   Future<void> fetchData(String postId) async {
@@ -107,7 +107,6 @@ class PostDetailViewModel extends ChangeNotifier {
     GeoPoint geoPoint = documentData['post_location'] as GeoPoint;
     pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
     await _reverseGeocodeLatLng(pickupLatLng);
-
     if (documentData.containsKey('images') && documentData['images'] is List) {
       imagesWithAltText = List<Map<String, String>>.from(
         (documentData['images'] as List).map((imageMap) {

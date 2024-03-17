@@ -1,4 +1,4 @@
-import 'package:FoodHood/Components/post_card.dart';
+import 'package:FoodHood/Components/profile_post_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,7 +7,6 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'dart:math' as math;
 import 'package:intl/intl.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -101,9 +100,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     Widget contentWidget;
+    void _removePost(String postId) async {
+      try {
+        await firestore.collection('post_details').doc(postId).delete();
+        setState(() {
+          recentPosts.removeWhere((post) => post['postId'] == postId);
+        });
+      } catch (e) {
+        print("Error removing post: $e");
+        // Show an error message if needed
+      }
+    }
+
     switch (segmentedControlGroupValue) {
       case 0:
-        contentWidget = RecentPostsTab(recentPosts: recentPosts);
+        contentWidget = RecentPostsTab(
+          recentPosts: recentPosts,
+          onRemove: _removePost, // Add this line
+        );
         break;
       case 1:
         contentWidget = ReviewsTab(userId: effectiveUserId, imageUrl: imageUrl);
@@ -228,15 +242,19 @@ class AboutSection extends StatelessWidget {
 }
 
 class RecentPostsTab extends StatelessWidget {
+  final List<Map<String, dynamic>> recentPosts;
+  final Function(String) onRemove;
+
+  RecentPostsTab({Key? key, required this.recentPosts, required this.onRemove})
+      : super(key: key);
+
   Future<Map<String, dynamic>> fetchUserDetails(String userId) async {
     try {
       DocumentSnapshot userDoc =
           await FirebaseFirestore.instance.collection('user').doc(userId).get();
-      if (userDoc.exists) {
-        return userDoc.data() as Map<String, dynamic>;
-      } else {
-        return {'firstName': 'Unknown', 'lastName': '', 'profileImagePath': ''};
-      }
+      return userDoc.exists
+          ? userDoc.data() as Map<String, dynamic>
+          : {'firstName': 'Unknown', 'lastName': '', 'profileImagePath': ''};
     } catch (e) {
       print('Error fetching user details: $e');
       return {'firstName': 'Error', 'lastName': '', 'profileImagePath': ''};
@@ -247,35 +265,25 @@ class RecentPostsTab extends StatelessWidget {
     final duration = DateTime.now().difference(dateTime);
     if (duration.inDays > 7) {
       return DateFormat('MMMM dd, yyyy').format(dateTime);
-    } else if (duration.inDays >= 1)
+    } else if (duration.inDays >= 1) {
       return '${duration.inDays} day${duration.inDays > 1 ? "s" : ""} ago';
-    else if (duration.inHours >= 1)
+    } else if (duration.inHours >= 1) {
       return '${duration.inHours} hour${duration.inHours > 1 ? "s" : ""} ago';
-    else if (duration.inMinutes >= 1)
+    } else if (duration.inMinutes >= 1) {
       return '${duration.inMinutes} minute${duration.inMinutes > 1 ? "s" : ""} ago';
-    else
+    } else {
       return 'just now';
+    }
   }
-
-  Color _getRandomColor() {
-    var colors = [yellow, orange, blue, babyPink, Cyan];
-    return colors[math.Random().nextInt(colors.length)];
-  }
-
-  final List<Map<String, dynamic>> recentPosts;
-
-  const RecentPostsTab({Key? key, required this.recentPosts}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return recentPosts.isEmpty
         ? const Center(child: Text("No posts available"))
         : ListView.separated(
-            separatorBuilder: (context, index) =>
-                const SizedBox(height: 20), // Consistent spacing between items
+            separatorBuilder: (context, index) => const SizedBox(height: 20),
             shrinkWrap: true,
-            padding: const EdgeInsets.symmetric(
-                vertical: 20), // Padding at the start and end of the list
+            padding: const EdgeInsets.symmetric(vertical: 20),
             physics: const NeverScrollableScrollPhysics(),
             itemCount: recentPosts.length,
             itemBuilder: (context, index) {
@@ -287,7 +295,6 @@ class RecentPostsTab extends StatelessWidget {
                     return SizedBox(
                         width: 300, child: CupertinoActivityIndicator());
                   }
-                  final user = snapshot.data!;
                   final imagesWithAltText =
                       post['images'] as List<dynamic>? ?? [];
                   final firstImage = imagesWithAltText.isNotEmpty
@@ -301,12 +308,8 @@ class RecentPostsTab extends StatelessWidget {
                           .map((tag) => tag.trim())
                           .toList() ??
                       [];
-                  Map<String, Color> tagColors = {};
-                  List<Color> assignedColors = tags
-                      .map((tag) =>
-                          tagColors.putIfAbsent(tag, () => _getRandomColor()))
-                      .toList();
-                  return PostCard(
+
+                  return ProfilePostCard(
                     imagesWithAltText: firstImage != null
                         ? [
                             {
@@ -315,19 +318,14 @@ class RecentPostsTab extends StatelessWidget {
                             }
                           ]
                         : [],
-                    title: post['title'] ?? 'No Title',
+                    title: post['title']!,
                     tags: tags,
-                    tagColors: assignedColors,
-                    firstName: user['firstName'] ?? 'Firstname',
-                    lastName: user['lastName'] ?? 'Lastname',
-                    timeAgo: timeAgoSinceDate(createdAt),
+                    orderInfo: 'Posted on ${timeAgoSinceDate(createdAt)}',
                     onTap: (postId) {
                       print('Tapped on post: $postId');
-                      // Add any additional logic you need when a post is tapped
                     },
-                    postId: post['postId'] ?? '',
-                    showShadow: true,
-                    profileURL: user['profileImagePath'] ?? '',
+                    postId: post['postId']!,
+                    onRemove: () => onRemove(post['postId']!), // Add this line
                   );
                 },
               );

@@ -188,7 +188,6 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: ProfileCard()), // Display the profile card
             _buildSegmentControl(myTabs),
             _buildOrdersContent(segmentedControlGroupValue),
-           
           ],
         ),
       ),
@@ -324,5 +323,10 @@ class _AccountScreenState extends State<AccountScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
