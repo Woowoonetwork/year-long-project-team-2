@@ -293,7 +293,7 @@ class _AccountScreenState extends State<AccountScreen> {
           List<Widget> allDonatedOrders = [];
           allDonatedOrders.addAll(activeDonatedOrders);
           allDonatedOrders.addAll(pastDonatedOrders);
-          return _buildDonatedOrdersSliver(allDonatedOrders);
+          return _buildDonatedOrdersSliver(activeDonatedOrders, pastDonatedOrders);
         } else {
           return _buildPlaceholderText();
         }
@@ -307,7 +307,8 @@ class _AccountScreenState extends State<AccountScreen> {
           List<Widget> allReservedOrders = [];
           allReservedOrders.addAll(activeReservedOrders);
           allReservedOrders.addAll(pastReservedOrders);
-          return _buildReservedOrdersSliver(allReservedOrders);
+          return _buildReservedOrdersSliver(activeReservedOrders, pastReservedOrders);
+          //return _buildReservedOrdersSliver(allReservedOrders);
         } else {
           return _buildPlaceholderText();
         }
@@ -329,11 +330,14 @@ class _AccountScreenState extends State<AccountScreen> {
   //   );
   // }
 
-  SliverList _buildDonatedOrdersSliver(List<Widget> allDonatedOrders) {
+  SliverList _buildDonatedOrdersSliver(List<Widget> activeDonatedOrders, List<Widget> pastDonatedOrders) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          if (index == 0) {
+          if (activeDonatedOrders.isEmpty && index == 0) {
+            return _buildSectionPlaceholderText("No active orders");
+          } 
+          else if (activeDonatedOrders.isNotEmpty && index == 0) {
             return Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
               child: Text(
@@ -345,7 +349,9 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
             );
-          } else if (index == activeDonatedOrders.length + 1) {
+          }
+          else if (index == activeDonatedOrders.length + 1) {
+            // Display the "Completed Orders" heading
             return Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
               child: Text(
@@ -357,28 +363,88 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
             );
-          } else if (index <= activeDonatedOrders.length) {
+          } 
+          else if (index <= activeDonatedOrders.length) {
             return Padding(
               padding: const EdgeInsets.all(16.0),
-              child: allDonatedOrders[index - 1], // Subtract 1 to adjust for the added text
+              child: activeDonatedOrders[index - 1], // Subtract 1 to adjust for the added text
             );
-          } else {
+          } 
+          else if (index < activeDonatedOrders.length + 2 + pastDonatedOrders.length) {
+            final pastOrdersIndex = index - (activeDonatedOrders.length + 2);
             return Padding(
               padding: const EdgeInsets.all(16.0),
-              child: allDonatedOrders[index - 2], // Subtract 2 to adjust for the added texts
+              child: pastDonatedOrders[pastOrdersIndex], // Subtract activeDonatedOrders.length + 2 to adjust for the added texts
             );
+          } 
+          else if (pastDonatedOrders.isEmpty && index == activeDonatedOrders.length + 2) {
+            // Display "No completed orders" text if there are no past orders
+            return _buildSectionPlaceholderText("No completed orders");
+          }
+          else {
+            return SizedBox.shrink(); // Return an empty widget
           }
         },
-        childCount: allDonatedOrders.length + 2, // Add 2 for each text separator
+        childCount: activeDonatedOrders.length + pastDonatedOrders.length + 3, // Add 2 for each text separator and "No active/completed orders" texts, plus 1 for the additional case
       ),
     );
   }
 
-  SliverList _buildReservedOrdersSliver(List<Widget> allReservedOrders) {
+  
+
+
+  // SliverList _buildReservedOrdersSliver(List<Widget> allReservedOrders) {
+  //   return SliverList(
+  //     delegate: SliverChildBuilderDelegate(
+  //       (context, index) {
+  //         if (index == 0) {
+  //           return Padding(
+  //             padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+  //             child: Text(
+  //               "Active Orders",
+  //               style: TextStyle(
+  //                 fontSize: 18,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: CupertinoColors.black,
+  //               ),
+  //             ),
+  //           );
+  //         } else if (index == activeReservedOrders.length + 1) {
+  //           return Padding(
+  //             padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+  //             child: Text(
+  //               "Completed Orders",
+  //               style: TextStyle(
+  //                 fontSize: 18,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: CupertinoColors.black,
+  //               ),
+  //             ),
+  //           );
+  //         } else if (index <= activeDonatedOrders.length) {
+  //           return Padding(
+  //             padding: const EdgeInsets.all(16.0),
+  //             child: allReservedOrders[index - 1], // Subtract 1 to adjust for the added text
+  //           );
+  //         } else {
+  //           return Padding(
+  //             padding: const EdgeInsets.all(16.0),
+  //             child: allReservedOrders[index - 2], // Subtract 2 to adjust for the added texts
+  //           );
+  //         }
+  //       },
+  //       childCount: allReservedOrders.length + 2, // Add 2 for each text separator
+  //     ),
+  //   );
+  // }
+
+  
+  SliverList _buildReservedOrdersSliver(List<Widget> activeReservedOrders, List<Widget> pastReservedOrders) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           if (index == 0) {
+            // Display the "Active Orders" heading
             return Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
               child: Text(
@@ -390,7 +456,9 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
             );
-          } else if (index == activeReservedOrders.length + 1) {
+          } 
+          else if (index == activeReservedOrders.length + 1) {
+            // Display the "Completed Orders" heading
             return Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
               child: Text(
@@ -402,19 +470,29 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
             );
-          } else if (index <= activeDonatedOrders.length) {
+          } 
+          else if (index <= activeReservedOrders.length) {
             return Padding(
               padding: const EdgeInsets.all(16.0),
-              child: allReservedOrders[index - 1], // Subtract 1 to adjust for the added text
+              child: activeReservedOrders[index - 1], // Subtract 1 to adjust for the added text
             );
-          } else {
+          } 
+          else if (index < activeReservedOrders.length + 2 + pastReservedOrders.length) {
+            final pastOrdersIndex = index - (activeReservedOrders.length + 2);
             return Padding(
               padding: const EdgeInsets.all(16.0),
-              child: allReservedOrders[index - 2], // Subtract 2 to adjust for the added texts
+              child: pastReservedOrders[pastOrdersIndex], // Subtract activeReservedOrders.length + 2 to adjust for the added texts
             );
+          } 
+          else if (pastReservedOrders.isEmpty && index == activeReservedOrders.length + 2) {
+            // Display "No completed orders" text if there are no past orders
+            return _buildSectionPlaceholderText("No completed orders");
+          }
+          else {
+            return SizedBox.shrink(); // Return an empty widget
           }
         },
-        childCount: allReservedOrders.length + 2, // Add 2 for each text separator
+        childCount: activeReservedOrders.length + pastReservedOrders.length + 3, // Add 2 for each text separator and "No active/completed orders" texts, plus 1 for the additional case
       ),
     );
   }
@@ -431,7 +509,20 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-// Method to build the placeholder text when there are no orders
+  Widget _buildSectionPlaceholderText(String message) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+      child: Text(
+        message,
+        style: TextStyle(
+          fontSize: 16,
+          color: CupertinoColors.systemGrey,
+        ),
+      ),
+    );
+  }
+
+  // Method to build the placeholder text when there are no orders
   SliverFillRemaining _buildPlaceholderText() {
     return SliverFillRemaining(
       hasScrollBody: false, // Prevents the sliver from being scrollable
