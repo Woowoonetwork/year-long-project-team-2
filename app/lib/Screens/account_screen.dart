@@ -289,14 +289,25 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildOrdersContent(int segmentedValue) {
     switch (segmentedValue) {
       case 0:
-        if (activeDonatedOrders.isNotEmpty) {
-          return _buildActiveOrdersSliver(activeDonatedOrders);
+        if (activeDonatedOrders.isNotEmpty || pastDonatedOrders.isNotEmpty) {
+          List<Widget> allDonatedOrders = [];
+          allDonatedOrders.addAll(activeDonatedOrders);
+          allDonatedOrders.addAll(pastDonatedOrders);
+          return _buildDonatedOrdersSliver(allDonatedOrders);
         } else {
           return _buildPlaceholderText();
         }
       case 1:
-        if (pastDonatedOrders.isNotEmpty) {
-          return _buildPastOrdersSliver(pastDonatedOrders);
+        // if (pastDonatedOrders.isNotEmpty) {
+        //   return _buildPastOrdersSliver(pastDonatedOrders);
+        // } else {
+        //   return _buildPlaceholderText();
+        // }
+        if (activeReservedOrders.isNotEmpty || pastReservedOrders.isNotEmpty) {
+          List<Widget> allReservedOrders = [];
+          allReservedOrders.addAll(activeReservedOrders);
+          allReservedOrders.addAll(pastReservedOrders);
+          return _buildReservedOrdersSliver(allReservedOrders);
         } else {
           return _buildPlaceholderText();
         }
@@ -306,14 +317,104 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  SliverList _buildActiveOrdersSliver(List<Widget> activeOrders) {
+  // SliverList _buildActiveOrdersSliver(List<Widget> activeOrders) {
+  //   return SliverList(
+  //     delegate: SliverChildBuilderDelegate(
+  //       (context, index) => Padding(
+  //         padding: const EdgeInsets.all(16.0),
+  //         child: activeOrders[index],
+  //       ),
+  //       childCount: activeOrders.length,
+  //     ),
+  //   );
+  // }
+
+  SliverList _buildDonatedOrdersSliver(List<Widget> allDonatedOrders) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (context, index) => Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: activeOrders[index],
-        ),
-        childCount: activeOrders.length,
+        (context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+              child: Text(
+                "Active Orders",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: CupertinoColors.black,
+                ),
+              ),
+            );
+          } else if (index == activeDonatedOrders.length + 1) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+              child: Text(
+                "Completed Orders",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: CupertinoColors.black,
+                ),
+              ),
+            );
+          } else if (index <= activeDonatedOrders.length) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: allDonatedOrders[index - 1], // Subtract 1 to adjust for the added text
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: allDonatedOrders[index - 2], // Subtract 2 to adjust for the added texts
+            );
+          }
+        },
+        childCount: allDonatedOrders.length + 2, // Add 2 for each text separator
+      ),
+    );
+  }
+
+  SliverList _buildReservedOrdersSliver(List<Widget> allReservedOrders) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+              child: Text(
+                "Active Orders",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: CupertinoColors.black,
+                ),
+              ),
+            );
+          } else if (index == activeReservedOrders.length + 1) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+              child: Text(
+                "Completed Orders",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: CupertinoColors.black,
+                ),
+              ),
+            );
+          } else if (index <= activeDonatedOrders.length) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: allReservedOrders[index - 1], // Subtract 1 to adjust for the added text
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: allReservedOrders[index - 2], // Subtract 2 to adjust for the added texts
+            );
+          }
+        },
+        childCount: allReservedOrders.length + 2, // Add 2 for each text separator
       ),
     );
   }
