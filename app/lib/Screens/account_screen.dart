@@ -288,25 +288,23 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildOrdersContent(int segmentedValue) {
     switch (segmentedValue) {
+      // Build the Donations tab
       case 0:
         if (activeDonatedOrders.isNotEmpty || pastDonatedOrders.isNotEmpty) {
-          List<Widget> allDonatedOrders = [];
-          allDonatedOrders.addAll(activeDonatedOrders);
-          allDonatedOrders.addAll(pastDonatedOrders);
+          // List<Widget> allDonatedOrders = [];
+          // allDonatedOrders.addAll(activeDonatedOrders);
+          // allDonatedOrders.addAll(pastDonatedOrders);
           return _buildDonatedOrdersSliver(activeDonatedOrders, pastDonatedOrders);
         } else {
           return _buildPlaceholderText();
         }
+
+      // Build the Reservations Tab  
       case 1:
-        // if (pastDonatedOrders.isNotEmpty) {
-        //   return _buildPastOrdersSliver(pastDonatedOrders);
-        // } else {
-        //   return _buildPlaceholderText();
-        // }
         if (activeReservedOrders.isNotEmpty || pastReservedOrders.isNotEmpty) {
-          List<Widget> allReservedOrders = [];
-          allReservedOrders.addAll(activeReservedOrders);
-          allReservedOrders.addAll(pastReservedOrders);
+          // List<Widget> allReservedOrders = [];
+          // allReservedOrders.addAll(activeReservedOrders);
+          // allReservedOrders.addAll(pastReservedOrders);
           return _buildReservedOrdersSliver(activeReservedOrders, pastReservedOrders);
           //return _buildReservedOrdersSliver(allReservedOrders);
         } else {
@@ -330,6 +328,7 @@ class _AccountScreenState extends State<AccountScreen> {
   //   );
   // }
 
+  // Build the Donated Orders Sliver
   SliverList _buildDonatedOrdersSliver(List<Widget> activeDonatedOrders, List<Widget> pastDonatedOrders) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
@@ -343,9 +342,9 @@ class _AccountScreenState extends State<AccountScreen> {
               child: Text(
                 "Active Orders",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: adjustedTextFontSize + 2,
                   fontWeight: FontWeight.bold,
-                  color: CupertinoColors.black,
+                  color: CupertinoColors.label.resolveFrom(context),
                 ),
               ),
             );
@@ -357,9 +356,9 @@ class _AccountScreenState extends State<AccountScreen> {
               child: Text(
                 "Completed Orders",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: adjustedTextFontSize + 2,
                   fontWeight: FontWeight.bold,
-                  color: CupertinoColors.black,
+                  color: CupertinoColors.label.resolveFrom(context),
                 ),
               ),
             );
@@ -390,55 +389,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  
-
-
-  // SliverList _buildReservedOrdersSliver(List<Widget> allReservedOrders) {
-  //   return SliverList(
-  //     delegate: SliverChildBuilderDelegate(
-  //       (context, index) {
-  //         if (index == 0) {
-  //           return Padding(
-  //             padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-  //             child: Text(
-  //               "Active Orders",
-  //               style: TextStyle(
-  //                 fontSize: 18,
-  //                 fontWeight: FontWeight.bold,
-  //                 color: CupertinoColors.black,
-  //               ),
-  //             ),
-  //           );
-  //         } else if (index == activeReservedOrders.length + 1) {
-  //           return Padding(
-  //             padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-  //             child: Text(
-  //               "Completed Orders",
-  //               style: TextStyle(
-  //                 fontSize: 18,
-  //                 fontWeight: FontWeight.bold,
-  //                 color: CupertinoColors.black,
-  //               ),
-  //             ),
-  //           );
-  //         } else if (index <= activeDonatedOrders.length) {
-  //           return Padding(
-  //             padding: const EdgeInsets.all(16.0),
-  //             child: allReservedOrders[index - 1], // Subtract 1 to adjust for the added text
-  //           );
-  //         } else {
-  //           return Padding(
-  //             padding: const EdgeInsets.all(16.0),
-  //             child: allReservedOrders[index - 2], // Subtract 2 to adjust for the added texts
-  //           );
-  //         }
-  //       },
-  //       childCount: allReservedOrders.length + 2, // Add 2 for each text separator
-  //     ),
-  //   );
-  // }
-
-  
+  // Build the Reserved Orders SLiver
   SliverList _buildReservedOrdersSliver(List<Widget> activeReservedOrders, List<Widget> pastReservedOrders) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
@@ -450,9 +401,9 @@ class _AccountScreenState extends State<AccountScreen> {
               child: Text(
                 "Active Orders",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: adjustedTextFontSize + 2,
                   fontWeight: FontWeight.bold,
-                  color: CupertinoColors.black,
+                  color: CupertinoColors.label.resolveFrom(context),
                 ),
               ),
             );
@@ -464,9 +415,9 @@ class _AccountScreenState extends State<AccountScreen> {
               child: Text(
                 "Completed Orders",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: adjustedTextFontSize + 2,
                   fontWeight: FontWeight.bold,
-                  color: CupertinoColors.black,
+                  color: CupertinoColors.label.resolveFrom(context),
                 ),
               ),
             );
@@ -492,7 +443,7 @@ class _AccountScreenState extends State<AccountScreen> {
             return SizedBox.shrink(); // Return an empty widget
           }
         },
-        childCount: activeReservedOrders.length + pastReservedOrders.length + 3, // Add 2 for each text separator and "No active/completed orders" texts, plus 1 for the additional case
+        childCount: activeReservedOrders.length + pastReservedOrders.length + 3, 
       ),
     );
   }
@@ -515,8 +466,8 @@ class _AccountScreenState extends State<AccountScreen> {
       child: Text(
         message,
         style: TextStyle(
-          fontSize: 16,
-          color: CupertinoColors.systemGrey,
+          fontSize: adjustedTextFontSize,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
         ),
       ),
     );
