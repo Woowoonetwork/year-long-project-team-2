@@ -29,8 +29,10 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   int segmentedControlGroupValue = 0;
-  List<Widget> activeOrders = [];
-  List<OrderCard> pastOrders = [];
+  List<Widget> activeDonatedOrders = [];
+  List<OrderCard> pastDonatedOrders = [];
+  List<Widget> activeReservedOrders = [];
+  List<OrderCard> pastReservedOrders = [];
   late double _textScaleFactor;
   late double adjustedTextFontSize;
   late double adjustedTabTextFontSize;
@@ -46,6 +48,8 @@ class _AccountScreenState extends State<AccountScreen> {
 
   void setUpPostStreamListener() {
     final String currentUserUID = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    // Update My Donations
     FirebaseFirestore.instance
         .collection('post_details')
         .orderBy('post_timestamp', descending: true)
@@ -53,34 +57,80 @@ class _AccountScreenState extends State<AccountScreen> {
         .snapshots()
         .listen((snapshot) {
       if (snapshot.docs.isNotEmpty) {
-        var activeDocs = snapshot.docs
-            .where((doc) => doc['post_status'] != 'delivered')
+        var activeDonatedDocs = snapshot.docs
+            .where((doc) => doc['post_status'] != 'completed')
             .toList();
-        var pastDocs = snapshot.docs
-            .where((doc) => doc['post_status'] == 'delivered')
+        var pastDonatedDocs = snapshot.docs
+            .where((doc) => doc['post_status'] == 'completed')
             .toList();
         if (mounted) {
-          updateActiveOrders(activeDocs);
-          updatePastOrders(pastDocs);
+          updateDonatedActiveOrders(activeDonatedDocs);
+          updateDonatedPastOrders(pastDonatedDocs);
         }
       }
     });
 
+    // Update My Reservations
     FirebaseFirestore.instance
         .collection('post_details')
-        .where('reserved_by', isEqualTo: currentUserUID) // Include posts reserved by the user
+        .orderBy('post_timestamp', descending: true)
+        .where('reserved_by', isEqualTo: currentUserUID)
         .snapshots()
         .listen((snapshot) {
-      var reservedDocs = snapshot.docs;
-      if (mounted) {
-        mergeReservedOrders(reservedDocs); // Handling reserved orders
+      if (snapshot.docs.isNotEmpty) {
+        var activeReservedDocs = snapshot.docs
+            .where((doc) => doc['post_status'] != 'completed')
+            .toList();
+        var pastReservedDocs = snapshot.docs
+            .where((doc) => doc['post_status'] == 'completed')
+            .toList();
+        if (mounted) {
+          updateReservedActiveOrders(activeReservedDocs);
+          updateReservedPastOrders(pastReservedDocs);
+        }
       }
+    });
+
+    // FirebaseFirestore.instance
+    //     .collection('post_details')
+    //     .where('reserved_by', isEqualTo: currentUserUID) // Include posts reserved by the user
+    //     .snapshots()
+    //     .listen((snapshot) {
+    //   var reservedDocs = snapshot.docs;
+    //   if (mounted) {
+    //     mergeReservedOrders(reservedDocs); // Handling reserved orders
+    //   }
+    // });
+  }
+
+  void updateDonatedActiveOrders(List<QueryDocumentSnapshot> documents) {
+    setState(() {
+      activeDonatedOrders = documents.map((doc) {
+        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id);
+      }).toList();
     });
   }
 
-  void updatePastOrders(List<QueryDocumentSnapshot> documents) {
+  void updateDonatedPastOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
-      pastOrders = documents
+      pastDonatedOrders = documents
+          .map((doc) =>
+              createOrderCard(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
+    });
+  }
+
+  void updateReservedActiveOrders(List<QueryDocumentSnapshot> documents) {
+    setState(() {
+      activeReservedOrders = documents.map((doc) {
+        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id);
+      }).toList();
+    });
+  }
+
+  void updateReservedPastOrders(List<QueryDocumentSnapshot> documents) {
+    setState(() {
+      pastReservedOrders = documents
           .map((doc) =>
               createOrderCard(doc.data() as Map<String, dynamic>, doc.id))
           .toList();
@@ -92,23 +142,15 @@ class _AccountScreenState extends State<AccountScreen> {
     adjustedTabTextFontSize = _defaultTabTextFontSize * _textScaleFactor;
   }
 
-  void updateActiveOrders(List<QueryDocumentSnapshot> documents) {
-    setState(() {
-      activeOrders = documents.map((doc) {
-        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id);
-      }).toList();
-    });
-  }
-
 
   // Merge Reserved Orders into active orders
-  void mergeReservedOrders(List<QueryDocumentSnapshot> reservedDocs) {
-    setState(() {
-      // Add reserved orders under the active orders tab
-      var mergedOrders = reservedDocs.map((doc) => createOrderCard(doc.data() as Map<String, dynamic>, doc.id)).toList();
-      activeOrders.addAll(mergedOrders);
-    });
-  }
+  // void mergeReservedOrders(List<QueryDocumentSnapshot> reservedDocs) {
+  //   setState(() {
+  //     // Add reserved orders under the active orders tab
+  //     var mergedOrders = reservedDocs.map((doc) => createOrderCard(doc.data() as Map<String, dynamic>, doc.id)).toList();
+  //     activeOrders.addAll(mergedOrders);
+  //   });
+  // }
 
   // @override
   // void dispose() {
@@ -161,14 +203,14 @@ class _AccountScreenState extends State<AccountScreen> {
 
     final Map<int, Widget> myTabs = <int, Widget>{
       0: Text(
-        'Active Orders',
+        'My Donations',
         style: TextStyle(
           fontSize: adjustedTabTextFontSize,
           fontWeight: FontWeight.w500,
         ),
       ),
       1: Text(
-        'Past Orders',
+        'My Reservations',
         style: TextStyle(
             fontSize: adjustedTabTextFontSize, fontWeight: FontWeight.w500),
       ),
@@ -247,14 +289,14 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget _buildOrdersContent(int segmentedValue) {
     switch (segmentedValue) {
       case 0:
-        if (activeOrders.isNotEmpty) {
-          return _buildActiveOrdersSliver(activeOrders);
+        if (activeDonatedOrders.isNotEmpty) {
+          return _buildActiveOrdersSliver(activeDonatedOrders);
         } else {
           return _buildPlaceholderText();
         }
       case 1:
-        if (pastOrders.isNotEmpty) {
-          return _buildPastOrdersSliver(pastOrders);
+        if (pastDonatedOrders.isNotEmpty) {
+          return _buildPastOrdersSliver(pastDonatedOrders);
         } else {
           return _buildPlaceholderText();
         }
@@ -281,9 +323,9 @@ class _AccountScreenState extends State<AccountScreen> {
       delegate: SliverChildBuilderDelegate(
         (context, index) => Padding(
           padding: const EdgeInsets.all(16.0),
-          child: pastOrders[index],
+          child: pastDonatedOrders[index],
         ),
-        childCount: pastOrders.length,
+        childCount: pastDonatedOrders.length,
       ),
     );
   }
