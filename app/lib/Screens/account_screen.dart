@@ -1,11 +1,3 @@
-/* 
-
-Account Screen
-
-- The account screen is the screen that displays the user's profile information and orders.
-
-*/
-
 import 'package:FoodHood/Screens/settings_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';

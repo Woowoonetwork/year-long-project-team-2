@@ -527,6 +527,7 @@ class _BrowseScreenState extends State<BrowseScreen>
 
     _checkAndUpdateMapStyle();
     return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       resizeToAvoidBottomInset: false,
       child: Stack(
         children: [
@@ -936,6 +937,8 @@ class _BrowseScreenState extends State<BrowseScreen>
       color: CupertinoColors.secondaryLabel.resolveFrom(context),
       letterSpacing: -0.6,
     );
+    final isDarkMode =
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
 
     return Align(
       alignment: Alignment.bottomCenter,
@@ -954,11 +957,13 @@ class _BrowseScreenState extends State<BrowseScreen>
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(14.0),
-                child: Image(
-                  image: AssetImage('assets/images/dice.png'),
-                ),
-              ),
+                  borderRadius: BorderRadius.circular(14.0),
+                  child: Image.asset(
+                    isDarkMode
+                        ? 'assets/images/dice_dark.png'
+                        : 'assets/images/dice.png',
+                    fit: BoxFit.cover,
+                  )),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 8),

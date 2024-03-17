@@ -10,6 +10,8 @@ import 'package:FoodHood/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pull_down_button/pull_down_button.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:share_plus/share_plus.dart';
 
 const double _defaultTextFontSize = 14.0;
 const double _defaultTitleFontSize = 16.0;
@@ -20,6 +22,7 @@ const double _defaultStatusFontSize = 10.0;
 class ProfilePostCard extends StatelessWidget {
   final List<Map<String, String>> imagesWithAltText;
   final String title;
+  final bool isCurrentUser;
   final List<String> tags;
   final String orderInfo;
   final VoidCallback? onEdit;
@@ -32,6 +35,7 @@ class ProfilePostCard extends StatelessWidget {
     Key? key,
     required this.imagesWithAltText,
     required this.title,
+    required this.isCurrentUser,
     required this.tags,
     required this.orderInfo,
     required this.onTap,
@@ -112,6 +116,7 @@ class ProfilePostCard extends StatelessWidget {
                   children: [
                     PullDownButton(
                       itemBuilder: (context) => [
+                        if (isCurrentUser) ...[
                         PullDownMenuItem(
                           title: 'Edit',
                           onTap: () {
@@ -119,14 +124,16 @@ class ProfilePostCard extends StatelessWidget {
                           },
                           icon: CupertinoIcons.pencil,
                         ),
+                        ],
                         PullDownMenuItem(
                           title: 'Share',
-                          subtitle: 'Forware as a link to others',
+                          subtitle: 'Forward as a link to others',
                           onTap: () {
-                            onEdit?.call();
+                            shareDynamicLink();
                           },
                           icon: CupertinoIcons.share,
                         ),
+                        if (isCurrentUser) ...[
                         PullDownMenuItem(
                           onTap: () {
                             _showDeletePostConfirmation(context);
@@ -135,6 +142,7 @@ class ProfilePostCard extends StatelessWidget {
                           isDestructive: true,
                           icon: CupertinoIcons.delete,
                         ),
+                        ],
                       ],
                       buttonBuilder: (context, showMenu) => CupertinoButton(
                         onPressed: showMenu,
@@ -157,6 +165,31 @@ class ProfilePostCard extends StatelessWidget {
     );
   }
 
+
+  Future<void> shareDynamicLink() async {
+    final Uri dynamicLink = await createDynamicLink(postId);
+    Share.share(dynamicLink.toString());
+  }
+
+  // Method to create a dynamic link
+  Future<Uri> createDynamicLink(String postId) async {
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      uriPrefix: 'https://foodhood.page.link',
+      link: Uri.parse('https://foodhood.page.link/post/$postId'),
+      androidParameters: AndroidParameters(
+        packageName: 'com.example.foodhood',
+        minimumVersion: 1,
+      ),
+      iosParameters: const IOSParameters(bundleId: 'com.example.foodhood'),
+    );
+
+    final ShortDynamicLink shortDynamicLink =
+        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+    final Uri dynamicUrl = shortDynamicLink.shortUrl;
+
+    return dynamicUrl;
+  }
+
   void _showDeletePostConfirmation(BuildContext context) {
     showCupertinoDialog(
       context: context,
@@ -174,7 +207,7 @@ class ProfilePostCard extends StatelessWidget {
             ),
             CupertinoDialogAction(
               isDestructiveAction: true,
-              child: Text('Delete'),
+              child: Text('Remove'),
               onPressed: () {
                 Navigator.of(context).pop();
                 onRemove?.call();

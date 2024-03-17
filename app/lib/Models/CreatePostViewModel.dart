@@ -31,6 +31,9 @@ class CreatePostViewModel {
     };
   }
 
+  
+
+
   Future<Position> determinePosition() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -88,6 +91,40 @@ class CreatePostViewModel {
     } catch (e) {
       print('Error fetching data: $e');
       return [];
+    }
+  }
+
+  Future<bool> updatePost({
+    required String postId,
+    required String title,
+    required String description,
+    required List<String> allergens,
+    required List<String> categories,
+    required DateTime expirationDate,
+    required String pickupInstructions,
+    required DateTime pickupTime,
+    required LatLng postLocation,
+    required Map<String, String> imageUrlsWithAltText,
+  }) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('post_details')
+          .doc(postId)
+          .update({
+        'title': title,
+        'description': description,
+        'allergens': allergens,
+        'categories': categories,
+        'expirationDate': expirationDate,
+        'pickupInstructions': pickupInstructions,
+        'pickupTime': pickupTime,
+        'postLocation': {'lat': postLocation.latitude, 'lng': postLocation.longitude},
+        'images': imageUrlsWithAltText.entries.map((entry) => {'url': entry.key, 'altText': entry.value}).toList(),
+      });
+      return true; // Success
+    } catch (e) {
+      print("Error updating post: $e");
+      return false; // Failure
     }
   }
 

@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:FoodHood/Screens/post_edit_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String? userId;
@@ -25,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<Map<String, dynamic>> recentPosts = [];
   int segmentedControlGroupValue = 0;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  String? effectiveUserId;
+  String? userId;
 
   @override
   void initState() {
@@ -35,8 +36,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _initializeData() {
     determineUserId().then((_) {
-      if (effectiveUserId != null) {
-        setUpStreamListener(effectiveUserId!);
+      if (userId != null) {
+        setUpStreamListener(userId!);
         fetchRecentPosts();
       } else {
         if (mounted) {
@@ -47,13 +48,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> determineUserId() async {
-    effectiveUserId = widget.userId ?? FirebaseAuth.instance.currentUser?.uid;
+    userId = widget.userId ?? FirebaseAuth.instance.currentUser?.uid;
   }
 
   void fetchRecentPosts() async {
     final QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('post_details')
-        .where('user_id', isEqualTo: effectiveUserId)
+        .where('user_id', isEqualTo: userId)
         .get();
     if (mounted) {
       setState(() {
@@ -116,11 +117,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case 0:
         contentWidget = RecentPostsTab(
           recentPosts: recentPosts,
+          userId: userId,
           onRemove: _removePost, // Add this line
+          onEdit: (postId) {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (context) => EditPostScreen(postId: postId)
+              ),
+            );
+          },
         );
         break;
       case 1:
-        contentWidget = ReviewsTab(userId: effectiveUserId, imageUrl: imageUrl);
+        contentWidget = ReviewsTab(userId: userId, imageUrl: imageUrl);
         break;
       default:
         contentWidget = Container();
@@ -154,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               isCurrentUser: false,
               isBlocked: false,
               imageUrl: imageUrl,
-              userId: effectiveUserId,
+              userId: userId,
               firstName: firstName,
               lastName: lastName,
               onBlockPressed: () {}),
@@ -243,10 +253,11 @@ class AboutSection extends StatelessWidget {
 
 class RecentPostsTab extends StatelessWidget {
   final List<Map<String, dynamic>> recentPosts;
+  final String? userId;
   final Function(String) onRemove;
+  final Function(String) onEdit;
 
-  RecentPostsTab({Key? key, required this.recentPosts, required this.onRemove})
-      : super(key: key);
+  RecentPostsTab({Key? key, required this.recentPosts, this.userId, required this.onRemove, required this.onEdit}) : super(key: key);
 
   Future<Map<String, dynamic>> fetchUserDetails(String userId) async {
     try {
@@ -325,7 +336,10 @@ class RecentPostsTab extends StatelessWidget {
                       print('Tapped on post: $postId');
                     },
                     postId: post['postId']!,
-                    onRemove: () => onRemove(post['postId']!), // Add this line
+                    onRemove: () => onRemove(post['postId']!),
+                    onEdit: () => onEdit(post['postId']!),
+                    isCurrentUser: userId == FirebaseAuth.instance.currentUser?.uid,
+
                   );
                 },
               );

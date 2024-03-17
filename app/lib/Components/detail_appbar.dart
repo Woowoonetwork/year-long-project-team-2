@@ -200,27 +200,25 @@ class _DetailAppBarState extends State<DetailAppBar> {
       CupertinoDynamicColor.resolve(detailsBackgroundColor, context)
           .withOpacity(0.8),
       () async {
-        HapticFeedback.selectionClick(); // Add haptic feedback here
+        HapticFeedback.selectionClick();
         widget.onFavoritePressed();
       },
     );
   }
 
- Widget _buildShareButton(BuildContext context) {
-  return blurEffect(
-    Icon(FeatherIcons.share, size: 18, color: CupertinoColors.label.resolveFrom(context)),
-    CupertinoDynamicColor.resolve(detailsBackgroundColor, context).withOpacity(0.8),
-    () async {
-      HapticFeedback.selectionClick(); // Add haptic feedback here
-      
-      // Assume `widget.postId` is the ID of the post you want to share
-      final Uri dynamicLink = await createDynamicLink(widget.postId);
-
-      // Share the Uri directly
-      Share.shareUri(dynamicLink);
-    },
-  );
-}
+  Widget _buildShareButton(BuildContext context) {
+    return blurEffect(
+      Icon(FeatherIcons.share,
+          size: 18, color: CupertinoColors.label.resolveFrom(context)),
+      CupertinoDynamicColor.resolve(detailsBackgroundColor, context)
+          .withOpacity(0.8),
+      () async {
+        HapticFeedback.selectionClick();
+        final Uri dynamicLink = await createDynamicLink(widget.postId);
+        Share.shareUri(dynamicLink);
+      },
+    );
+  }
 
   Widget blurEffect(
       Widget child, Color backgroundColor, VoidCallback onPressed) {
