@@ -409,14 +409,43 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<List<Widget>> fetchFilteredPosts(
+      List<String> selectedCategories) async {
+    Query query = FirebaseFirestore.instance.collection('post_details');
+
+    // Ensure the categories list is not empty before using 'whereIn'
+
+    if (selectedCategories.isNotEmpty) {
+      query = query.where('categories', whereIn: selectedCategories);
+    }
+
+    // Continue with your query as before
+    var querySnapshot = await query.get();
+    var futures = querySnapshot.docs.map((doc) => _buildPostCard(doc)).toList();
+    return await Future.wait(futures);
+  }
+
+  void _applyFilters(List<String> selectedFilters) {
+    // You might want to store the selected filters in the state, then use them in your posts query
+    fetchFilteredPosts(selectedFilters).then((filteredPosts) {
+      setState(() {
+        postCards = filteredPosts;
+      });
+    });
+  }
+
   void _showFilterSheet() {
     showCupertinoModalBottomSheet(
       context: context,
       backgroundColor:
           CupertinoDynamicColor.resolve(groupedBackgroundColor, context),
       builder: (context) => SafeArea(
-          child:
-              FilterSheet()), // Make sure you have a FilterSheet widget or replace it with your own filter widget
+        child: FilterSheet(
+          onApplyFilters: (selectedFilters) {
+            _applyFilters(selectedFilters);
+          },
+        ),
+      ),
     );
   }
 

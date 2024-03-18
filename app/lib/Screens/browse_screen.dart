@@ -832,7 +832,15 @@ class _BrowseScreenState extends State<BrowseScreen>
       context: context,
       backgroundColor:
           CupertinoDynamicColor.resolve(groupedBackgroundColor, context),
-      builder: (context) => SafeArea(child: FilterSheet()),
+      builder: (context) => SafeArea(
+        child: FilterSheet(
+          onApplyFilters: (selectedFilters) {
+            // For now, do nothing or implement filtering logic if needed
+            Navigator.of(context)
+                .pop(); // You might want to close the sheet after applying filters
+          },
+        ),
+      ),
     );
   }
 
