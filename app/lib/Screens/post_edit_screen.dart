@@ -8,7 +8,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
@@ -46,6 +45,7 @@ class _EditPostScreenState extends State<EditPostScreen>
   LatLng? initialLocation;
   GoogleMapController? mapController;
   String instructionText = 'Move the map to select a location';
+  late Future<void> _delayFuture;
 
   @override
   void initState() {
@@ -53,8 +53,8 @@ class _EditPostScreenState extends State<EditPostScreen>
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
-    setInitialLocation();
     loadInitialData();
+    _delayFuture = Future.delayed(Duration(milliseconds: 300));
     loadPostData(widget.postId);
   }
 
@@ -116,12 +116,6 @@ class _EditPostScreenState extends State<EditPostScreen>
 
   void _updateAdjustedFontSize() {
     adjustedFontSize = _defaultFontSize * _textScaleFactor;
-  }
-
-  Future<void> setInitialLocation() async {
-    Position position = await viewModel.determinePosition();
-    setState(
-        () => initialLocation = LatLng(position.latitude, position.longitude));
   }
 
   Future<void> _pickImage() async {
@@ -862,19 +856,36 @@ class _EditPostScreenState extends State<EditPostScreen>
   }
 
   Widget buildMapSection() {
-    return SliverToBoxAdapter(
-      child: Container(
-        height: 250.0,
-        margin: EdgeInsets.all(16.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15.0),
-          child: GoogleMapWidget(
-            initialLocation: initialLocation, // Make sure this is not null
-            onLocationSelected:
-                _onLocationSelected, // Here you listen for changes
-          ),
-        ),
-      ),
+    return FutureBuilder(
+      future: _delayFuture, // Use the initialized future
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // While waiting for the future to complete, show a loading indicator
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 250.0,
+              margin: EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else {
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 250.0,
+              margin: EdgeInsets.all(16.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15.0),
+                child: GoogleMapWidget(
+                  initialLocation: selectedLocation,
+                  onLocationSelected: _onLocationSelected,
+                  isCurrentLocation: false,
+                ),
+              ),
+            ),
+          );
+        } 
+      },
     );
   }
 }

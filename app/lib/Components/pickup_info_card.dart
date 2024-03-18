@@ -37,7 +37,7 @@ class _PickupInformationState extends State<PickupInformation> {
   @override
   void initState() {
     super.initState();
-    _delayFuture = Future.delayed(Duration(milliseconds: 200));
+    _delayFuture = Future.delayed(Duration(milliseconds: 300));
   }
 
   @override
