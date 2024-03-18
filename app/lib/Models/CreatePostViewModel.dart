@@ -7,7 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-
+import 'package:path/path.dart';
 import 'package:FoodHood/firestore_service.dart';
 
 class CreatePostViewModel {
@@ -17,8 +17,7 @@ class CreatePostViewModel {
   final altTextController = TextEditingController();
   DateTime selectedDate = DateTime.now();
   DateTime selectedTime = DateTime.now();
-  List<String> selectedAllergens = [],
-      selectedCategories = [];
+  List<String> selectedAllergens = [], selectedCategories = [];
   String? selectedImagePath;
   Set<Marker> markers = {};
 
@@ -51,6 +50,21 @@ class CreatePostViewModel {
     }
 
     return await Geolocator.getCurrentPosition();
+  }
+
+  Future<String?> uploadImage(File imageFile) async {
+    try {
+      String fileName = basename(imageFile.path);
+      Reference firebaseStorageRef =
+          FirebaseStorage.instance.ref().child('uploads/$fileName');
+      UploadTask uploadTask = firebaseStorageRef.putFile(imageFile);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print(e);
+      return null;
+    }
   }
 
   Future<Map<String, String>> uploadImagesToFirebase(
@@ -88,6 +102,50 @@ class CreatePostViewModel {
     } catch (e) {
       print('Error fetching data: $e');
       return [];
+    }
+  }
+
+  Future<bool> updatePost({
+    required String postId,
+    required String title,
+    required String description,
+    required List<String> allergens,
+    required List<String> categories,
+    required DateTime expirationDate,
+    required String pickupInstructions,
+    required DateTime pickupTime,
+    required LatLng postLocation,
+    required Map<String, String> imageUrlsWithAltText,
+  }) async {
+    try {
+      List<Map<String, String>> imagesWithAltTextList =
+          imageUrlsWithAltText.entries.map((entry) {
+        return {
+          'url': entry.key,
+          'alt_text': entry.value,
+        };
+      }).toList();
+
+      await FirebaseFirestore.instance
+          .collection('post_details')
+          .doc(postId)
+          .update({
+        'title': title,
+        'description': description,
+        'allergens': allergens.join(', '),
+        'categories': categories.join(', '),
+        'expiration_date': Timestamp.fromDate(expirationDate),
+        'pickup_instructions': pickupInstructions,
+        'pickup_time': Timestamp.fromDate(pickupTime),
+        'post_location':
+            GeoPoint(postLocation.latitude, postLocation.longitude),
+        'images': imagesWithAltTextList,
+      });
+
+      return true;
+    } catch (e) {
+      print("Error updating post: $e");
+      return false;
     }
   }
 
@@ -133,12 +191,7 @@ class CreatePostViewModel {
         'images': imagesWithAltTextList,
         'post_status': "not reserved",
       });
-
-      // Update corresponding user document by adding the post id to it
-      await FirebaseFirestore.instance
-          .collection('user')
-          .doc(userId)
-          .update({
+      await FirebaseFirestore.instance.collection('user').doc(userId).update({
         'posts': FieldValue.arrayUnion([documentId]),
       });
 

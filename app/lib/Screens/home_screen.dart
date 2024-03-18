@@ -645,7 +645,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return '${duration.inHours} hour${duration.inHours > 1 ? "s" : ""} ago';
     if (duration.inMinutes >= 1)
       return '${duration.inMinutes} minute${duration.inMinutes > 1 ? "s" : ""} ago';
-    return 'just now';
+    return 'Just now';
   }
 
   Color _getRandomColor() {

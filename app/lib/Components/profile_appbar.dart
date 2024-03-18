@@ -118,7 +118,8 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
 
     ImageProvider imageProvider;
     if (_imageUrl!.startsWith('http')) {
-      imageProvider = CachedNetworkImageProvider(_imageUrl!);
+      imageProvider = ResizeImage(CachedNetworkImageProvider(_imageUrl!),
+          height: 5, width: 5);
     } else {
       imageProvider = AssetImage(_imageUrl!);
     }
@@ -188,7 +189,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   Widget _buildGradientBackground() {
-    final backgroundColor = _backgroundColor ?? CupertinoColors.systemOrange;
+    final backgroundColor = _backgroundColor ?? CupertinoColors.systemBackground;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -262,7 +263,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
                       child: Text('Edit Profile'),
                       onPressed: () {
                         HapticFeedback.mediumImpact();
-                         Navigator.pop(context);
+                        Navigator.pop(context);
                         Navigator.of(context).push(
                           CupertinoPageRoute(
                             builder: (context) => EditProfileScreen(),

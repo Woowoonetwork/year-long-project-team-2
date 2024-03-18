@@ -18,10 +18,11 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Components/cupertino_search_navigationBar.dart';
+import 'package:FoodHood/Components/search_navigationBar.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:FoodHood/Components/filter_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:sf_symbols/sf_symbols.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -50,8 +51,9 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   // State variables
   double _searchRadius = baseSearchRadius;
-  double mapBottomPadding = 80; // Default padding
-  double mapTopPadding = 80;
+  // mapBottomPadding is the bottom safe area padding
+  double mapBottomPadding = 0;
+  double mapTopPadding = 0;
   double currentZoomLevel = defaultZoomLevel;
   String? _mapStyle;
   Set<Marker> _markers = {};
@@ -81,6 +83,13 @@ class _BrowseScreenState extends State<BrowseScreen>
     createCustomMarkerIcon(color: Colors.orange, isSelected: true);
     _fetchAllMarkers();
     _requestLocationPermission();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    mapBottomPadding = MediaQuery.of(context).padding.bottom;
+    mapTopPadding = MediaQuery.of(context).padding.top;
   }
 
   void _setupKeyboardVisibilityListener() {
@@ -518,6 +527,7 @@ class _BrowseScreenState extends State<BrowseScreen>
 
     _checkAndUpdateMapStyle();
     return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
       resizeToAvoidBottomInset: false,
       child: Stack(
         children: [
@@ -668,33 +678,78 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   Widget _buildBottomButton() {
-    return Positioned(
-      bottom: mapBottomPadding + 16,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: Container(
-          decoration: BoxDecoration(
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x19000000),
-                blurRadius: 20,
-                offset: Offset(0, 0),
+    return Stack(
+      children: [
+        Positioned(
+          bottom: mapBottomPadding + 16,
+          left: 0,
+          right: 0,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x19000000),
+                    blurRadius: 20,
+                    offset: Offset(0, 0),
+                  ),
+                ],
+                borderRadius: BorderRadius.circular(
+                    100.0), // Match button's border radius
               ),
-            ],
-            borderRadius:
-                BorderRadius.circular(100.0), // Match button's border radius
-          ),
-          child: CupertinoButton(
-            onPressed: _currentLocation,
-            color: CupertinoColors.tertiarySystemBackground,
-            borderRadius: BorderRadius.circular(100.0),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
-            child: _isZooming ? _zoomButtonContent() : _locationButtonContent(),
+              child: CupertinoButton(
+                  onPressed: _currentLocation,
+                  color: CupertinoColors.tertiarySystemBackground,
+                  borderRadius: BorderRadius.circular(100.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0, vertical: 14.0),
+                  child: _isZooming
+                      ? _zoomButtonContent()
+                      : _locationButtonContent()),
+            ),
           ),
         ),
-      ),
+        Positioned(
+          bottom: mapBottomPadding + 16,
+          right: 20,
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x19000000),
+                    blurRadius: 20,
+                    offset: Offset(0, 0),
+                  ),
+                ],
+                borderRadius: BorderRadius.circular(100.0),
+              ),
+              child: CupertinoButton(
+                onPressed: () => _showFeelingLuckyModal(context),
+                color: CupertinoColors.tertiarySystemBackground,
+                borderRadius: BorderRadius.circular(100.0),
+                padding: EdgeInsets.all(14.0),
+                child: _RandomPostContent(),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showFeelingLuckyModal(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+            child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          child: _buildModalContent(context),
+        ));
+      },
     );
   }
 
@@ -740,12 +795,26 @@ class _BrowseScreenState extends State<BrowseScreen>
     );
   }
 
+  Row _RandomPostContent() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SfSymbol(
+          size: 18,
+          weight: FontWeight.w400,
+          color: orange.resolveFrom(context),
+          name: 'dice.fill',
+        ),
+      ],
+    );
+  }
+
   Widget _buildOverlayUI() {
     return Stack(
       children: [
         CupertinoSearchNavigationBar(
           title: "Browse",
-          onFeelingLuckyPressed: _pickRandomPost,
           textController: searchController,
           onSearchTextChanged: (text) {
             if (text.isEmpty) {
@@ -861,5 +930,88 @@ class _BrowseScreenState extends State<BrowseScreen>
       babyPink,
     ];
     return colors[random.nextInt(colors.length)];
+  }
+
+  Widget _buildModalContent(BuildContext context) {
+    // Define commonly used text styles to avoid redundancy
+    final titleStyle = TextStyle(
+      fontWeight: FontWeight.w700,
+      fontSize: 22,
+      letterSpacing: -0.6,
+    );
+
+    final descriptionStyle = TextStyle(
+      fontSize: 16,
+      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+      letterSpacing: -0.6,
+    );
+    final isDarkMode =
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
+
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.95,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Fit content
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14.0),
+                  child: Image.asset(
+                    isDarkMode
+                        ? 'assets/images/dice_dark.png'
+                        : 'assets/images/dice.png',
+                    fit: BoxFit.cover,
+                  )),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text("Can't make up your mind?", style: titleStyle),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Text(
+                "Let us decide for you!",
+                textAlign: TextAlign.center,
+                style: descriptionStyle,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 0), // Adjust the padding if needed
+              child: SizedBox(
+                width: double
+                    .infinity, // Forces the button to expand to fill the width
+                child: CupertinoButton(
+                  color:
+                      secondaryColor, // Ensure this variable is defined or replace it with a specific color
+                  child: Text(
+                    'Pick for me', // Changed 'Connect' to 'Pick for me' to match the context
+                    style: TextStyle(
+                      color: CupertinoColors.black,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.8,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _pickRandomPost();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -2,8 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:io';
 import 'package:flutter/Cupertino.dart';
+import 'package:path_provider/path_provider.dart';
+
 
 class EditProfileViewModel extends ChangeNotifier {
   final TextEditingController firstNameController = TextEditingController();
@@ -28,7 +31,10 @@ class EditProfileViewModel extends ChangeNotifier {
 
   Future<void> fetchProvincesAndCities() async {
     try {
-      var documentSnapshot = await _firestore.collection('location').doc('rLxaYnbNB4x6Rpvil1Oe').get();
+      var documentSnapshot = await _firestore
+          .collection('location')
+          .doc('rLxaYnbNB4x6Rpvil1Oe')
+          .get();
       if (documentSnapshot.exists) {
         Map<String, dynamic> data = documentSnapshot.get('location');
         Map<String, List<String>> fetchedCities = {};
@@ -55,7 +61,8 @@ class EditProfileViewModel extends ChangeNotifier {
     final user = _auth.currentUser;
     if (user != null) {
       try {
-        DocumentSnapshot userDoc = await _firestore.collection('user').doc(user.uid).get();
+        DocumentSnapshot userDoc =
+            await _firestore.collection('user').doc(user.uid).get();
         if (userDoc.exists) {
           Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
           firstNameController.text = data['firstName'] ?? '';
@@ -87,7 +94,8 @@ class EditProfileViewModel extends ChangeNotifier {
         'city': selectedCity,
       };
       if (_isImageChanged) {
-        updateData['profileImagePath'] = await uploadImageToFirebase(File(profileImagePath));
+        updateData['profileImagePath'] =
+            await uploadImageToFirebase(File(profileImagePath));
       }
       await _firestore.collection('user').doc(userId).update(updateData);
       print("Profile updated successfully");
@@ -101,10 +109,36 @@ class EditProfileViewModel extends ChangeNotifier {
     try {
       String userId = _auth.currentUser!.uid;
       String fileName = 'profile_$userId.jpg';
-      Reference storageRef = _storage.ref().child('profile_images').child(fileName);
-      UploadTask uploadTask = storageRef.putFile(imageFile);
+      Reference storageRef =
+          _storage.ref().child('profile_images').child(fileName);
+
+      // Compress the image
+      final Uint8List? compressedImage =
+          await FlutterImageCompress.compressWithFile(
+        imageFile.absolute.path,
+        minWidth: 500, // Adjust based on your requirements
+        minHeight: 500,
+        quality: 85, // Adjust based on your requirements
+      );
+
+      if (compressedImage == null) {
+        print("Error compressing image");
+        return null;
+      }
+
+      // Create a temporary file to store the compressed image
+      final Directory tempDir = await getTemporaryDirectory();
+      final File tempFile = File('${tempDir.path}/temp_$fileName');
+      await tempFile.writeAsBytes(compressedImage);
+
+      // Upload the compressed image
+      UploadTask uploadTask = storageRef.putFile(tempFile);
       await uploadTask.whenComplete(() => null);
       String downloadUrl = await storageRef.getDownloadURL();
+
+      // Optionally, delete the temporary file after uploading
+      await tempFile.delete();
+
       return downloadUrl;
     } catch (e) {
       print("Error uploading image: $e");
