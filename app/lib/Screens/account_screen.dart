@@ -219,16 +219,17 @@ class _AccountScreenState extends State<AccountScreen> {
 
     return CupertinoPageScaffold(
       backgroundColor: groupedBackgroundColor,
-      child: CustomScrollView(
-        slivers: <Widget>[
-          _buildNavigationBar(context),
-          SliverToBoxAdapter(child: ProfileCard()), // Display the profile card
-          _buildSegmentControl(myTabs),
-          SliverPadding(
-            padding: const EdgeInsets.only(bottom: 100.0),
-            sliver: _buildOrdersContent(segmentedControlGroupValue),
-          ),
-        ],
+      child: SafeArea(
+        top: false,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            _buildNavigationBar(context),
+            SliverToBoxAdapter(
+                child: ProfileCard()), // Display the profile card
+            _buildSegmentControl(myTabs),
+            _buildOrdersContent(segmentedControlGroupValue),
+          ],
+        ),
       ),
     );
   }
@@ -453,7 +454,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) => Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
           child: pastDonatedOrders[index],
         ),
         childCount: pastDonatedOrders.length,
@@ -517,5 +518,10 @@ class _AccountScreenState extends State<AccountScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

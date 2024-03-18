@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Components/colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AltTextEditor extends StatefulWidget {
   final String imagePath;
@@ -65,6 +66,12 @@ class _AltTextEditorState extends State<AltTextEditor> {
     Navigator.pop(context);
   }
 
+  _determineImageProvider(String path) {
+    return path.startsWith('http')
+        ? CachedNetworkImageProvider(path)
+        : FileImage(File(path));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -98,84 +105,83 @@ class _AltTextEditorState extends State<AltTextEditor> {
               ),
             ),
             child: SafeArea(
-              child: 
-              GestureDetector(
+              child: GestureDetector(
                 onTap: () {
                   if (_focusNode.hasFocus) {
                     _focusNode.unfocus();
                   }
                 },
-                child:
-              
-              Container(
-                 height: double.infinity,
-                child:
-              SingleChildScrollView(
-                controller: _scrollController,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 1,
-                        child: Image.file(File(widget.imagePath),
-                            fit: BoxFit.cover),
-                      ),
-                      SizedBox(height: 6),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                child: Container(
+                  height: double.infinity,
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          AspectRatio(
+                            aspectRatio: 1,
+                            child: Image(
+                              image: _determineImageProvider(widget.imagePath),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CupertinoButton(
-                                padding: EdgeInsets.zero,
-                                child: Text('What\'s an image description?',
-                                    style: TextStyle(
-                                        color: accentColor,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500)),
-                                onPressed: () {
-                                  _showImageDescriptionInfo(context);
-                                },
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CupertinoButton(
+                                    padding: EdgeInsets.zero,
+                                    child: Text('What\'s an image description?',
+                                        style: TextStyle(
+                                            color: accentColor,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500)),
+                                    onPressed: () {
+                                      _showImageDescriptionInfo(context);
+                                    },
+                                  ),
+                                  ValueListenableBuilder<int>(
+                                    valueListenable: _charCount,
+                                    builder: (_, value, __) => Text(
+                                        '$value/$_maxLength',
+                                        style: TextStyle(
+                                            color: CupertinoColors.systemGrey,
+                                            fontSize: 12)),
+                                  ),
+                                ],
                               ),
-                              ValueListenableBuilder<int>(
-                                valueListenable: _charCount,
-                                builder: (_, value, __) => Text(
-                                    '$value/$_maxLength',
-                                    style: TextStyle(
-                                        color: CupertinoColors.systemGrey,
-                                        fontSize: 12)),
+                              CupertinoTextField(
+                                padding: EdgeInsets.only(bottom: 16),
+                                controller: _altTextController,
+                                focusNode: _focusNode,
+                                placeholder: 'Image description',
+                                placeholderStyle: TextStyle(
+                                    color: CupertinoColors.placeholderText,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w400),
+                                maxLines: null,
+                                keyboardType: TextInputType.multiline,
+                                decoration: BoxDecoration(
+                                    color: CupertinoColors.systemBackground
+                                        .resolveFrom(context),
+                                    borderRadius: BorderRadius.circular(8)),
                               ),
                             ],
                           ),
-                          CupertinoTextField(
-                            padding: EdgeInsets.only(bottom: 16),
-                            controller: _altTextController,
-                            focusNode: _focusNode,
-                            placeholder: 'Image description',
-                            placeholderStyle: TextStyle(
-                                color: CupertinoColors.placeholderText,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400),
-                            maxLines: null,
-                            keyboardType: TextInputType.multiline,
-                            decoration: BoxDecoration(
-                                color: CupertinoColors.systemBackground
-                                    .resolveFrom(context),
-                                borderRadius: BorderRadius.circular(8)),
-                          ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    ),
       ],
     );
   }

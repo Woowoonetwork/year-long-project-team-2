@@ -28,6 +28,12 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
+        <array>
+            <string>foodhood</string>
+        </array>
+        <key>CFBundleURLName</key>
+        <string></string>
+        <key>CFBundleURLTypes</key>
 			<array>
 				<string>com.googleusercontent.apps.918510273238-fi4p7b5ncge74sfu5qpug7ils1kka1ej</string>
 			</array>
@@ -84,5 +90,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	
 </dict>
 </plist>

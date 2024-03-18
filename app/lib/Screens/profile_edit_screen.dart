@@ -152,12 +152,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           style: TextStyle(
               color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
               fontWeight: FontWeight.w500)),
-      leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Icon(FeatherIcons.x,
-              size: 22,
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.label, context))),
+      leading: CupertinoButton(
+        padding: EdgeInsets.zero,
+        child: Text(
+          'Cancel',
+          style: TextStyle(
+            color: CupertinoColors.label.resolveFrom(context),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        onPressed: () async {
+          Navigator.of(context).pop();
+        },
+      ),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
         child: Text(
