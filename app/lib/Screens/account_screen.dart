@@ -342,10 +342,11 @@ class _AccountScreenState extends State<AccountScreen> {
             return Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
               child: Text(
-                "Active Orders",
+                "Active",
                 style: TextStyle(
-                  fontSize: adjustedTextFontSize + 2,
-                  fontWeight: FontWeight.bold,
+                  fontSize: adjustedTextFontSize + 2.4,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.8,
                   color: CupertinoColors.label.resolveFrom(context),
                 ),
               ),
@@ -356,10 +357,11 @@ class _AccountScreenState extends State<AccountScreen> {
             return Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
               child: Text(
-                "Completed Orders",
+                "Completed",
                 style: TextStyle(
-                  fontSize: adjustedTextFontSize + 2,
-                  fontWeight: FontWeight.bold,
+                  fontSize: adjustedTextFontSize + 2.4,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.8,
                   color: CupertinoColors.label.resolveFrom(context),
                 ),
               ),
