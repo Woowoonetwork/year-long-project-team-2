@@ -106,7 +106,7 @@ class _AccountScreenState extends State<AccountScreen> {
   void updateDonatedActiveOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
       activeDonatedOrders = documents.map((doc) {
-        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id);
+        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id, true);
       }).toList();
     });
   }
@@ -115,7 +115,7 @@ class _AccountScreenState extends State<AccountScreen> {
     setState(() {
       pastDonatedOrders = documents
           .map((doc) =>
-              createOrderCard(doc.data() as Map<String, dynamic>, doc.id))
+              createOrderCard(doc.data() as Map<String, dynamic>, doc.id, true))
           .toList();
     });
   }
@@ -123,7 +123,7 @@ class _AccountScreenState extends State<AccountScreen> {
   void updateReservedActiveOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
       activeReservedOrders = documents.map((doc) {
-        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id);
+        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id, false);
       }).toList();
     });
   }
@@ -132,7 +132,7 @@ class _AccountScreenState extends State<AccountScreen> {
     setState(() {
       pastReservedOrders = documents
           .map((doc) =>
-              createOrderCard(doc.data() as Map<String, dynamic>, doc.id))
+              createOrderCard(doc.data() as Map<String, dynamic>, doc.id, false))
           .toList();
     });
   }
@@ -164,7 +164,7 @@ class _AccountScreenState extends State<AccountScreen> {
     print(postId + 'accountscreen');
   }
 
-  OrderCard createOrderCard(Map<String, dynamic> documentData, String postId) {
+  OrderCard createOrderCard(Map<String, dynamic> documentData, String postId, bool isDonation) {
     String title = documentData['title'] ?? 'No Title';
     List<String> tags = documentData['categories'].split(',');
     DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
@@ -189,6 +189,7 @@ class _AccountScreenState extends State<AccountScreen> {
       onTap: _onOrderCardTap,
       imagesWithAltText: imagesWithAltText,
       orderState: OrderState.confirmed,
+      isDonation: isDonation,
     );
   }
 

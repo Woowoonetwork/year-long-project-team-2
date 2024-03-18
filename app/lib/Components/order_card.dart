@@ -1,3 +1,4 @@
+import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -37,6 +38,7 @@ class OrderCard extends StatelessWidget {
   final String postId;
   final VoidCallback? onStatusPressed;
   final OrderState orderState;
+  final bool isDonation;
 
   OrderCard({
     Key? key,
@@ -50,6 +52,7 @@ class OrderCard extends StatelessWidget {
     this.onCancel,
     this.onStatusPressed,
     required this.orderState,
+    required this.isDonation,
   }) : super(key: key);
 
   @override
@@ -73,7 +76,10 @@ class OrderCard extends StatelessWidget {
           Navigator.push(
             context,
             CupertinoPageRoute(
-              builder: (context) => DonorScreen(postId: postId),
+              builder: (context) => 
+                  isDonation 
+                    ? DonorScreen(postId: postId) 
+                    : DoneePath(postId: postId),
             ),
           );
         },
