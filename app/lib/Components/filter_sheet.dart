@@ -4,6 +4,10 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
 
 class FilterSheet extends StatefulWidget {
+  final Function(List<String>) onApplyFilters;
+
+  FilterSheet({required this.onApplyFilters});
+
   @override
   _FilterSheetState createState() => _FilterSheetState();
 }
@@ -221,7 +225,14 @@ class _FilterSheetState extends State<FilterSheet> {
                 style: TextStyle(
                     fontWeight: FontWeight.w600, color: CupertinoColors.white)),
             onPressed: () {
-              // Apply filter logic
+              // Combine selected food types and diet preferences
+              List<String> selectedFilters = [
+                ...selectedFoodTypes,
+                ...selectedDietPreferences
+              ];
+
+              widget.onApplyFilters(selectedFilters);
+              Navigator.of(context).pop(); // Close the FilterSheet
             },
           ),
         ],

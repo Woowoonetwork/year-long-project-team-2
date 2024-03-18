@@ -416,15 +416,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<QueryDocumentSnapshot> filterDocuments(
-      List<QueryDocumentSnapshot> docs, List<String> selectedCategories) {
+      List<QueryDocumentSnapshot> docs, List<String> selectedFilters) {
     return docs.where((doc) {
-      var docCategories =
-          doc['categories'].split(',').map((s) => s.trim()).toList();
-      // To check if the document contains any of the selected categories
-      // return docCategories.any((category) => selectedCategories.contains(category));
-      // To check if the document contains all of the selected categories
-      return selectedCategories
-          .every((category) => docCategories.contains(category));
+      List<String> docCategories = doc
+          .get('categories')
+          .toString()
+          .split(',')
+          .map((s) => s.trim())
+          .toList();
+      List<String> docAllergens = doc
+          .get('allergens')
+          .toString()
+          .split(',')
+          .map((s) => s.trim())
+          .toList();
+
+      // Assuming you need to check if any selected filters match any of the document's categories or allergens
+      bool matchesCategories =
+          selectedFilters.any((filter) => docCategories.contains(filter));
+      bool matchesAllergens =
+          selectedFilters.any((filter) => docAllergens.contains(filter));
+
+      return matchesCategories || matchesAllergens;
     }).toList();
   }
 
