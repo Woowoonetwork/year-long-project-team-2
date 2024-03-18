@@ -58,6 +58,8 @@ We've been actively working on several tasks from the project board. Here's a su
 
 We've been steadily progressing over the week. Here is our auto-generated chart from GitHub for the week.
 
+![burnup](./Burnup%20Charts/burnupT2W10.png)
+
 ## Test Report
 
 Here is our code coverage report for most of our screens for the week:
