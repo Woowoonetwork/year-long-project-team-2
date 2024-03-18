@@ -283,7 +283,7 @@ class RecentPostsTab extends StatelessWidget {
     } else if (duration.inMinutes >= 1) {
       return '${duration.inMinutes} minute${duration.inMinutes > 1 ? "s" : ""} ago';
     } else {
-      return 'just now';
+      return 'Just now';
     }
   }
 

@@ -69,11 +69,10 @@ class OrderCard extends StatelessWidget {
         padding: EdgeInsets.zero,
         onPressed: () {
           HapticFeedback.selectionClick();
-          onStatusPressed?.call();
           Navigator.push(
             context,
             CupertinoPageRoute(
-              builder: (context) => DonorScreen(postId: postId),
+              builder: (context) => PostDetailView(postId: postId),
             ),
           );
         },
@@ -114,8 +113,28 @@ class OrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Icon(FeatherIcons.chevronRight,
-                    color: CupertinoColors.systemGrey.resolveFrom(context)),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        onStatusPressed?.call();
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => DonorScreen(postId: postId),
+                          ),
+                        );
+                      },
+                      child: Icon(FeatherIcons.chevronRight,
+                          size: 24,
+                          color:
+                              CupertinoColors.systemGrey.resolveFrom(context)),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -141,18 +160,7 @@ class OrderCard extends StatelessWidget {
         ? imagesWithAltText[0]['url'] ?? ''
         : 'assets/images/sampleFoodPic.jpg';
 
-    return CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: () {
-          HapticFeedback.selectionClick();
-          Navigator.push(
-            context,
-            CupertinoPageRoute(
-              builder: (context) => PostDetailView(postId: postId),
-            ),
-          );
-        },
-        child: ClipRRect(
+    return  ClipRRect(
           borderRadius: BorderRadius.circular(14),
           child: CachedNetworkImage(
             imageUrl: imageToShow,
@@ -163,7 +171,7 @@ class OrderCard extends StatelessWidget {
             errorWidget: (context, url, error) =>
                 buildImageFailedPlaceHolder(context, true),
           ),
-        ));
+        );
   }
 
   static Widget _buildTitleSection(
