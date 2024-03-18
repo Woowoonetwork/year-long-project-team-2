@@ -41,15 +41,18 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   Widget _buildMap(LatLng position) {
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(target: position, zoom: 14.4746),
-      markers: {
-        Marker(
-            markerId: MarkerId("pickupLocation"),
-            position: position,
-            infoWindow: InfoWindow(title: "Pickup Location")),
-      },
-      onMapCreated: (GoogleMapController controller) {},
+    return Container(
+      height: 200,
+      child: GoogleMap(
+        initialCameraPosition: CameraPosition(target: position, zoom: 14.4746),
+        markers: {
+          Marker(
+              markerId: MarkerId("pickupLocation"),
+              position: position,
+              infoWindow: InfoWindow(title: "Pickup Location")),
+        },
+        onMapCreated: (GoogleMapController controller) {},
+      ),
     );
   }
 
@@ -121,7 +124,7 @@ class _DoneePathState extends State<DoneePath> {
     if (postStatus == "confirmed") {
       return _buildNavigateButton();
     } else {
-      return Container(); // Placeholder for other statuses
+      return Container();
     }
   }
 
@@ -176,33 +179,35 @@ class _DoneePathState extends State<DoneePath> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildPostDetailsSection(data),
+                    Text(
+                      'You have reserved the ${viewModel.title} from ${viewModel.firstName}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 20),
                     _buildProgressBar(postStatus),
+                    SizedBox(height: 20),
                     if (postStatus == 'confirmed')
                       _buildMap(LatLng(49.8862, -119.4971)),
+                    if (postStatus != 'confirmed') _buildImageSection(),
                     SizedBox(height: 20),
-                    _buildStatusDependentButton(postStatus),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Made by ${viewModel.firstName} ${viewModel.lastName} Posted ${viewModel.timeAgoSinceDate(viewModel.postTimestamp)}',
-                          style: TextStyle(
-                            color: CupertinoColors.label
-                                .resolveFrom(context)
-                                .withOpacity(0.8),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: -0.48,
-                          ),
-                        ),
-                        Text(""),
-                        RatingText(viewModel: viewModel)
-                      ],
+                    Text(
+                      'Made by ${viewModel.firstName} ${viewModel.lastName} Posted ${viewModel.timeAgoSinceDate(viewModel.postTimestamp)}',
+                      style: TextStyle(
+                        color: CupertinoColors.label
+                            .resolveFrom(context)
+                            .withOpacity(0.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: -0.48,
+                      ),
                     ),
                     SizedBox(height: 20),
                     if (postStatus == "confirmed") _buildNavigateButton(),
-                    SizedBox(height: 10),
                     if (postStatus == "pending" || postStatus == "not reserved")
                       PendingConfirmationWithTimer(
                           durationInSeconds: 500, postId: widget.postId),
