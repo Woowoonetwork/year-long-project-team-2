@@ -463,14 +463,26 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Widget _buildSectionPlaceholderText(String message) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-      child: Text(
-        message,
-        style: TextStyle(
-          fontSize: adjustedTextFontSize,
-          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-        ),
-      ),
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            FeatherIcons.shoppingBag,
+            size: 22,
+            color: CupertinoColors.systemGrey,
+          ),
+          SizedBox(width: 8.0,),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: adjustedTextFontSize,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      )
     );
   }
 
