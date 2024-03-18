@@ -53,6 +53,93 @@ class _DoneePathState extends State<DoneePath> {
     );
   }
 
+  Widget _buildNavigateButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+      child: Container(
+        width: double.infinity,
+        height: 50.0,
+        decoration: BoxDecoration(
+          color: accentColor,
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        child: CupertinoButton(
+          onPressed: () {},
+          child: Text(
+            'Navigate',
+            style: TextStyle(fontSize: 16.0, color: CupertinoColors.white),
+          ),
+          padding: EdgeInsets.zero,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTrailingNavigationBar() {
+    return isLoading
+        ? Container(width: 0, height: 0)
+        : CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {},
+            child: Text('Message ${viewModel.firstName}',
+                style: TextStyle(color: accentColor, fontSize: 16)),
+          );
+  }
+
+  Widget _buildPostDetailsSection(Map<String, dynamic> data) {
+    return SingleChildScrollView(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      SizedBox(height: 10),
+      Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          'You have reserved the ${viewModel.title} from ${viewModel.firstName}',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      )
+    ]));
+  }
+
+  Widget _buildProgressBar(String postStatus) {
+    return SlimProgressBar(
+      stepTitles: [
+        'Confirmed',
+        'Out for delivery',
+        'Ready for pickup',
+        'Complete'
+      ],
+      postStatus: postStatus,
+    );
+  }
+
+  Widget _buildStatusDependentButton(String postStatus) {
+    if (postStatus == "confirmed") {
+      return _buildNavigateButton();
+    } else {
+      return Container(); // Placeholder for other statuses
+    }
+  }
+
+  Widget _buildImageSection() {
+    return Container(
+        height: 200,
+        child: Image.network(
+            viewModel.imagesWithAltText.isNotEmpty
+                ? viewModel.imagesWithAltText[0]['url']!
+                : 'default_image_url',
+            fit: BoxFit.cover,
+            height: 200,
+            width: double.infinity, errorBuilder: (BuildContext context,
+                Object exception, StackTrace? stackTrace) {
+          return const Icon(Icons.error);
+        }));
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -60,29 +147,10 @@ class _DoneePathState extends State<DoneePath> {
         navigationBar: CupertinoNavigationBar(
           backgroundColor: Colors.white,
           leading: CupertinoNavigationBarBackButton(
-              onPressed: () => Navigator.of(context).pop(),
-              color: Colors.black),
-          trailing: isLoading
-              ? Container(width: 0, height: 0)
-              : StreamBuilder<DocumentSnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('post_details')
-                      .doc(widget.postId)
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData || snapshot.data!.data() == null) {
-                      return Text('Loading...');
-                    }
-                    var firstName =
-                        (snapshot.data!.data() as Map)['firstName'] ?? 'User';
-                    return CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () {},
-                      child: Text('Message ${viewModel.firstName}',
-                          style: TextStyle(color: accentColor, fontSize: 16)),
-                    );
-                  },
-                ),
+            onPressed: () => Navigator.of(context).pop(),
+            color: Colors.black,
+          ),
+          trailing: _buildTrailingNavigationBar(),
           border: null,
         ),
         child: SafeArea(
@@ -98,52 +166,22 @@ class _DoneePathState extends State<DoneePath> {
               if (!snapshot.hasData || snapshot.data!.data() == null) {
                 return Center(child: Text('Document not found.'));
               }
+
               var data = snapshot.data!.data() as Map<String, dynamic>;
               var postStatus = data['post_status'] ?? 'not reserved';
-              var title = data['title'] ?? 'Item';
-              var firstName = data['firstName'] ?? 'User';
+
               return SingleChildScrollView(
+                  child: Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'You have reserved the ${viewModel.title} from ${viewModel.firstName}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    SlimProgressBar(
-                      stepTitles: [
-                        'Confirmed',
-                        'Out for delivery',
-                        'Ready for pickup',
-                        'Complete'
-                      ],
-                      postStatus: postStatus,
-                    ),
+                    _buildPostDetailsSection(data),
+                    _buildProgressBar(postStatus),
+                    if (postStatus == 'confirmed')
+                      _buildMap(LatLng(49.8862, -119.4971)),
                     SizedBox(height: 20),
-                    postStatus == 'confirmed'
-                        ? _buildMap(LatLng(49.8862, -119.4971))
-                        : Image.network(
-                            viewModel.imagesWithAltText.isNotEmpty
-                                ? viewModel.imagesWithAltText[0]['url']!
-                                : 'default_image_url',
-                            fit: BoxFit.cover,
-                            height: 200,
-                            width: double.infinity,
-                            errorBuilder: (BuildContext context,
-                                Object exception, StackTrace? stackTrace) {
-                              return const Icon(Icons.error);
-                            },
-                          ),
-                    SizedBox(height: 20),
+                    _buildStatusDependentButton(postStatus),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -163,19 +201,11 @@ class _DoneePathState extends State<DoneePath> {
                       ],
                     ),
                     SizedBox(height: 20),
-                    if (postStatus == "confirmed")
-                      CupertinoButton.filled(
-                        onPressed: () {
-                          // Action for the navigate button
-                        },
-                        child: Text('Navigate'),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 24.0, vertical: 8.0),
-                        borderRadius: BorderRadius.circular(18.0),
-                      ),
+                    if (postStatus == "confirmed") _buildNavigateButton(),
                     SizedBox(height: 10),
-                    PendingConfirmationWithTimer(
-                        durationInSeconds: 500, postId: widget.postId),
+                    if (postStatus == "pending" || postStatus == "not reserved")
+                      PendingConfirmationWithTimer(
+                          durationInSeconds: 500, postId: widget.postId),
                     SizedBox(height: 15),
                     Container(
                       width: 350,
@@ -264,7 +294,7 @@ class _DoneePathState extends State<DoneePath> {
                     SizedBox(height: 50),
                   ],
                 ),
-              );
+              ));
             },
           ),
         ));
