@@ -573,9 +573,46 @@ class _HomeScreenState extends State<HomeScreen> {
         color: color,
         padding: const EdgeInsets.symmetric(horizontal: 18),
         borderRadius: BorderRadius.circular(100),
-        onPressed: () {},
+        onPressed: () => _filterPostsByCategory(title),
       ),
     );
+  }
+
+  void _filterPostsByCategory(String categoryName) async {
+    setState(() => isLoading = true);
+
+    // Fetch all posts excluding those with 'reserved_by'.
+    var snapshot = await FirebaseFirestore.instance
+        .collection('post_details')
+        .orderBy('post_timestamp', descending: true)
+        .get();
+
+    List<Widget> filteredPosts = [];
+
+    // Iterate through each document.
+    for (var doc in snapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+      var categories =
+          List.from(data['categories'].split(',').map((c) => c.trim()));
+      var allergens = data['allergens'] != null
+          ? List.from(data['allergens'].split(',').map((a) => a.trim()))
+          : [];
+
+      // Check if 'All' is selected or if the category matches 'categories' or 'allergens'.
+      if (categoryName == 'All' ||
+          categories.contains(categoryName) ||
+          allergens.contains(categoryName)) {
+        var postWidget = await _buildPostCard(doc);
+        filteredPosts.add(postWidget);
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        postCards = filteredPosts;
+        isLoading = false;
+      });
+    }
   }
 
   Widget _buildAddButton(BuildContext context) {
