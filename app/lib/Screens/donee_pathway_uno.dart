@@ -1,14 +1,16 @@
+import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
-import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Components/slimProgressBar.dart';
+import 'package:FoodHood/Components/progress_bar.dart';
 import 'package:FoodHood/Screens/donor_rating.dart';
 import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../components.dart';
+
+//enum OrderState { reserved, confirmed, delivering, readyToPickUp }
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -22,6 +24,7 @@ class DoneePath extends StatefulWidget {
 class _DoneePathState extends State<DoneePath> {
   late PostDetailViewModel viewModel;
   bool isLoading = true;
+  //OrderState orderState = OrderState.reserved;
 
   @override
   void initState() {
@@ -57,22 +60,41 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   Widget _buildNavigateButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-      child: Container(
-        width: double.infinity,
-        height: 50.0,
-        decoration: BoxDecoration(
-          color: accentColor,
-          borderRadius: BorderRadius.circular(30.0),
-        ),
-        child: CupertinoButton(
-          onPressed: () {},
-          child: Text(
-            'Navigate',
-            style: TextStyle(fontSize: 16.0, color: CupertinoColors.white),
+    return Container(
+      width: 150,
+      decoration: BoxDecoration(
+        color: CupertinoColors.activeBlue,
+        borderRadius: BorderRadius.circular(30.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3),
           ),
-          padding: EdgeInsets.zero,
+        ],
+      ),
+      child: CupertinoButton(
+        onPressed: () {},
+        padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              CupertinoIcons.location_north_fill,
+              color: CupertinoColors.white,
+              size: 24.0,
+            ),
+            SizedBox(width: 8.0),
+            Text(
+              'Navigate',
+              style: TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 16.0,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -108,17 +130,15 @@ class _DoneePathState extends State<DoneePath> {
     ]));
   }
 
-  Widget _buildProgressBar(String postStatus) {
-    return SlimProgressBar(
-      stepTitles: [
-        'Confirmed',
-        'Out for delivery',
-        'Ready for pickup',
-        'Complete'
-      ],
-      postStatus: postStatus,
-    );
-  }
+  // Widget _buildProgressBar(String postStatus) {
+  //   return ProgressBar(
+  //     progress: _calculateProgress(),
+  //     labels: ["Reserved", "Confirmed", "Delivering", "Ready to Pick Up"],
+  //     color: accentColor,
+  //     isReserved: postStatus == "pending",
+  //     //currentState: orderState,
+  //   );
+  // }
 
   Widget _buildStatusDependentButton(String postStatus) {
     if (postStatus == "confirmed") {
@@ -189,12 +209,9 @@ class _DoneePathState extends State<DoneePath> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    _buildProgressBar(postStatus),
+                    //_buildProgressBar(postStatus),
                     SizedBox(height: 20),
-                    if (postStatus == 'confirmed')
-                      _buildMap(LatLng(49.8862, -119.4971)),
-                    if (postStatus != 'confirmed') _buildImageSection(),
-                    SizedBox(height: 20),
+
                     Text(
                       'Made by ${viewModel.firstName} ${viewModel.lastName} Posted ${viewModel.timeAgoSinceDate(viewModel.postTimestamp)}',
                       style: TextStyle(
@@ -207,6 +224,12 @@ class _DoneePathState extends State<DoneePath> {
                       ),
                     ),
                     SizedBox(height: 20),
+                    if (postStatus == 'confirmed')
+                      _buildMap(LatLng(49.8862, -119.4971)),
+                    if (postStatus != 'confirmed') _buildImageSection(),
+
+                    SizedBox(height: 30),
+
                     if (postStatus == "confirmed") _buildNavigateButton(),
                     if (postStatus == "pending" || postStatus == "not reserved")
                       PendingConfirmationWithTimer(
@@ -345,4 +368,18 @@ class _DoneePathState extends State<DoneePath> {
       ),
     );
   }
+
+  // double _calculateProgress() {
+  //   switch (orderState) {
+  //     case OrderState.reserved:
+  //       return 0.25; // Progress for reserved state
+  //     case OrderState.confirmed:
+  //       return 0.5; // Progress for confirmed state
+  //     case OrderState.delivering:
+  //       return 0.75; // Progress for delivering state
+  //     case OrderState.readyToPickUp:
+  //       return 1.0; // Progress for readyToPickUp state
+  //     default:
+  //       return 0.0; // Default progress
+  //   }
 }
