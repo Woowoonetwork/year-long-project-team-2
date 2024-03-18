@@ -27,7 +27,7 @@ class _ProfileCardState extends State<ProfileCard> {
   void _initializeUserProfile() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
       return;
     }
 
@@ -40,7 +40,7 @@ class _ProfileCardState extends State<ProfileCard> {
         if (snapshot.exists) {
           _updateProfileData(snapshot.data()!);
         } else {
-          setState(() => isLoading = false);
+          if (mounted) setState(() => isLoading = false);
         }
       },
       onError: (e) {
@@ -53,11 +53,12 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   void _updateProfileData(Map<String, dynamic> data) {
-    setState(() {
-      profileData = data;
-      photo = data['profileImagePath'] as String? ?? '';
-      isLoading = false;
-    });
+    if (mounted)
+      setState(() {
+        profileData = data;
+        photo = data['profileImagePath'] as String? ?? '';
+        isLoading = false;
+      });
   }
 
   @override

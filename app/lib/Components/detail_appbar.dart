@@ -73,7 +73,9 @@ class _DetailAppBarState extends State<DetailAppBar> {
   void _scrollListener() {
     if (_pageController.page != null) {
       if (!_showIndicator) {
-        setState(() => _showIndicator = true);
+        if (mounted) {
+          setState(() => _showIndicator = true);
+        }
       }
       Future.delayed(Duration(seconds: 2), () {
         if (mounted) {
