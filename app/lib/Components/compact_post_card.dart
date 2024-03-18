@@ -15,15 +15,7 @@ class CompactPostCard extends StatelessWidget {
   final Function(String) onTap; // New callback parameter
   final String postId;
   final profileURL; // New parameter to store the profile image URL
-  final bool showTags; // New parameter to indicate whether to show tags or not
-
-  // Define your colors here
-  final List<Color> colors = [
-    Colors.lightGreenAccent, // Light Green
-    Colors.lightBlueAccent, // Light Blue
-    Colors.pinkAccent[100]!, // Light Pink
-    Colors.yellowAccent[100]! // Light Yellow
-  ];
+  final bool showTags; // New parameter to indicate whether to show tags or notxx
 
   CompactPostCard({
     Key? key,

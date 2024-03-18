@@ -81,13 +81,53 @@ class _CreatePostPageState extends State<CreatePostScreen>
   void _updateMarker(LatLng position) {}
 
   Future<void> _pickImage() async {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        message: const Text('Choose an option to add a photo from'),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            child: const Text('Camera'),
+            onPressed: () {
+              Navigator.pop(context);
+              _pickImageFromCamera();
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: const Text('Gallery'),
+            onPressed: () {
+              Navigator.pop(context);
+              _pickImageFromGallery();
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() {
+        _selectedImagesWithAltText[image.path] = "";
+      });
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
     final List<XFile>? images = await picker.pickMultiImage();
     if (images != null) {
       setState(() {
         for (var image in images) {
-          _selectedImagesWithAltText[image.path] =
-              ""; // Initialize alt text with an empty string
+          _selectedImagesWithAltText[image.path] = "";
         }
       });
     }
@@ -136,8 +176,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
       return;
     }
 
-// Start loading
-    showLoadingDialog(context); // Show loading indicator
+    showLoadingDialog(context);
 
     try {
       List<File> imageFiles =
@@ -213,7 +252,12 @@ class _CreatePostPageState extends State<CreatePostScreen>
             },
             child: CustomScrollView(
               slivers: <Widget>[
-                SliverToBoxAdapter(child: SizedBox(height: 20.0)),
+                SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                buildImageSection(
+                    context, _selectedImagesWithAltText.keys.toList()),
+                _buildPhotoSection(context),
+                SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+
                 buildTextField('Title'),
                 buildTextInputField(
                   context,
@@ -230,10 +274,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
                   height: 160.0,
                   capitalize: true,
                 ),
-                buildImageSection(
-                    context, _selectedImagesWithAltText.keys.toList()),
-                _buildPhotoSection(context),
-                SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 buildDateTimeSection(
                   context: context,
                   sectionType: SectionType.date,
@@ -333,7 +373,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                           EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? accentColor.resolveFrom(context)
+                            ? accentColor.resolveFrom(context).withOpacity(0.3)
                             : CupertinoColors.tertiarySystemBackground
                                 .resolveFrom(context),
                         borderRadius: BorderRadius.circular(16.0),
@@ -345,10 +385,15 @@ class _CreatePostPageState extends State<CreatePostScreen>
                             item, // Capitalize the first letter of each word
                             style: TextStyle(
                               color: isSelected
-                                  ? CupertinoColors.white
+                                  ? MediaQuery.of(context).platformBrightness ==
+                                          Brightness.light
+                                      ? darken(
+                                          accentColor.resolveFrom(context), 0.3)
+                                      : lighten(
+                                          accentColor.resolveFrom(context), 0.3)
                                   : CupertinoColors.label.resolveFrom(context),
                               fontSize: adjustedFontSize - 2,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -387,14 +432,9 @@ class _CreatePostPageState extends State<CreatePostScreen>
       ),
       trailing: GestureDetector(
         onTap: () => _savePost(),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          decoration: BoxDecoration(
-              color: accentColor, borderRadius: BorderRadius.circular(100.0)),
-          child: Text('Post', style: _textStyle(CupertinoColors.white)),
-        ),
+        child: Text('Post'),
       ),
-      border: const Border(bottom: BorderSide.none),
+      border: null,
     );
   }
 
@@ -466,22 +506,28 @@ class _CreatePostPageState extends State<CreatePostScreen>
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 14.0),
             decoration: BoxDecoration(
-              color: accentColor,
-              borderRadius: BorderRadius.circular(20),
+              color: accentColor.resolveFrom(context).withOpacity(0.3),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.add_photo_alternate_rounded,
-                  size: 28,
-                  color: CupertinoColors.white,
-                ),
+                Icon(Icons.add_photo_alternate_rounded,
+                    size: 28,
+                    color:
+                        // if current mode is darkmode, use lighten, else use darken
+                        MediaQuery.of(context).platformBrightness ==
+                                Brightness.light
+                            ? darken(accentColor.resolveFrom(context), 0.3)
+                            : lighten(accentColor.resolveFrom(context), 0.3)),
                 SizedBox(width: 10),
                 Text(
                   'Add Photos',
                   style: TextStyle(
-                    color: CupertinoColors.white,
+                    color: MediaQuery.of(context).platformBrightness ==
+                            Brightness.light
+                        ? darken(accentColor.resolveFrom(context), 0.3)
+                        : lighten(accentColor.resolveFrom(context), 0.3),
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),

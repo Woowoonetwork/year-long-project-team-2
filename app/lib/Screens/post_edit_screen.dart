@@ -125,6 +125,47 @@ class _EditPostScreenState extends State<EditPostScreen>
   }
 
   Future<void> _pickImage() async {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        message: const Text('Choose an option to add a photo from'),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            child: const Text('Camera'),
+            onPressed: () {
+              Navigator.pop(context);
+              _pickImageFromCamera();
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: const Text('Gallery'),
+            onPressed: () {
+              Navigator.pop(context);
+              _pickImageFromGallery();
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImageFromCamera() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() {
+        _selectedImagesWithAltText[image.path] = "";
+      });
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
     final ImagePicker picker = ImagePicker();
     final List<XFile>? images = await picker.pickMultiImage();
     if (images != null) {
@@ -283,8 +324,12 @@ class _EditPostScreenState extends State<EditPostScreen>
             },
             child: CustomScrollView(
               slivers: <Widget>[
-                SliverToBoxAdapter(child: SizedBox(height: 20.0)),
+                SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+                buildImageSection(
+                    context, _selectedImagesWithAltText.keys.toList()),
+                _buildPhotoSection(context),
                 buildTextField('Title'),
+                SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 buildTextInputField(
                   context,
                   titleController,
@@ -300,10 +345,8 @@ class _EditPostScreenState extends State<EditPostScreen>
                   height: 160.0,
                   capitalize: true,
                 ),
-                buildImageSection(
-                    context, _selectedImagesWithAltText.keys.toList()),
-                _buildPhotoSection(context),
                 SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+
                 buildDateTimeSection(
                   context: context,
                   sectionType: SectionType.date,
@@ -403,7 +446,7 @@ class _EditPostScreenState extends State<EditPostScreen>
                           EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? accentColor.resolveFrom(context)
+                            ? blue.resolveFrom(context).withOpacity(0.3)
                             : CupertinoColors.tertiarySystemBackground
                                 .resolveFrom(context),
                         borderRadius: BorderRadius.circular(16.0),
@@ -415,10 +458,13 @@ class _EditPostScreenState extends State<EditPostScreen>
                             item, // Capitalize the first letter of each word
                             style: TextStyle(
                               color: isSelected
-                                  ? CupertinoColors.white
+                                  ? MediaQuery.of(context).platformBrightness ==
+                                          Brightness.light
+                                      ? darken(blue.resolveFrom(context), 0.4)
+                                      : lighten(blue.resolveFrom(context), 0.4)
                                   : CupertinoColors.label.resolveFrom(context),
                               fontSize: adjustedFontSize - 2,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -538,22 +584,26 @@ class _EditPostScreenState extends State<EditPostScreen>
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 14.0),
             decoration: BoxDecoration(
-              color: accentColor,
-              borderRadius: BorderRadius.circular(20),
+              color: blue.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.add_photo_alternate_rounded,
-                  size: 28,
-                  color: CupertinoColors.white,
-                ),
+                Icon(Icons.add_photo_alternate_rounded,
+                    size: 28,
+                    color: MediaQuery.of(context).platformBrightness ==
+                            Brightness.light
+                        ? darken(blue.resolveFrom(context), 0.4)
+                        : lighten(blue.resolveFrom(context), 0.4)),
                 SizedBox(width: 10),
                 Text(
                   'Add Photos',
                   style: TextStyle(
-                    color: CupertinoColors.white,
+                    color: MediaQuery.of(context).platformBrightness ==
+                            Brightness.light
+                        ? darken(blue.resolveFrom(context), 0.4)
+                        : lighten(blue.resolveFrom(context), 0.4),
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
