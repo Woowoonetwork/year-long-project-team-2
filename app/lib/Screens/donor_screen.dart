@@ -14,6 +14,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 //import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:timelines/timelines.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
+import 'package:FoodHood/Components/progress_bar.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -45,6 +48,7 @@ class _DonorScreenState extends State<DonorScreen> {
   late double adjustedOrderInfoFontSize;
   late LatLng pickupLatLng;
   late PostDetailViewModel viewModel;
+  String location = "";
 
   @override
   void initState() {
@@ -143,6 +147,36 @@ class _DonorScreenState extends State<DonorScreen> {
     adjustedHeadingFontSize = _defaultHeadingFontSize * _textScaleFactor;
     adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
   }
+  
+  // void _onLocationSelected(LatLng location) async {
+  //   String address = await getAddressFromLatLng(location);
+  //   setState(() {
+  //     selectedLocation = location;
+  //     instructionText = address;
+  //   });
+  // }
+  // void LocationReading(LatLng location) async{
+  //   String address = await getAddressFromLatLng(location);
+  // }
+
+  Future<String> getAddressFromLatLng(LatLng position) async {
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      if (jsonResponse['results'] != null &&
+          jsonResponse['results'].length > 0) {
+        String address = jsonResponse['results'][0]['formatted_address'];
+        return address;
+      } else {
+        return 'Location not found';
+      }
+    } else {
+      throw Exception('Failed to fetch address');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,12 +235,30 @@ class _DonorScreenState extends State<DonorScreen> {
                   SizedBox(height: 10.0),
 
                   // Progress Bar 
-                  _buildProgressBar(),
+                  ProgressBar(
+                    progress: _calculateProgress(), 
+                    labels: ["Reserved", "Confirmed", "Delivering", "Ready to Pick Up"], 
+                    color: accentColor,
+                    isReserved: reservedByName != null,
+                    currentState: orderState,
+                  ),
 
                   // SizedBox(height: 25,),
-
-                  //__buildTextField(text: "Pickup at ."),
+                  
                   _buildMap(context),
+
+                  FutureBuilder<String>(
+                    future: getAddressFromLatLng(pickupLatLng),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        return __buildTextField( text: "Pickup from ${snapshot.data}");
+                      }
+                    },
+                  ),
                   
                   // PendingConfirmationWithTimer(
                   //       durationInSeconds: 120, postId: widget.postId),
@@ -393,16 +445,16 @@ class _DonorScreenState extends State<DonorScreen> {
     required String text,
   }) {
     return Padding(
-      padding: EdgeInsets.all(24.0),
+      padding: EdgeInsets.all(16.0),
       child: Container(
         padding: EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           border: Border.all(
             color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 1.0,
+            width: 0.0,
           ),
           color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(24.0),
         ),
         child: Text(
           text,
@@ -427,7 +479,7 @@ class _DonorScreenState extends State<DonorScreen> {
             height: 250.0,
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: locationCoordinates,
+                target: pickupLatLng,
                 zoom: 12.0,
               ),
               markers: Set.from([
