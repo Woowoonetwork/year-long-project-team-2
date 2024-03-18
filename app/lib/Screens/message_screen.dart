@@ -64,8 +64,8 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
     return AppBar(
       titleSpacing: 0,
       elevation: 0,
-      scrolledUnderElevation: 0.0,
-      leading: _buildBackButton(),
+      scrolledUnderElevation: 0,
+      leading: _buildLeading(context),
       backgroundColor: CupertinoDynamicColor.resolve(
         backgroundColor,
         context,
@@ -73,32 +73,24 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
       centerTitle: false,
       title: _buildContactName(),
       actions: [_buildTrailingItems()],
-      automaticallyImplyLeading: false,
     );
   }
 
   Widget _buildTrailingItems() {
-    return Container(
-      padding: EdgeInsets.only(right: 16),
-      child: Row(
-        children: [
-          _buildOnlineIndicator(),
-          _buildLastSeenText(),
-        ],
-      ),
+    return Row(
+      children: [
+        _buildOnlineIndicator(),
+      ],
     );
   }
 
-  Widget _buildBackButton() {
-    return IconButton(
-      icon: Icon(FeatherIcons.chevronLeft,
-          size: 22, color: CupertinoColors.label.resolveFrom(context)),
+   Widget _buildLeading(BuildContext context) {
+    return CupertinoButton(
+      child: Icon(FeatherIcons.chevronLeft,
+          size: 24, color: CupertinoColors.label.resolveFrom(context)),
       onPressed: () => Navigator.of(context).pop(),
-      padding: EdgeInsets.zero,
-      constraints: BoxConstraints(),
     );
   }
-
   Widget _buildContactName() {
     return GestureDetector(
       onTap: () {
@@ -110,9 +102,8 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
       child: Text(
         'Harry Styles',
         style: TextStyle(
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
           color: CupertinoColors.label.resolveFrom(context),
-          letterSpacing: -1.3,
         ),
       ),
     );
@@ -126,18 +117,6 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
       decoration: BoxDecoration(
         color: CupertinoColors.activeGreen,
         shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  Widget _buildLastSeenText() {
-    return Text(
-      'Last seen a minute ago',
-      style: TextStyle(
-        fontSize: 14,
-        color: CupertinoColors.secondaryLabel.resolveFrom(context),
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.5,
       ),
     );
   }
