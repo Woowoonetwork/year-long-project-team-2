@@ -8,7 +8,10 @@ import 'package:FoodHood/Components/progress_bar.dart';
 import 'package:FoodHood/Screens/donor_rating.dart';
 import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../components.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/services.dart';
 
 //enum OrderState { reserved, confirmed, delivering, readyToPickUp }
 
@@ -59,6 +62,31 @@ class _DoneePathState extends State<DoneePath> {
     );
   }
 
+  Future<void> _launchMapUrl(LatLng locationCoordinates) async {
+    final String googleMapsUrl =
+        'https://www.google.com/maps/search/?api=1&query=${locationCoordinates.latitude},${locationCoordinates.longitude}';
+    final String appleMapsUrl =
+        'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}';
+
+    HapticFeedback.selectionClick();
+    // Check if the device is running on iOS
+    if (Platform.isIOS) {
+      // Attempt to open Apple Maps
+      if (await canLaunch(appleMapsUrl)) {
+        await launch(appleMapsUrl);
+      } else {
+        throw 'Could not launch $appleMapsUrl';
+      }
+    } else {
+      // Attempt to open Google Maps or the default map application on other devices
+      if (await canLaunch(googleMapsUrl)) {
+        await launch(googleMapsUrl);
+      } else {
+        throw 'Could not launch $googleMapsUrl';
+      }
+    }
+  }
+
   Widget _buildNavigateButton() {
     return Container(
       width: 150,
@@ -75,7 +103,7 @@ class _DoneePathState extends State<DoneePath> {
         ],
       ),
       child: CupertinoButton(
-        onPressed: () {},
+        onPressed: () => _launchMapUrl(viewModel.pickupLatLng),
         padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
