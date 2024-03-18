@@ -1,3 +1,4 @@
+import 'package:FoodHood/Components/filter_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:FoodHood/Components/post_card.dart';
 import 'package:FoodHood/Screens/create_post.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:feather_icons/feather_icons.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import '../components.dart';
 // import gesture
 import 'package:flutter/services.dart';
@@ -407,6 +409,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showFilterSheet() {
+    showCupertinoModalBottomSheet(
+      context: context,
+      backgroundColor:
+          CupertinoDynamicColor.resolve(groupedBackgroundColor, context),
+      builder: (context) => SafeArea(
+          child:
+              FilterSheet()), // Make sure you have a FilterSheet widget or replace it with your own filter widget
+    );
+  }
+
   Widget _buildFilterButton() {
     return Container(
       height: 37,
@@ -420,9 +433,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Icon(FeatherIcons.filter,
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
             size: 20),
-        onPressed: () {
-          // Implement filter logic
-        },
+        onPressed:
+            _showFilterSheet, // Updated to call the filter sheet display method
       ),
     );
   }
