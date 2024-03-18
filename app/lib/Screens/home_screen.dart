@@ -456,15 +456,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void applyFilters(Map<String, dynamic> filterCriteria) async {
-    String collectionDay = filterCriteria['collectionDay'];
+    // Assuming 'collectionDay' is provided as 'Today' or 'Tomorrow'
+    String collectionDay = filterCriteria['collectionDay'] ?? 'Today';
     List<String> selectedFilters =
-        List<String>.from(filterCriteria['selectedFilters']);
-
-    // Calculate the start and end of the day for "today" or "tomorrow"
+        List<String>.from(filterCriteria['selectedFilters'] ?? []);
     DateTime now = DateTime.now();
-    DateTime startOfDay = DateTime(now.year, now.month, now.day);
-    DateTime endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
-    if (collectionDay == "Tomorrow") {
+    DateTime startOfDay;
+    DateTime endOfDay;
+
+    // Calculate start and end of the day based on 'collectionDay'
+    if (collectionDay == 'Today') {
+      startOfDay = DateTime(now.year, now.month, now.day);
+      endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    } else {
+      // 'Tomorrow'
       DateTime tomorrow = now.add(Duration(days: 1));
       startOfDay = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
       endOfDay =
@@ -473,33 +478,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
     var docs = await fetchDocuments();
     var filteredDocs = docs.where((doc) {
-      Timestamp? pickupTimestamp = doc['pickup_time'];
+      var data = doc.data() as Map<String, dynamic>;
+      Timestamp? pickupTimestamp = data['pickup_time'] as Timestamp?;
       DateTime? pickupDateTime = pickupTimestamp?.toDate();
 
+      // Ensures the post's pickup time falls within the start and end of the selected day
       bool isWithinSelectedDay = pickupDateTime != null &&
           pickupDateTime.isAfter(startOfDay) &&
           pickupDateTime.isBefore(endOfDay);
 
-      var docCategoriesAndAllergens = [];
-      if (doc['categories'] != null) {
-        docCategoriesAndAllergens.addAll(List<String>.from(
-            doc['categories'].split(',').map((s) => s.trim())));
+      List<String> docCategoriesAndAllergens = [];
+      if (data['categories'] is String) {
+        docCategoriesAndAllergens.addAll((data['categories'] as String)
+            .split(',')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty));
       }
-      if (doc['allergens'] != null) {
-        docCategoriesAndAllergens.addAll(List<String>.from(
-            doc['allergens'].split(',').map((s) => s.trim())));
+      if (data['allergens'] is String) {
+        docCategoriesAndAllergens.addAll((data['allergens'] as String)
+            .split(',')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty));
       }
 
-      // Check if the document matches all selected filters in either categories or allergens
+      // Matches selected filters with the combined list of categories and allergens
       bool matchesSelectedFilters = selectedFilters
           .every((filter) => docCategoriesAndAllergens.contains(filter));
 
       return isWithinSelectedDay && matchesSelectedFilters;
     }).toList();
 
-    var filteredPosts = filteredDocs.map((doc) => _buildPostCard(doc)).toList();
-
-    List<Widget> postWidgets = await Future.wait(filteredPosts);
+    List<Widget> postWidgets =
+        await Future.wait(filteredDocs.map((doc) => _buildPostCard(doc)));
     setState(() {
       postCards = postWidgets;
     });

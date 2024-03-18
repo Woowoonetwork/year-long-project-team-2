@@ -238,6 +238,7 @@ class _FilterSheetState extends State<FilterSheet> {
               Map<String, dynamic> filterCriteria = {
                 'collectionDay': collectionDay, // 'Today' or 'Tomorrow'
                 'selectedFilters': selectedFilters,
+                'timeRange': collectionTime, // Add this line
               };
 
               widget.onApplyFilters(filterCriteria);
