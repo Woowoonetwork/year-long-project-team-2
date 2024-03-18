@@ -456,20 +456,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void applyFilters(Map<String, dynamic> filterCriteria) async {
-    // Extract the collectionDay and selectedFilters from the filterCriteria map
     String collectionDay = filterCriteria['collectionDay'];
     List<String> selectedFilters =
         List<String>.from(filterCriteria['selectedFilters']);
 
+    // Calculate the start and end of the day for "today" or "tomorrow"
     DateTime now = DateTime.now();
-    DateTime startOfDay, endOfDay;
-
-    // Determine the date range based on the collectionDay
-    if (collectionDay == 'Today') {
-      startOfDay = DateTime(now.year, now.month, now.day);
-      endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
-    } else {
-      // Assuming 'Tomorrow'
+    DateTime startOfDay = DateTime(now.year, now.month, now.day);
+    DateTime endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    if (collectionDay == "Tomorrow") {
       DateTime tomorrow = now.add(Duration(days: 1));
       startOfDay = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
       endOfDay =
@@ -478,29 +473,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
     var docs = await fetchDocuments();
     var filteredDocs = docs.where((doc) {
-      // Assuming your documents include 'pickup_time' as Timestamp
       Timestamp? pickupTimestamp = doc['pickup_time'];
       DateTime? pickupDateTime = pickupTimestamp?.toDate();
 
-      // Check if the document's pickup time is within the start and end of the selected day
       bool isWithinSelectedDay = pickupDateTime != null &&
           pickupDateTime.isAfter(startOfDay) &&
           pickupDateTime.isBefore(endOfDay);
 
-      // Now, filter based on selected categories (if any)
-      bool matchesSelectedFilters =
-          true; // Default to true, adjust logic as necessary based on selectedFilters
+      var docCategoriesAndAllergens = [];
+      if (doc['categories'] != null) {
+        docCategoriesAndAllergens.addAll(List<String>.from(
+            doc['categories'].split(',').map((s) => s.trim())));
+      }
+      if (doc['allergens'] != null) {
+        docCategoriesAndAllergens.addAll(List<String>.from(
+            doc['allergens'].split(',').map((s) => s.trim())));
+      }
 
-      // TODO: Adjust the logic below to match your specific needs for filtering by selectedFilters
-      // This might involve checking if the document's categories match any of the selectedFilters
+      // Check if the document matches all selected filters in either categories or allergens
+      bool matchesSelectedFilters = selectedFilters
+          .every((filter) => docCategoriesAndAllergens.contains(filter));
 
       return isWithinSelectedDay && matchesSelectedFilters;
     }).toList();
 
-    // Convert filtered documents to widgets
     var filteredPosts = filteredDocs.map((doc) => _buildPostCard(doc)).toList();
 
-    // Update state with the filtered posts
     List<Widget> postWidgets = await Future.wait(filteredPosts);
     setState(() {
       postCards = postWidgets;
