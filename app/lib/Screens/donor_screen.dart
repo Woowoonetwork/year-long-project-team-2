@@ -14,6 +14,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 //import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:timelines/timelines.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
+import 'package:FoodHood/Components/progress_bar.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -201,7 +202,13 @@ class _DonorScreenState extends State<DonorScreen> {
                   SizedBox(height: 10.0),
 
                   // Progress Bar 
-                  _buildProgressBar(),
+                  ProgressBar(
+                    progress: _calculateProgress(), 
+                    labels: ["Reserved", "Confirmed", "Delivering", "Ready to Pick Up"], 
+                    color: accentColor,
+                    isReserved: reservedByName != null,
+                    currentState: orderState,
+                  ),
 
                   // SizedBox(height: 25,),
 
