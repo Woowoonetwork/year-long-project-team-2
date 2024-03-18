@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/maps_marker_widget.dart';
 import 'package:FoodHood/Models/CreatePostViewModel.dart';
@@ -6,26 +8,25 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:FoodHood/Components/upload_image_tile.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 enum SectionType { date, time }
 
-class CreatePostScreen extends StatefulWidget {
-  const CreatePostScreen({super.key});
-
+class EditPostScreen extends StatefulWidget {
+  final String postId;
+  const EditPostScreen({super.key, required this.postId});
   @override
-  _CreatePostPageState createState() => _CreatePostPageState();
+  _EditPostScreenState createState() => _EditPostScreenState();
 }
 
-class _CreatePostPageState extends State<CreatePostScreen>
+class _EditPostScreenState extends State<EditPostScreen>
     with WidgetsBindingObserver {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descController = TextEditingController();
@@ -44,6 +45,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
   LatLng? initialLocation;
   GoogleMapController? mapController;
   String instructionText = 'Move the map to select a location';
+  late Future<void> _delayFuture;
 
   @override
   void initState() {
@@ -51,8 +53,55 @@ class _CreatePostPageState extends State<CreatePostScreen>
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
-    setInitialLocation();
     loadInitialData();
+    _delayFuture = Future.delayed(Duration(milliseconds: 300));
+    loadPostData(widget.postId);
+  }
+
+  Future<void> loadPostData(String postId) async {
+    try {
+      var postDocument = await FirebaseFirestore.instance
+          .collection('post_details')
+          .doc(postId)
+          .get();
+
+      if (postDocument.exists) {
+        var postData = postDocument.data();
+        titleController.text = postData?['title'] ?? '';
+        descController.text = postData?['description'] ?? '';
+        pickupInstrController.text = postData?['pickup_instructions'] ?? '';
+        selectedDate = (postData?['expiration_date'] as Timestamp?)?.toDate() ??
+            DateTime.now();
+        selectedTime = (postData?['pickup_time'] as Timestamp?)?.toDate() ??
+            DateTime.now();
+        selectedAllergens = postData?['allergens']?.split(', ') ?? [];
+        selectedCategories = postData?['categories']?.split(', ') ?? [];
+        GeoPoint location = postData?['post_location'];
+        selectedLocation = LatLng(location.latitude, location.longitude);
+
+        if (postData?.containsKey('images') == true &&
+            postData?['images'] is List) {
+          _selectedImagesWithAltText.clear();
+
+          List<dynamic> images = postData!['images'];
+          for (var imageMap in images) {
+            if (imageMap is Map<String, dynamic>) {
+              String url = imageMap['url'] as String? ?? '';
+              String altText = imageMap['alt_text'] as String? ?? '';
+              if (url.isNotEmpty) {
+                _selectedImagesWithAltText[url] = altText;
+              }
+            }
+          }
+        } else {
+          _selectedImagesWithAltText = {};
+        }
+      } else {
+        print("No such post found");
+      }
+    } catch (e) {
+      print("Error loading post data: $e");
+    }
   }
 
   Future<void> loadInitialData() async {
@@ -61,24 +110,13 @@ class _CreatePostPageState extends State<CreatePostScreen>
           await viewModel.fetchDocumentData('Allergens', 'allergens');
       categoriesList =
           await viewModel.fetchDocumentData('Categories', 'categories');
-      setState(
-          () {}); // Call setState to update the UI after the data is fetched
-    } catch (e) {
-      // Handle any errors here
-    }
+      setState(() {});
+    } catch (e) {}
   }
 
   void _updateAdjustedFontSize() {
     adjustedFontSize = _defaultFontSize * _textScaleFactor;
   }
-
-  Future<void> setInitialLocation() async {
-    Position position = await viewModel.determinePosition();
-    setState(
-        () => initialLocation = LatLng(position.latitude, position.longitude));
-  }
-
-  void _updateMarker(LatLng position) {}
 
   Future<void> _pickImage() async {
     showCupertinoModalPopup(
@@ -134,18 +172,11 @@ class _CreatePostPageState extends State<CreatePostScreen>
   }
 
   Future<void> _savePost() async {
-    // Only checking if title, description, and pickup instructions are empty
     bool isAnyFieldEmpty = titleController.text.isEmpty ||
         descController.text.isEmpty ||
         pickupInstrController.text.isEmpty;
-
-    // Checking if no images are selected
     bool isNoImageSelected = _selectedImagesWithAltText.isEmpty;
-
-    // Check if a location has been picked
     bool isLocationNotPicked = selectedLocation == null;
-
-    // Combine all error messages into one to display in the dialog
     List<String> errorMessages = [];
     if (isAnyFieldEmpty) {
       errorMessages.add("fill in all fields");
@@ -160,36 +191,25 @@ class _CreatePostPageState extends State<CreatePostScreen>
     if (errorMessages.isNotEmpty) {
       String errorMessage =
           "Please " + errorMessages.join(", ") + " before posting.";
-      showCupertinoDialog(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: Text("Oops! Something's missing"),
-          content: Text(errorMessage),
-          actions: [
-            CupertinoDialogAction(
-              child: Text('OK'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      );
+      _showErrorDialog(errorMessage);
       return;
     }
+    _showLoadingDialog(context, "Saving Post...");
 
-    showLoadingDialog(context);
-
+    Map<String, String> updatedImagesWithAltText = {};
+    for (var entry in _selectedImagesWithAltText.entries) {
+      if (entry.key.startsWith('/')) {
+        String? imageUrl = await viewModel.uploadImage(File(entry.key));
+        if (imageUrl != null) {
+          updatedImagesWithAltText[imageUrl] = entry.value;
+        }
+      } else {
+        updatedImagesWithAltText[entry.key] = entry.value;
+      }
+    }
     try {
-      List<File> imageFiles =
-          _selectedImagesWithAltText.keys.map((path) => File(path)).toList();
-
-      Map<String, String> imageUrlsWithPaths =
-          await viewModel.uploadImagesToFirebase(imageFiles);
-
-      // The alt text is no longer mandatory, so provide a default empty string if it's missing
-      Map<String, String> imageUrlsWithAltText = imageUrlsWithPaths.map(
-          (url, path) => MapEntry(url, _selectedImagesWithAltText[path] ?? ""));
-
-      bool success = await viewModel.savePost(
+      bool success = await viewModel.updatePost(
+        postId: widget.postId,
         title: titleController.text,
         description: descController.text,
         allergens: selectedAllergens,
@@ -198,42 +218,88 @@ class _CreatePostPageState extends State<CreatePostScreen>
         pickupInstructions: pickupInstrController.text,
         pickupTime: selectedTime,
         postLocation: selectedLocation!,
-        imageUrlsWithAltText: imageUrlsWithAltText,
+        imageUrlsWithAltText: updatedImagesWithAltText,
       );
+
       if (success) {
-        if (mounted) {
-          Navigator.pop(context); // Close loading indicator
-        }
-        Navigator.pop(context); // Close the create post screen
-        showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: Text("Post published"),
-            content: Text("Your post has been posted successfully."),
-            actions: [
-              CupertinoDialogAction(
-                child: Text('OK'),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        );
+        _closeLoadingIndicator();
+        _showSuccessDialog("Your post has been updated successfully.");
+      } else {
+        _closeLoadingIndicator();
+        _showErrorDialog("Failed to update the post. Please try again.");
       }
     } catch (e) {
-      showCupertinoDialog(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: Text("Error"),
-          content: Text("An error occurred while saving the post."),
-          actions: [
-            CupertinoDialogAction(
-              child: Text('OK'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      );
+      _closeLoadingIndicator();
+      _showErrorDialog("An error occurred while saving the post.");
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text("Oops!"),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLoadingDialog(BuildContext context, String message) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Center(
+          child: Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CupertinoActivityIndicator(),
+                SizedBox(height: 24),
+                Text(
+                  message,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _closeLoadingIndicator() {
+    Navigator.pop(context); // Assumes loading dialog is the topmost route
+  }
+
+  void _showSuccessDialog(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text("Success"),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Optionally close the edit screen
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -256,9 +322,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
                 buildImageSection(
                     context, _selectedImagesWithAltText.keys.toList()),
                 _buildPhotoSection(context),
-                SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-
                 buildTextField('Title'),
+                SliverToBoxAdapter(child: SizedBox(height: 10.0)),
                 buildTextInputField(
                   context,
                   titleController,
@@ -274,6 +339,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
                   height: 160.0,
                   capitalize: true,
                 ),
+                SliverToBoxAdapter(child: SizedBox(height: 10.0)),
+
                 buildDateTimeSection(
                   context: context,
                   sectionType: SectionType.date,
@@ -373,7 +440,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                           EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? accentColor.resolveFrom(context).withOpacity(0.3)
+                            ? blue.resolveFrom(context).withOpacity(0.3)
                             : CupertinoColors.tertiarySystemBackground
                                 .resolveFrom(context),
                         borderRadius: BorderRadius.circular(16.0),
@@ -387,10 +454,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
                               color: isSelected
                                   ? MediaQuery.of(context).platformBrightness ==
                                           Brightness.light
-                                      ? darken(
-                                          accentColor.resolveFrom(context), 0.3)
-                                      : lighten(
-                                          accentColor.resolveFrom(context), 0.3)
+                                      ? darken(blue.resolveFrom(context), 0.4)
+                                      : lighten(blue.resolveFrom(context), 0.4)
                                   : CupertinoColors.label.resolveFrom(context),
                               fontSize: adjustedFontSize - 2,
                               fontWeight: FontWeight.w600,
@@ -409,7 +474,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
     return CupertinoNavigationBar(
       transitionBetweenRoutes: false,
       backgroundColor: groupedBackgroundColor,
-      middle: Text('New Post',
+      middle: Text('Edit Post',
           style:
               _textStyle(CupertinoColors.label.resolveFrom(context)).copyWith(
             fontSize: 18,
@@ -432,7 +497,14 @@ class _CreatePostPageState extends State<CreatePostScreen>
       ),
       trailing: GestureDetector(
         onTap: () => _savePost(),
-        child: Text('Post'),
+        child: Container(
+          child: Text('Save',
+              style: _textStyle(CupertinoColors.label.resolveFrom(context))
+                  .copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              )),
+        ),
       ),
       border: null,
     );
@@ -506,7 +578,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 14.0),
             decoration: BoxDecoration(
-              color: accentColor.resolveFrom(context).withOpacity(0.3),
+              color: blue.withOpacity(0.3),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -514,20 +586,18 @@ class _CreatePostPageState extends State<CreatePostScreen>
               children: [
                 Icon(Icons.add_photo_alternate_rounded,
                     size: 28,
-                    color:
-                        // if current mode is darkmode, use lighten, else use darken
-                        MediaQuery.of(context).platformBrightness ==
-                                Brightness.light
-                            ? darken(accentColor.resolveFrom(context), 0.3)
-                            : lighten(accentColor.resolveFrom(context), 0.3)),
+                    color: MediaQuery.of(context).platformBrightness ==
+                            Brightness.light
+                        ? darken(blue.resolveFrom(context), 0.4)
+                        : lighten(blue.resolveFrom(context), 0.4)),
                 SizedBox(width: 10),
                 Text(
                   'Add Photos',
                   style: TextStyle(
                     color: MediaQuery.of(context).platformBrightness ==
                             Brightness.light
-                        ? darken(accentColor.resolveFrom(context), 0.3)
-                        : lighten(accentColor.resolveFrom(context), 0.3),
+                        ? darken(blue.resolveFrom(context), 0.4)
+                        : lighten(blue.resolveFrom(context), 0.4),
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
@@ -727,7 +797,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   CupertinoButton(
-                    child: Text('Done',
+                    child: Text('Save',
                         style: TextStyle(
                             color: CupertinoDynamicColor.resolve(
                                 CupertinoColors.label, context))),
@@ -786,19 +856,36 @@ class _CreatePostPageState extends State<CreatePostScreen>
   }
 
   Widget buildMapSection() {
-    return SliverToBoxAdapter(
-      child: Container(
-        height: 250.0,
-        margin: EdgeInsets.all(16.0),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15.0),
-          child: GoogleMapWidget(
-            initialLocation: initialLocation, // Make sure this is not null
-            onLocationSelected:
-                _onLocationSelected, // Here you listen for changes
-          ),
-        ),
-      ),
+    return FutureBuilder(
+      future: _delayFuture, // Use the initialized future
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // While waiting for the future to complete, show a loading indicator
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 250.0,
+              margin: EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else {
+          return SliverToBoxAdapter(
+            child: Container(
+              height: 250.0,
+              margin: EdgeInsets.all(16.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15.0),
+                child: GoogleMapWidget(
+                  initialLocation: selectedLocation,
+                  onLocationSelected: _onLocationSelected,
+                  isCurrentLocation: false,
+                ),
+              ),
+            ),
+          );
+        } 
+      },
     );
   }
 }

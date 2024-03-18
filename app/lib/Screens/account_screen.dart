@@ -1,11 +1,3 @@
-/* 
-
-Account Screen
-
-- The account screen is the screen that displays the user's profile information and orders.
-
-*/
-
 import 'package:FoodHood/Screens/settings_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
@@ -68,7 +60,8 @@ class _AccountScreenState extends State<AccountScreen> {
 
     FirebaseFirestore.instance
         .collection('post_details')
-        .where('reserved_by', isEqualTo: currentUserUID) // Include posts reserved by the user
+        .where('reserved_by',
+            isEqualTo: currentUserUID) // Include posts reserved by the user
         .snapshots()
         .listen((snapshot) {
       var reservedDocs = snapshot.docs;
@@ -100,12 +93,14 @@ class _AccountScreenState extends State<AccountScreen> {
     });
   }
 
-
   // Merge Reserved Orders into active orders
   void mergeReservedOrders(List<QueryDocumentSnapshot> reservedDocs) {
     setState(() {
       // Add reserved orders under the active orders tab
-      var mergedOrders = reservedDocs.map((doc) => createOrderCard(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      var mergedOrders = reservedDocs
+          .map((doc) =>
+              createOrderCard(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
       activeOrders.addAll(mergedOrders);
     });
   }
@@ -176,16 +171,17 @@ class _AccountScreenState extends State<AccountScreen> {
 
     return CupertinoPageScaffold(
       backgroundColor: groupedBackgroundColor,
-      child: CustomScrollView(
-        slivers: <Widget>[
-          _buildNavigationBar(context),
-          SliverToBoxAdapter(child: ProfileCard()), // Display the profile card
-          _buildSegmentControl(myTabs),
-          SliverPadding(
-            padding: const EdgeInsets.only(bottom: 100.0),
-            sliver: _buildOrdersContent(segmentedControlGroupValue),
-          ),
-        ],
+      child: SafeArea(
+        top: false,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            _buildNavigationBar(context),
+            SliverToBoxAdapter(
+                child: ProfileCard()), // Display the profile card
+            _buildSegmentControl(myTabs),
+            _buildOrdersContent(segmentedControlGroupValue),
+          ],
+        ),
       ),
     );
   }
@@ -268,7 +264,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) => Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
           child: activeOrders[index],
         ),
         childCount: activeOrders.length,
@@ -280,7 +276,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) => Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
           child: pastOrders[index],
         ),
         childCount: pastOrders.length,
@@ -319,5 +315,10 @@ class _AccountScreenState extends State<AccountScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

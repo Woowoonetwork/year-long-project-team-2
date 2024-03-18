@@ -1,7 +1,6 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/donor_screen.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/text_scale_provider.dart';
@@ -10,6 +9,9 @@ import 'dart:ui';
 import 'package:FoodHood/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pull_down_button/pull_down_button.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:share_plus/share_plus.dart';
 
 const double _defaultTextFontSize = 14.0;
 const double _defaultTitleFontSize = 16.0;
@@ -17,51 +19,40 @@ const double _defaultTagFontSize = 10.0;
 const double _defaultOrderInfoFontSize = 12.0;
 const double _defaultStatusFontSize = 10.0;
 
-enum OrderState {
-  reserved,
-  confirmed,
-  delivering,
-  readyToPickUp,
-  pending,
-  notReserved
-}
-
-class OrderCard extends StatelessWidget {
+class ProfilePostCard extends StatelessWidget {
   final List<Map<String, String>> imagesWithAltText;
   final String title;
+  final bool isCurrentUser;
   final List<String> tags;
   final String orderInfo;
   final VoidCallback? onEdit;
-  final VoidCallback? onCancel;
+  final VoidCallback? onRemove;
   final Function(String) onTap;
   final String postId;
   final VoidCallback? onStatusPressed;
-  final OrderState orderState;
 
-  OrderCard({
+  ProfilePostCard({
     Key? key,
     required this.imagesWithAltText,
     required this.title,
+    required this.isCurrentUser,
     required this.tags,
     required this.orderInfo,
     required this.onTap,
     required this.postId,
     this.onEdit,
-    this.onCancel,
+    this.onRemove,
     this.onStatusPressed,
-    required this.orderState,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double _textScaleFactor =
         Provider.of<TextScaleProvider>(context).textScaleFactor;
-
     double adjustedTitleFontSize = _defaultTitleFontSize * _textScaleFactor;
     double adjustedTagFontSize = _defaultTagFontSize * _textScaleFactor;
     double adjustedOrderInfoFontSize =
         _defaultOrderInfoFontSize * _textScaleFactor;
-    double adjustedStatusFontSize = _defaultStatusFontSize * _textScaleFactor;
 
     return SizedBox(
       width: MediaQuery.of(context).size.width,
@@ -69,6 +60,7 @@ class OrderCard extends StatelessWidget {
         padding: EdgeInsets.zero,
         onPressed: () {
           HapticFeedback.selectionClick();
+          onStatusPressed?.call();
           Navigator.push(
             context,
             CupertinoPageRoute(
@@ -77,10 +69,18 @@ class OrderCard extends StatelessWidget {
           );
         },
         child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: CupertinoDynamicColor.resolve(
                 CupertinoColors.tertiarySystemBackground, context),
             borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x19000000),
+                blurRadius: 10,
+                offset: Offset(0, 0),
+              )
+            ],
           ),
           child: Container(
             padding: EdgeInsets.all(14),
@@ -94,13 +94,10 @@ class OrderCard extends StatelessWidget {
                   children: [
                     _buildImageSection(context, imagesWithAltText, postId),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 14),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildStatusText(
-                              context, adjustedStatusFontSize, orderState),
-                          const SizedBox(height: 4),
                           _buildTitleSection(
                               context, title, adjustedTitleFontSize),
                           const SizedBox(height: 4),
@@ -117,29 +114,108 @@ class OrderCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        onStatusPressed?.call();
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => DonorScreen(postId: postId),
-                          ),
-                        );
-                      },
-                      child: Icon(FeatherIcons.chevronRight,
-                          size: 24,
-                          color:
-                              CupertinoColors.systemGrey.resolveFrom(context)),
+                    PullDownButton(
+                      itemBuilder: (context) => [
+                        if (isCurrentUser) ...[
+                        PullDownMenuItem(
+                          title: 'Edit',
+                          onTap: () {
+                            onEdit?.call();
+                          },
+                          icon: CupertinoIcons.pencil,
+                        ),
+                        ],
+                        PullDownMenuItem(
+                          title: 'Share',
+                          subtitle: 'Forward as a link to others',
+                          onTap: () {
+                            shareDynamicLink();
+                          },
+                          icon: CupertinoIcons.share,
+                        ),
+                        if (isCurrentUser) ...[
+                        PullDownMenuItem(
+                          onTap: () {
+                            _showDeletePostConfirmation(context);
+                          },
+                          title: 'Remove Post',
+                          isDestructive: true,
+                          icon: CupertinoIcons.delete,
+                        ),
+                        ],
+                      ],
+                      buttonBuilder: (context, showMenu) => CupertinoButton(
+                        onPressed: showMenu,
+                        padding: EdgeInsets.all(10),
+                        child: Icon(
+                          FeatherIcons.moreVertical,
+                          size: 20,
+                          color: CupertinoDynamicColor.resolve(
+                              CupertinoColors.secondaryLabel, context),
+                        ),
+                      ),
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+
+  Future<void> shareDynamicLink() async {
+    final Uri dynamicLink = await createDynamicLink(postId);
+    Share.share(dynamicLink.toString());
+  }
+
+  // Method to create a dynamic link
+  Future<Uri> createDynamicLink(String postId) async {
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      uriPrefix: 'https://foodhood.page.link',
+      link: Uri.parse('https://foodhood.page.link/post/$postId'),
+      androidParameters: AndroidParameters(
+        packageName: 'com.example.foodhood',
+        minimumVersion: 1,
+      ),
+      iosParameters: const IOSParameters(bundleId: 'com.example.foodhood'),
+    );
+
+    final ShortDynamicLink shortDynamicLink =
+        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+    final Uri dynamicUrl = shortDynamicLink.shortUrl;
+
+    return dynamicUrl;
+  }
+
+  void _showDeletePostConfirmation(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text('Remove Post'),
+          content: Text(
+              'Are you sure you want to delete this post? This action cannot be undone.'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: Text('Remove'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                onRemove?.call();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -160,18 +236,20 @@ class OrderCard extends StatelessWidget {
         ? imagesWithAltText[0]['url'] ?? ''
         : 'assets/images/sampleFoodPic.jpg';
 
-    return  ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: CachedNetworkImage(
-            imageUrl: imageToShow,
-            width: 90,
-            height: 90,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => CupertinoActivityIndicator(),
-            errorWidget: (context, url, error) =>
-                buildImageFailedPlaceHolder(context, true),
-          ),
-        );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: CachedNetworkImage(
+        imageUrl: imageToShow,
+        width: 90,
+        height: 90,
+        maxHeightDiskCache: 200, // Set maximum height for disk caching
+        maxWidthDiskCache: 200, // Set maximum width for disk caching
+        fit: BoxFit.cover,
+        placeholder: (context, url) => CupertinoActivityIndicator(),
+        errorWidget: (context, url, error) =>
+            buildImageFailedPlaceHolder(context, true),
+      ),
+    );
   }
 
   static Widget _buildTitleSection(
@@ -251,66 +329,6 @@ class OrderCard extends StatelessWidget {
             CupertinoColors.secondaryLabel, context),
         fontSize: adjustedOrderInfoFontSize,
         fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-
-  static Widget _buildStatusText(BuildContext context,
-      double adjustedStatusFontSize, OrderState orderState) {
-    String statusText = '';
-    Color statusColor = CupertinoColors.systemGreen; // Default color
-
-    switch (orderState) {
-      case OrderState.reserved:
-        statusText = 'Reserved';
-        statusColor = CupertinoColors.systemYellow;
-        break;
-      case OrderState.confirmed:
-        statusText = 'Confirmed';
-        statusColor = CupertinoColors.systemGreen;
-        break;
-      case OrderState.delivering:
-        statusText = 'Delivering';
-        statusColor = CupertinoColors.systemBlue;
-        break;
-      case OrderState.readyToPickUp:
-        statusText = 'Ready to Pick Up';
-        statusColor = CupertinoColors.systemGreen;
-        break;
-      case OrderState.pending:
-        statusText = 'Pending';
-        statusColor = CupertinoColors.systemOrange;
-        break;
-      case OrderState.notReserved:
-        statusText = 'Not Reserved';
-        statusColor = CupertinoColors.systemGrey;
-        break;
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        color: statusColor.withOpacity(0.2),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(CupertinoIcons.circle_fill,
-                color: statusColor, size: adjustedStatusFontSize),
-            const SizedBox(width: 4),
-            Text(
-              statusText,
-              style: TextStyle(
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.label, context),
-                fontWeight: FontWeight.w500,
-                fontSize: adjustedStatusFontSize,
-              ),
-              overflow: TextOverflow.visible,
-            ),
-          ],
-        ),
       ),
     );
   }
