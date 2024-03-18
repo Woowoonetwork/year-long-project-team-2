@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
 
+// In FilterSheet.dart
 class FilterSheet extends StatefulWidget {
-  final Function(List<String>) onApplyFilters;
+  final Function(Map<String, dynamic>) onApplyFilters;
 
-  FilterSheet({required this.onApplyFilters});
+  const FilterSheet({Key? key, required this.onApplyFilters}) : super(key: key);
 
   @override
   _FilterSheetState createState() => _FilterSheetState();
@@ -217,6 +218,8 @@ class _FilterSheetState extends State<FilterSheet> {
               });
             },
           ),
+          // In _buildBottomButtons method of FilterSheet
+// Inside _buildBottomButtons method of FilterSheet
           CupertinoButton(
             padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
             color: accentColor,
@@ -231,7 +234,14 @@ class _FilterSheetState extends State<FilterSheet> {
                 ...selectedDietPreferences
               ];
 
-              widget.onApplyFilters(selectedFilters);
+              // Construct the filter criteria map correctly
+              Map<String, dynamic> filterCriteria = {
+                'collectionDay': collectionDay, // 'Today' or 'Tomorrow'
+                'selectedFilters': selectedFilters,
+              };
+
+              widget.onApplyFilters(filterCriteria);
+
               Navigator.of(context).pop(); // Close the FilterSheet
             },
           ),
