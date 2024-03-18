@@ -668,9 +668,52 @@ N/A.
     - Fixed the data reading on the donor screen to fix the order status bug.
 
 - Complete the T2 W9 team log.
-- Complete the T2 W8=9 individual log.
+- Complete the T2 W9 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
 
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Term 2 Week 10: Monday 11th Mar 2024 - Sunday 17th Mar 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W10.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Added functionality for active and past/completed orders.
+- Reorganized how donated and reserved posts are displayed and added functionality.
+- Fixed major bugs on the account screen.
+- Added the progress bar as a component for reusability.
+- Added location display on the donor screen using reverse geocaching.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Display the reserved posts
+    - Reorganized how donated and reserved posts are displayed and added functionality.
+    - Reorganized how active and past orders are displayed and added functionality.
+    - Fixed bugs on the account screen.
+    - Added location display on the donor screen using reverse geocaching.
+    - Added the progress bar as a component for reusability.
+
+- Complete the T2 W10 team log.
+- Complete the T2 W10 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
 
 ### Tasks in progress (from Project Board)
 
