@@ -279,9 +279,7 @@ class _PostDetailViewState extends State<PostDetailView> {
   }
 
   Widget _buildPickupInformation() {
-    return Container(
-        key: _pickupInfoKey,
-        child: PickupInformation(
+    return PickupInformation(
           pickupTime:
               DateFormat('EEE, MMM d, ' 'h:mm a').format(viewModel.pickupTime),
           pickupLocation: viewModel.pickupLocation,
@@ -289,7 +287,7 @@ class _PostDetailViewState extends State<PostDetailView> {
           additionalInfo: viewModel.pickupInstructions,
           locationCoordinates: viewModel.pickupLatLng,
           viewModel: viewModel,
-        ));
+        );
   }
 
   Widget _buildAllergensSection() {

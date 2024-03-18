@@ -106,7 +106,9 @@ class PostDetailViewModel extends ChangeNotifier {
 
     GeoPoint geoPoint = documentData['post_location'] as GeoPoint;
     pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+
     await _reverseGeocodeLatLng(pickupLatLng);
+
     if (documentData.containsKey('images') && documentData['images'] is List) {
       imagesWithAltText = List<Map<String, String>>.from(
         (documentData['images'] as List).map((imageMap) {

@@ -267,7 +267,7 @@ class _DetailAppBarState extends State<DetailAppBar> {
                       type: WormType.underground,
                       dotColor:
                           CupertinoColors.systemGrey2.resolveFrom(context),
-                      activeDotColor: CupertinoColors.systemBackground
+                      activeDotColor: CupertinoColors.label
                           .resolveFrom(context)),
                 ),
               )),

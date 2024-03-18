@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
 
-class PickupInformation extends StatelessWidget {
+class PickupInformation extends StatefulWidget {
   final String pickupTime;
   final String pickupLocation;
   final String meetingPoint;
@@ -26,6 +26,19 @@ class PickupInformation extends StatelessWidget {
     this.locationCoordinates,
     required this.viewModel,
   }) : super(key: key);
+
+  @override
+  _PickupInformationState createState() => _PickupInformationState();
+}
+
+class _PickupInformationState extends State<PickupInformation> {
+  late Future<void> _delayFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _delayFuture = Future.delayed(Duration(milliseconds: 200));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,57 +104,74 @@ class PickupInformation extends StatelessWidget {
   }
 
   Widget _buildMap(BuildContext context) {
-    final LatLng? locationCoordinates = viewModel.pickupLatLng;
-
-    if (locationCoordinates != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-        child: SizedBox(
-          width: double.infinity,
-          height: 140.0,
-          child: GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: locationCoordinates,
-              zoom: 16.0,
+    return FutureBuilder(
+      future: _delayFuture, // Use the initialized future
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            width: double.infinity,
+            height: 200.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              color: CupertinoColors.systemGrey6,
             ),
-            markers: Set.from([
-              Marker(
-                markerId: MarkerId('pickupLocation'),
-                position: locationCoordinates,
+            alignment: Alignment.center,
+            child: CupertinoActivityIndicator(),
+          );
+        } else {
+          if (widget.locationCoordinates != null) {
+            return ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              child: SizedBox(
+                width: double.infinity,
+                height: 140.0,
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: widget.viewModel.pickupLatLng,
+                    zoom: 16.0,
+                  ),
+                  markers: Set.from([
+                    Marker(
+                      markerId: MarkerId('pickupLocation'),
+                      position: widget.viewModel.pickupLatLng,
+                    ),
+                  ]),
+                  zoomControlsEnabled: false,
+                  scrollGesturesEnabled: false,
+                  rotateGesturesEnabled: false,
+                  tiltGesturesEnabled: false,
+                  zoomGesturesEnabled: false,
+                  myLocationEnabled: false,
+                  mapType: MapType.normal,
+                  myLocationButtonEnabled: false,
+                ),
               ),
-            ]),
-            zoomControlsEnabled: false,
-            scrollGesturesEnabled: false,
-            rotateGesturesEnabled: false,
-            tiltGesturesEnabled: false,
-            zoomGesturesEnabled: false,
-            myLocationEnabled: false,
-            mapType: MapType.normal,
-            myLocationButtonEnabled: false,
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        width: double.infinity,
-        height: 200.0,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-          color: CupertinoColors.systemGrey4,
-        ),
-        alignment: Alignment.center,
-        child: Text('Map Placeholder'),
-      );
-    }
+            );
+          } else {
+            return Container(
+              width: double.infinity,
+              height: 200.0,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                color: CupertinoColors.systemGrey4,
+              ),
+              alignment: Alignment.center,
+              child: Text('Map Placeholder'),
+            );
+          }
+        }
+      },
+    );
   }
+
 
   Widget _buildDetails(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CustomInfoTile(title: 'Pickup Time', subtitle: pickupTime),
+        CustomInfoTile(title: 'Pickup Time', subtitle: widget.pickupTime),
         CustomInfoTile(
-            title: 'Pickup Location', subtitle: viewModel.pickupLocation),
+            title: 'Pickup Location', subtitle: widget.pickupLocation),
         const SizedBox(height: 12),
         _buildAdditionalInfo(context),
         const SizedBox(height: 12),
@@ -184,10 +214,10 @@ class PickupInformation extends StatelessWidget {
               width: 30.0,
               height: 30.0,
               child: //clipoval
-                  IconPlaceholder(imageUrl: viewModel.profileURL)),
+                  IconPlaceholder(imageUrl: widget.viewModel.profileURL)),
         ),
         Expanded(
-          child: MessageBox(context: context, text: additionalInfo),
+          child: MessageBox(context: context, text: widget.additionalInfo),
         ),
       ],
     );
@@ -202,7 +232,7 @@ class PickupInformation extends StatelessWidget {
           Expanded(
             child: InfoButton(
               context: context,
-              text: 'Message ${viewModel.firstName}',
+              text: 'Message ${widget.viewModel.firstName}',
               icon: FeatherIcons.messageCircle,
               iconColor: CupertinoColors.label.resolveFrom(context),
               onPressed: () {
@@ -220,7 +250,7 @@ class PickupInformation extends StatelessWidget {
               text: 'Navigate Here',
               icon: FeatherIcons.arrowUpRight,
               iconColor: CupertinoColors.label.resolveFrom(context),
-              onPressed: () => _launchMapUrl(viewModel.pickupLatLng),
+              onPressed: () => _launchMapUrl(widget.viewModel.pickupLatLng),
             ),
           ),
         ],
