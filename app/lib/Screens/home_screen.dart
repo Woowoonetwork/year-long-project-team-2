@@ -460,49 +460,53 @@ class _HomeScreenState extends State<HomeScreen> {
         filterCriteria['collectionDay'] as String? ?? 'Today';
     List<String> selectedFilters =
         List<String>.from(filterCriteria['selectedFilters'] ?? []);
-    // Assuming selectedTime could be null or isn't always a DateTime object.
-    // If it's intended to be an hour, it should be passed as an int or null if not set.
-    int? selectedHour = filterCriteria['selectedHour'] as int?;
+    RangeValues selectedTimeRange =
+        filterCriteria['collectionTime'] as RangeValues;
 
     DateTime now = DateTime.now();
     DateTime targetDate = collectionDay == "Today"
         ? DateTime(now.year, now.month, now.day)
         : DateTime(now.year, now.month, now.day).add(Duration(days: 1));
 
-    var docs = await fetchDocuments();
+    var snapshot = await FirebaseFirestore.instance
+        .collection('post_details')
+        .orderBy('post_timestamp', descending: true)
+        .get();
 
-    var filteredDocs = docs.where((doc) {
-      var docData = doc.data() as Map<String, dynamic>;
-      Timestamp? pickupTimestamp = docData['pickup_time'] as Timestamp?;
+    List<Widget> filteredPosts = [];
+
+    for (var doc in snapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+      Timestamp? pickupTimestamp = data['pickup_time'] as Timestamp?;
       DateTime? pickupDateTime = pickupTimestamp?.toDate();
 
       bool isSameDay = pickupDateTime != null &&
           pickupDateTime.year == targetDate.year &&
           pickupDateTime.month == targetDate.month &&
           pickupDateTime.day == targetDate.day;
-      // Adjusting the condition to check for a specific hour if selectedHour is not null.
-      bool isWithinSelectedTime = selectedHour == null ||
-          (pickupDateTime != null && pickupDateTime.hour == selectedHour);
 
-      List<String> docCategoriesAndAllergens =
-          ((docData['categories'] as String?)?.split(',') ?? [])
-              .map((s) => s.trim())
-              .toList()
-            ..addAll(((docData['allergens'] as String?)?.split(',') ?? [])
-                .map((s) => s.trim()));
+      bool isWithinTimeRange = false;
+      if (pickupDateTime != null && isSameDay) {
+        double pickupHour =
+            pickupDateTime.hour + (pickupDateTime.minute / 60.0);
+        isWithinTimeRange = pickupHour >= selectedTimeRange.start &&
+            pickupHour <= selectedTimeRange.end;
+      }
 
-      bool matchesSelectedFilters = selectedFilters
-          .every((filter) => docCategoriesAndAllergens.contains(filter));
+      // Ensure the post is not reserved and meets the time range criteria
+      if (!data.containsKey('reserved_by') && isWithinTimeRange) {
+        // Apply additional filters for categories and allergens as needed
+        var postWidget = await _buildPostCard(doc);
+        filteredPosts.add(postWidget);
+      }
+    }
 
-      return isSameDay && isWithinSelectedTime && matchesSelectedFilters;
-    }).toList();
-
-    List<Widget> postWidgets =
-        await Future.wait(filteredDocs.map((doc) => _buildPostCard(doc)));
-
-    setState(() {
-      postCards = postWidgets;
-    });
+    if (mounted) {
+      setState(() {
+        postCards = filteredPosts;
+        isLoading = false;
+      });
+    }
   }
 
   // In HomeScreen.dart
