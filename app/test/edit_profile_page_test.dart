@@ -2,7 +2,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:FoodHood/Screens/edit_profile_screen.dart';
+import 'package:FoodHood/Screens/profile_edit_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'mock_firestore_service.dart';

@@ -29,7 +29,7 @@ Future<void> addAllergensCategoriesAndPL() async {
     'Vegan',
     'Vegetarian',
     'Halal',
-    'Kosher'
+    'Kosher',
     'Chicken',
     'Meat',
     'Beef',

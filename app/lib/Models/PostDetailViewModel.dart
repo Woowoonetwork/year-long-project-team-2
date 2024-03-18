@@ -102,7 +102,6 @@ class PostDetailViewModel extends ChangeNotifier {
     title = documentData['title'] ?? '';
     pickupInstructions = documentData['pickup_instructions'] ?? '';
     userid = documentData['user_id'] ?? '';
-    rating = documentData['rating'] ?? 0.0;
     isReserved = documentData['post_status'] != 'not reserved';
 
     GeoPoint geoPoint = documentData['post_location'] as GeoPoint;
@@ -122,8 +121,6 @@ class PostDetailViewModel extends ChangeNotifier {
     } else {
       imagesWithAltText = [];
     }
-
-    rating = documentData['rating'] ?? 0.0;
     pickupTime = (documentData['pickup_time'] as Timestamp).toDate();
     expirationDate = (documentData['expiration_date'] as Timestamp).toDate();
     postTimestamp = (documentData['post_timestamp'] as Timestamp).toDate();
@@ -134,6 +131,7 @@ class PostDetailViewModel extends ChangeNotifier {
   void _updateUserDetails(Map<String, dynamic> userDocument) {
     firstName = userDocument['firstName'] ?? '';
     lastName = userDocument['lastName'] ?? '';
+    rating = userDocument['avgRating']?.toDouble();
     profileURL = userDocument['profileImagePath'] ?? '';
     notifyListeners();
   }

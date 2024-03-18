@@ -12,6 +12,8 @@ import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 //import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
+import 'package:timelines/timelines.dart';
+import 'package:FoodHood/Models/PostDetailViewModel.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -42,12 +44,12 @@ class _DonorScreenState extends State<DonorScreen> {
   late double adjustedHeadingFontSize;
   late double adjustedOrderInfoFontSize;
   late LatLng pickupLatLng;
+  late PostDetailViewModel viewModel;
 
   @override
   void initState() {
     super.initState();
-    pickupLatLng = LatLng(
-        49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
+    pickupLatLng = LatLng(49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
     fetchPostInformation(); // Fetch reserved by user name when the widget initializes
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
@@ -69,7 +71,7 @@ class _DonorScreenState extends State<DonorScreen> {
       if (postSnapshot.exists) {
         // Extract the reserved_by user ID from the post details
         reservedByUserId = postSnapshot['reserved_by'];
-        pickupLocation = postSnapshot['pickup_location'];
+        //pickupLocation = postSnapshot['pickup_location'];
 
         if (postSnapshot['post_location'] is GeoPoint) {
           GeoPoint geoPoint = postSnapshot['post_location'] as GeoPoint;
@@ -181,7 +183,7 @@ class _DonorScreenState extends State<DonorScreen> {
             alignment: Alignment.bottomCenter,
             children: <Widget>[
               Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   __buildHeadingTextField(text: _buildHeadingText()),
@@ -198,64 +200,19 @@ class _DonorScreenState extends State<DonorScreen> {
                     
                   SizedBox(height: 10.0),
 
-                  //Progress Bar
-                  if (reservedByName != null)
-                    Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        // Linear progress indicator
-                        LinearProgressIndicator(
-                          value: _calculateProgress(),
-                          minHeight: 5.0, // Adjust the height as needed
-                          backgroundColor: groupedBackgroundColor,
-                          valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-                        ),
-                        // Circles
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            for (int i = 1; i <= 4; i++)
-                              Expanded(
-                                child: Container(
-                                  width: 12.0,
-                                  height: 12.0,
-                                  margin: EdgeInsets.only(left: i < 4 ? 8.0 : 0.0, right: i > 1 ? 8.0 : 0.0),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: i <= _calculateProgress() * 4 ? accentColor : Colors.transparent,
-                                    border: Border.all(color: accentColor, width: 2.0),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  
-                  if (reservedByName != null)
-                    SizedBox(height: 8.0),
-                  
-                  if (reservedByName != null)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildProgressText("Reserved", OrderState.reserved),
-                        _buildProgressText("Confirmed", OrderState.confirmed),
-                        _buildProgressText("Delivering", OrderState.delivering),
-                        _buildProgressText("Ready to Pick Up", OrderState.readyToPickUp),
-                      ],
-                    ),
+                  // Progress Bar 
+                  _buildProgressBar(),
 
-                  SizedBox(height: 25,),
+                  // SizedBox(height: 25,),
 
-                  //__buildTextField(text: "Pickup at specified location"),
+                  //__buildTextField(text: "Pickup at ."),
                   _buildMap(context),
                   
                   // PendingConfirmationWithTimer(
                   //       durationInSeconds: 120, postId: widget.postId),
-
+                
                   // Replace the placeholder with the chat bubble in the future
-                  SizedBox(height: 200.0),
+                  //SizedBox(height: 200.0),
 
                 ],
               ),
@@ -268,6 +225,113 @@ class _DonorScreenState extends State<DonorScreen> {
       ),
     );
   }
+
+  // Reusable Widget to build the Progress Bar
+  Widget _buildProgressBar(){
+    return Container(
+      height: 120,
+      alignment: Alignment.topCenter, 
+      child: Timeline.tileBuilder(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        
+        theme: TimelineThemeData(
+          direction: Axis.horizontal,
+          connectorTheme: ConnectorThemeData(space: 6.0, thickness: 3.0),
+          nodePosition: 0
+        ),
+
+        builder: TimelineTileBuilder.connected(
+          connectionDirection: ConnectionDirection.before,
+          itemCount: 4,
+
+          itemExtentBuilder: (_, __) {
+            final double padding = 16.0;
+            final double availableWidth = MediaQuery.of(context).size.width - padding * 2;
+            return availableWidth / 4.0; 
+          },
+
+          oppositeContentsBuilder: (context, index) {
+            return Container();
+          },
+          
+          contentsBuilder: (context, index) {
+            switch (index) {
+              case 0:
+                return _buildProgressPoint("Reserved", OrderState.reserved);
+              case 1:
+                return _buildProgressPoint("Confirmed", OrderState.confirmed);
+              case 2:
+                return _buildProgressPoint("Delivering", OrderState.delivering);
+              case 3:
+                return _buildProgressPoint("Ready to Pick Up", OrderState.readyToPickUp);
+              default:
+                return Container();
+            }
+          },
+
+          indicatorBuilder: (_, index) {
+            if (reservedByName == null){
+              return OutlinedDotIndicator(
+                borderWidth: 2.0,
+                color: accentColor,
+              );
+            }
+            if (index < (_calculateProgress() * 4).toInt()) {
+              return DotIndicator(
+                color: accentColor,
+              );
+            } else {
+              return OutlinedDotIndicator(
+                borderWidth: 2.0,
+                color:  accentColor,
+              );
+            }
+          },
+
+          connectorBuilder: (_, index, type) {
+            if (index < (_calculateProgress() * 4).toInt()) {
+              return SolidLineConnector(
+                color: accentColor,
+              );
+            } else {
+              return DashedLineConnector(
+                color:  accentColor,
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  // Widget to build each progress point
+  Widget _buildProgressPoint(String text, OrderState state) {
+    final bool isReserved = reservedByName != null;
+    final bool isCurrentState = orderState == state;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: adjustedFontSize - 2.0,
+          fontWeight: FontWeight.bold,
+          color: isReserved
+              ? isCurrentState
+                  ? CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context)
+                  : CupertinoDynamicColor.resolve(
+                      CupertinoColors.secondaryLabel, context)
+              :
+                  CupertinoDynamicColor.resolve(
+                      CupertinoColors.secondaryLabel, context)
+        ),
+      ),
+    );
+  }
+
 
   // Method to calculate progress based on order state
   double _calculateProgress() {
@@ -283,18 +347,6 @@ class _DonorScreenState extends State<DonorScreen> {
       default:
         return 0.0; // Default progress
     }
-  }
-
-  // Method to build progress text widget
-  Widget _buildProgressText(String text, OrderState state) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 14.0,
-        fontWeight: FontWeight.bold,
-        color: orderState == state ? CupertinoColors.label : CupertinoColors.secondaryLabel,
-      ),
-    );
   }
 
   // Reusable widget to build the text fields

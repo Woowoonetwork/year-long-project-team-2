@@ -11,12 +11,11 @@ import 'package:FoodHood/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const double _defaultTextFontSize = 16.0;
-const double _defaultTitleFontSize = 18.0;
+const double _defaultTextFontSize = 14.0;
+const double _defaultTitleFontSize = 16.0;
 const double _defaultTagFontSize = 10.0;
 const double _defaultOrderInfoFontSize = 12.0;
-const double _defaultStatusFontSize = 13.0;
-const double imageHeight = 120;
+const double _defaultStatusFontSize = 10.0;
 
 enum OrderState {
   reserved,
@@ -58,7 +57,6 @@ class OrderCard extends StatelessWidget {
     double _textScaleFactor =
         Provider.of<TextScaleProvider>(context).textScaleFactor;
 
-    double adjustedTextFontSize = _defaultTextFontSize * _textScaleFactor;
     double adjustedTitleFontSize = _defaultTitleFontSize * _textScaleFactor;
     double adjustedTagFontSize = _defaultTagFontSize * _textScaleFactor;
     double adjustedOrderInfoFontSize =
@@ -69,28 +67,57 @@ class OrderCard extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       child: CupertinoButton(
         padding: EdgeInsets.zero,
-        onPressed: () => _onCardTap(context, postId),
+        onPressed: () {
+          HapticFeedback.selectionClick();
+          onStatusPressed?.call();
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+              builder: (context) => DonorScreen(postId: postId),
+            ),
+          );
+        },
         child: Container(
           decoration: BoxDecoration(
             color: CupertinoDynamicColor.resolve(
                 CupertinoColors.tertiarySystemBackground, context),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(20),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Stack(
-                children: [
-                  _buildImageSection(context, imagesWithAltText),
-                  _buildStatusRow(context, adjustedStatusFontSize, orderState,
-                      onStatusPressed, postId),
-                ],
-              ),
-              _buildTitleSection(context, title, adjustedTitleFontSize),
-              _buildTagSection(context, tags, adjustedTagFontSize),
-              _buildOrderInfoSection(
-                  context, orderInfo, adjustedOrderInfoFontSize),
-            ],
+          child: Container(
+            padding: EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _buildImageSection(context, imagesWithAltText, postId),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildStatusText(
+                              context, adjustedStatusFontSize, orderState),
+                          const SizedBox(height: 4),
+                          _buildTitleSection(
+                              context, title, adjustedTitleFontSize),
+                          const SizedBox(height: 4),
+                          _buildOrderInfoSection(
+                              context, orderInfo, adjustedOrderInfoFontSize),
+                          const SizedBox(height: 4),
+                          _buildTagSection(context, tags, adjustedTagFontSize),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Icon(FeatherIcons.chevronRight,
+                    color: CupertinoColors.systemGrey.resolveFrom(context)),
+              ],
+            ),
           ),
         ),
       ),
@@ -108,72 +135,73 @@ class OrderCard extends StatelessWidget {
     );
   }
 
-  static Widget _buildImageSection(
-      BuildContext context, List<Map<String, String>> imagesWithAltText) {
+  static Widget _buildImageSection(BuildContext context,
+      List<Map<String, String>> imagesWithAltText, String postId) {
     final String imageToShow = imagesWithAltText.isNotEmpty
         ? imagesWithAltText[0]['url'] ?? ''
         : 'assets/images/sampleFoodPic.jpg';
 
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+    return CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          HapticFeedback.selectionClick();
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+              builder: (context) => PostDetailView(postId: postId),
+            ),
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
           child: CachedNetworkImage(
             imageUrl: imageToShow,
-            width: MediaQuery.of(context).size.width,
-            height: imageHeight,
+            width: 90,
+            height: 90,
             fit: BoxFit.cover,
             placeholder: (context, url) => CupertinoActivityIndicator(),
             errorWidget: (context, url, error) =>
                 buildImageFailedPlaceHolder(context, true),
           ),
-        ),
-        Container(
-          height: imageHeight,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.grey.withOpacity(0.4),
-                Colors.transparent,
-              ],
-              stops: [0.0, 0.5],
-            ),
-          ),
-        ),
-      ],
-    );
+        ));
   }
 
   static Widget _buildTitleSection(
       BuildContext context, String title, double adjustedTitleFontSize) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Text(
-        title,
-        style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-          fontSize: adjustedTitleFontSize,
-          letterSpacing: -0.8,
-          fontWeight: FontWeight.w600,
-        ),
+    return Text(
+      title,
+      style: TextStyle(
+        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+        fontSize: adjustedTitleFontSize,
+        letterSpacing: -0.8,
+        fontWeight: FontWeight.w600,
       ),
     );
   }
 
   static Widget _buildTagSection(
       BuildContext context, List<String> tags, double adjustedTagFontSize) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Wrap(
-        spacing: 7,
-        children: tags
-            .map((tag) => _buildTag(tag, _generateTagColor(tags.indexOf(tag)),
-                context, adjustedTagFontSize))
-            .toList(),
-      ),
+    const int maxDisplayTags = 2;
+    List<Widget> tagWidgets = [];
+    int displayedTagsCount =
+        tags.length > maxDisplayTags ? maxDisplayTags : tags.length;
+    int truncatedTags = tags.length - displayedTagsCount;
+
+    for (int i = 0; i < displayedTagsCount; i++) {
+      tagWidgets.add(
+        _buildTag(tags[i], _generateTagColor(i), context, adjustedTagFontSize),
+      );
+    }
+    if (truncatedTags > 0) {
+      tagWidgets.add(
+        _buildTag('+$truncatedTags', _generateTagColor(displayedTagsCount),
+            context, adjustedTagFontSize),
+      );
+    }
+    return Wrap(
+      spacing: 8,
+      runSpacing: 0,
+      children: tagWidgets,
     );
   }
 
@@ -185,55 +213,36 @@ class OrderCard extends StatelessWidget {
   static Widget _buildTag(String text, Color color, BuildContext context,
       double adjustedTagFontSize) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration:
-          BoxDecoration(color: color, borderRadius: BorderRadius.circular(20)),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 10, vertical: 4), // Adjusted padding
+      decoration: BoxDecoration(
+          color: CupertinoDynamicColor.resolve(color, context),
+          borderRadius: BorderRadius.circular(20)),
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+          color: color.computeLuminance() > 0.5
+              ? CupertinoDynamicColor.resolve(CupertinoColors.black, context)
+              : CupertinoDynamicColor.resolve(CupertinoColors.white, context),
           fontSize: adjustedTagFontSize,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
         ),
-        overflow: TextOverflow.visible,
+        overflow: TextOverflow
+            .ellipsis, // Changed to ellipsis to handle very long text
       ),
     );
   }
 
   static Widget _buildOrderInfoSection(BuildContext context, String orderInfo,
       double adjustedOrderInfoFontSize) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Text(
-        orderInfo,
-        style: TextStyle(
-          color: CupertinoDynamicColor.resolve(
-              CupertinoColors.secondaryLabel, context),
-          fontSize: adjustedOrderInfoFontSize,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  static Widget _buildStatusRow(
-      BuildContext context,
-      double adjustedStatusFontSize,
-      OrderState orderState,
-      VoidCallback? onStatusPressed,
-      String postId) {
-    return Container(
-      height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _buildStatusText(context, adjustedStatusFontSize, orderState),
-          _buildStatusButton(
-              context, adjustedStatusFontSize, onStatusPressed, postId),
-        ],
+    return Text(
+      orderInfo,
+      style: TextStyle(
+        color: CupertinoDynamicColor.resolve(
+            CupertinoColors.secondaryLabel, context),
+        fontSize: adjustedOrderInfoFontSize,
+        fontWeight: FontWeight.w500,
       ),
     );
   }
@@ -273,12 +282,15 @@ class OrderCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        color: statusColor.withOpacity(0.2),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(CupertinoIcons.circle_fill, color: statusColor, size: 12),
-            const SizedBox(width: 6),
+            Icon(CupertinoIcons.circle_fill,
+                color: statusColor, size: adjustedStatusFontSize),
+            const SizedBox(width: 4),
             Text(
               statusText,
               style: TextStyle(
@@ -290,58 +302,6 @@ class OrderCard extends StatelessWidget {
               overflow: TextOverflow.visible,
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  static Widget _buildStatusButton(
-      BuildContext context,
-      double adjustedStatusFontSize,
-      VoidCallback? onStatusPressed,
-      String postId) {
-    final buttonText = "Status";
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () {
-            HapticFeedback.selectionClick();
-            onStatusPressed?.call();
-            Navigator.push(
-              context,
-              CupertinoPageRoute(
-                builder: (context) => DonorScreen(postId: postId),
-              ),
-            );
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                buttonText,
-                style: TextStyle(
-                  color: CupertinoDynamicColor.resolve(
-                      CupertinoColors.label, context),
-                  fontWeight: FontWeight.w500,
-                  fontSize: adjustedStatusFontSize,
-                ),
-                overflow: TextOverflow.visible,
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                FeatherIcons.chevronRight,
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.label, context),
-                size: 14,
-              ),
-            ],
-          ),
         ),
       ),
     );

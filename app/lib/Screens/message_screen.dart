@@ -2,7 +2,7 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:FoodHood/Screens/profile_screen.dart';
 
 class MessageScreenPage extends StatefulWidget {
   @override
@@ -104,7 +104,7 @@ class _MessageScreenPageState extends State<MessageScreenPage> {
       onTap: () {
         Navigator.push(
           context,
-          CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
+          CupertinoPageRoute(builder: (context) => ProfileScreen()),
         );
       },
       child: Text(

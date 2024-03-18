@@ -139,8 +139,8 @@ class _HomeScreenState extends State<HomeScreen> {
         title: data['title'] ?? 'No Title',
         tags: tags,
         tagColors: assignedColors,
-        firstname: userData?['firstName'] ?? 'Unknown',
-        lastname: userData?['lastName'] ?? 'Unknown',
+        firstName: userData?['firstName'] ?? 'Unknown',
+        lastName: userData?['lastName'] ?? 'Unknown',
         timeAgo: timeAgoSinceDate(createdAt),
         onTap: (postId) => setState(() => {}),
         postId: document.id,
@@ -215,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Stack(
         children: [
           CustomScrollView(slivers: <Widget>[
-            buildMainNavigationBar(context, 'Discover'),
+            buildMainNavigationBar(context, 'Home'),
             SliverToBoxAdapter(
                 child: Column(children: <Widget>[
               _buildSearchBar(context),
@@ -450,7 +450,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: CupertinoButton(
         child: Text(title,
             style: TextStyle(
-                color: CupertinoColors.white,
+                color: color.computeLuminance() > 0.5
+                    ? CupertinoColors.black
+                    : CupertinoColors.white,
                 fontSize: 16,
                 letterSpacing: -0.6,
                 fontWeight: FontWeight.w600)),
@@ -468,16 +470,16 @@ class _HomeScreenState extends State<HomeScreen> {
       right: 16.0,
       child: GestureDetector(
         onTap: () => {
-           HapticFeedback.selectionClick(),
+          HapticFeedback.selectionClick(),
           _openCreatePostScreen(context),
         },
         onTapDown: (_) {
-          setState(() => _scale = 0.85); 
+          setState(() => _scale = 0.85);
           HapticFeedback.selectionClick();
         },
         onTapUp: (_) {
-          setState(() => _scale = 1.0); 
-          HapticFeedback.selectionClick(); 
+          setState(() => _scale = 1.0);
+          HapticFeedback.selectionClick();
           _openCreatePostScreen(context);
         },
         onTapCancel: () {
