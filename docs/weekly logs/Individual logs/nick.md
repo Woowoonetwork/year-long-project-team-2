@@ -558,3 +558,34 @@ N/A.
 ### Additional Information
 
 N/A.
+
+
+## Term 2 Week 10: Monday 11th Mar 2024 - Sunday 17th Mar 2024
+
+![Peer Evaluation](./images/nickT2W10.png)
+
+### Tasks completed (from Project Board)
+
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+- Resolved the bugs in the app and compiled feedback from the peer evaluations.
+- Implemented features allowing users to edit or delete their posts directly from the profile page.
+
+### Recap of personal goals
+
+- Implemented features allowing users to edit or delete their posts directly from the profile page.
+- Integrated a sharing button that generates and shares a link to the post hosted on the Firebase domain.
+- Redesigned the 'Feeling Lucky' button and the pop up modal window
+- Addressed and resolved the issue causing lagginess when opening the profile screen.
+- Enhanced the image selection process by allowing users to choose their camera source.
+- Modified the logic for the tapping area on the order card.
+
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+  
+### Additional Information
+
+N/A.
