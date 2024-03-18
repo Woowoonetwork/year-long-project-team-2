@@ -456,60 +456,50 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void applyFilters(Map<String, dynamic> filterCriteria) async {
-    // Assuming 'collectionDay' is provided as 'Today' or 'Tomorrow'
-    String collectionDay = filterCriteria['collectionDay'] ?? 'Today';
+    String collectionDay =
+        filterCriteria['collectionDay'] as String? ?? 'Today';
     List<String> selectedFilters =
         List<String>.from(filterCriteria['selectedFilters'] ?? []);
-    DateTime now = DateTime.now();
-    DateTime startOfDay;
-    DateTime endOfDay;
+    // Assuming selectedTime could be null or isn't always a DateTime object.
+    // If it's intended to be an hour, it should be passed as an int or null if not set.
+    int? selectedHour = filterCriteria['selectedHour'] as int?;
 
-    // Calculate start and end of the day based on 'collectionDay'
-    if (collectionDay == 'Today') {
-      startOfDay = DateTime(now.year, now.month, now.day);
-      endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
-    } else {
-      // 'Tomorrow'
-      DateTime tomorrow = now.add(Duration(days: 1));
-      startOfDay = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
-      endOfDay =
-          DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 23, 59, 59);
-    }
+    DateTime now = DateTime.now();
+    DateTime targetDate = collectionDay == "Today"
+        ? DateTime(now.year, now.month, now.day)
+        : DateTime(now.year, now.month, now.day).add(Duration(days: 1));
 
     var docs = await fetchDocuments();
+
     var filteredDocs = docs.where((doc) {
-      var data = doc.data() as Map<String, dynamic>;
-      Timestamp? pickupTimestamp = data['pickup_time'] as Timestamp?;
+      var docData = doc.data() as Map<String, dynamic>;
+      Timestamp? pickupTimestamp = docData['pickup_time'] as Timestamp?;
       DateTime? pickupDateTime = pickupTimestamp?.toDate();
 
-      // Ensures the post's pickup time falls within the start and end of the selected day
-      bool isWithinSelectedDay = pickupDateTime != null &&
-          pickupDateTime.isAfter(startOfDay) &&
-          pickupDateTime.isBefore(endOfDay);
+      bool isSameDay = pickupDateTime != null &&
+          pickupDateTime.year == targetDate.year &&
+          pickupDateTime.month == targetDate.month &&
+          pickupDateTime.day == targetDate.day;
+      // Adjusting the condition to check for a specific hour if selectedHour is not null.
+      bool isWithinSelectedTime = selectedHour == null ||
+          (pickupDateTime != null && pickupDateTime.hour == selectedHour);
 
-      List<String> docCategoriesAndAllergens = [];
-      if (data['categories'] is String) {
-        docCategoriesAndAllergens.addAll((data['categories'] as String)
-            .split(',')
-            .map((s) => s.trim())
-            .where((s) => s.isNotEmpty));
-      }
-      if (data['allergens'] is String) {
-        docCategoriesAndAllergens.addAll((data['allergens'] as String)
-            .split(',')
-            .map((s) => s.trim())
-            .where((s) => s.isNotEmpty));
-      }
+      List<String> docCategoriesAndAllergens =
+          ((docData['categories'] as String?)?.split(',') ?? [])
+              .map((s) => s.trim())
+              .toList()
+            ..addAll(((docData['allergens'] as String?)?.split(',') ?? [])
+                .map((s) => s.trim()));
 
-      // Matches selected filters with the combined list of categories and allergens
       bool matchesSelectedFilters = selectedFilters
           .every((filter) => docCategoriesAndAllergens.contains(filter));
 
-      return isWithinSelectedDay && matchesSelectedFilters;
+      return isSameDay && isWithinSelectedTime && matchesSelectedFilters;
     }).toList();
 
     List<Widget> postWidgets =
         await Future.wait(filteredDocs.map((doc) => _buildPostCard(doc)));
+
     setState(() {
       postCards = postWidgets;
     });
