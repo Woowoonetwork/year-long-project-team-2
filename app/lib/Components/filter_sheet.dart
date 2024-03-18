@@ -214,12 +214,14 @@ class _FilterSheetState extends State<FilterSheet> {
                         CupertinoColors.secondaryLabel.resolveFrom(context))),
             onPressed: () {
               setState(() {
-                // Clear filter logic
+                // Reset all filters to their initial values
+                collectionDay = 'Today';
+                selectedFoodTypes = [];
+                selectedDietPreferences = [];
+                collectionTime = RangeValues(0, 24);
               });
             },
           ),
-          // In _buildBottomButtons method of FilterSheet
-// Inside _buildBottomButtons method of FilterSheet
           CupertinoButton(
             padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
             color: accentColor,
@@ -234,11 +236,11 @@ class _FilterSheetState extends State<FilterSheet> {
                 ...selectedDietPreferences
               ];
 
-              // Construct the filter criteria map correctly
+              // Construct the filter criteria map
               Map<String, dynamic> filterCriteria = {
                 'collectionDay': collectionDay, // 'Today' or 'Tomorrow'
                 'selectedFilters': selectedFilters,
-                'timeRange': collectionTime, // Add this line
+                'collectionTime': collectionTime, // RangeValues for time
               };
 
               widget.onApplyFilters(filterCriteria);
