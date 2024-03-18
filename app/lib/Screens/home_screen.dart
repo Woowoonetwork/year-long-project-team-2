@@ -409,6 +409,25 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<List<QueryDocumentSnapshot>> fetchDocuments() async {
+    var snapshot =
+        await FirebaseFirestore.instance.collection('post_details').get();
+    return snapshot.docs;
+  }
+
+  List<QueryDocumentSnapshot> filterDocuments(
+      List<QueryDocumentSnapshot> docs, List<String> selectedCategories) {
+    return docs.where((doc) {
+      var docCategories =
+          doc['categories'].split(',').map((s) => s.trim()).toList();
+      // To check if the document contains any of the selected categories
+      // return docCategories.any((category) => selectedCategories.contains(category));
+      // To check if the document contains all of the selected categories
+      return selectedCategories
+          .every((category) => docCategories.contains(category));
+    }).toList();
+  }
+
   Future<List<Widget>> fetchFilteredPosts(
       List<String> selectedCategories) async {
     Query query = FirebaseFirestore.instance.collection('post_details');
@@ -425,12 +444,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return await Future.wait(futures);
   }
 
-  void _applyFilters(List<String> selectedFilters) {
-    // You might want to store the selected filters in the state, then use them in your posts query
-    fetchFilteredPosts(selectedFilters).then((filteredPosts) {
-      setState(() {
-        postCards = filteredPosts;
-      });
+  void applyFilters(List<String> selectedCategories) async {
+    // Step 1: Perform asynchronous work outside of setState()
+    var docs = await fetchDocuments();
+    var filteredDocs = filterDocuments(docs, selectedCategories);
+    var filteredPosts = filteredDocs.map((doc) => _buildPostCard(doc)).toList();
+
+    // Step 2: Wait for all asynchronous work to complete (if there's any inside the map)
+    List<Widget> postWidgets = await Future.wait(filteredPosts);
+
+    // Step 3: Now, update the state
+    setState(() {
+      postCards = postWidgets; // Update your state with the new list
     });
   }
 
@@ -442,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) => SafeArea(
         child: FilterSheet(
           onApplyFilters: (selectedFilters) {
-            _applyFilters(selectedFilters);
+            applyFilters(selectedFilters);
           },
         ),
       ),
