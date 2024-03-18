@@ -456,18 +456,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void applyFilters(Map<String, dynamic> filterCriteria) async {
-    String collectionDay =
-        filterCriteria['collectionDay'] as String? ?? 'Today';
+    // Extracting filter criteria
+    String collectionDay = filterCriteria['collectionDay'] ?? 'Today';
     List<String> selectedFilters =
         List<String>.from(filterCriteria['selectedFilters'] ?? []);
     RangeValues selectedTimeRange =
         filterCriteria['collectionTime'] as RangeValues;
 
+    // Prepare for date filtering
     DateTime now = DateTime.now();
     DateTime targetDate = collectionDay == "Today"
         ? DateTime(now.year, now.month, now.day)
         : DateTime(now.year, now.month, now.day).add(Duration(days: 1));
 
+    // Fetch all documents
     var snapshot = await FirebaseFirestore.instance
         .collection('post_details')
         .orderBy('post_timestamp', descending: true)
@@ -485,17 +487,34 @@ class _HomeScreenState extends State<HomeScreen> {
           pickupDateTime.month == targetDate.month &&
           pickupDateTime.day == targetDate.day;
 
+      // Calculate the pickup hour for comparison
       bool isWithinTimeRange = false;
-      if (pickupDateTime != null && isSameDay) {
-        double pickupHour =
-            pickupDateTime.hour + (pickupDateTime.minute / 60.0);
+      if (pickupDateTime != null) {
+        double pickupHour = pickupDateTime.hour + pickupDateTime.minute / 60.0;
         isWithinTimeRange = pickupHour >= selectedTimeRange.start &&
             pickupHour <= selectedTimeRange.end;
       }
 
-      // Ensure the post is not reserved and meets the time range criteria
-      if (!data.containsKey('reserved_by') && isWithinTimeRange) {
-        // Apply additional filters for categories and allergens as needed
+      // Additional checks for categories and allergens
+      var categories = (data['categories'] as String)
+          .split(',')
+          .map((c) => c.trim())
+          .toList();
+      var allergens = (data['allergens'] as String?)
+              ?.split(',')
+              .map((a) => a.trim())
+              .toList() ??
+          [];
+
+      // Check for category or allergen match
+      bool hasMatchingCategoryOrAllergen = selectedFilters.isEmpty ||
+          selectedFilters.any((filter) =>
+              categories.contains(filter) || allergens.contains(filter));
+
+      if (!data.containsKey('reserved_by') &&
+          isSameDay &&
+          isWithinTimeRange &&
+          hasMatchingCategoryOrAllergen) {
         var postWidget = await _buildPostCard(doc);
         filteredPosts.add(postWidget);
       }
