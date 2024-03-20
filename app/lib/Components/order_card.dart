@@ -8,7 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
-import 'package:FoodHood/components.dart';
+import 'package:FoodHood/Components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -204,13 +204,12 @@ class OrderCard extends StatelessWidget {
 
     for (int i = 0; i < displayedTagsCount; i++) {
       tagWidgets.add(
-        _buildTag(tags[i], _generateTagColor(i), context, adjustedTagFontSize),
+        Tag(text: tags[i], color: _generateTagColor(i)),
       );
     }
     if (truncatedTags > 0) {
       tagWidgets.add(
-        _buildTag('+$truncatedTags', _generateTagColor(displayedTagsCount),
-            context, adjustedTagFontSize),
+        Tag(text: '+$truncatedTags', color: _generateTagColor(displayedTagsCount)),
       );
     }
     return Wrap(

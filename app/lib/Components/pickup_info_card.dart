@@ -96,7 +96,7 @@ class _PickupInformationState extends State<PickupInformation> {
       boxShadow: [
         BoxShadow(
           color: const Color(0x19000000),
-          blurRadius: 20,
+          blurRadius: 10,
           offset: const Offset(0, 0),
         ),
       ],

@@ -5,7 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/reset_pwd_screen.dart';
-import '../components.dart';
+import '../Components/components.dart';
 
 class LogInScreen extends StatefulWidget {
   @override

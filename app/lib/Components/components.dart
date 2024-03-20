@@ -7,6 +7,7 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
+import 'package:intl/intl.dart';
 
 class Styles {
   static TextStyle titleStyle = TextStyle(
@@ -473,14 +474,14 @@ class _PasswordCupertinoTextFieldState
           obscureText: _obscureText,
           placeholder: widget.placeholder,
           padding: EdgeInsets.all(16.0),
-           textAlign: TextAlign.left,
+          textAlign: TextAlign.left,
           style: TextStyle(
             color:
                 CupertinoDynamicColor.resolve(CupertinoColors.label, context),
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
-           placeholderStyle: TextStyle(
+          placeholderStyle: TextStyle(
             color: CupertinoDynamicColor.resolve(
                 CupertinoColors.placeholderText, context),
             fontSize: 16,
@@ -495,7 +496,7 @@ class _PasswordCupertinoTextFieldState
                 ? Border.all(color: CupertinoColors.systemRed)
                 : null,
           ),
-           onChanged: (value) {
+          onChanged: (value) {
             if (widget.liveValidation != null) {
               widget.liveValidation!(value);
             }
@@ -513,7 +514,6 @@ class _PasswordCupertinoTextFieldState
                           _obscureText ? FeatherIcons.eyeOff : FeatherIcons.eye,
                           color: CupertinoDynamicColor.resolve(
                               CupertinoColors.placeholderText, context),
-
                           size: 20)),
                 )
               : null,
@@ -539,6 +539,52 @@ class _PasswordCupertinoTextFieldState
             ),
           ),
       ],
+    );
+  }
+}
+
+String timeAgoSinceDate(DateTime dateTime) {
+  final duration = DateTime.now().difference(dateTime);
+  if (duration.inDays > 8) {
+    return 'on ${DateFormat('MMMM dd, yyyy').format(dateTime)}';
+  } else if (duration.inDays >= 1) {
+    return '${duration.inDays} days ago';
+  } else if (duration.inHours >= 1) {
+    return '${duration.inHours} hours ago';
+  } else if (duration.inMinutes >= 1) {
+    return '${duration.inMinutes} minutes ago';
+  } else {
+    return 'Just now';
+  }
+}
+
+
+class Tag extends StatelessWidget {
+  final String text;
+  final Color color;
+
+  const Tag({Key? key, required this.text, required this.color})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: CupertinoDynamicColor.resolve(color, context).withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: MediaQuery.platformBrightnessOf(context) == Brightness.dark
+              ? lighten(color, 0.5)
+              : darken(color, 0.5),
+          fontSize: 10,
+          letterSpacing: -0.40,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

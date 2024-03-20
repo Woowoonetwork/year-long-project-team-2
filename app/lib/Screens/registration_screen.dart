@@ -3,7 +3,7 @@
 
 import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
-import '../components.dart';
+import '../Components/components.dart';
 import '../auth_service.dart';
 import '../firestore_service.dart';
 import 'package:feather_icons/feather_icons.dart';
@@ -121,6 +121,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             placeholder: 'Confirm Password',
             controller: _confPasswordController,
             context: context,
+            showHint: true,
             autofillHints: [AutofillHints.password],
             errorText: _confPasswordErrorText),
         const SizedBox(height: 16),
@@ -482,7 +483,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               Icon(FeatherIcons.chevronDown,
                   size: 18,
                   color: CupertinoDynamicColor.resolve(
-                      CupertinoColors.label, context)),
+                      CupertinoColors.secondaryLabel, context)),
             ],
           ),
         ),

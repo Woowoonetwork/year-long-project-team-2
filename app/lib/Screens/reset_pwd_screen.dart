@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/reset_sent_screen.dart';
-import '../components.dart'; // Assuming this file contains common UI components
+import '../Components/components.dart'; // Assuming this file contains common UI components
 
 class ForgotPasswordScreen extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
