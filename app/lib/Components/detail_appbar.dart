@@ -7,14 +7,16 @@ import 'package:share_plus/share_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:FoodHood/Screens/photo_gallery_screen.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
-class FoodAppBar extends StatefulWidget {
+class DetailAppBar extends StatefulWidget {
   final String postId;
   final bool isFavorite;
   final VoidCallback onFavoritePressed;
   final List<Map<String, String>> imagesWithAltText;
 
-  const FoodAppBar({
+  const DetailAppBar({
     Key? key,
     required this.postId,
     required this.isFavorite,
@@ -23,10 +25,10 @@ class FoodAppBar extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FoodAppBarState createState() => _FoodAppBarState();
+  _DetailAppBarState createState() => _DetailAppBarState();
 }
 
-class _FoodAppBarState extends State<FoodAppBar> {
+class _DetailAppBarState extends State<DetailAppBar> {
   final PageController _pageController = PageController();
 
   bool _showIndicator = false;
@@ -44,10 +46,36 @@ class _FoodAppBarState extends State<FoodAppBar> {
     super.dispose();
   }
 
+  Future<void> shareDynamicLink() async {
+    final Uri dynamicLink = await createDynamicLink(widget.postId);
+    Share.share(dynamicLink.toString());
+  }
+
+  // Method to create a dynamic link
+  Future<Uri> createDynamicLink(String postId) async {
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      uriPrefix: 'https://foodhood.page.link',
+      link: Uri.parse('https://foodhood.page.link/post/$postId'),
+      androidParameters: AndroidParameters(
+        packageName: 'com.example.foodhood',
+        minimumVersion: 1,
+      ),
+      iosParameters: const IOSParameters(bundleId: 'com.example.foodhood'),
+    );
+
+    final ShortDynamicLink shortDynamicLink =
+        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+    final Uri dynamicUrl = shortDynamicLink.shortUrl;
+
+    return dynamicUrl;
+  }
+
   void _scrollListener() {
     if (_pageController.page != null) {
       if (!_showIndicator) {
-        setState(() => _showIndicator = true);
+        if (mounted) {
+          setState(() => _showIndicator = true);
+        }
       }
       Future.delayed(Duration(seconds: 2), () {
         if (mounted) {
@@ -63,7 +91,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
       scrolledUnderElevation: 0.0,
       backgroundColor:
           CupertinoDynamicColor.resolve(detailsBackgroundColor, context),
-      expandedHeight: 340,
+      expandedHeight: 280,
       elevation: 0,
       pinned: true,
       stretch: true,
@@ -75,7 +103,7 @@ class _FoodAppBarState extends State<FoodAppBar> {
             _buildBackgroundImage(),
             AnimatedOpacity(
               opacity: _showIndicator ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 500),
+              duration: Duration(milliseconds: 400),
               child: _buildPageIndicator(
                   _pageController,
                   CupertinoDynamicColor.resolve(detailsBackgroundColor, context)
@@ -94,14 +122,13 @@ class _FoodAppBarState extends State<FoodAppBar> {
       CircleAvatar(
         backgroundColor: Colors.transparent,
         child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Icon(FeatherIcons.chevronLeft,
-              size: 20, color: CupertinoColors.label.resolveFrom(context)),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+            padding: EdgeInsets.zero,
+            child: Icon(FeatherIcons.chevronLeft,
+                size: 20, color: CupertinoColors.label.resolveFrom(context)),
+            onPressed: () =>
+                {HapticFeedback.selectionClick(), Navigator.of(context).pop()}),
       ),
-      CupertinoColors.secondarySystemBackground
-          .resolveFrom(context)
+      CupertinoDynamicColor.resolve(detailsBackgroundColor, context)
           .withOpacity(0.8),
       () => Navigator.of(context).pop(),
     );
@@ -166,16 +193,18 @@ class _FoodAppBarState extends State<FoodAppBar> {
   Widget _buildFavoriteButton(BuildContext context) {
     return blurEffect(
       Icon(
-        widget.isFavorite ? Icons.bookmark : Icons.bookmark_add_outlined,
+        widget.isFavorite ? Icons.bookmark : Icons.bookmark_outline_outlined,
         size: 18,
         color: widget.isFavorite
             ? CupertinoColors.systemOrange
             : CupertinoColors.label.resolveFrom(context),
       ),
-      CupertinoColors.secondarySystemBackground
-          .resolveFrom(context)
+      CupertinoDynamicColor.resolve(detailsBackgroundColor, context)
           .withOpacity(0.8),
-      widget.onFavoritePressed,
+      () async {
+        HapticFeedback.selectionClick();
+        widget.onFavoritePressed();
+      },
     );
   }
 
@@ -183,35 +212,35 @@ class _FoodAppBarState extends State<FoodAppBar> {
     return blurEffect(
       Icon(FeatherIcons.share,
           size: 18, color: CupertinoColors.label.resolveFrom(context)),
-      CupertinoColors.secondarySystemBackground
-          .resolveFrom(context)
+      CupertinoDynamicColor.resolve(detailsBackgroundColor, context)
           .withOpacity(0.8),
-      () => Share.share('Check out this food post!'),
+      () async {
+        HapticFeedback.selectionClick();
+        final Uri dynamicLink = await createDynamicLink(widget.postId);
+        Share.shareUri(dynamicLink);
+      },
     );
   }
 
   Widget blurEffect(
       Widget child, Color backgroundColor, VoidCallback onPressed) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(4.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: backgroundColor,
-              ),
-              child: CircleAvatar(
-                backgroundColor: Colors.transparent,
-                child: child,
-              ),
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: backgroundColor,
             ),
-            onPressed: onPressed,
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              child: child,
+            ),
           ),
+          onPressed: onPressed,
         ),
       ),
     );
@@ -240,7 +269,8 @@ class _FoodAppBarState extends State<FoodAppBar> {
                       type: WormType.underground,
                       dotColor:
                           CupertinoColors.systemGrey2.resolveFrom(context),
-                      activeDotColor: accentColor),
+                      activeDotColor: CupertinoColors.label
+                          .resolveFrom(context)),
                 ),
               )),
         ),

@@ -30,6 +30,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _confPasswordController = TextEditingController();
   final _provinceController = TextEditingController();
   final _cityController = TextEditingController();
+  bool _showPassword = false;
 
   String _selectedProvince = '';
   String _selectedCity = '';
@@ -109,13 +110,35 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             context, [AutofillHints.email],
             errorText: _emailErrorText),
         const SizedBox(height: 16),
-        buildCupertinoTextField('Password', _passwordController, true, context,
+        buildCupertinoTextField('Password', _passwordController, !_showPassword, context,
             [AutofillHints.password],
             errorText: _passwordErrorText),
         const SizedBox(height: 16),
+
         buildCupertinoTextField('Confirm Password', _confPasswordController,
-            true, context, [AutofillHints.password],
+            !_showPassword, context, [AutofillHints.password],
             errorText: _confPasswordErrorText), // Confirm password text field
+
+        const SizedBox(height: 16),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+              'Password must be at least 8 letters long, with one upper case letter, one lower case letter, and one number.',
+              style: TextStyle(
+                color: CupertinoColors.systemGrey,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              )),
+        ),
+        // Show/Hide Password button
+        CupertinoButton(
+          onPressed: () {
+            setState(() {
+              _showPassword = !_showPassword; // Toggle the boolean variable
+            });
+          },
+          child: Text(_showPassword ? 'Hide Password' : 'Show Password'),
+        ),
         const SizedBox(height: 16),
         buildTwoPickerFieldsRow(
           'Province',
@@ -270,6 +293,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       isFormValid = false;
     }
 
+//updated validation rules for password
+    if (_passwordController.text.length < 8 ||
+        !_passwordController.text.contains(RegExp(r'[a-z]')) ||
+        !_passwordController.text.contains(RegExp(r'[A-Z]')) ||
+        !_passwordController.text.contains(RegExp(r'[0-9]'))) {
+      _passwordErrorText =
+          "Password is weak.";
+      isFormValid = false;
+    }
+
     bool isValidForm = _formKey.currentState?.validate() ?? false;
     isFormValid = isFormValid && isValidForm;
 
@@ -330,7 +363,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           'email',
           'itemsSold',
           'description',
-          'posts'
+          'posts',
+          'avgRating',
+          'ratings',
+          'comments',
+          'profileImagePath'
         ],
         fieldValues: [
           _firstNameController.text,
@@ -340,7 +377,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           _emailController.text,
           [],
           '',
-          []
+          [],
+          0.0,
+          [0],
+          [],
+          ''
         ],
       );
 

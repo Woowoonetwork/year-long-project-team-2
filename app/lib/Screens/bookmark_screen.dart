@@ -13,12 +13,12 @@ import 'package:provider/provider.dart';
 const double _defaultFontSize = 16.0;
 const double _defaultPostCountFontSize = 14.0;
 
-class SavedScreen extends StatefulWidget {
+class BookmarkScreen extends StatefulWidget {
   @override
-  _SavedScreenState createState() => _SavedScreenState();
+  _BookmarkScreenState createState() => _BookmarkScreenState();
 }
 
-class _SavedScreenState extends State<SavedScreen> {
+class _BookmarkScreenState extends State<BookmarkScreen> {
   final String userId = FirebaseAuth.instance.currentUser!.uid;
   List<String> savedPostIds = [];
   bool isLoading = true;
@@ -200,8 +200,8 @@ class _SavedScreenState extends State<SavedScreen> {
                     .map((tag) => tag.trim())
                     .toList(),
                 tagColors: _assignedColors(),
-                firstname: userData['firstName'] ?? 'Unknown',
-                lastname: userData['lastName'] ?? 'Unknown',
+                firstName: userData['firstName'] ?? 'Unknown',
+                lastName: userData['lastName'] ?? 'Unknown',
                 timeAgo: timeAgoSinceDate(
                     (postData['post_timestamp'] as Timestamp).toDate()),
                 onTap: (postId) => _onPostCardTap(postId),

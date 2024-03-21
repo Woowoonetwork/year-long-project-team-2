@@ -2,7 +2,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:FoodHood/Screens/edit_profile_screen.dart';
+import 'package:FoodHood/Screens/profile_edit_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'mock_firestore_service.dart';
@@ -21,14 +21,12 @@ void main() {
 
   group('Edit Profile Test', () {
     testWidgets('Edit Profile Screen UI Test', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: ChangeNotifierProvider(
+      await tester.pumpWidget(CupertinoApp(
+        home: ChangeNotifierProvider(
           create: (context) => TextScaleProvider(),
-          child: EditProfilePage(),
-          ),
-        )
-      );
+          child: EditProfileScreen(),
+        ),
+      ));
 
       expect(find.text('Save'), findsOneWidget);
       expect(find.byType(CupertinoTextField), findsNWidgets(4));
@@ -39,7 +37,7 @@ void main() {
 
       //await tester.tap(find.byIcon(FeatherIcons.x));
       //await tester.pumpAndSettle();
-      
+
       //expect(find.byType(EditProfilePage), findsNothing);
     });
 

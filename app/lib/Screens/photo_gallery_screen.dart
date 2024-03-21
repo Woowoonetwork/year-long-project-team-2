@@ -7,6 +7,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'dart:ui';
 import 'package:FoodHood/Components/colors.dart';
+import 'package:flutter/services.dart';
 
 class PhotoGalleryScreen extends StatefulWidget {
   final List<Map<String, String>> imagesWithAltText;
@@ -124,7 +125,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                       type: WormType.underground,
                       dotColor:
                           CupertinoColors.systemGrey2.resolveFrom(context),
-                      activeDotColor: accentColor),
+                      activeDotColor: CupertinoColors.white),
                 ),
               )),
         ),
@@ -137,28 +138,25 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
       padding: const EdgeInsets.all(8.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                color:
-                    _showAltText ? blue : CupertinoColors.darkBackgroundGray),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () {
-                setState(() {
-                  _showAltText = !_showAltText;
-                });
-              },
-              child: Text(
-                'ALT',
-                style: TextStyle(
-                  color: CupertinoColors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              color: _showAltText ? blue : CupertinoColors.darkBackgroundGray),
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              HapticFeedback.selectionClick();
+              setState(() {
+                _showAltText = !_showAltText;
+              });
+            },
+            child: Text(
+              'ALT',
+              style: TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -178,23 +176,20 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
       child: _showAltText && altText.isNotEmpty
           ? ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  padding: EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.darkBackgroundGray.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    altText,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CupertinoColors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: -0.5,
-                    ),
+              child: Container(
+                padding: EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.darkBackgroundGray.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  altText,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: CupertinoColors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.5,
                   ),
                 ),
               ),
@@ -209,22 +204,19 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
       padding: const EdgeInsets.all(8.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: backgroundColor,
-              ),
-              child: CircleAvatar(
-                backgroundColor: Colors.transparent,
-                child: child,
-              ),
+        child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: backgroundColor,
             ),
-            onPressed: onPressed,
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              child: child,
+            ),
           ),
+          onPressed: onPressed,
         ),
       ),
     );

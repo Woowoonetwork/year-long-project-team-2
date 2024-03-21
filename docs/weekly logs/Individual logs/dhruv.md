@@ -377,3 +377,126 @@ N/A.
 
 N/A.
 
+-----
+-----
+
+## Term 2 Week 6: Monday 12th Feb 2024 - Sunday 18th Feb 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week6.png)
+### Recap of personal goals
+- Helped plan out the feature to work on this week
+- Team meating to prioritise and assign tasks for people 
+- Removed reserve post from browse screen
+- Removed reserve post from saved screen 
+- Contributed to team log
+- Completed individual log
+
+
+### Tasks completed (from Project Board)
+- Remove the posts from browse and saved screen if they have been reserved
+- Complete the T2 W6 individual logs
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+- I was not well this week and I have already given my doctor's note to the Professor
+
+-----
+-----
+
+## Term 2 Week 7 and 8: Monday 19 Feb 2024 - Sunday 3rd March 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week8.png)
+### Recap of personal goals
+- Helped plan out the feature to work on this week
+- Team meating to prioritise and assign tasks for people 
+- Worked on the backend implementation of the public profile
+- Completed blocking feature 
+- Contributed to team log
+- Completed individual log
+
+
+### Tasks completed (from Project Board)
+- Complete the public profile backend
+   - Extraction of various components from firebase
+   - Blocking feature
+   - Display ratings and comments from firebase
+   - Edit profileAppBar based on infromation from firebase
+   - Changed circle avatar 
+
+- Complete the T2 W6 individual logs
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+
+-----
+-----
+
+## Term 2 Week 9: Monday 4th march 2024 - Sunday 10th March 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week9.png)
+### Recap of personal goals
+- Meeting with team to decide what task to give during peer testing
+- Peer testing in class
+- Taking feedback and issues related to the app
+- resolve all the fix in public profile
+- Making necessary changes like navigation , circle avatar and blocking in the public profile
+- Contributed to team log
+- Completed individual log
+
+
+### Tasks completed (from Project Board)
+- Fix public profile bugs
+   - Fixed navigation to the correct post detail from recent post section
+   - Fixed the alignment of review and recent post when none is available
+   - Set the avatar to default for review
+   - After blocking is done it goes back to public profile screen
+
+- Complete the T2 W9 individual logs
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+- My flutter stopped working this week for some reason , so It took me around 3 days to fix that issue
+
+-----
+-----
+
+## Term 2 Week 10: Monday 11th Mar 2024 - Sunday 17th Mar 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week10.png)
+
+### Recap of personal goals
+- Helped in planning out the features for the upcoming milestone 
+- Helped assign and prioritize tasks to be completed.
+- Fixing bugs on public profile page 
+- Functionality for the filter button on the home screen
+- Functionality for the filter cupertino buttons on the home screen 
+- Completed the weekly logs.
+
+
+### Tasks completed (from Project Board)
+- Add filtering to the home page
+  - Added the UI for filtering 
+  - Filter post based on categories 
+  - Filter post based on allergens 
+  - Filter post based on day 
+- Complete the T2 W10 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+- Add filtering to the home page
+  - Filter post based on time 

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -138,8 +139,8 @@ class _HomeScreenState extends State<HomeScreen> {
         title: data['title'] ?? 'No Title',
         tags: tags,
         tagColors: assignedColors,
-        firstname: userData?['firstName'] ?? 'Unknown',
-        lastname: userData?['lastName'] ?? 'Unknown',
+        firstName: userData?['firstName'] ?? 'Unknown',
+        lastName: userData?['lastName'] ?? 'Unknown',
         timeAgo: timeAgoSinceDate(createdAt),
         onTap: (postId) => setState(() => {}),
         postId: document.id,
@@ -214,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Stack(
         children: [
           CustomScrollView(slivers: <Widget>[
-            buildMainNavigationBar(context, 'Discover'),
+            buildMainNavigationBar(context, 'Home'),
             SliverToBoxAdapter(
                 child: Column(children: <Widget>[
               _buildSearchBar(context),
@@ -449,7 +450,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: CupertinoButton(
         child: Text(title,
             style: TextStyle(
-                color: CupertinoColors.white,
+                color: color.computeLuminance() > 0.5
+                    ? CupertinoColors.black
+                    : CupertinoColors.white,
                 fontSize: 16,
                 letterSpacing: -0.6,
                 fontWeight: FontWeight.w600)),
@@ -466,17 +469,23 @@ class _HomeScreenState extends State<HomeScreen> {
       bottom: 100.0,
       right: 16.0,
       child: GestureDetector(
+        onTap: () => {
+          HapticFeedback.selectionClick(),
+          _openCreatePostScreen(context),
+        },
         onTapDown: (_) {
-          setState(() => _scale = 0.85); // Shrink the button a bit when pressed
-          HapticFeedback.lightImpact(); // Provide haptic feedback
+          setState(() => _scale = 0.85);
+          HapticFeedback.selectionClick();
         },
         onTapUp: (_) {
-          setState(() => _scale = 1.0); // Revert the button size on release
-          _openCreatePostScreen(context); // Your original onPressed function
+          setState(() => _scale = 1.0);
+          HapticFeedback.selectionClick();
+          _openCreatePostScreen(context);
         },
         onTapCancel: () {
           setState(() =>
               _scale = 1.0); // Ensure button size reverts if tap is canceled
+          HapticFeedback.selectionClick(); // Add haptic feedback here
         },
         child: Transform.scale(
           scale: _scale,
@@ -494,7 +503,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () => _openCreatePostScreen(context),
               padding: EdgeInsets.all(16.0),
               color: accentColor,
-              child: Icon(FeatherIcons.plus,
+              child: Icon(CupertinoIcons.add,
                   color: CupertinoColors.white, size: 30),
               borderRadius: BorderRadius.circular(40.0),
             ),
@@ -505,27 +514,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openCreatePostScreen(BuildContext context) {
-    Navigator.of(context).push(PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          CreatePostScreen(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(0.0, 1.0);
-        const end = Offset.zero;
-        const curve = Curves.easeInOutCubic;
-
-        var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
-      },
-      transitionDuration: Duration(milliseconds: 500), // Customize the duration
-      // The reverse transition duration can also be customized (optional)
-      reverseTransitionDuration: Duration(milliseconds: 500),
-    ));
+    Navigator.of(context).push(
+      CupertinoModalPopupRoute(
+        builder: (context) => CreatePostScreen(),
+      ),
+    );
   }
 
   String timeAgoSinceDate(DateTime dateTime) {
@@ -538,7 +531,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return '${duration.inHours} hour${duration.inHours > 1 ? "s" : ""} ago';
     if (duration.inMinutes >= 1)
       return '${duration.inMinutes} minute${duration.inMinutes > 1 ? "s" : ""} ago';
-    return 'just now';
+    return 'Just now';
   }
 
   Color _getRandomColor() {

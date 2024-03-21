@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:FoodHood/Screens/public_profile_screen.dart';
+import 'package:flutter/services.dart';
 
 class PostCard extends StatelessWidget {
   final List<Map<String, String>> imagesWithAltText;
-  final String firstname;
-  final String lastname;
+  final String firstName;
+  final String lastName;
   final String title;
   final List<String> tags;
   final List<Color> tagColors;
@@ -27,8 +27,8 @@ class PostCard extends StatelessWidget {
     required this.title,
     required this.tags,
     required this.tagColors,
-    required this.firstname,
-    required this.lastname,
+    required this.firstName,
+    required this.lastName,
     required this.timeAgo,
     required this.onTap,
     required this.postId,
@@ -45,6 +45,7 @@ class PostCard extends StatelessWidget {
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: () {
+          HapticFeedback.selectionClick();
           onTap(postId);
           Navigator.push(
             context,
@@ -63,10 +64,11 @@ class PostCard extends StatelessWidget {
                 _buildTitleSection(context),
                 if (showTags) ...[
                   _buildTagSection(context),
+                  SizedBox(height: 2),
                 ] else ...[
                   SizedBox(height: 10),
                 ],
-                _buildOrderInfoSection(context, profileURL, firstname, lastname,
+                _buildOrderInfoSection(context, profileURL, firstName, lastName,
                     timeAgo), // Add the order info section
               ],
             ),
@@ -129,18 +131,40 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildTagSection(BuildContext context) {
-    const double horizontalSpacing = 7.0;
+    const double spacing = 4;
+    int tagCount = tags.length;
+    int displayedTags = tagCount > 4 ? 4 : tagCount; // Display up to 4 tags
+    int truncatedTags = tagCount - displayedTags; // Calculate remaining tags
+
+    List<Widget> tagWidgets =
+        tags.take(displayedTags).toList().asMap().entries.map((entry) {
+      int idx = entry.key;
+      String tag = entry.value;
+      return Container(
+        child: _buildTag(tag, _generateTagColor(idx), context),
+      );
+    }).toList();
+
+    // If there are truncated tags, add a "+X" tag
+    if (truncatedTags > 0) {
+      tagWidgets.add(_buildTag(
+          '+$truncatedTags', _generateTagColor(displayedTags), context));
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
-        children: List.generate(tags.length, (index) {
-          return Row(
-            children: [
-              _buildTag(tags[index], _generateTagColor(index), context),
-              SizedBox(width: horizontalSpacing),
-            ],
-          );
-        }),
+        children: [
+          Expanded(
+            child: Wrap(
+              alignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: spacing,
+              runSpacing: spacing,
+              children: tagWidgets,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -149,13 +173,15 @@ class PostCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color,
+        color: CupertinoDynamicColor.resolve(color, context),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
+          color: color.computeLuminance() > 0.5
+              ? CupertinoDynamicColor.resolve(CupertinoColors.black, context)
+              : CupertinoDynamicColor.resolve(CupertinoColors.white, context),
           fontSize: 10,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,
@@ -185,41 +211,30 @@ class PostCard extends StatelessWidget {
       String firstname, String lastname, String timeAgo) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            CupertinoPageRoute(builder: (context) => PublicProfileScreen()),
-          );
-        },
-        child: Row(
-          children: [
-            avatarUrl.isNotEmpty
-                ? CircleAvatar(
-                    radius: 10,
-                    backgroundImage: CachedNetworkImageProvider(avatarUrl),
-                    onBackgroundImageError: (_, __) {
-                      // Handle image load error
-                    },
-                    backgroundColor: Colors.transparent,
-                  )
-                : CircleAvatar(
-                    radius: 10,
-                    backgroundImage:
-                        AssetImage('assets/images/sampleProfile.png'),
-                  ),
-            SizedBox(width: 8),
-            Text(
-              'Posted by $firstname $lastname $timeAgo',
-              style: TextStyle(
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.secondaryLabel, context),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+      child: Row(
+        children: [
+          avatarUrl.isNotEmpty
+              ? CircleAvatar(
+                  radius: 8,
+                  backgroundImage: CachedNetworkImageProvider(avatarUrl),
+                  backgroundColor: Colors.transparent,
+                )
+              : CircleAvatar(
+                  radius: 8,
+                  backgroundImage:
+                      AssetImage('assets/images/sampleProfile.png'),
+                ),
+          SizedBox(width: 8),
+          Text(
+            'Posted by $firstname $lastname  $timeAgo',
+            style: TextStyle(
+              color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.secondaryLabel, context),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

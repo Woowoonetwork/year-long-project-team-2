@@ -158,7 +158,6 @@ N/A
 - Attended weekly meetings and completed individual log.
 - Presented the demo for the app.
 
-
 ## Tasks in progress (from Project Board)
 
 N/A
@@ -200,7 +199,6 @@ N/A
 
 N/A
 
-
 ## Week 11 & 12: Monday 13th Oct 2023 - Sunday 26th Nov 2023
 
 ![Peer Evaluation](./images/nickWeek11&12.png)
@@ -235,7 +233,6 @@ N/A
 
 N/A
 
-
 ## Week 13: Monday 27th Oct 2023 - Sunday 3rd Dec 2023
 
 ![Peer Evaluation](./images/nickWeek13.png)
@@ -256,7 +253,7 @@ N/A
 - Helped with the presentation slides and demo.
 - Helped with writing up the design document.
 
-## Tasks completed 
+## Tasks completed
 
 - The profile card has been updated to synchronize with Firebase changes.
 - Orders are now retrieved from Firebase.
@@ -272,7 +269,6 @@ N/A
 - Assisted in creating presentation slides and preparing the demo.
 - Contributed to the development of the design document.
 
-
 ## Tasks in progress (from Project Board)
 
 N/A
@@ -280,8 +276,6 @@ N/A
 ## Additional Information
 
 N/A
-
-
 
 ## Term 2 Week 1: Monday 8th Jan 2024 - Sunday 14th Dec 2024
 
@@ -298,7 +292,6 @@ N/A
 - Seperated out multiple pages into viewmodels and widgets.
 - Completed the weekly logs.
 - Assisted in assigning and prioritizing the tasks for the upcoming milestone.
-
 
 ### Tasks completed (from Project Board)
 
@@ -318,8 +311,6 @@ N/A
 ### Additional Information
 
 N/A.
-
-
 
 ## Term 2 Week 2: Monday 15th Jan 2024 - Sunday 21th Dec 2024
 
@@ -361,7 +352,6 @@ N/A.
 ### Additional Information
 
 N/A.
-
 
 ## Term 2 Week 3: Monday 22th Jan 2024 - Sunday 28th Dec 2024
 
@@ -441,7 +431,6 @@ N/A.
 
 N/A.
 
-
 ## Term 2 Week 5: Monday 5th Feb 2024 - Sunday 11th Feb 2024
 
 ### Tasks Worked On During the Week
@@ -472,6 +461,131 @@ N/A.
 
 - No other tasks currently in progress.
 
+### Additional Information
+
+N/A.
+
+## Term 2 Week 6: Monday 12th Feb 2024 - Sunday 18th Feb 2024
+
+![Peer Evaluation](./images/nickT2W6.png)
+
+### Tasks completed (from Project Board)
+
+- Added feature for the mulitple image upload for the post and gallery view of the post.
+- Added the backend logic for image upload and gallery view.
+- Refactored the code further to make it more modular and reusable.
+- Attended weekly meetings and completed the weekly log.
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+
+### Recap of personal goals
+
+- added multiple images upload on create post scree, alt text sheet, image grid.
+- Made image view on the FoodAppBar, photo gallery view when tapped on the photos, each matched with Hero transition.
+- Minor adjustment to the UI from the peer review feedbacks.
+- Improve haptics on the buttons.
+- Adapted components for the new image view.
+- Improve the criterion when creating a post.
+- fixed refresh issues on the account screen.
+- Refractor screens to cohere MVVM model, and added more modularization to the code.
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
+
+## Term 2 Week 8: Monday 26th Feb 2024 - Sunday 3rd Mar 2024
+
+![Peer Evaluation](./images/nickT2W8.png)
+
+### Tasks completed (from Project Board)
+
+- Added features and prepared the app for the upcoming peer testings.
+- Attended weekly meeting and started preparing for the plans for the workstation in next week.
+- Reviewed the Peer Evaluation and provided feedback to the team
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+
+### Recap of personal goals
+
+- Improved the UI on the Settings page whichis now sectioned correctly with coloured icons.
+- Improved the loading speed of the app using QuerySnapshot.
+- Minor adjustment to the UI from the peer review feedbacks.
+- Haptic feedback of the buttons are now added to different part of the screen
+- Added choice chips for the allergen and category selection (from the peer review feedbacks)
+- Added reverse geocoding for pickup locations and ditched the manual selection of the pickup address.
+- Completed the weekly log and contributed to the team log.
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
+
+
+## Term 2 Week 9: Monday 4th Mar 2024 - Sunday 10th Mar 2024
+
+![Peer Evaluation](./images/nickT2W9.png)
+
+### Tasks completed (from Project Board)
+
+- Attended peer evaluations and provided feedback to the team.
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+- Resolved the bugs in the app and compiled feedback from the peer evaluations.
+- Assisted in preparing for the instructions for the peer evaluations.
+
+### Recap of personal goals
+
+- Enhanced the create post screen by incorporating instructional text urging users to navigate the map. Upon positioning the marker, it displays the chosen address.
+- Improved the browse screen's marker interaction, reflecting changes when selected.
+- Relocated the edit button to the profile page for better accessibility.
+- Redesigned the edit profile screen, featuring a prominently larger profile photo avatar for easier interaction.
+- Enriched the tab bar by adding labels for improved navigation clarity.
+- Addressed and resolved the issue where selecting multiple tags led to overflow on cards and the profile page.
+- Optimized the detail page by ensuring tapping on info cards navigates users directly to the respective section, enhancing user experience.
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
+
+
+## Term 2 Week 10: Monday 11th Mar 2024 - Sunday 17th Mar 2024
+
+![Peer Evaluation](./images/nickT2W10.png)
+
+### Tasks completed (from Project Board)
+
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+- Resolved the bugs in the app and compiled feedback from the peer evaluations.
+- Implemented features allowing users to edit or delete their posts directly from the profile page.
+
+### Recap of personal goals
+
+- Implemented features allowing users to edit or delete their posts directly from the profile page.
+- Integrated a sharing button that generates and shares a link to the post hosted on the Firebase domain.
+- Redesigned the 'Feeling Lucky' button and the pop up modal window
+- Addressed and resolved the issue causing lagginess when opening the profile screen.
+- Enhanced the image selection process by allowing users to choose their camera source.
+- Modified the logic for the tapping area on the order card.
+
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+  
 ### Additional Information
 
 N/A.

@@ -2,12 +2,14 @@
 // entry point of the app
 
 import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Models/RemoteNotification.dart';
 import 'package:FoodHood/Screens/browse_screen.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/Screens/login_screen.dart';
 import 'package:FoodHood/Screens/navigation_screen.dart';
 import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -19,52 +21,65 @@ import 'package:flutter/services.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
-
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 void main() async {
-  // Initialize Firebase
   WidgetsFlutterBinding.ensureInitialized();
-  // make status bar transparent and nav bar transparent
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     systemNavigationBarColor: Colors.black.withOpacity(0.002),
   ));
+  WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Call the function to add a pre-defined list of allergens and categories
+  await FirebaseNotification().initNotifications();
+
   await addAllergensCategoriesAndPL();
 
-  // Run the app
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown
-  ]) // Restrict orientation to portrait
-      .then((_) {
-    //runApp(FoodHoodApp());
+  // Handling the dynamic link when the app is launched from a terminated state
+  final PendingDynamicLinkData? initialLink =
+      await FirebaseDynamicLinks.instance.getInitialLink();
+
+  // Setting up the dynamic link listener for foreground/background states
+  FirebaseDynamicLinks.instance.onLink.listen(
+    (dynamicLinkData) {
+      // Handle dynamic link within your navigation logic
+      // For example:
+      // Navigator.pushNamed(context, dynamicLinkData.link.path);
+    },
+    onError: (error) {
+      // Handle errors
+      print('Dynamic Link Failed: $error');
+    },
+  );
+
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(
-      // ChangeNotifierProvider(
-      //   create: (context) => TextScaleProvider(),
-      //   child: FoodHoodApp(),
-      // ),
       MultiProvider(
         providers: [
           ChangeNotifierProvider<TextScaleProvider>(
             create: (context) => TextScaleProvider(),
           ),
         ],
-        child: FoodHoodApp(),
+        child: FoodHoodApp(initialLink: initialLink),
       ),
     );
   });
 }
 
 class FoodHoodApp extends StatelessWidget {
+  final PendingDynamicLinkData? initialLink;
+
+  FoodHoodApp({this.initialLink});
+
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
+      builder: FToastBuilder(),
       localizationsDelegates: [
         DefaultCupertinoLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
@@ -72,16 +87,9 @@ class FoodHoodApp extends StatelessWidget {
       ],
       theme: CupertinoThemeData(
         textTheme: CupertinoTextThemeData(
-          // textStyle: TextStyle(
-          //     fontSize: 16,
-          //     fontStyle: FontStyle.normal,
-          //     fontWeight: FontWeight.normal,
-          //     overflow: TextOverflow.visible,
-          //     color: CupertinoColors.label
-          // ),
           navLargeTitleTextStyle: TextStyle(
               fontSize: 34,
-              letterSpacing: -1.3,
+              letterSpacing: -1.4,
               fontStyle: FontStyle.normal,
               fontWeight: FontWeight.bold,
               color: CupertinoColors.label),

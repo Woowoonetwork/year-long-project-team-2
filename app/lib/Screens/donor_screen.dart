@@ -1,7 +1,6 @@
 //donor_screen.dart
 
 import 'package:FoodHood/Screens/message_screen.dart';
-import 'package:FoodHood/Screens/saved_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -11,6 +10,13 @@ import 'package:FoodHood/Screens/donee_rating.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+//import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
+import 'package:timelines/timelines.dart';
+import 'package:FoodHood/Models/PostDetailViewModel.dart';
+import 'package:FoodHood/Components/progress_bar.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -33,25 +39,28 @@ class _DonorScreenState extends State<DonorScreen> {
   String? reservedByLastName;
   double rating = 0.0;
   String pickupLocation = '';
-  //bool isConfirmed = false;
+  String photo = '';
+  String? reservedByUserId = '';
   OrderState orderState = OrderState.reserved;
   late double _textScaleFactor;
   late double adjustedFontSize;
   late double adjustedHeadingFontSize;
   late double adjustedOrderInfoFontSize;
   late LatLng pickupLatLng;
+  late PostDetailViewModel viewModel;
+  String location = "";
 
   @override
   void initState() {
     super.initState();
-    pickupLatLng = LatLng(
-        49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
+    pickupLatLng = LatLng(49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
     fetchPostInformation(); // Fetch reserved by user name when the widget initializes
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
   }
 
+  // Reading post information
   Future<void> fetchPostInformation() async {
     final CollectionReference postDetailsCollection =
         FirebaseFirestore.instance.collection('post_details');
@@ -65,8 +74,8 @@ class _DonorScreenState extends State<DonorScreen> {
 
       if (postSnapshot.exists) {
         // Extract the reserved_by user ID from the post details
-        final String? reservedByUserId = postSnapshot['reserved_by'];
-        pickupLocation = postSnapshot['pickup_location'];
+        reservedByUserId = postSnapshot['reserved_by'];
+        //pickupLocation = postSnapshot['pickup_location'];
 
         if (postSnapshot['post_location'] is GeoPoint) {
           GeoPoint geoPoint = postSnapshot['post_location'] as GeoPoint;
@@ -93,11 +102,12 @@ class _DonorScreenState extends State<DonorScreen> {
             final userName = userSnapshot['firstName'];
             final userLastName = userSnapshot['lastName'];
             final userRating = userSnapshot['avgRating'];
+
             setState(() {
-              reservedByName =
-                  userName; // Update the reserved by user name in the UI
+              reservedByName = userName; 
               reservedByLastName = userLastName;
               rating = userRating;
+              photo = userSnapshot['profileImagePath'] as String? ?? '';
             });
           } else {
             print(
@@ -137,10 +147,39 @@ class _DonorScreenState extends State<DonorScreen> {
     adjustedHeadingFontSize = _defaultHeadingFontSize * _textScaleFactor;
     adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
   }
+  
+  // void _onLocationSelected(LatLng location) async {
+  //   String address = await getAddressFromLatLng(location);
+  //   setState(() {
+  //     selectedLocation = location;
+  //     instructionText = address;
+  //   });
+  // }
+  // void LocationReading(LatLng location) async{
+  //   String address = await getAddressFromLatLng(location);
+  // }
+
+  Future<String> getAddressFromLatLng(LatLng position) async {
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      if (jsonResponse['results'] != null &&
+          jsonResponse['results'].length > 0) {
+        String address = jsonResponse['results'][0]['formatted_address'];
+        return address;
+      } else {
+        return 'Location not found';
+      }
+    } else {
+      throw Exception('Failed to fetch address');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // double screenWidth = MediaQuery.of(context).size.width;
     return CupertinoPageScaffold(
       backgroundColor: detailsBackgroundColor,
       navigationBar: CupertinoNavigationBar(
@@ -178,7 +217,7 @@ class _DonorScreenState extends State<DonorScreen> {
             alignment: Alignment.bottomCenter,
             children: <Widget>[
               Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   __buildHeadingTextField(text: _buildHeadingText()),
@@ -186,19 +225,47 @@ class _DonorScreenState extends State<DonorScreen> {
                   //Only show the order info section if the order has been reserved.
                   if (reservedByName != null)
                     OrderInfoSection(
-                      avatarUrl: '',
                       reservedByName: reservedByName,
                       reservedByLastName: reservedByLastName,
                       adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
                       rating: rating,
+                      photo: photo,
                     ),
+                    
+                  SizedBox(height: 10.0),
 
-                  //__buildTextField(text: "Pickup at specified location"),
-                  //print(pickupLatLng),
+                  // Progress Bar 
+                  ProgressBar(
+                    progress: _calculateProgress(), 
+                    labels: ["Reserved", "Confirmed", "Delivering", "Ready to Pick Up"], 
+                    color: accentColor,
+                    isReserved: reservedByName != null,
+                    currentState: orderState,
+                  ),
+
+                  // SizedBox(height: 25,),
+                  
                   _buildMap(context),
 
-                  // Replace the placeholder with the chat bubble in the future, placeholder for now
-                  SizedBox(height: 200.0),
+                  FutureBuilder<String>(
+                    future: getAddressFromLatLng(pickupLatLng),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        return __buildTextField( text: "Pickup from ${snapshot.data}");
+                      }
+                    },
+                  ),
+                  
+                  // PendingConfirmationWithTimer(
+                  //       durationInSeconds: 120, postId: widget.postId),
+                
+                  // Replace the placeholder with the chat bubble in the future
+                  //SizedBox(height: 200.0),
+
                 ],
               ),
 
@@ -209,6 +276,129 @@ class _DonorScreenState extends State<DonorScreen> {
         ),
       ),
     );
+  }
+
+  // Reusable Widget to build the Progress Bar
+  Widget _buildProgressBar(){
+    return Container(
+      height: 120,
+      alignment: Alignment.topCenter, 
+      child: Timeline.tileBuilder(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        
+        theme: TimelineThemeData(
+          direction: Axis.horizontal,
+          connectorTheme: ConnectorThemeData(space: 6.0, thickness: 3.0),
+          nodePosition: 0
+        ),
+
+        builder: TimelineTileBuilder.connected(
+          connectionDirection: ConnectionDirection.before,
+          itemCount: 4,
+
+          itemExtentBuilder: (_, __) {
+            final double padding = 16.0;
+            final double availableWidth = MediaQuery.of(context).size.width - padding * 2;
+            return availableWidth / 4.0; 
+          },
+
+          oppositeContentsBuilder: (context, index) {
+            return Container();
+          },
+          
+          contentsBuilder: (context, index) {
+            switch (index) {
+              case 0:
+                return _buildProgressPoint("Reserved", OrderState.reserved);
+              case 1:
+                return _buildProgressPoint("Confirmed", OrderState.confirmed);
+              case 2:
+                return _buildProgressPoint("Delivering", OrderState.delivering);
+              case 3:
+                return _buildProgressPoint("Ready to Pick Up", OrderState.readyToPickUp);
+              default:
+                return Container();
+            }
+          },
+
+          indicatorBuilder: (_, index) {
+            if (reservedByName == null){
+              return OutlinedDotIndicator(
+                borderWidth: 2.0,
+                color: accentColor,
+              );
+            }
+            if (index < (_calculateProgress() * 4).toInt()) {
+              return DotIndicator(
+                color: accentColor,
+              );
+            } else {
+              return OutlinedDotIndicator(
+                borderWidth: 2.0,
+                color:  accentColor,
+              );
+            }
+          },
+
+          connectorBuilder: (_, index, type) {
+            if (index < (_calculateProgress() * 4).toInt()) {
+              return SolidLineConnector(
+                color: accentColor,
+              );
+            } else {
+              return DashedLineConnector(
+                color:  accentColor,
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  // Widget to build each progress point
+  Widget _buildProgressPoint(String text, OrderState state) {
+    final bool isReserved = reservedByName != null;
+    final bool isCurrentState = orderState == state;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: adjustedFontSize - 2.0,
+          fontWeight: FontWeight.bold,
+          color: isReserved
+              ? isCurrentState
+                  ? CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context)
+                  : CupertinoDynamicColor.resolve(
+                      CupertinoColors.secondaryLabel, context)
+              :
+                  CupertinoDynamicColor.resolve(
+                      CupertinoColors.secondaryLabel, context)
+        ),
+      ),
+    );
+  }
+
+
+  // Method to calculate progress based on order state
+  double _calculateProgress() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return 0.25; // Progress for reserved state
+      case OrderState.confirmed:
+        return 0.5; // Progress for confirmed state
+      case OrderState.delivering:
+        return 0.75; // Progress for delivering state
+      case OrderState.readyToPickUp:
+        return 1.0; // Progress for readyToPickUp state
+      default:
+        return 0.0; // Default progress
+    }
   }
 
   // Reusable widget to build the text fields
@@ -255,16 +445,16 @@ class _DonorScreenState extends State<DonorScreen> {
     required String text,
   }) {
     return Padding(
-      padding: EdgeInsets.all(24.0),
+      padding: EdgeInsets.all(16.0),
       child: Container(
         padding: EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           border: Border.all(
             color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 1.0,
+            width: 0.0,
           ),
           color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(24.0),
         ),
         child: Text(
           text,
@@ -289,7 +479,7 @@ class _DonorScreenState extends State<DonorScreen> {
             height: 250.0,
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: locationCoordinates,
+                target: pickupLatLng,
                 zoom: 12.0,
               ),
               markers: Set.from([
@@ -526,8 +716,7 @@ class _DonorScreenState extends State<DonorScreen> {
             CupertinoDialogAction(
               child: Text("Cancel"),
               onPressed: () {
-                Navigator.pop(
-                    context, false); // Return false to indicate cancel
+                Navigator.pop(context, false); // Return false to indicate cancel
               },
             ),
             CupertinoDialogAction(
@@ -545,6 +734,29 @@ class _DonorScreenState extends State<DonorScreen> {
     // If the user confirms the cancelation, proceed with canceling the order
     if (confirmCancel == true) {
       try {
+        // Get the user document
+        DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(reservedByUserId)
+            .get();
+
+        // Check if data exists
+        if (userSnapshot.exists) {
+          // Get the current reserved posts of the user
+          List<String> reservedPosts =
+              List<String>.from(userSnapshot.data()?['reserved_posts'] ?? []);
+
+          // Remove the postId of the canceled order
+          reservedPosts.remove(widget.postId);
+
+          // Update the user document with the updated reserved_posts list
+          await FirebaseFirestore.instance
+              .collection('user')
+              .doc(reservedByUserId)
+              .update({'reserved_posts': reservedPosts});
+        }
+
+        // Update the reserved_by and post_status fields in the post_details document 
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
@@ -592,26 +804,26 @@ class _DonorScreenState extends State<DonorScreen> {
 }
 
 class OrderInfoSection extends StatelessWidget {
-  final String avatarUrl;
   final String? reservedByName;
   final String? reservedByLastName;
   final double adjustedOrderInfoFontSize;
   final double rating;
+  final String photo;
 
   const OrderInfoSection({
     Key? key,
-    required this.avatarUrl,
     required this.reservedByName,
     required this.reservedByLastName,
     required this.adjustedOrderInfoFontSize,
     required this.rating,
+    required this.photo,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // Use a default image if avatarUrl is empty or null
-    String effectiveAvatarUrl =
-        avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
+    // String effectiveAvatarUrl =
+    //     avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
 
     return Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -621,11 +833,25 @@ class OrderInfoSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                backgroundImage: AssetImage(
-                    effectiveAvatarUrl), // Load the image from assets
-                radius: 10,
-              ),
+              // CircleAvatar(
+              //   backgroundImage: AssetImage(
+              //       effectiveAvatarUrl), // Load the image from assets
+              //   radius: 10,
+              // ),
+              photo.isNotEmpty
+                ? CircleAvatar(
+                    radius: 10,
+                    backgroundImage: CachedNetworkImageProvider(photo),
+                    onBackgroundImageError: (_, __) {
+                      // Handle image load error
+                    },
+                    backgroundColor: Colors.transparent,
+                  )
+                : CircleAvatar(
+                    radius: 10,
+                    backgroundImage:
+                        AssetImage('assets/images/sampleProfile.png'),
+                  ),
               SizedBox(width: 8),
               Text(
                 'Reserved by $reservedByName $reservedByLastName',

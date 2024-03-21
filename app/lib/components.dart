@@ -5,6 +5,8 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:FoodHood/Models/PostDetailViewModel.dart';
 
 class Styles {
   static TextStyle titleStyle = TextStyle(
@@ -284,4 +286,132 @@ Widget buildImageFailedPlaceHolder(BuildContext context, bool isCompact) {
           ],
         );
 }
+
+class IconPlaceholder extends StatelessWidget {
+  final String imageUrl;
+  IconPlaceholder({Key? key, required this.imageUrl}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      child: ClipOval(
+        child: imageUrl.isNotEmpty && imageUrl.startsWith('http')
+            ? CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+              )
+            : Image.asset(
+                'assets/images/sampleProfile.png',
+                fit: BoxFit.cover,
+              ),
+      ),
+    );
+  }
+}
+
+class CombinedTexts extends StatelessWidget {
+  final String firstName;
+  final String lastName;
+  final DateTime postTimestamp;
+  final PostDetailViewModel viewModel;
+
+  const CombinedTexts({
+    Key? key,
+    required this.firstName,
+    required this.lastName,
+    required this.postTimestamp,
+    required this.viewModel,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          'Posted by $firstName $lastName  ${viewModel.timeAgoSinceDate(postTimestamp)}',
+          style: TextStyle(
+            color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.48,
+          ),
+        ),
+        Text("  "),
+        RatingText(viewModel: viewModel),
+      ],
+    );
+  }
+}
+
+class InfoText extends StatelessWidget {
+  final String firstName;
+  final String lastName;
+  final DateTime postTimestamp;
+  final PostDetailViewModel viewModel;
+
+  const InfoText({
+    Key? key,
+    required this.firstName,
+    required this.lastName,
+    required this.postTimestamp,
+    required this.viewModel,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      overflow: TextOverflow.fade,
+      text: TextSpan(
+        style: TextStyle(
+          color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          letterSpacing: -0.48,
+        ),
+        children: <TextSpan>[
+          TextSpan(text: 'Prepared by $firstName $lastName'),
+          TextSpan(text: '   '),
+          TextSpan(
+            text: 'Posted ${viewModel.timeAgoSinceDate(postTimestamp)}',
+            style: TextStyle(letterSpacing: -0.48),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RatingText extends StatelessWidget {
+  final PostDetailViewModel viewModel;
+
+  const RatingText({Key? key, required this.viewModel}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.star,
+          color: secondaryColor,
+          size: 14,
+        ),
+        const SizedBox(width: 3),
+        Text(
+          '${viewModel.rating} Rating',
+          style: TextStyle(
+            overflow: TextOverflow.fade,
+            color: CupertinoColors.label.resolveFrom(context).withOpacity(0.8),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.48,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 

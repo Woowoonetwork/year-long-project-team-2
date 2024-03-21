@@ -29,26 +29,26 @@ const Color detailsBackgroundColor = CupertinoDynamicColor.withBrightness(
 */
 
 final CupertinoDynamicColor accentColor = CupertinoDynamicColor.withBrightness(
-  color: Color.fromARGB(255, 63, 133, 151),
-  darkColor: Color(0xFF1B3C4A),
+  color: Color.fromARGB(255, 52, 140, 162),
+  darkColor: Color.fromARGB(255, 52, 140, 162),
 );
 
 final CupertinoDynamicColor secondaryColor =
     CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF9FD0C6),
-  darkColor: Color(0xFF4f6a67),
+  color: Color.fromARGB(255, 157, 206, 196),
+  darkColor: Color.fromARGB(255, 157, 206, 196),
 );
 
 final CupertinoDynamicColor tertiaryColor =
     CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFBFD7D2),
-  darkColor: Color(0xFF72817e),
+  color: Color.fromARGB(255, 191, 215, 210),
+  darkColor: Color.fromARGB(255, 191, 215, 210),
 );
 
 final CupertinoDynamicColor quaternaryColor =
     CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFD4E2DF),
-  darkColor: Color(0xFF7f8785),
+  color: Color.fromARGB(255, 212, 226, 223),
+  darkColor: Color.fromARGB(255, 212, 226, 223),
 );
 
 /* 
@@ -57,28 +57,28 @@ final CupertinoDynamicColor quaternaryColor =
 */
 
 final CupertinoDynamicColor yellow = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFF9CF54),
-  darkColor: Color(0xFF957c32),
+  color: Color.fromARGB(255, 249, 207, 84),
+  darkColor: Color.fromARGB(255, 249, 207, 84),
 );
 
 final CupertinoDynamicColor orange = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFFF8C5B),
-  darkColor: Color(0xFF995436),
+  color: Color.fromARGB(255, 255, 140, 91),
+  darkColor: Color.fromARGB(255, 255, 140, 91),
 );
 
 final CupertinoDynamicColor blue = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF42A9F4),
-  darkColor: Color(0xFF276592),
+  color: Color.fromARGB(255, 66, 169, 244),
+  darkColor: Color.fromARGB(255, 66, 169, 244),
 );
 
 final CupertinoDynamicColor babyPink = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFFFF8383),
-  darkColor: Color(0xFF994e4e),
+  color: Color.fromARGB(255, 255, 131, 131),
+  darkColor: Color.fromARGB(255, 255, 131, 131),
 );
 
 final CupertinoDynamicColor Cyan = CupertinoDynamicColor.withBrightness(
-  color: Color(0xFF05B7CF),
-  darkColor: Color(0xFF036d7c),
+  color: Color.fromARGB(255, 5, 183, 207),
+  darkColor: Color.fromARGB(255, 5, 183, 207),
 );
 
 
@@ -94,3 +94,24 @@ final CupertinoDynamicColor Cyan = CupertinoDynamicColor.withBrightness(
   CupertinoColors.quaternaryLabel - Use for text that contains quaternary content.
 
 */
+
+
+// ranges from 0.0 to 1.0
+
+Color darken(Color color, [double amount = .1]) {
+  assert(amount >= 0 && amount <= 1);
+
+  final hsl = HSLColor.fromColor(color);
+  final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+
+  return hslDark.toColor();
+}
+
+Color lighten(Color color, [double amount = .1]) {
+  assert(amount >= 0 && amount <= 1);
+
+  final hsl = HSLColor.fromColor(color);
+  final hslLight = hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
+
+  return hslLight.toColor();
+}

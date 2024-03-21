@@ -12,16 +12,16 @@ import 'package:provider/provider.dart';
 
 const double _defaultFontSize = 16.0;
 
-class EditProfilePage extends StatefulWidget {
+class EditProfileScreen extends StatefulWidget {
   final Function? onProfileUpdated;
 
-  EditProfilePage({this.onProfileUpdated});
+  EditProfileScreen({this.onProfileUpdated});
 
   @override
-  _EditProfilePageState createState() => _EditProfilePageState();
+  _EditProfileScreenState createState() => _EditProfileScreenState();
 }
 
-class _EditProfilePageState extends State<EditProfilePage> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _aboutMeController = TextEditingController();
@@ -39,7 +39,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     _fetchUserDetails();
-    _textScaleFactor = Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _textScaleFactor =
+        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
   }
 
@@ -137,28 +138,39 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   CupertinoActivityIndicator(),
                   SizedBox(height: 8),
                   Text('Uploading Profile Image...',
-                      style: TextStyle(color: CupertinoColors.label)),
+                      style: TextStyle(
+                          color: CupertinoColors.label.resolveFrom(context)))
                 ]))
           : SafeArea(
-              child: SingleChildScrollView(
-                  padding: EdgeInsets.all(8),
-                  child: _buildProfileForm(context))),
+              child: SingleChildScrollView(child: _buildProfileForm(context))),
     );
   }
 
   ObstructingPreferredSizeWidget buildNavigationBar(BuildContext context) {
     return CupertinoNavigationBar(
-      leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Icon(FeatherIcons.x,
-              size: 22,
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.label, context))),
+      middle: Text('Edit Profile',
+          style: TextStyle(
+              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+              fontWeight: FontWeight.w500)),
+      leading: CupertinoButton(
+        padding: EdgeInsets.zero,
+        child: Text(
+          'Cancel',
+          style: TextStyle(
+            color: CupertinoColors.label.resolveFrom(context),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        onPressed: () async {
+          Navigator.of(context).pop();
+        },
+      ),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
-        child: Text('Save',
+        child: Text(
+          'Save',
           style: TextStyle(
-            color: accentColor, 
+            color: CupertinoColors.label.resolveFrom(context),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -325,83 +337,62 @@ class _EditProfilePageState extends State<EditProfilePage> {
     ]);
   }
 
-  Widget _buildProfileImageUploader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipOval(
-            child: Container(
-              width: 85,
-              height: 85,
-              decoration: BoxDecoration(
-                color: CupertinoColors
-                    .tertiarySystemFill, // Background color for loading state
-                image: _isLoading
-                    ? null
-                    : DecorationImage(
-                        // Conditional image loading
-                        image: _getProfileImage(),
-                        fit: BoxFit.cover,
-                      ),
-              ),
-              child: _isLoading
-                  ? Center(
-                      child:
-                          CupertinoActivityIndicator()) // Show loading indicator if loading
-                  : null, // No additional content if not loading
-            ),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: CupertinoButton(
-                color: CupertinoColors.tertiarySystemBackground,
-                padding: EdgeInsets.zero,
+Widget _buildProfileImageUploader(BuildContext context) {
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: () async {
+            await _uploadImage();
+          },
+          child: Stack(
+            alignment: Alignment.bottomRight, // Aligns the pen icon to the bottom right
+            children: [
+              ClipOval(
                 child: Container(
-                  height: 80,
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Center(
-                        child: Icon(
-                          FeatherIcons.uploadCloud,
-                          size: 22,
-                          color: CupertinoDynamicColor.resolve(
-                              CupertinoColors.label, context),
-                        ),
+                  width: 100, // Adjust the size as needed
+                  height: 100, // Adjust the size as needed
+                  child: ClipOval(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.tertiarySystemFill, // Background color
+                        image: _isLoading
+                            ? null
+                            : DecorationImage(
+                                image: _getProfileImage(), // Fetches the profile image
+                                fit: BoxFit.cover,
+                              ),
                       ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Upload Profile Picture',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: adjustedFontSize,
-                            color: CupertinoDynamicColor.resolve(
-                                CupertinoColors.label, context),
-                            letterSpacing: -0.60,
-                            fontWeight: FontWeight.w500
-                          ),
-                          overflow: TextOverflow.visible,
-                        ),
-                      ),
-                    ],
+                      child: _isLoading
+                          ? Center(child: CupertinoActivityIndicator()) // Shows loading indicator
+                          : null, // No child when not loading
+                    ),
                   ),
                 ),
-                onPressed: () async {
-                  await _uploadImage();
-                },
               ),
-            ),
+              Container(
+                width: 32, // Size of the pen icon container
+                height: 32, // Size of the pen icon container
+                decoration: BoxDecoration(
+                  color: accentColor.resolveFrom(context), // Background color
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  FeatherIcons.edit2, 
+                  color: CupertinoColors.white,
+                  size: 18, // Size of the pen icon
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   ImageProvider _getProfileImage() {
     if (_profileImagePath.isNotEmpty) {
@@ -425,11 +416,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
           Text(
             label,
             style: TextStyle(
-              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: adjustedFontSize,
-              letterSpacing: -0.40,
-              fontWeight: FontWeight.w500
-            ),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
+                fontSize: adjustedFontSize,
+                letterSpacing: -0.40,
+                fontWeight: FontWeight.w500),
           ),
           SizedBox(height: 8),
           CupertinoTextField(
@@ -437,16 +428,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
             padding: EdgeInsets.all(16.0),
             placeholder: placeholder,
             style: TextStyle(
-              color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-              fontSize: adjustedFontSize,
-              fontWeight: FontWeight.w500
-            ),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
+                fontSize: adjustedFontSize,
+                fontWeight: FontWeight.w500),
             placeholderStyle: TextStyle(
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.placeholderText, context),
-              fontSize: adjustedFontSize,
-              fontWeight: FontWeight.w500
-            ),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.placeholderText, context),
+                fontSize: adjustedFontSize,
+                fontWeight: FontWeight.w500),
             decoration: BoxDecoration(
               color: CupertinoDynamicColor.resolve(
                   CupertinoColors.tertiarySystemBackground, context),
@@ -469,8 +459,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             label,
             style: TextStyle(
               letterSpacing: -0.60,
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.label, context),
+              color:
+                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
               fontSize: adjustedFontSize,
               fontWeight: FontWeight.w500,
             ),
@@ -489,12 +479,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 fontWeight: FontWeight.w500,
               ),
               decoration: BoxDecoration(
-                color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemBackground, context),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.tertiarySystemBackground, context),
                 borderRadius: BorderRadius.circular(12),
               ),
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+                color: CupertinoDynamicColor.resolve(
+                    CupertinoColors.label, context),
                 fontSize: adjustedFontSize,
                 fontWeight: FontWeight.w500,
               ),
@@ -520,8 +512,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             label,
             style: TextStyle(
               letterSpacing: -0.60,
-              color: CupertinoDynamicColor.resolve(
-                  CupertinoColors.label, context),
+              color:
+                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
               fontSize: adjustedFontSize,
               fontWeight: FontWeight.w500,
             ),
@@ -539,17 +531,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
               children: [
                 Expanded(
                   child: Text(
-                      currentValue,
-                      style: TextStyle(
-                        color: currentValue == label
-                            ? CupertinoDynamicColor.resolve(
-                                CupertinoColors.placeholderText, context)
-                            : CupertinoDynamicColor.resolve(
-                                CupertinoColors.label, context),
-                        fontSize: adjustedFontSize,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    currentValue,
+                    style: TextStyle(
+                      color: currentValue == label
+                          ? CupertinoDynamicColor.resolve(
+                              CupertinoColors.placeholderText, context)
+                          : CupertinoDynamicColor.resolve(
+                              CupertinoColors.label, context),
+                      fontSize: adjustedFontSize,
+                      fontWeight: FontWeight.w500,
                     ),
+                  ),
                 ),
                 Icon(FeatherIcons.chevronDown,
                     size: 18,

@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>FirebaseMessagingAutoInitEnabled</key>
-	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -30,6 +28,12 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
+        <array>
+            <string>foodhood</string>
+        </array>
+        <key>CFBundleURLName</key>
+        <string></string>
+        <key>CFBundleURLTypes</key>
 			<array>
 				<string>com.googleusercontent.apps.918510273238-fi4p7b5ncge74sfu5qpug7ils1kka1ej</string>
 			</array>
@@ -39,6 +43,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>FLTEnableWideGamut</key>
 	<true/>
+	<key>FirebaseMessagingAutoInitEnabled</key>
+	<false/>
 	<key>GIDClientID</key>
 	<string>918510273238-fi4p7b5ncge74sfu5qpug7ils1kka1ej.apps.googleusercontent.com</string>
 	<key>GoogleAppID</key>
@@ -67,6 +73,8 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>UIRequiresFullScreen</key>
+	<false/>
 	<key>UIStatusBarHidden</key>
 	<false/>
 	<key>UISupportedInterfaceOrientations</key>
@@ -82,5 +90,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	
 </dict>
 </plist>

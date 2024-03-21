@@ -2,15 +2,15 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/accessibility_screen.dart';
 import 'package:FoodHood/Screens/reset_pwd_screen.dart';
 import 'package:flutter/cupertino.dart';
-import '../components/profile_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:FoodHood/Screens/edit_profile_screen.dart';
+import 'package:FoodHood/Screens/profile_edit_screen.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 
 // Constants for styling
 const double _defaultPadding = 20.0;
@@ -67,25 +67,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: SafeArea(
         bottom: false,
         child: ListView(children: [
-          SizedBox(height: 10),
-          ProfileCard(),
-          SizedBox(height: 10),
-          _buildEditProfileButton(),
           SizedBox(height: 16),
           _buildSettingOption('Push Notifications', _buildSwitch()),
           SizedBox(height: 16),
           _buildSettingButton('Accessibility', FeatherIcons.eye, () {
-            Navigator.of(context).push(
-              CupertinoPageRoute(
-                builder: (context) => AccessibilityScreen(),
-              ),
-            );
-          }),
+            _navigateToPage(context, AccessibilityScreen());
+          }, CupertinoColors.activeGreen),
           SizedBox(height: 14),
-          _buildSettingButton('Help', FeatherIcons.helpCircle, () {}),
-          SizedBox(height: 14),
+          _buildSettingButton('Help', FeatherIcons.helpCircle, () {},
+              CupertinoColors.systemCyan),
+          SizedBox(height: 16),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  child: Text(
+                    "Account Settings",
+                    style: TextStyle(
+                        fontSize: adjustedFontSize,
+                        letterSpacing: -0.8,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
           _buildSettingButton('Sign out', FeatherIcons.logOut, () {
-            //showSignOutConfirmationSheet(context);
             _showActionSheet(
               context,
               'Sign Out',
@@ -96,68 +105,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     .pushNamedAndRemoveUntil('/', (route) => false);
               },
             );
-          }),
-
-          SizedBox(
-            height: 36.0,
-          ),
-
-          // Account settings text
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: EdgeInsets.only(right: _spacing),
-                  child: Text(
-                    "Account Settings",
-                    style: TextStyle(
-                      fontSize: adjustedFontSize,
-                      letterSpacing: -0.8,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 16, 0, 12),
-            child: _buildActionButtons(
-              'Reset Password',
-              CupertinoColors.activeBlue,
-              () => Navigator.of(context).push(
-                CupertinoPageRoute(
-                  builder: (context) => ForgotPasswordScreen(),
-                ),
-              ),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: _buildActionButtons(
+          }, CupertinoColors.activeOrange),
+          SizedBox(height: 14),
+          _buildSettingButton('Reset Password', FeatherIcons.refreshCw, () {
+            _navigateToPage(context, ForgotPasswordScreen());
+          }, CupertinoColors.activeBlue),
+          SizedBox(height: 14),
+          _buildSettingButton('Delete Account', FeatherIcons.trash2, () {
+            _showActionSheet(
+              context,
               'Delete Account',
-              CupertinoColors.destructiveRed,
-              () => _showActionSheet(
-                context,
-                'Delete Account',
-                'Are you sure you want to delete your account?',
-                () async {
-                  try {
-                    User user = FirebaseAuth.instance.currentUser!;
-                    await user.delete();
-                    Navigator.of(context)
-                        .pushNamedAndRemoveUntil('/', (route) => false);
-                  } catch (e) {
-                    print('Error deleting account: $e');
-                  }
-                },
-              ),
-            ),
-          ),
+              'Are you sure you want to delete your account?',
+              () async {
+                try {
+                  User user = FirebaseAuth.instance.currentUser!;
+                  await user.delete();
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil('/', (route) => false);
+                } catch (e) {
+                  print('Error deleting account: $e');
+                }
+              },
+            );
+          }, CupertinoColors.destructiveRed),
         ]),
       ),
     );
@@ -166,34 +136,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Method to build the Edit Profile button
   Widget _buildEditProfileButton() {
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: CupertinoButton(
-          color: accentColor,
-          borderRadius: BorderRadius.circular(10),
-          minSize: 44,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          onPressed: () => _navigateToEditProfile(context),
-          child: Text(
-            'Edit FoodHood Profile',
-            style: TextStyle(
-              fontSize: adjustedFontSize,
-              fontWeight: FontWeight.w500,
-              letterSpacing: -0.8,
-              color: CupertinoColors.white,
-            ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: CupertinoButton(
+        color: accentColor,
+        borderRadius: BorderRadius.circular(12),
+        padding: EdgeInsets.symmetric(vertical: 16),
+        onPressed: () => {
+          HapticFeedback.selectionClick(),
+          _navigateToPage(context, EditProfileScreen()),
+        },
+        child: Text(
+          'Edit FoodHood Profile',
+          style: TextStyle(
+            fontSize: adjustedFontSize,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.8,
+            color: CupertinoColors.white,
           ),
         ),
-      );
+      ),
+    );
   }
 
-  void _navigateToEditProfile(BuildContext context) async {
-    final result = await Navigator.of(context).push(
-      CupertinoPageRoute(builder: (context) => EditProfilePage()),
+  void _navigateToPage(BuildContext context, Widget page) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(builder: (context) => page),
     );
-
-    if (result == 'updated') {
-      setState(() {});
-    }
   }
 
   ObstructingPreferredSizeWidget _buildNavigationBar(BuildContext context) {
@@ -212,18 +180,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSettingOption(String title, Widget trailing) {
-    return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: _defaultPadding, vertical: 10.0),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: _defaultMargin),
+      padding: EdgeInsets.symmetric(
+          horizontal: _defaultPadding, vertical: _defaultPadding / 1.25),
+      decoration: BoxDecoration(
+        color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(_buttonBorderRadius),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title,
-              style: TextStyle(
-                  fontSize: adjustedFontSize,
-                  letterSpacing: -0.8,
-                  fontWeight: FontWeight.w600)),
-          trailing
+          Row(
+            children: [
+              Icon(FeatherIcons.bell,
+                  size: _iconSize,
+                  color: CupertinoColors.systemOrange.resolveFrom(context)),
+              SizedBox(width: _spacing),
+              Text(
+                title,
+                style: TextStyle(
+                    fontSize: adjustedFontSize,
+                    fontWeight: FontWeight.w500,
+                    color: CupertinoColors.label.resolveFrom(context)),
+              ),
+            ],
+          ),
+          trailing,
         ],
       ),
     );
@@ -241,13 +224,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onToggle: (value) {
         setState(() => pushNotificationsEnabled = value);
         if (value) {
-          // Request permission and subscribe to topics as shown previously
           requestNotificationPermission();
         } else {
-          // Unsubscribe from all topics (example)
           unsubscribeFromAllTopics();
-
-          // Optionally, inform your backend about the user's decision to disable notifications
           updateBackendNotificationPreference(false);
         }
       },
@@ -262,8 +241,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> updateBackendNotificationPreference(bool enabled) async {
-    // Send a request to your backend to update the user's notification preference
-    // This is just a placeholder function. Implement according to your backend API.
     final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     final Uri backendUrl =
         Uri.parse('https://yourbackend.example.com/updatePreference');
@@ -294,11 +271,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSettingButton(
-      String title, IconData icon, VoidCallback onPressed) {
+    String title,
+    IconData icon,
+    VoidCallback onPressed,
+    Color? color, // Make color optional
+  ) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: _defaultMargin),
       child: CupertinoButton(
-        onPressed: onPressed,
+        onPressed: () {
+          HapticFeedback.selectionClick();
+          onPressed();
+        },
         color: CupertinoColors.tertiarySystemBackground,
         borderRadius: BorderRadius.circular(_buttonBorderRadius),
         padding: EdgeInsets.symmetric(
@@ -310,7 +294,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Icon(icon,
                     size: _iconSize,
-                    color: CupertinoColors.label.resolveFrom(context)),
+                    color: color ??
+                        CupertinoColors.label.resolveFrom(
+                            context)), // Use color if provided, else default
                 SizedBox(width: _spacing),
                 Text(
                   title,
@@ -329,61 +315,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // void showSignOutConfirmationSheet(BuildContext context) {
-  //   showCupertinoModalPopup(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return CupertinoActionSheet(
-  //         title: Text(
-  //           'Are you sure you want to Sign out?',
-  //           style: TextStyle(
-  //             fontSize: 13,
-  //             letterSpacing: -0.6,
-  //             fontWeight: FontWeight.w600,
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           CupertinoActionSheetAction(
-  //             child: Text(
-  //               'Sign Out',
-  //               style: TextStyle(
-  //                   letterSpacing: -0.6,
-  //                   fontWeight: FontWeight.w500,
-  //                   fontSize: 18),
-  //             ),
-  //             isDestructiveAction: true,
-  //             onPressed: () async {
-  //               Navigator.of(context).pop(); // Close the action sheet
-  //               await FirebaseAuth.instance.signOut();
-  //               Navigator.of(context)
-  //                   .pushNamedAndRemoveUntil('/', (route) => false);
-  //             },
-  //           ),
-  //         ],
-  //         cancelButton: CupertinoActionSheetAction(
-  //           child: Text(
-  //             'Cancel',
-  //             style: TextStyle(
-  //                 fontWeight: FontWeight.w500,
-  //                 letterSpacing: -0.6,
-  //                 fontSize: 18),
-  //           ),
-  //           onPressed: () {
-  //             Navigator.of(context).pop(); // Close the action sheet
-  //           },
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget _buildActionButtons(
       String title, Color color, VoidCallback onPressed) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         height: 50,
-        width: double.infinity, // Makes the button take full width
+        width: double.infinity,
         child: CupertinoButton(
           color: CupertinoDynamicColor.resolve(
               CupertinoColors.tertiarySystemBackground, context),
@@ -397,34 +335,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontWeight: FontWeight.w500),
             overflow: TextOverflow.visible,
           ),
-          //   child: Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     Flexible(
-          //       child: Text(
-          //         title,
-          //         style: TextStyle(
-          //           fontSize: adjustedFontSize,
-          //           color: color,
-          //           fontWeight: FontWeight.w500,
-          //         ),
-          //         overflow: TextOverflow.visible,
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          // child: Center( // Center the text
-          //   child: Text(
-          //     title,
-          //     style: TextStyle(
-          //       fontSize: adjustedFontSize,
-          //       color: color,
-          //       fontWeight: FontWeight.w500,
-          //     ),
-          //     overflow: TextOverflow.visible, // Allow text to overflow
-          //     textAlign: TextAlign.center, // Center text within its container
-          //   ),
-          // ),
         ),
       ),
     );
@@ -440,7 +350,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: TextStyle(
             fontWeight: FontWeight.w500,
             color: CupertinoColors.label.resolveFrom(context),
-            fontSize: 18,
+            fontSize: 16,
             letterSpacing: -0.60,
           ),
         ),

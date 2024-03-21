@@ -353,3 +353,82 @@ N/A, all is complete
 ### Additional Information
 
 N/A.
+
+## Term 2 Week 6
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w6manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- modified code in register_screen
+- modified password validation rules UI
+- created the server-side (firebase) collection, documents and rules for user messaging
+- edited code in message_screen for messaging between users
+- debugging code
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- edited register_screen code
+- updated password rules UI
+- created rules, collection and documents for messaging
+- Completed Week 18 individual log.
+
+### Tasks in progress (from Project Board)
+
+- updating code in message_screen, all is complete
+
+### Additional Information
+
+N/A.
+
+## Term 2 Week 9 (March 4-10)
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w9manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- modified code in register_screen
+- edited code in login screen
+-added functionality to show/hide password on both screens, as well as for confirm password screen for registration screen
+- debugging code
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- edited register_screen code
+- updated code in login screen
+- added buttons to hide/show password in both screens
+- Completed Week 21 individual log.
+
+### Tasks in progress (from Project Board)
+
+- none
+
+### Additional Information
+
+N/A.
+
+## Term 2 Week 10
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w10manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- modified code in settings_screen and implemented delete account feature
+-updated android/build.gradle file to update ext.katlin version for compatibility
+- updated android/app/build.gradle to update android sdk, min sdk and other dependencies for compatibility issues
+- cleaned out and rebuilt dependency files
+- debugging code
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- added delete account functionality
+- updated kotlin, android sdk, min sdk and other requirements and metadata alongside some packages to resolve compatibility issues on android devices
+- Completed Week 22 individual log.
+
+### Tasks in progress (from Project Board)
+
+- none
+
+### Additional Information
+
+N/A.
