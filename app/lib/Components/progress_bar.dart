@@ -3,7 +3,6 @@ import 'package:timelines/timelines.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Screens/donor_screen.dart' as dos;
 
-
 class ProgressBar extends StatelessWidget {
   final double progress;
   final List<String> labels;
@@ -23,7 +22,7 @@ class ProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 120,
+      height: 80,
       alignment: Alignment.topCenter,
       child: Timeline.tileBuilder(
         shrinkWrap: true,
@@ -48,27 +47,26 @@ class ProgressBar extends StatelessWidget {
           contentsBuilder: (context, index) {
             //return _buildProgressPoint(labels[index], currentState);
             final bool isCurrentState = labels[index] ==
-                _getStateText(currentState); // Check if label matches current state
+                _getStateText(
+                    currentState); // Check if label matches current state
             return Text(
               labels[index],
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14.0,
-                fontWeight: FontWeight.bold,
-                color: isReserved 
-                    ? isCurrentState
-                        ? CupertinoDynamicColor.resolve(
-                            CupertinoColors.label, context)
-                        : CupertinoDynamicColor.resolve(
-                            CupertinoColors.secondaryLabel, context)
-                    :
-                        CupertinoDynamicColor.resolve(
-                            CupertinoColors.secondaryLabel, context)
-              ),
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold,
+                  color: isReserved
+                      ? isCurrentState
+                          ? CupertinoDynamicColor.resolve(
+                              CupertinoColors.label, context)
+                          : CupertinoDynamicColor.resolve(
+                              CupertinoColors.secondaryLabel, context)
+                      : CupertinoDynamicColor.resolve(
+                          CupertinoColors.secondaryLabel, context)),
             );
           },
           indicatorBuilder: (_, index) {
-            if (!isReserved){
+            if (!isReserved) {
               return OutlinedDotIndicator(
                 borderWidth: 2.0,
                 color: color,
@@ -102,7 +100,6 @@ class ProgressBar extends StatelessWidget {
   }
 
   Widget _buildProgressPoint(String text, dos.OrderState state) {
-
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Text(
