@@ -166,7 +166,7 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                         "How was your experience with ${reservedByName ?? 'Unknown User'}?",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: CupertinoColors.black,
+                          color: CupertinoColors.label.resolveFrom(context),
                           fontSize: 32,
                           letterSpacing: -1.3,
                           fontWeight: FontWeight.w600,
