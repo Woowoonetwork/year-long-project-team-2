@@ -75,7 +75,9 @@ class OrderCard extends StatelessWidget {
           Navigator.push(
             context,
             CupertinoPageRoute(
-              builder: (context) => PostDetailView(postId: postId),
+              builder: (context) => isDonation
+                  ? DonorScreen(postId: postId)
+                  : DoneePath(postId: postId),
             ),
           );
         },
@@ -120,25 +122,9 @@ class OrderCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        onStatusPressed?.call();
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => isDonation
-                                ? DonorScreen(postId: postId)
-                                : DoneePath(postId: postId),
-                            //DonorScreen(postId: postId),
-                          ),
-                        );
-                      },
-                      child: Icon(FeatherIcons.chevronRight,
-                          size: 24,
-                          color:
-                              CupertinoColors.systemGrey.resolveFrom(context)),
-                    ),
+                    Icon(FeatherIcons.chevronRight,
+                        size: 24,
+                        color: CupertinoColors.systemGrey.resolveFrom(context)),
                   ],
                 ),
               ],
@@ -166,17 +152,28 @@ class OrderCard extends StatelessWidget {
         ? imagesWithAltText[0]['url'] ?? ''
         : 'assets/images/sampleFoodPic.jpg';
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: CachedNetworkImage(
-        imageUrl: imageToShow,
-        width: 88,
-        height: 88,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => CupertinoActivityIndicator(),
-        errorWidget: (context, url, error) =>
-            buildImageFailedPlaceHolder(context, true),
-      ),
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: CachedNetworkImage(
+            imageUrl: imageToShow,
+            width: 88,
+            height: 88,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => CupertinoActivityIndicator(),
+            errorWidget: (context, url, error) =>
+                buildImageFailedPlaceHolder(context, true),
+          )),
+      onPressed: () {
+        HapticFeedback.selectionClick();
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => PostDetailView(postId: postId),
+          ),
+        );
+      },
     );
   }
 
