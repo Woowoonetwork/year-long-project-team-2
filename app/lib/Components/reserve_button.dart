@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 
-
 class ReserveButton extends StatefulWidget {
   final bool isReserved;
   final String postId;
@@ -86,30 +85,35 @@ class _ReserveButtonState extends State<ReserveButton> {
       child: CupertinoButton(
         color: _isReserved
             ? accentColor.resolveFrom(context).withOpacity(0.2)
-            : accentColor,
+            : accentColor.resolveFrom(context).withOpacity(0.8),
         padding: const EdgeInsets.all(16),
         borderRadius: BorderRadius.circular(14),
         child: Text(
-          _isReserved ? 'Reserve' : 'Reserve',
+          _isReserved
+              ? 'Reserved'
+              : 'Reserve', // Reflect reservation status in the text
           style: TextStyle(
-            color: _isReserved ? accentColor : CupertinoColors.white,
+            color: _isReserved
+                ? Colors.grey
+                : CupertinoColors.white, // Grey text to indicate disabled state
             fontSize: 18,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.90,
           ),
         ),
-        onPressed: () {
-          if (!_isReserved) {
-            _handleReservation();
-          }
-          Navigator.push(
-            context,
-            CupertinoPageRoute(
-                builder: (context) => DoneePath(
-                      postId: widget.postId,
-                    )),
-          );
-        },
+        onPressed: _isReserved
+            ? null
+            : () {
+                // Pass null to disable the button
+                _handleReservation();
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) => DoneePath(
+                            postId: widget.postId,
+                          )),
+                );
+              },
       ),
     );
   }

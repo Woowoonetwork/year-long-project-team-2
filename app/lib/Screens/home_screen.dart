@@ -1,17 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/post_card.dart';
 import 'package:FoodHood/Screens/create_post.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:feather_icons/feather_icons.dart';
-import '../components.dart';
-// import gesture
+import '../Components/components.dart';
 import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -111,9 +108,10 @@ class _HomeScreenState extends State<HomeScreen> {
             .map((tag) => tag.trim())
             .toList() ??
         [];
-    List<Color> assignedColors = tags
-        .map((tag) => tagColors.putIfAbsent(tag, () => _getRandomColor()))
-        .toList();
+    List<Color> assignedColors() {
+      return [yellow, orange, blue, babyPink, Cyan];
+    }
+
     var userData = await readDocument(
         collectionName: 'user', docName: data['user_id'] ?? 'Unknown');
     var createdAt =
@@ -138,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
         imagesWithAltText: imagesWithAltText, // Pass the images with alt text
         title: data['title'] ?? 'No Title',
         tags: tags,
-        tagColors: assignedColors,
+        tagColors: assignedColors(),
         firstName: userData?['firstName'] ?? 'Unknown',
         lastName: userData?['lastName'] ?? 'Unknown',
         timeAgo: timeAgoSinceDate(createdAt),
@@ -466,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildAddButton(BuildContext context) {
     return Positioned(
-      bottom: 100.0,
+      bottom: MediaQuery.of(context).padding.bottom + 16.0,
       right: 16.0,
       child: GestureDetector(
         onTap: () => {
@@ -532,10 +530,5 @@ class _HomeScreenState extends State<HomeScreen> {
     if (duration.inMinutes >= 1)
       return '${duration.inMinutes} minute${duration.inMinutes > 1 ? "s" : ""} ago';
     return 'Just now';
-  }
-
-  Color _getRandomColor() {
-    var colors = [yellow, orange, blue, babyPink, Cyan];
-    return colors[math.Random().nextInt(colors.length)];
   }
 }

@@ -123,8 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.push(
               context,
               CupertinoPageRoute(
-                builder: (context) => EditPostScreen(postId: postId)
-              ),
+                  builder: (context) => EditPostScreen(postId: postId)),
             );
           },
         );
@@ -257,7 +256,13 @@ class RecentPostsTab extends StatelessWidget {
   final Function(String) onRemove;
   final Function(String) onEdit;
 
-  RecentPostsTab({Key? key, required this.recentPosts, this.userId, required this.onRemove, required this.onEdit}) : super(key: key);
+  RecentPostsTab(
+      {Key? key,
+      required this.recentPosts,
+      this.userId,
+      required this.onRemove,
+      required this.onEdit})
+      : super(key: key);
 
   Future<Map<String, dynamic>> fetchUserDetails(String userId) async {
     try {
@@ -338,8 +343,8 @@ class RecentPostsTab extends StatelessWidget {
                     postId: post['postId']!,
                     onRemove: () => onRemove(post['postId']!),
                     onEdit: () => onEdit(post['postId']!),
-                    isCurrentUser: userId == FirebaseAuth.instance.currentUser?.uid,
-
+                    isCurrentUser:
+                        userId == FirebaseAuth.instance.currentUser?.uid,
                   );
                 },
               );
@@ -374,7 +379,7 @@ class ReviewsTab extends StatelessWidget {
       future: fetchComments(effectiveUserId),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CupertinoActivityIndicator());
         } else if (snapshot.hasError) {
           return const Center(child: Text('Error loading reviews'));
         } else if (snapshot.data!.isEmpty) {
