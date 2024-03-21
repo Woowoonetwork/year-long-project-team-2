@@ -182,7 +182,9 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                       children: List.generate(5, (index) {
                         return IconButton(
                           icon: Icon(
-                            _rating > index ? Ionicons.star : Ionicons.star_outline,
+                            _rating > index
+                                ? Ionicons.star
+                                : Ionicons.star_outline,
                             color: accentColor.resolveFrom(context),
                           ),
                           iconSize: 40,
@@ -203,7 +205,7 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                         child: CupertinoTextField(
                           controller: _commentController,
                           onChanged: (_) => setState(() {}),
-                         
+
                           textAlign: TextAlign.start,
                           textAlignVertical: TextAlignVertical.top,
                           textCapitalization: TextCapitalization.sentences,
