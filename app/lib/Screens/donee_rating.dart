@@ -1,8 +1,11 @@
+import 'package:FoodHood/Screens/message_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ionicons/ionicons.dart';
 
 class DoneeRatingPage extends StatefulWidget {
   final String postId;
@@ -13,19 +16,19 @@ class DoneeRatingPage extends StatefulWidget {
 
 class _DoneeRatingPageState extends State<DoneeRatingPage> {
   String? reservedByName;
-  int _rating = 0; // State variable to keep track of the rating
+  String? image;
+  int _rating = 0;
   TextEditingController _commentController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     fetchReservedByName();
-    // Fetch reserved by user name when the widget initializes
   }
 
   Future<void> _storeCommentInDatabase() async {
     String comment = _commentController.text;
-    int starRating = _rating; // Number of stars clicked
+    int starRating = _rating;
 
     DocumentReference postDocRef = FirebaseFirestore.instance
         .collection('post_details')
@@ -52,11 +55,9 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
           comments.add(comment);
           ratings.add(starRating);
 
-          // Calculate the average rating
           double avgRating = 0;
           if (ratings.isNotEmpty) {
             avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
-            // Format the average to two decimal places
             avgRating = double.parse(avgRating.toStringAsFixed(2));
           }
 
@@ -94,21 +95,17 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
           await postDetailsCollection.doc(postId).get();
 
       if (postSnapshot.exists) {
-        // Extract the reserved_by user ID from the post details
         final String reservedByUserId = postSnapshot['reserved_by'];
-
-        // Fetch the user document using reserved_by user ID
         final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
             .collection('user')
             .doc(reservedByUserId)
             .get();
 
         if (userSnapshot.exists) {
-          // Extract the user name from the user document
           final userName = userSnapshot['firstName'];
           setState(() {
-            reservedByName =
-                userName; // Update the reserved by user name in the UI
+            reservedByName = userName;
+            image = userSnapshot['profileImagePath'] as String? ?? '';
           });
         } else {
           print(
@@ -135,110 +132,158 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: groupedBackgroundColor,
-      child: CustomScrollView(
-        slivers: <Widget>[
-          CupertinoSliverNavigationBar(
-            largeTitle: Text('', style: TextStyle(letterSpacing: -1.34)),
-            border: Border(bottom: BorderSide.none),
-            backgroundColor: groupedBackgroundColor,
-            leading: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Icon(FeatherIcons.chevronLeft,
-                  size: 22, color: CupertinoColors.label.resolveFrom(context)),
-            ),
-            trailing: GestureDetector(
-              onTap: () {
-                print("Message Harry Tapped");
-              },
-              child: Text(
-                'Message ${reservedByName ?? 'Unknown User'}',
-                style:
-                    TextStyle(color: CupertinoColors.activeBlue, fontSize: 17),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+        backgroundColor: backgroundColor,
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              CupertinoSliverNavigationBar(
+                largeTitle: Text('', style: TextStyle(letterSpacing: -1.34)),
+                border: null,
+                backgroundColor: backgroundColor,
+                leading: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Icon(FeatherIcons.x,
+                      size: 22,
+                      color: CupertinoColors.label.resolveFrom(context)),
+                ),
+                trailing: GestureDetector(
+                  onTap: () {
+                    MessageScreenPage();
+                  },
                   child: Text(
-                    "How was your experience with ${reservedByName ?? 'Unknown User'}?",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CupertinoColors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Message ${reservedByName!}',
+                    style: TextStyle(color: accentColor.resolveFrom(context)),
                   ),
                 ),
-                ClipOval(),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(5, (index) {
-                    return IconButton(
-                      icon: Icon(
-                        _rating > index ? Icons.star : Icons.star_border,
-                        color: Colors.amber,
+              ),
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 30, horizontal: 16),
+                      child: Text(
+                        "How was your experience with ${reservedByName ?? 'Unknown User'}?",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: CupertinoColors.black,
+                          fontSize: 32,
+                          letterSpacing: -1.3,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      iconSize: 40,
-                      onPressed: () {
-                        setState(() {
-                          _rating = index + 1;
-                        });
-                      },
-                    );
-                  }),
-                ),
-                SizedBox(height: 20),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 16), // Padding for the text field
-                  child: CupertinoTextField(
-                    controller: _commentController,
-                    onChanged: (_) => setState(() {}),
-                    maxLines:
-                        3, // Increased maxLines to make the text field taller
-                    placeholder: 'Write your comments here',
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.white,
-                      border: Border.all(
-                        color: CupertinoColors.systemGrey3,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                    padding:
-                        EdgeInsets.all(12), // Internal padding for text content
-                  ),
+                    CircleAvatar(
+                        radius: 50,
+                        backgroundImage: CachedNetworkImageProvider(image!)),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(5, (index) {
+                        return IconButton(
+                          icon: Icon(
+                            _rating > index ? Ionicons.star : Ionicons.star_outline,
+                            color: accentColor.resolveFrom(context),
+                          ),
+                          iconSize: 40,
+                          onPressed: () {
+                            setState(() {
+                              _rating = index + 1;
+                            });
+                          },
+                        );
+                      }),
+                    ),
+                    SizedBox(height: 20),
+                    SizedBox(
+                      height: 100.0,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16), // Padding for the text field
+                        child: CupertinoTextField(
+                          controller: _commentController,
+                          onChanged: (_) => setState(() {}),
+                         
+                          textAlign: TextAlign.start,
+                          textAlignVertical: TextAlignVertical.top,
+                          textCapitalization: TextCapitalization.sentences,
+                          placeholder:
+                              'Write a review for ${reservedByName ?? 'Unknown User'}',
+                          decoration: BoxDecoration(
+                            color: groupedBackgroundColor,
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          placeholderStyle: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -0.8,
+                            color: CupertinoColors.placeholderText
+                                .resolveFrom(context), // Placeholder text color
+                          ),
+                          padding: EdgeInsets.all(
+                              16), // Internal padding for text content
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 40),
+                    _buildButton(context, "Publish", FeatherIcons.check),
+                    SizedBox(height: 40),
+                  ],
                 ),
-                SizedBox(height: 40),
-                CupertinoButton(
-                  onPressed: _isPublishButtonEnabled
-                      ? () async {
-                          await _storeCommentInDatabase();
-                        }
-                      : null,
-                  color: _isPublishButtonEnabled
-                      ? CupertinoColors.activeBlue
-                      : CupertinoColors.quaternarySystemFill,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.publish, size: 20),
-                      SizedBox(width: 4),
-                      Text("Publish"),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-              ],
-            ),
+              ),
+            ],
+          ),
+        ));
+  }
+
+  Widget _buildButton(BuildContext context, String text, IconData icon) {
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x19000000),
+            blurRadius: 10,
+            offset: Offset(0, 0),
           ),
         ],
       ),
+      child: CupertinoButton(
+          padding: EdgeInsets.zero,
+          borderRadius: BorderRadius.circular(100.0),
+          color: _isPublishButtonEnabled
+              ? CupertinoColors.systemBackground.resolveFrom(context)
+              : CupertinoColors.systemGrey4.resolveFrom(context),
+          onPressed: _isPublishButtonEnabled
+              ? () async {
+                  await _storeCommentInDatabase();
+                }
+              : null,
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: _isPublishButtonEnabled
+                        ? CupertinoColors.label.resolveFrom(context)
+                        : CupertinoColors.inactiveGray,
+                    fontSize: 18,
+                    letterSpacing: -0.8,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(width: 8),
+                Icon(
+                  icon,
+                  size: 20,
+                  color: _isPublishButtonEnabled
+                      ? CupertinoColors.label.resolveFrom(context)
+                      : CupertinoColors.inactiveGray,
+                ),
+              ],
+            ),
+          )),
     );
   }
 }

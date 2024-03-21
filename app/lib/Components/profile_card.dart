@@ -53,12 +53,13 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   void _updateProfileData(Map<String, dynamic> data) {
-    if (mounted)
+    if (mounted) {
       setState(() {
         profileData = data;
         photo = data['profileImagePath'] as String? ?? '';
         isLoading = false;
       });
+    }
   }
 
   @override
