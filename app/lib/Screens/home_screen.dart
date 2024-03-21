@@ -1,17 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/post_card.dart';
 import 'package:FoodHood/Screens/create_post.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:feather_icons/feather_icons.dart';
 import '../Components/components.dart';
-// import gesture
 import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {

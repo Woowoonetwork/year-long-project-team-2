@@ -1,14 +1,6 @@
-/* 
-
-Account Screen
-
-- The account screen is the screen that displays the user's profile information and orders.
-
-*/
-
 import 'package:FoodHood/Screens/settings_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:feather_icons/feather_icons.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/profile_card.dart';
 import 'package:FoodHood/Components/order_card.dart';
 import 'package:FoodHood/Components/colors.dart';
@@ -18,7 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 
-//Constants for styling
+
 const double _defaultTextFontSize = 16.0;
 const double _defaultTabTextFontSize = 14.0;
 
@@ -49,7 +41,6 @@ class _AccountScreenState extends State<AccountScreen> {
   void setUpPostStreamListener() {
     final String currentUserUID = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-    // Update My Donations
     FirebaseFirestore.instance
         .collection('post_details')
         .orderBy('post_timestamp', descending: true)
@@ -70,7 +61,6 @@ class _AccountScreenState extends State<AccountScreen> {
       }
     });
 
-    // Update My Reservations
     FirebaseFirestore.instance
         .collection('post_details')
         .orderBy('post_timestamp', descending: true)
@@ -90,23 +80,13 @@ class _AccountScreenState extends State<AccountScreen> {
         }
       }
     });
-
-    // FirebaseFirestore.instance
-    //     .collection('post_details')
-    //     .where('reserved_by', isEqualTo: currentUserUID) // Include posts reserved by the user
-    //     .snapshots()
-    //     .listen((snapshot) {
-    //   var reservedDocs = snapshot.docs;
-    //   if (mounted) {
-    //     mergeReservedOrders(reservedDocs); // Handling reserved orders
-    //   }
-    // });
   }
 
   void updateDonatedActiveOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
       activeDonatedOrders = documents.map((doc) {
-        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id, true);
+        return createOrderCard(
+            doc.data() as Map<String, dynamic>, doc.id, true);
       }).toList();
     });
   }
@@ -123,7 +103,8 @@ class _AccountScreenState extends State<AccountScreen> {
   void updateReservedActiveOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
       activeReservedOrders = documents.map((doc) {
-        return createOrderCard(doc.data() as Map<String, dynamic>, doc.id, false);
+        return createOrderCard(
+            doc.data() as Map<String, dynamic>, doc.id, false);
       }).toList();
     });
   }
@@ -131,8 +112,8 @@ class _AccountScreenState extends State<AccountScreen> {
   void updateReservedPastOrders(List<QueryDocumentSnapshot> documents) {
     setState(() {
       pastReservedOrders = documents
-          .map((doc) =>
-              createOrderCard(doc.data() as Map<String, dynamic>, doc.id, false))
+          .map((doc) => createOrderCard(
+              doc.data() as Map<String, dynamic>, doc.id, false))
           .toList();
     });
   }
@@ -142,21 +123,6 @@ class _AccountScreenState extends State<AccountScreen> {
     adjustedTabTextFontSize = _defaultTabTextFontSize * _textScaleFactor;
   }
 
-
-  // Merge Reserved Orders into active orders
-  // void mergeReservedOrders(List<QueryDocumentSnapshot> reservedDocs) {
-  //   setState(() {
-  //     // Add reserved orders under the active orders tab
-  //     var mergedOrders = reservedDocs.map((doc) => createOrderCard(doc.data() as Map<String, dynamic>, doc.id)).toList();
-  //     activeOrders.addAll(mergedOrders);
-  //   });
-  // }
-
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  // }
-
   void _onOrderCardTap(String postId) {
     setState(() {
       postId = postId;
@@ -164,7 +130,8 @@ class _AccountScreenState extends State<AccountScreen> {
     print(postId + 'accountscreen');
   }
 
-  OrderCard createOrderCard(Map<String, dynamic> documentData, String postId, bool isDonation) {
+  OrderCard createOrderCard(
+      Map<String, dynamic> documentData, String postId, bool isDonation) {
     String title = documentData['title'] ?? 'No Title';
     List<String> tags = documentData['categories'].split(',');
     DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
@@ -202,16 +169,16 @@ class _AccountScreenState extends State<AccountScreen> {
     _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
     _updateAdjustedFontSize();
 
-    final Map<int, Widget> myTabs = <int, Widget>{
+    final Map<int, Widget> tabs = <int, Widget>{
       0: Text(
-        'My Donations',
+        'Donations',
         style: TextStyle(
           fontSize: adjustedTabTextFontSize,
           fontWeight: FontWeight.w500,
         ),
       ),
       1: Text(
-        'My Reservations',
+        'Reservations',
         style: TextStyle(
             fontSize: adjustedTabTextFontSize, fontWeight: FontWeight.w500),
       ),
@@ -224,9 +191,8 @@ class _AccountScreenState extends State<AccountScreen> {
         child: CustomScrollView(
           slivers: <Widget>[
             _buildNavigationBar(context),
-            SliverToBoxAdapter(
-                child: ProfileCard()), // Display the profile card
-            _buildSegmentControl(myTabs),
+            SliverToBoxAdapter(child: ProfileCard()),
+            _buildSegmentControl(tabs),
             _buildOrdersContent(segmentedControlGroupValue),
           ],
         ),
@@ -253,28 +219,14 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   void _navigateToSettings(BuildContext context) {
-    // Implement navigation to settings screen
     Navigator.of(context)
         .push(CupertinoPageRoute(builder: (context) => SettingsScreen()));
-  }
-
-  SliverToBoxAdapter _buildOrdersSectionTitle() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
-        child: Text('Orders',
-            style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.6)),
-      ),
-    );
   }
 
   SliverToBoxAdapter _buildSegmentControl(Map<int, Widget> myTabs) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
         child: CupertinoSlidingSegmentedControl<int>(
           children: myTabs,
           onValueChanged: (int? newValue) {
@@ -289,177 +241,66 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Widget _buildOrdersContent(int segmentedValue) {
-    switch (segmentedValue) {
-      // Build the Donations tab
-      case 0:
-        if (activeDonatedOrders.isNotEmpty || pastDonatedOrders.isNotEmpty) {
-          // List<Widget> allDonatedOrders = [];
-          // allDonatedOrders.addAll(activeDonatedOrders);
-          // allDonatedOrders.addAll(pastDonatedOrders);
-          return _buildDonatedOrdersSliver(activeDonatedOrders, pastDonatedOrders);
-        } else {
-          return _buildPlaceholderText();
-        }
+    List<dynamic> orders =
+        segmentedValue == 1 ? activeReservedOrders : activeDonatedOrders;
+    List<dynamic> pastOrders =
+        segmentedValue == 1 ? pastReservedOrders : pastDonatedOrders;
+    String activeTitle = "In Progress";
+    String completedTitle = "Completed";
 
-      // Build the Reservations Tab  
-      case 1:
-        if (activeReservedOrders.isNotEmpty || pastReservedOrders.isNotEmpty) {
-          // List<Widget> allReservedOrders = [];
-          // allReservedOrders.addAll(activeReservedOrders);
-          // allReservedOrders.addAll(pastReservedOrders);
-          return _buildReservedOrdersSliver(activeReservedOrders, pastReservedOrders);
-          //return _buildReservedOrdersSliver(allReservedOrders);
-        } else {
-          return _buildPlaceholderText();
-        }
-      default:
-        return SliverToBoxAdapter(
-            child: Text('Content for the selected segment'));
+    int totalWidgets = 0;
+    if (orders.isNotEmpty) {
+      totalWidgets +=
+          1 + (2 * orders.length); // For title and each order with a SizedBox
     }
-  }
+    if (pastOrders.isNotEmpty) {
+      totalWidgets += 1 + (2 * pastOrders.length); // Same as above
+    }
 
-  // SliverList _buildActiveOrdersSliver(List<Widget> activeOrders) {
-  //   return SliverList(
-  //     delegate: SliverChildBuilderDelegate(
-  //       (context, index) => Padding(
-  //         padding: const EdgeInsets.all(16.0),
-  //         child: activeOrders[index],
-  //       ),
-  //       childCount: activeOrders.length,
-  //     ),
-  //   );
-  // }
-
-  // Build the Donated Orders Sliver
-  SliverList _buildDonatedOrdersSliver(List<Widget> activeDonatedOrders, List<Widget> pastDonatedOrders) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          if (activeDonatedOrders.isEmpty && index == 0) {
-            return _buildSectionPlaceholderText("No active orders");
-          } 
-          else if (activeDonatedOrders.isNotEmpty && index == 0) {
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-              child: Text(
-                "Active",
-                style: TextStyle(
-                  fontSize: adjustedTextFontSize + 2.4,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.8,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-              ),
-            );
-          }
-          else if (index == activeDonatedOrders.length + 1) {
-            // Display the "Completed Orders" heading
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-              child: Text(
-                "Completed",
-                style: TextStyle(
-                  fontSize: adjustedTextFontSize + 2.4,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.8,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-              ),
-            );
-          } 
-          else if (index <= activeDonatedOrders.length) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: activeDonatedOrders[index - 1], // Subtract 1 to adjust for the added text
-            );
-          } 
-          else if (index < activeDonatedOrders.length + 2 + pastDonatedOrders.length) {
-            final pastOrdersIndex = index - (activeDonatedOrders.length + 2);
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: pastDonatedOrders[pastOrdersIndex], // Subtract activeDonatedOrders.length + 2 to adjust for the added texts
-            );
-          } 
-          else if (pastDonatedOrders.isEmpty && index == activeDonatedOrders.length + 2) {
-            // Display "No completed orders" text if there are no past orders
-            return _buildSectionPlaceholderText("No completed orders");
-          }
-          else {
-            return SizedBox.shrink(); // Return an empty widget
-          }
-        },
-        childCount: activeDonatedOrders.length + pastDonatedOrders.length + 3, // Add 2 for each text separator and "No active/completed orders" texts, plus 1 for the additional case
-      ),
-    );
-  }
-
-  // Build the Reserved Orders SLiver
-  SliverList _buildReservedOrdersSliver(List<Widget> activeReservedOrders, List<Widget> pastReservedOrders) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          if (index == 0) {
-            // Display the "Active Orders" heading
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-              child: Text(
-                "Active Orders",
-                style: TextStyle(
-                  fontSize: adjustedTextFontSize + 2,
-                  fontWeight: FontWeight.bold,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-              ),
-            );
-          } 
-          else if (index == activeReservedOrders.length + 1) {
-            // Display the "Completed Orders" heading
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-              child: Text(
-                "Completed Orders",
-                style: TextStyle(
-                  fontSize: adjustedTextFontSize + 2,
-                  fontWeight: FontWeight.bold,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-              ),
-            );
-          } 
-          else if (index <= activeReservedOrders.length) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: activeReservedOrders[index - 1], // Subtract 1 to adjust for the added text
-            );
-          } 
-          else if (index < activeReservedOrders.length + 2 + pastReservedOrders.length) {
-            final pastOrdersIndex = index - (activeReservedOrders.length + 2);
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: pastReservedOrders[pastOrdersIndex], // Subtract activeReservedOrders.length + 2 to adjust for the added texts
-            );
-          } 
-          else if (pastReservedOrders.isEmpty && index == activeReservedOrders.length + 2) {
-            // Display "No completed orders" text if there are no past orders
-            return _buildSectionPlaceholderText("No completed orders");
-          }
-          else {
-            return SizedBox.shrink(); // Return an empty widget
-          }
-        },
-        childCount: activeReservedOrders.length + pastReservedOrders.length + 3, 
-      ),
-    );
-  }
-
-  SliverList _buildPastOrdersSliver(List<Widget> activeOrders) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) => Padding(
-          padding: EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
-          child: pastDonatedOrders[index],
+    return SliverPadding(
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            List<Widget> combinedList = [];
+            if (orders.isNotEmpty) {
+              combinedList.add(buildTitleSection(context, activeTitle));
+              combinedList.addAll(
+                  orders.expand((order) => [order, SizedBox(height: 16.0)]));
+            }
+            if (pastOrders.isNotEmpty) {
+              combinedList.add(buildTitleSection(context, completedTitle));
+              combinedList.addAll(pastOrders
+                  .expand((order) => [order, SizedBox(height: 16.0)]));
+            }
+            if (combinedList.isEmpty) {
+              combinedList.add(_buildSectionPlaceholderText(
+                  segmentedValue == 1
+                      ? "No Reserved Orders"
+                      : "No Donated Orders"));
+            }
+            return combinedList[index];
+          },
+          childCount:
+              totalWidgets, // Updated to use the calculated totalWidgets
         ),
-        childCount: pastDonatedOrders.length,
+      ),
+    );
+  }
+
+  Widget buildTitleSection(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0, left: 10.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          overflow: TextOverflow.ellipsis,
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)
+              .withOpacity(0.8),
+          fontSize: 18,
+          letterSpacing: -0.8,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -486,39 +327,6 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
         ],
       )
-    );
-  }
-
-  // Method to build the placeholder text when there are no orders
-  SliverFillRemaining _buildPlaceholderText() {
-    return SliverFillRemaining(
-      hasScrollBody: false, // Prevents the sliver from being scrollable
-      child: SizedBox(
-        height: 50,
-        child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                FeatherIcons.shoppingBag,
-                size: 40,
-                color: CupertinoColors.systemGrey,
-              ),
-              SizedBox(height: 20),
-              Text(
-                'No orders available',
-                style: TextStyle(
-                  fontSize: adjustedTextFontSize,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.6,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 

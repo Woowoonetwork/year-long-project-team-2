@@ -69,7 +69,7 @@ class ProfilePostCard extends StatelessWidget {
           );
         },
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 16),
+          margin: EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
             color: CupertinoDynamicColor.resolve(
                 CupertinoColors.tertiarySystemBackground, context),
@@ -78,12 +78,11 @@ class ProfilePostCard extends StatelessWidget {
               BoxShadow(
                 color: Color(0x19000000),
                 blurRadius: 10,
-                offset: Offset(0, 0),
-              )
+              ),
             ],
           ),
           child: Container(
-            padding: EdgeInsets.all(14),
+            padding: EdgeInsets.all(12),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,13 +116,13 @@ class ProfilePostCard extends StatelessWidget {
                     PullDownButton(
                       itemBuilder: (context) => [
                         if (isCurrentUser) ...[
-                        PullDownMenuItem(
-                          title: 'Edit',
-                          onTap: () {
-                            onEdit?.call();
-                          },
-                          icon: CupertinoIcons.pencil,
-                        ),
+                          PullDownMenuItem(
+                            title: 'Edit',
+                            onTap: () {
+                              onEdit?.call();
+                            },
+                            icon: CupertinoIcons.pencil,
+                          ),
                         ],
                         PullDownMenuItem(
                           title: 'Share',
@@ -134,14 +133,14 @@ class ProfilePostCard extends StatelessWidget {
                           icon: CupertinoIcons.share,
                         ),
                         if (isCurrentUser) ...[
-                        PullDownMenuItem(
-                          onTap: () {
-                            _showDeletePostConfirmation(context);
-                          },
-                          title: 'Remove Post',
-                          isDestructive: true,
-                          icon: CupertinoIcons.delete,
-                        ),
+                          PullDownMenuItem(
+                            onTap: () {
+                              _showDeletePostConfirmation(context);
+                            },
+                            title: 'Remove Post',
+                            isDestructive: true,
+                            icon: CupertinoIcons.delete,
+                          ),
                         ],
                       ],
                       buttonBuilder: (context, showMenu) => CupertinoButton(
@@ -164,7 +163,6 @@ class ProfilePostCard extends StatelessWidget {
       ),
     );
   }
-
 
   Future<void> shareDynamicLink() async {
     final Uri dynamicLink = await createDynamicLink(postId);
@@ -240,10 +238,8 @@ class ProfilePostCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       child: CachedNetworkImage(
         imageUrl: imageToShow,
-        width: 90,
-        height: 90,
-        maxHeightDiskCache: 200, // Set maximum height for disk caching
-        maxWidthDiskCache: 200, // Set maximum width for disk caching
+        width: 80,
+        height: 80,
         fit: BoxFit.cover,
         placeholder: (context, url) => CupertinoActivityIndicator(),
         errorWidget: (context, url, error) =>
@@ -275,13 +271,15 @@ class ProfilePostCard extends StatelessWidget {
 
     for (int i = 0; i < displayedTagsCount; i++) {
       tagWidgets.add(
-        _buildTag(tags[i], _generateTagColor(i), context, adjustedTagFontSize),
+        Tag(text: tags[i], color: _generateTagColor(i)),
       );
     }
     if (truncatedTags > 0) {
       tagWidgets.add(
-        _buildTag('+$truncatedTags', _generateTagColor(displayedTagsCount),
-            context, adjustedTagFontSize),
+        Tag(
+          text: '+$truncatedTags',
+          color: CupertinoDynamicColor.resolve(blue, context),
+        ),
       );
     }
     return Wrap(

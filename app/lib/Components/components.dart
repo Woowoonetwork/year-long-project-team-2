@@ -571,15 +571,15 @@ class Tag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: CupertinoDynamicColor.resolve(color, context).withOpacity(0.5),
+        color: CupertinoDynamicColor.resolve(color, context),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: MediaQuery.platformBrightnessOf(context) == Brightness.dark
-              ? lighten(color, 0.5)
-              : darken(color, 0.5),
+          color: color.computeLuminance() > 0.5
+              ? CupertinoColors.black
+              : CupertinoColors.white,
           fontSize: 10,
           letterSpacing: -0.40,
           fontWeight: FontWeight.w600,

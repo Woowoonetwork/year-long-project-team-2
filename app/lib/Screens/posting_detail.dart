@@ -23,7 +23,8 @@ class PostDetailView extends StatefulWidget {
   _PostDetailViewState createState() => _PostDetailViewState();
 }
 
-class _PostDetailViewState extends State<PostDetailView> {
+class _PostDetailViewState extends State<PostDetailView>
+    with TickerProviderStateMixin {
   late PostDetailViewModel viewModel;
   late String userID;
   final GlobalKey _pickupInfoKey = GlobalKey();
@@ -281,14 +282,14 @@ class _PostDetailViewState extends State<PostDetailView> {
 
   Widget _buildPickupInformation() {
     return PickupInformation(
-          pickupTime:
-              DateFormat('EEE, MMM d, ' 'h:mm a').format(viewModel.pickupTime),
-          pickupLocation: viewModel.pickupLocation,
-          meetingPoint: '330, 1130 Trello Way\nKelowna, BC\nV1V 5E0',
-          additionalInfo: viewModel.pickupInstructions,
-          locationCoordinates: viewModel.pickupLatLng,
-          viewModel: viewModel,
-        );
+      pickupTime:
+          DateFormat('EEE, MMM d, ' 'h:mm a').format(viewModel.pickupTime),
+      pickupLocation: viewModel.pickupLocation,
+      meetingPoint: '330, 1130 Trello Way\nKelowna, BC\nV1V 5E0',
+      additionalInfo: viewModel.pickupInstructions,
+      locationCoordinates: viewModel.pickupLatLng,
+      viewModel: viewModel,
+    );
   }
 
   Widget _buildAllergensSection() {
@@ -365,65 +366,86 @@ class InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          CupertinoPageRoute(
-              builder: (context) => ProfileScreen(userId: viewModel.userid)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              child: ClipOval(
-                child: viewModel.profileURL.isNotEmpty &&
-                        viewModel.profileURL.startsWith('http')
-                    ? CachedNetworkImage(
-                        imageUrl: viewModel.profileURL,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) =>
-                            const CupertinoActivityIndicator(),
-                        errorWidget: (context, url, error) => const Icon(Icons.error),
-                      )
-                    : Image.asset('assets/images/sampleProfile.png',
-                        fit: BoxFit.cover),
+          onTap: () => Navigator.push(
+                context,
+                CupertinoPageRoute(
+                    builder: (context) =>
+                        ProfileScreen(userId: viewModel.userid)),
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Row(
-                children: [
-                  Text(
-                    'Posted by $firstName $lastName  ${viewModel.timeAgoSinceDate(postTimestamp)}',
-                    style: TextStyle(
+          child: Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                child: ClipOval(
+                  child: viewModel.profileURL.isNotEmpty &&
+                          viewModel.profileURL.startsWith('http')
+                      ? CachedNetworkImage(
+                          imageUrl: viewModel.profileURL,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) =>
+                              const CupertinoActivityIndicator(),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.error),
+                        )
+                      : Image.asset('assets/images/sampleProfile.png',
+                          fit: BoxFit.cover),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Posted by $firstName $lastName',
+                      style: TextStyle(
+                        color: CupertinoColors.label
+                            .resolveFrom(context)
+                            .withOpacity(0.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: -0.48,
+                      ),
+                    ),
+                    Icon(
+                      FeatherIcons.chevronRight,
+                      size: 14,
                       color: CupertinoColors.label
                           .resolveFrom(context)
                           .withOpacity(0.8),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: -0.48,
                     ),
-                  ),
-                  const SizedBox(width: 3),
-                  Icon(Icons.star, color: secondaryColor, size: 14),
-                  Text(
-                    '${viewModel.rating} Rating',
-                    style: TextStyle(
-                      overflow: TextOverflow.fade,
-                      color: CupertinoColors.label
-                          .resolveFrom(context)
-                          .withOpacity(0.8),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: -0.48,
+                    Text(
+                      ' ${viewModel.timeAgoSinceDate(postTimestamp)}',
+                      style: TextStyle(
+                        color: CupertinoColors.label
+                            .resolveFrom(context)
+                            .withOpacity(0.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: -0.48,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 3),
+                    Icon(Icons.star, color: secondaryColor, size: 14),
+                    Text(
+                      '${viewModel.rating} Rating',
+                      style: TextStyle(
+                        overflow: TextOverflow.fade,
+                        color: CupertinoColors.label
+                            .resolveFrom(context)
+                            .withOpacity(0.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: -0.48,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          )),
     );
   }
 }
@@ -671,8 +693,6 @@ class RatingText extends StatelessWidget {
     );
   }
 }
-
-
 
 class CustomInfoTile extends StatelessWidget {
   final String title;

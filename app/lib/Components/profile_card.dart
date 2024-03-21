@@ -105,7 +105,7 @@ class _ProfileCardState extends State<ProfileCard> {
                   FontWeight.w600),
               const SizedBox(height: 4),
               _buildDescriptiveText(
-                  "Edit Account & Profile", 12, FontWeight.w500),
+                  "Edit Account & Posts", 12, FontWeight.w500),
             ],
           ),
         ),

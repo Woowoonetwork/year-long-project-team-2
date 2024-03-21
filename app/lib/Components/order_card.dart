@@ -16,7 +16,7 @@ const double _defaultTextFontSize = 14.0;
 const double _defaultTitleFontSize = 16.0;
 const double _defaultTagFontSize = 10.0;
 const double _defaultOrderInfoFontSize = 12.0;
-const double _defaultStatusFontSize = 10.0;
+const double _defaultStatusFontSize = 9.0;
 
 enum OrderState {
   reserved,
@@ -127,10 +127,9 @@ class OrderCard extends StatelessWidget {
                         Navigator.push(
                           context,
                           CupertinoPageRoute(
-                            builder: (context) => 
-                                isDonation 
-                                  ? DonorScreen(postId: postId) 
-                                  : DoneePath(postId: postId),
+                            builder: (context) => isDonation
+                                ? DonorScreen(postId: postId)
+                                : DoneePath(postId: postId),
                             //DonorScreen(postId: postId),
                           ),
                         );
@@ -167,18 +166,18 @@ class OrderCard extends StatelessWidget {
         ? imagesWithAltText[0]['url'] ?? ''
         : 'assets/images/sampleFoodPic.jpg';
 
-    return  ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: CachedNetworkImage(
-            imageUrl: imageToShow,
-            width: 90,
-            height: 90,
-            fit: BoxFit.cover,
-            placeholder: (context, url) => CupertinoActivityIndicator(),
-            errorWidget: (context, url, error) =>
-                buildImageFailedPlaceHolder(context, true),
-          ),
-        );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: CachedNetworkImage(
+        imageUrl: imageToShow,
+        width: 88,
+        height: 88,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => CupertinoActivityIndicator(),
+        errorWidget: (context, url, error) =>
+            buildImageFailedPlaceHolder(context, true),
+      ),
+    );
   }
 
   static Widget _buildTitleSection(
@@ -209,7 +208,9 @@ class OrderCard extends StatelessWidget {
     }
     if (truncatedTags > 0) {
       tagWidgets.add(
-        Tag(text: '+$truncatedTags', color: _generateTagColor(displayedTagsCount)),
+        Tag(
+            text: '+$truncatedTags',
+            color: _generateTagColor(displayedTagsCount)),
       );
     }
     return Wrap(
@@ -296,24 +297,33 @@ class OrderCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         color: statusColor.withOpacity(0.2),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(CupertinoIcons.circle_fill,
-                color: statusColor, size: adjustedStatusFontSize),
+            ClipOval(
+                child: Container(
+              color: statusColor,
+              width: 8,
+              height: 8,
+            )),
             const SizedBox(width: 4),
-            Text(
-              statusText,
-              style: TextStyle(
-                color: CupertinoDynamicColor.resolve(
-                    CupertinoColors.label, context),
-                fontWeight: FontWeight.w500,
-                fontSize: adjustedStatusFontSize,
-              ),
-              overflow: TextOverflow.visible,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(statusText,
+                    style: TextStyle(
+                      color: MediaQuery.platformBrightnessOf(context) ==
+                              Brightness.dark
+                          ? lighten(statusColor, 0.4)
+                          : darken(statusColor, 0.4),
+                      fontSize: adjustedStatusFontSize,
+                      letterSpacing: -0.4,
+                      fontWeight: FontWeight.w500,
+                    )),
+              ],
             ),
           ],
         ),

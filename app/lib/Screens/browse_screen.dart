@@ -56,7 +56,7 @@ class _BrowseScreenState extends State<BrowseScreen>
   CameraPosition? _lastKnownCameraPosition;
   late StreamSubscription<bool> keyboardVisibilitySubscription;
   bool isKeyboardVisible = false;
-  bool _isZooming = false; 
+  bool _isZooming = false;
   Map<String, Color> tagColors = {};
   List<Map<String, dynamic>> allPosts = [];
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
@@ -97,10 +97,10 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   Future<void> createCustomMarkerIcon(
       {required Color color, bool isSelected = false}) async {
-    const double markerSize = 100.0; 
-    const double shadowSize = 10.0; 
-    const double borderSize = 10.0; 
-    const double circleSize = markerSize - shadowSize - borderSize; 
+    const double markerSize = 100.0;
+    const double shadowSize = 10.0;
+    const double borderSize = 10.0;
+    const double circleSize = markerSize - shadowSize - borderSize;
 
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
@@ -108,15 +108,15 @@ class _BrowseScreenState extends State<BrowseScreen>
     final Paint shadowPaint = Paint()
       ..color = Colors.black.withOpacity(0.25)
       ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, shadowSize);
-    canvas.drawCircle(
-        const Offset(markerSize / 2, markerSize / 2), circleSize / 2, shadowPaint);
+    canvas.drawCircle(const Offset(markerSize / 2, markerSize / 2),
+        circleSize / 2, shadowPaint);
 
     final Paint borderPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = borderSize;
-    canvas.drawCircle(
-        const Offset(markerSize / 2, markerSize / 2), circleSize / 2, borderPaint);
+    canvas.drawCircle(const Offset(markerSize / 2, markerSize / 2),
+        circleSize / 2, borderPaint);
 
     final Paint circlePaint = Paint()..color = color;
     canvas.drawCircle(const Offset(markerSize / 2, markerSize / 2),
@@ -156,14 +156,16 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   void _pickRandomPost() {
-    if (allPosts.isEmpty) { return;}
+    if (allPosts.isEmpty) {
+      return;
+    }
 
     var random = math.Random();
     var randomPostIndex = random.nextInt(allPosts.length);
     var randomPost = allPosts[randomPostIndex];
     GeoPoint location = randomPost['post_location'];
     LatLng latLng = LatLng(location.latitude, location.longitude);
-    _zoomToPostLocation(latLng); 
+    _zoomToPostLocation(latLng);
   }
 
   @override
@@ -360,8 +362,7 @@ class _BrowseScreenState extends State<BrowseScreen>
                   postData['image_url'] ?? 'assets/images/sampleFoodPic.png',
               'title': title,
               'tags': tags,
-              'profileURL':
-                  userData?['profileImagePath'] ?? '', 
+              'profileURL': userData?['profileImagePath'] ?? '',
               'tagColors': assignedColors,
               'firstname': userData?['firstName'] ?? 'Unknown',
               'lastname': userData?['lastName'] ?? 'Unknown',
@@ -394,7 +395,7 @@ class _BrowseScreenState extends State<BrowseScreen>
       _markers.removeWhere((m) => m.markerId == tappedMarkerId);
       _markers.add(updatedMarker);
     });
-    }
+  }
 
   void _zoomToPostLocation(LatLng postLatLng) {
     if (mapController == null) return;
@@ -531,8 +532,16 @@ class _BrowseScreenState extends State<BrowseScreen>
               padding:
                   EdgeInsets.only(bottom: mapBottomPadding, top: mapTopPadding),
             ),
-            if (_showPostCard) _buildPostCard(),
-            if (!_showPostCard) _buildBottomButton(),
+            Positioned(
+              bottom: mapBottomPadding + 24,
+              left: 0,
+              right: 0,
+              child: AnimatedSwitcher(
+                duration: Duration(
+                    milliseconds: 300), // Adjust the duration as needed
+                child: _showPostCard ? _buildPostCard() : _buildBottomButton(),
+              ),
+            ),
           ],
         );
       },
@@ -593,31 +602,26 @@ class _BrowseScreenState extends State<BrowseScreen>
     String postId = _selectedPostData['postId'] ?? '0';
     String profileURL = _selectedPostData['profileURL'] ?? '';
 
-    return Positioned(
-      bottom: mapBottomPadding + 24,
-      left: 0,
-      right: 0,
-      child: GestureDetector(
-        onVerticalDragUpdate: (details) {
-          if (details.primaryDelta! > 10) {
-            _zoomOutToDefault(null);
-            _resetUIState();
-          }
-        },
-        onTap: () => _resetUIState(),
-        child: CompactPostCard(
-          imageLocation: imageLocation,
-          title: title,
-          tags: tags,
-          tagColors: _generateTagColors(tags.length),
-          firstname: firstname,
-          lastname: lastname,
-          timeAgo: timeAgo,
-          onTap: (postId) => _onMarkerTapped(postId),
-          postId: postId,
-          profileURL: profileURL,
-          showTags: false,
-        ),
+    return GestureDetector(
+      onVerticalDragUpdate: (details) {
+        if (details.primaryDelta! > 10) {
+          _zoomOutToDefault(null);
+          _resetUIState();
+        }
+      },
+      onTap: () => _resetUIState(),
+      child: CompactPostCard(
+        imageLocation: imageLocation,
+        title: title,
+        tags: tags,
+        tagColors: _generateTagColors(tags.length),
+        firstname: firstname,
+        lastname: lastname,
+        timeAgo: timeAgo,
+        onTap: (postId) => _onMarkerTapped(postId),
+        postId: postId,
+        profileURL: profileURL,
+        showTags: false,
       ),
     );
   }
@@ -639,34 +643,28 @@ class _BrowseScreenState extends State<BrowseScreen>
   Widget _buildBottomButton() {
     return Stack(
       children: [
-        Positioned(
-          bottom: mapBottomPadding + 16,
-          left: 0,
-          right: 0,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x19000000),
-                    blurRadius: 20,
-                    offset: Offset(0, 0),
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(
-                    100.0), // Match button's border radius
-              ),
-              child: CupertinoButton(
-                  onPressed: _currentLocation,
-                  color: CupertinoColors.tertiarySystemBackground,
-                  borderRadius: BorderRadius.circular(100.0),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 14.0),
-                  child: _isZooming
-                      ? zoomButtonContent()
-                      : locationButtonContent()),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x19000000),
+                  blurRadius: 20,
+                  offset: Offset(0, 0),
+                ),
+              ],
+              borderRadius:
+                  BorderRadius.circular(100.0), // Match button's border radius
             ),
+            child: CupertinoButton(
+                onPressed: _currentLocation,
+                color: CupertinoColors.tertiarySystemBackground,
+                borderRadius: BorderRadius.circular(100.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 14.0),
+                child:
+                    _isZooming ? zoomButtonContent() : locationButtonContent()),
           ),
         ),
         Positioned(
@@ -884,79 +882,79 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   Widget _buildModalContent(BuildContext context) {
-  return Align(
-    alignment: Alignment.bottomCenter,
-    child: Container(
-      width: MediaQuery.of(context).size.width * 0.95,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(14.0),
-              child: Image.asset(
-                MediaQuery.of(context).platformBrightness == Brightness.dark
-                    ? 'assets/images/dice_dark.png'
-                    : 'assets/images/dice.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              "Can't make up your mind?",
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 22,
-                letterSpacing: -0.6,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Text(
-              "Let us decide for you!",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                letterSpacing: -0.6,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 0),
-            child: SizedBox(
-              width: double.infinity,
-              child: CupertinoButton(
-                color: secondaryColor,
-                child: const Text(
-                  'Pick for me',
-                  style: TextStyle(
-                    color: CupertinoColors.black,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: -0.8,
-                  ),
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.95,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14.0),
+                child: Image.asset(
+                  MediaQuery.of(context).platformBrightness == Brightness.dark
+                      ? 'assets/images/dice_dark.png'
+                      : 'assets/images/dice.png',
+                  fit: BoxFit.cover,
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _pickRandomPost();
-                },
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                "Can't make up your mind?",
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 22,
+                  letterSpacing: -0.6,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Text(
+                "Let us decide for you!",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  letterSpacing: -0.6,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 0),
+              child: SizedBox(
+                width: double.infinity,
+                child: CupertinoButton(
+                  color: secondaryColor,
+                  child: const Text(
+                    'Pick for me',
+                    style: TextStyle(
+                      color: CupertinoColors.black,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.8,
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _pickRandomPost();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

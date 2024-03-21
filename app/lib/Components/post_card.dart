@@ -43,90 +43,79 @@ class PostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: OpenContainer(
-        transitionType: ContainerTransitionType.fadeThrough,
-        transitionDuration: const Duration(milliseconds: 400),
-        openBuilder: (BuildContext context, VoidCallback _) {
-          return PostDetailView(postId: postId);
-        },
-        closedElevation: showShadow ? 6 : 0,
-        closedShape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(14)),
-        ),
-        openColor: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-        closedColor: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-        closedBuilder: (BuildContext context, VoidCallback openContainer) {
-          return GestureDetector(
-            onTap: openContainer,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: showShadow
-                    ? [
-                        const BoxShadow(
-                            color: Color(0x19000000),
-                            blurRadius: 10,
-                            offset: Offset(0, 0)),
-                      ]
-                    : [],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(14)),
-                    child: CachedNetworkImage(
-                      imageUrl: imagesWithAltText.isNotEmpty
-                          ? imagesWithAltText[0]['url'] ?? ''
-                          : 'assets/images/sampleFoodPic.jpg',
-                      width: MediaQuery.of(context).size.width,
-                      height: imageHeight,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          const CupertinoActivityIndicator(),
-                      errorWidget: (context, url, error) =>
-                          buildImageFailedPlaceHolder(context, true),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: Text(title,
-                        style: TextStyle(
-                            color: CupertinoDynamicColor.resolve(
-                                CupertinoColors.label, context),
-                            fontSize: 18,
-                            letterSpacing: -0.8,
-                            fontWeight: FontWeight.w600)),
-                  ),
-                  if (showTags) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                              child: Wrap(
-                            alignment: WrapAlignment.start,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 4,
-                            runSpacing: 4,
-                            children: _buildTags(context),
-                          ))
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                  ] else ...[
-                    const SizedBox(height: 10),
-                  ],
-                  _buildOrderInfoSection(
-                      context, profileURL, firstName, lastName, timeAgo),
-                ],
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () => {
+          HapticFeedback.selectionClick(),
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PostDetailView(
+                postId: postId,
               ),
             ),
-          );
+          ),
         },
+        child: Container(
+          decoration: BoxDecoration(
+            color:
+                CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(14)),
+                child: CachedNetworkImage(
+                  imageUrl: imagesWithAltText.isNotEmpty
+                      ? imagesWithAltText[0]['url'] ?? ''
+                      : 'assets/images/sampleFoodPic.jpg',
+                  width: MediaQuery.of(context).size.width,
+                  height: imageHeight,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) =>
+                      const CupertinoActivityIndicator(),
+                  errorWidget: (context, url, error) =>
+                      buildImageFailedPlaceHolder(context, true),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Text(title,
+                    style: TextStyle(
+                        color: CupertinoDynamicColor.resolve(
+                            CupertinoColors.label, context),
+                        fontSize: 18,
+                        letterSpacing: -0.8,
+                        fontWeight: FontWeight.w600)),
+              ),
+              if (showTags) ...[
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: Wrap(
+                        alignment: WrapAlignment.start,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: _buildTags(context),
+                      ))
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2),
+              ] else ...[
+                const SizedBox(height: 10),
+              ],
+              _buildOrderInfoSection(
+                  context, profileURL, firstName, lastName, timeAgo),
+            ],
+          ),
+        ),
       ),
     );
   }
