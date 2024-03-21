@@ -15,6 +15,8 @@ import '../components.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import 'package:FoodHood/Screens/donor_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -27,12 +29,14 @@ class DoneePath extends StatefulWidget {
 
 class _DoneePathState extends State<DoneePath> {
   late PostDetailViewModel viewModel;
+  late LatLng pickupLatLng;
   bool isLoading = true;
   OrderState orderState = OrderState.reserved;
 
   @override
   void initState() {
     super.initState();
+    pickupLatLng = LatLng(49.8862, -119.4971);
     viewModel = PostDetailViewModel(widget.postId);
     viewModel.fetchData(widget.postId).then((_) {
       if (mounted) {
@@ -45,6 +49,30 @@ class _DoneePathState extends State<DoneePath> {
 
   Widget _buildLoadingScreen() {
     return Center(child: CupertinoActivityIndicator(radius: 16));
+  }
+
+  Widget _buildTextField({
+    required String text,
+  }) {
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+            width: 0.0,
+          ),
+          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+          borderRadius: BorderRadius.circular(24.0),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(),
+        ),
+      ),
+    );
   }
 
   Widget _buildMap(LatLng position) {
@@ -124,7 +152,7 @@ class _DoneePathState extends State<DoneePath> {
               style: TextStyle(
                 color: CupertinoColors.white,
                 fontSize: 16.0,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -221,6 +249,25 @@ class _DoneePathState extends State<DoneePath> {
     }
   }
 
+  Future<String> getAddressFromLatLng(LatLng position) async {
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      if (jsonResponse['results'] != null &&
+          jsonResponse['results'].length > 0) {
+        String address = jsonResponse['results'][0]['formatted_address'];
+        return address;
+      } else {
+        return 'Location not found';
+      }
+    } else {
+      throw Exception('Failed to fetch address');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -251,6 +298,12 @@ class _DoneePathState extends State<DoneePath> {
               var data = snapshot.data!.data() as Map<String, dynamic>;
               var postStatus = data['post_status'] ?? 'not reserved';
               orderState = _mapStatusToOrderState(postStatus);
+              if (data['post_location'] is GeoPoint) {
+                GeoPoint geoPoint = data['post_location'] as GeoPoint;
+                pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+              } else {
+                pickupLatLng = LatLng(49.8862, -119.4971);
+              }
 
               return SingleChildScrollView(
                   child: Padding(
@@ -281,68 +334,93 @@ class _DoneePathState extends State<DoneePath> {
                     ),
                     SizedBox(height: 30),
                     _buildProgressBar(postStatus),
-                    if (postStatus == 'confirmed' || postStatus == 'delivering')
-                      _buildMap(LatLng(49.8862, -119.4971)),
+                    if (postStatus == 'confirmed' ||
+                        postStatus == 'delivering' ||
+                        postStatus == 'readyToPickUp')
+                      Column(
+                        children: [
+                          _buildMap(LatLng(49.8862, -119.4971)),
+                          FutureBuilder<String>(
+                            future: getAddressFromLatLng(pickupLatLng),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                return _buildTextField(
+                                    text: "Pickup from ${snapshot.data}");
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                     if (postStatus == 'pending') _buildImageSection(),
-                    SizedBox(height: 30),
+                    SizedBox(height: 10),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         if (postStatus == "confirmed" ||
-                            postStatus == "delivering")
-                          _buildNavigateButton(),
+                            postStatus == "delivering" ||
+                            postStatus == "readyToPickUp")
+                          Expanded(
+                            child: _buildNavigateButton(),
+                          ),
                         if (postStatus == "pending" ||
                             postStatus == "not reserved")
-                          PendingConfirmationWithTimer(
-                            durationInSeconds: 500,
-                            postId: widget.postId,
+                          Expanded(
+                            child: PendingConfirmationWithTimer(
+                              durationInSeconds: 500,
+                              postId: widget.postId,
+                            ),
                           ),
                       ],
                     ),
                     SizedBox(height: 15),
-                    Container(
-                      width: 350,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: CupertinoButton(
-                        onPressed: () {
-                          _handleCancelReservation();
-                        },
-                        color: CupertinoColors.white,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 24.0, vertical: 8.0),
-                        borderRadius: BorderRadius.circular(30.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              CupertinoIcons.xmark,
-                              color: CupertinoColors.destructiveRed,
-                              size: 24.0,
-                            ),
-                            SizedBox(width: 8.0),
-                            Text(
-                              'Cancel Order',
-                              style: TextStyle(
-                                color: CupertinoColors.black,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    if (postStatus != "readyToPickUp")
+                      Container(
+                        width: 350,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
+                        child: CupertinoButton(
+                          onPressed: () {
+                            _handleCancelReservation();
+                          },
+                          color: CupertinoColors.white,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24.0, vertical: 8.0),
+                          borderRadius: BorderRadius.circular(30.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                CupertinoIcons.xmark,
+                                color: CupertinoColors.destructiveRed,
+                                size: 24.0,
+                              ),
+                              SizedBox(width: 8.0),
+                              Text(
+                                'Cancel Order',
+                                style: TextStyle(
+                                  color: CupertinoColors.black,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 20.0),
+                    SizedBox(height: 0.0),
                     if (postStatus == "readyToPickUp")
                       Container(
                         width: 350,
