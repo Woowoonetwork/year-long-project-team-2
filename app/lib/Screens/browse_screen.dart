@@ -16,7 +16,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/search_navigationBar.dart';
-import 'package:FoodHood/firestore_service.dart';
+import 'package:FoodHood/Services/FirebaseService.dart';
 import 'package:FoodHood/Components/filter_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sf_symbols/sf_symbols.dart';

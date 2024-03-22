@@ -273,7 +273,10 @@ class _PickupInformationState extends State<PickupInformation>
               onPressed: () {
                 Navigator.push(
                   context,
-                  CupertinoPageRoute(builder: (context) => MessageScreenPage()),
+                  CupertinoPageRoute(
+                      builder: (context) => MessageScreen(
+                            receiverID: widget.viewModel.userid,
+                          )),
                 );
               },
             ),

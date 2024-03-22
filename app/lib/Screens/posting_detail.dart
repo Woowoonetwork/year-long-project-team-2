@@ -14,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:FoodHood/Components/components.dart';
+import 'package:ionicons/ionicons.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
@@ -414,7 +415,7 @@ class InfoRow extends StatelessWidget {
                       size: 14,
                       color: CupertinoColors.label
                           .resolveFrom(context)
-                          .withOpacity(0.8),
+                          .withOpacity(0.6),
                     ),
                     Text(
                       ' ${viewModel.timeAgoSinceDate(postTimestamp)}',
@@ -430,7 +431,7 @@ class InfoRow extends StatelessWidget {
                     const SizedBox(width: 3),
                     Icon(Icons.star, color: secondaryColor, size: 14),
                     Text(
-                      '${viewModel.rating} Rating',
+                      ' ${viewModel.rating} Rating',
                       style: TextStyle(
                         overflow: TextOverflow.fade,
                         color: CupertinoColors.label
@@ -790,14 +791,14 @@ class InfoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoButton(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
       borderRadius: BorderRadius.circular(100),
       onPressed: onPressed,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: iconColor),
+          Icon(icon, size: 16, color: iconColor),
           const SizedBox(width: 8),
           Text(
             text,

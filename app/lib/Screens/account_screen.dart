@@ -1,3 +1,4 @@
+import 'package:FoodHood/Screens/message_list.dart';
 import 'package:FoodHood/Screens/settings_screen.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
@@ -207,6 +208,12 @@ class _AccountScreenState extends State<AccountScreen> {
           CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
               .withOpacity(0.8),
       largeTitle: Text('Account'),
+      leading: CupertinoButton(
+        padding: EdgeInsets.zero,
+        child: Text('Messages',
+            style: TextStyle(fontWeight: FontWeight.w500, color: accentColor)),
+        onPressed:  () => Navigator.of(context).push(CupertinoPageRoute(builder: (context) => MessageListPage())),
+      ),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
         child: Text('Settings',

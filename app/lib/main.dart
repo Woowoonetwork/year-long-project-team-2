@@ -6,6 +6,7 @@ import 'package:FoodHood/Models/RemoteNotification.dart';
 import 'package:FoodHood/Screens/browse_screen.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/Screens/login_screen.dart';
+import 'package:FoodHood/Screens/message_list.dart';
 import 'package:FoodHood/Screens/navigation_screen.dart';
 import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
@@ -15,10 +16,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'package:FoodHood/auth_wrapper.dart';
-import 'auth_service.dart';
+import 'Services/AuthService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:FoodHood/firestore_service.dart';
+import 'package:FoodHood/Services/FirebaseService.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -114,7 +115,7 @@ class FoodHoodApp extends StatelessWidget {
           case '/signup':
             return MaterialWithModalsPageRoute(
               builder: (context) => RegistrationScreen(
-                  auth: AuthService(FirebaseAuth.instance)), // Signup route
+                  auth: AuthService()), // Signup route
             );
           case '/signin':
             return MaterialWithModalsPageRoute(
@@ -132,6 +133,7 @@ class FoodHoodApp extends StatelessWidget {
                 onItemTapped: (index) {},
               ),
             );
+         
           case '/browse':
             return MaterialWithModalsPageRoute(
                 builder: (context) => BrowseScreen());

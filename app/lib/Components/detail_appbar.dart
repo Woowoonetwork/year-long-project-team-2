@@ -194,7 +194,7 @@ class _DetailAppBarState extends State<DetailAppBar> {
     return blurEffect(
       Icon(
         widget.isFavorite ? Icons.bookmark : Icons.bookmark_outline_outlined,
-        size: 18,
+        size: 20,
         color: widget.isFavorite
             ? CupertinoColors.systemOrange
             : CupertinoColors.label.resolveFrom(context),
