@@ -358,16 +358,17 @@ class _DonorScreenState extends State<DonorScreen> {
         text,
         textAlign: TextAlign.center,
         style: TextStyle(
-            fontSize: adjustedFontSize - 2.0,
-            fontWeight: FontWeight.bold,
-            color: isReserved
-                ? isCurrentState
-                    ? CupertinoDynamicColor.resolve(
-                        CupertinoColors.label, context)
-                    : CupertinoDynamicColor.resolve(
-                        CupertinoColors.secondaryLabel, context)
-                : CupertinoDynamicColor.resolve(
-                    CupertinoColors.secondaryLabel, context)),
+          fontSize: adjustedFontSize - 2.0,
+          fontWeight: FontWeight.bold,
+          color: isReserved
+              ? isCurrentState
+                  ? CupertinoDynamicColor.resolve(
+                      CupertinoColors.label, context)
+                  : CupertinoDynamicColor.resolve(
+                      CupertinoColors.secondaryLabel, context)
+              : CupertinoDynamicColor.resolve(
+                  CupertinoColors.secondaryLabel, context)
+        ),
       ),
     );
   }
@@ -454,57 +455,12 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  // Widget _buildMap(BuildContext context) {
-  //   final LatLng? locationCoordinates = pickupLatLng;
-
-  //   if (locationCoordinates != null) {
-  //     return ClipRRect(
-  //       borderRadius: BorderRadius.vertical(
-  //           top: Radius.circular(16), bottom: Radius.circular(15)),
-  //       child: SizedBox(
-  //         width: double.infinity,
-  //         height: 250.0,
-  //         child: GoogleMap(
-  //           initialCameraPosition: CameraPosition(
-  //             target: locationCoordinates,
-  //             zoom: 12.0,
-  //           ),
-  //           markers: Set.from([
-  //             Marker(
-  //               markerId: MarkerId('pickupLocation'),
-  //               position: locationCoordinates,
-  //             ),
-  //           ]),
-  //           zoomControlsEnabled: false,
-  //           scrollGesturesEnabled: true,
-  //           rotateGesturesEnabled: false,
-  //           tiltGesturesEnabled: false,
-  //           zoomGesturesEnabled: true,
-  //           myLocationEnabled: false,
-  //           mapType: MapType.normal,
-  //           myLocationButtonEnabled: false,
-  //         ),
-  //       ),
-  //     );
-  //   } else {
-  //     return Container(
-  //       width: double.infinity,
-  //       height: 250.0,
-  //       decoration: BoxDecoration(
-  //         borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-  //         color: CupertinoColors.systemGrey4,
-  //       ),
-  //       alignment: Alignment.center,
-  //       child: Text('Map Placeholder'),
-  //     );
-  //   }
-  // }
   Widget _buildMap(BuildContext context) {
     return FutureBuilder(
       future: Future.delayed(Duration(milliseconds: 100)), // Add a small delay
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Show loading indicator
+          return CupertinoActivityIndicator(); // Show loading indicator
         } else {
           final LatLng? locationCoordinates = pickupLatLng;
 
@@ -528,11 +484,20 @@ class _DonorScreenState extends State<DonorScreen> {
                       position: locationCoordinates,
                     ),
                   ]),
+                  onMapCreated: (GoogleMapController controller) {
+                    // Move camera to focus on marker
+                    controller.moveCamera(
+                      CameraUpdate.newLatLngZoom(
+                        locationCoordinates, 
+                        15.0, // Zoom level
+                      ),
+                    );
+                  },
                   zoomControlsEnabled: false,
-                  scrollGesturesEnabled: true,
+                  scrollGesturesEnabled: false,
                   rotateGesturesEnabled: false,
                   tiltGesturesEnabled: false,
-                  zoomGesturesEnabled: true,
+                  zoomGesturesEnabled: false,
                   myLocationEnabled: false,
                   mapType: MapType.normal,
                   myLocationButtonEnabled: false,
@@ -555,7 +520,6 @@ class _DonorScreenState extends State<DonorScreen> {
       },
     );
   }
-
 
   Widget _buildButton() {
     if (orderState == OrderState.readyToPickUp) {
