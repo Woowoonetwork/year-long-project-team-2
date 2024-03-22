@@ -6,7 +6,7 @@ import 'package:FoodHood/Models/RemoteNotification.dart';
 import 'package:FoodHood/Screens/browse_screen.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/Screens/login_screen.dart';
-import 'package:FoodHood/Screens/message_list.dart';
+import 'package:FoodHood/Screens/conversations_screen.dart';
 import 'package:FoodHood/Screens/navigation_screen.dart';
 import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';

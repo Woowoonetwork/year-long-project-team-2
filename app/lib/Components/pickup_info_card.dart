@@ -1,15 +1,14 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Screens/message_screen.dart';
-import 'package:feather_icons/feather_icons.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/services.dart';
-import 'dart:async';
-
-import 'dart:io' show Platform;
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
+import 'package:feather_icons/feather_icons.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PickupInformation extends StatefulWidget {
   final String pickupTime;
@@ -20,14 +19,14 @@ class PickupInformation extends StatefulWidget {
   final PostDetailViewModel viewModel;
 
   const PickupInformation({
-    Key? key,
+    super.key,
     required this.pickupTime,
     required this.pickupLocation,
     required this.meetingPoint,
     required this.additionalInfo,
     this.locationCoordinates,
     required this.viewModel,
-  }) : super(key: key);
+  });
 
   @override
   _PickupInformationState createState() => _PickupInformationState();
@@ -39,9 +38,18 @@ class _PickupInformationState extends State<PickupInformation>
   String? _mapStyle;
   GoogleMapController? mapController;
   @override
-  void initState() {
-    super.initState();
-    _delayFuture = Future.delayed(Duration(milliseconds: 300));
+  Widget build(BuildContext context) {
+    _checkAndUpdateMapStyle();
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _buildHeader(context),
+          _buildInfoCard(context),
+        ],
+      ),
+    );
   }
 
   @override
@@ -56,30 +64,80 @@ class _PickupInformationState extends State<PickupInformation>
     mapController?.dispose();
   }
 
-  void _checkAndUpdateMapStyle() async {
-    String stylePath =
-        MediaQuery.of(context).platformBrightness == Brightness.dark
-            ? 'assets/map_style_dark.json'
-            : 'assets/map_style_light.json';
-    String style = await rootBundle.loadString(stylePath);
-    if (_mapStyle != style) {
-      setState(() => _mapStyle = style);
-      mapController?.setMapStyle(_mapStyle);
-    }
+  @override
+  void initState() {
+    super.initState();
+    _delayFuture = Future.delayed(const Duration(milliseconds: 300));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    _checkAndUpdateMapStyle();
+  Widget _buildAdditionalInfo(BuildContext context) {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: SizedBox(
+              width: 30.0,
+              height: 30.0,
+              child: //clipoval
+                  IconPlaceholder(imageUrl: widget.viewModel.profileURL)),
+        ),
+        Expanded(
+          child: MessageBox(context: context, text: widget.additionalInfo),
+        ),
+      ],
+    );
+  }
 
+  Widget _buildButtonBar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildHeader(context),
-          _buildInfoCard(context),
+          Expanded(
+            child: InfoButton(
+              context: context,
+              text: 'Message ${widget.viewModel.firstName}',
+              icon: FeatherIcons.messageCircle,
+              iconColor: CupertinoColors.label.resolveFrom(context),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) => MessageScreen(
+                            receiverID: widget.viewModel.userid,
+                          )),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: InfoButton(
+              context: context,
+              text: 'Navigate Here',
+              icon: FeatherIcons.arrowUpRight,
+              iconColor: CupertinoColors.label.resolveFrom(context),
+              onPressed: () => _launchMapUrl(widget.viewModel.pickupLatLng),
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDetails(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CustomInfoTile(title: 'Pickup Time', subtitle: widget.pickupTime),
+        CustomInfoTile(
+            title: 'Pickup Location', subtitle: widget.pickupLocation),
+        const SizedBox(height: 12),
+        _buildAdditionalInfo(context),
+        const SizedBox(height: 12),
+        _buildButtonBar(context),
+      ],
     );
   }
 
@@ -119,20 +177,6 @@ class _PickupInformationState extends State<PickupInformation>
     );
   }
 
-  BoxDecoration _cardDecoration(BuildContext context) {
-    return BoxDecoration(
-      color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: const Color(0x19000000),
-          blurRadius: 10,
-          offset: const Offset(0, 0),
-        ),
-      ],
-    );
-  }
-
   Widget _buildMap(BuildContext context) {
     return FutureBuilder(
       future: _delayFuture, // Use the initialized future
@@ -141,17 +185,17 @@ class _PickupInformationState extends State<PickupInformation>
           return Container(
             width: double.infinity,
             height: 200.0,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
               color: CupertinoColors.systemGrey6,
             ),
             alignment: Alignment.center,
-            child: CupertinoActivityIndicator(),
+            child: const CupertinoActivityIndicator(),
           );
         } else {
           if (widget.locationCoordinates != null) {
             return ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               child: SizedBox(
                 width: double.infinity,
                 height: 140.0,
@@ -161,12 +205,12 @@ class _PickupInformationState extends State<PickupInformation>
                     target: widget.viewModel.pickupLatLng,
                     zoom: 16.0,
                   ),
-                  markers: Set.from([
+                  markers: {
                     Marker(
-                      markerId: MarkerId('pickupLocation'),
+                      markerId: const MarkerId('pickupLocation'),
                       position: widget.viewModel.pickupLatLng,
                     ),
-                  ]),
+                  },
                   zoomControlsEnabled: false,
                   scrollGesturesEnabled: false,
                   rotateGesturesEnabled: false,
@@ -182,12 +226,12 @@ class _PickupInformationState extends State<PickupInformation>
             return Container(
               width: double.infinity,
               height: 200.0,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                 color: CupertinoColors.systemGrey4,
               ),
               alignment: Alignment.center,
-              child: Text('Map Placeholder'),
+              child: const Text('Map Placeholder'),
             );
           }
         }
@@ -195,24 +239,30 @@ class _PickupInformationState extends State<PickupInformation>
     );
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-    mapController?.setMapStyle(_mapStyle);
-  }
-
-  Widget _buildDetails(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomInfoTile(title: 'Pickup Time', subtitle: widget.pickupTime),
-        CustomInfoTile(
-            title: 'Pickup Location', subtitle: widget.pickupLocation),
-        const SizedBox(height: 12),
-        _buildAdditionalInfo(context),
-        const SizedBox(height: 12),
-        _buildButtonBar(context),
+  BoxDecoration _cardDecoration(BuildContext context) {
+    return BoxDecoration(
+      color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x19000000),
+          blurRadius: 10,
+          offset: Offset(0, 0),
+        ),
       ],
     );
+  }
+
+  void _checkAndUpdateMapStyle() async {
+    String stylePath =
+        MediaQuery.of(context).platformBrightness == Brightness.dark
+            ? 'assets/map_style_dark.json'
+            : 'assets/map_style_light.json';
+    String style = await rootBundle.loadString(stylePath);
+    if (_mapStyle != style) {
+      setState(() => _mapStyle = style);
+      mapController?.setMapStyle(_mapStyle);
+    }
   }
 
   Future<void> _launchMapUrl(LatLng locationCoordinates) async {
@@ -231,7 +281,6 @@ class _PickupInformationState extends State<PickupInformation>
         throw 'Could not launch $appleMapsUrl';
       }
     } else {
-      // Attempt to open Google Maps or the default map application on other devices
       if (await canLaunch(googleMapsUrl)) {
         await launch(googleMapsUrl);
       } else {
@@ -240,59 +289,8 @@ class _PickupInformationState extends State<PickupInformation>
     }
   }
 
-  Widget _buildAdditionalInfo(BuildContext context) {
-    return Row(
-      children: [
-        Padding(
-          padding: EdgeInsets.only(right: 8.0),
-          child: Container(
-              width: 30.0,
-              height: 30.0,
-              child: //clipoval
-                  IconPlaceholder(imageUrl: widget.viewModel.profileURL)),
-        ),
-        Expanded(
-          child: MessageBox(context: context, text: widget.additionalInfo),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildButtonBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Expanded(
-            child: InfoButton(
-              context: context,
-              text: 'Message ${widget.viewModel.firstName}',
-              icon: FeatherIcons.messageCircle,
-              iconColor: CupertinoColors.label.resolveFrom(context),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  CupertinoPageRoute(
-                      builder: (context) => MessageScreen(
-                            receiverID: widget.viewModel.userid,
-                          )),
-                );
-              },
-            ),
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: InfoButton(
-              context: context,
-              text: 'Navigate Here',
-              icon: FeatherIcons.arrowUpRight,
-              iconColor: CupertinoColors.label.resolveFrom(context),
-              onPressed: () => _launchMapUrl(widget.viewModel.pickupLatLng),
-            ),
-          ),
-        ],
-      ),
-    );
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+    mapController?.setMapStyle(_mapStyle);
   }
 }

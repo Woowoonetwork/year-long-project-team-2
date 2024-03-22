@@ -3,18 +3,15 @@ import 'package:FoodHood/Screens/message_screen.dart';
 import 'package:FoodHood/Services/AuthService.dart';
 import 'package:FoodHood/Services/MessageService.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:feather_icons/feather_icons.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-
-class MessageListPage extends StatelessWidget {
-  MessageListPage({super.key});
-
+class ConversationsScreen extends StatelessWidget {
   final MessageService messageService = MessageService();
+
   final AuthService authService = AuthService();
+  ConversationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +20,31 @@ class MessageListPage extends StatelessWidget {
       child: CustomScrollView(
         slivers: <Widget>[
           CupertinoSliverNavigationBar(
+            transitionBetweenRoutes: true,
             backgroundColor: backgroundColor,
             largeTitle: Text('Messages'),
             border: null,
-            leading: GestureDetector(
-              child: Icon(
-                FeatherIcons.chevronLeft,
-                size: 24,
-                color: CupertinoColors.label.resolveFrom(context),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Text(
+                'Back',
+                style: TextStyle(
+                  color: CupertinoColors.label.resolveFrom(context),
+                ),
               ),
-              onTap: () {
-                Navigator.of(context).pop();
+              onPressed: () {
+                Navigator.pop(context);
               },
+            ),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Text(
+                'Compose',
+                style: TextStyle(
+                  color: CupertinoColors.label.resolveFrom(context),
+                ),
+              ),
+              onPressed: () {},
             ),
           ),
           _buildMessageList(context),
@@ -42,53 +52,6 @@ class MessageListPage extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildMessageList(BuildContext context) {
-  return StreamBuilder<QuerySnapshot>(
-    stream: messageService.getUserStream(),
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return const SliverFillRemaining(
-          child: Center(
-            child: Text('An error occurred. Please try again later.'),
-          ),
-        );
-      }
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const SliverFillRemaining(
-          child: Center(
-            child: CupertinoActivityIndicator(),
-          ),
-        );
-      }
-      if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-        return SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              // Here we get the document snapshot
-              var documentSnapshot = snapshot.data!.docs[index];
-              // And here we get the document ID
-              var userID = documentSnapshot.id;
-              // Then we get the user data
-              var userData = documentSnapshot.data() as Map<String, dynamic>;
-
-              return _buildMessageCard(context, userData, userID);
-            },
-            childCount: snapshot.data!.docs.length,
-          ),
-        );
-      } else {
-        // Handle the case when there is no data
-        return SliverFillRemaining(
-          child: Center(
-            child: Text('No messages found.'),
-          ),
-        );
-      }
-    },
-  );
-}
-
 
   Widget _buildMessageCard(
       BuildContext context, Map<String, dynamic> userData, String userID) {
@@ -110,6 +73,52 @@ class MessageListPage extends StatelessWidget {
             ),
           ),
         );
+      },
+    );
+  }
+
+  Widget _buildMessageList(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: messageService.getUserStream(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const SliverFillRemaining(
+            child: Center(
+              child: Text('An error occurred. Please try again later.'),
+            ),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SliverFillRemaining(
+            child: Center(
+              child: CupertinoActivityIndicator(),
+            ),
+          );
+        }
+        if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+          return SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                // Here we get the document snapshot
+                var documentSnapshot = snapshot.data!.docs[index];
+                // And here we get the document ID
+                var userID = documentSnapshot.id;
+                // Then we get the user data
+                var userData = documentSnapshot.data() as Map<String, dynamic>;
+
+                return _buildMessageCard(context, userData, userID);
+              },
+              childCount: snapshot.data!.docs.length,
+            ),
+          );
+        } else {
+          // Handle the case when there is no data
+          return SliverFillRemaining(
+            child: Center(
+              child: Text('No messages found.'),
+            ),
+          );
+        }
       },
     );
   }

@@ -235,7 +235,7 @@ class _PostDetailViewState extends State<PostDetailView>
               Expanded(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOut,
+                  curve: Curves.fastOutSlowIn,
                   height: _isTagSectionExpanded ? null : 22,
                   child: Wrap(
                     spacing: 2.0,

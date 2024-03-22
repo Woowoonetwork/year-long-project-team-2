@@ -14,11 +14,14 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return 
+    
+    
+    Container(
       alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
             color: isCurrentUser
                 ? accentColor.resolveFrom(context)

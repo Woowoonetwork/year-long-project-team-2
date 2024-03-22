@@ -147,7 +147,7 @@ class ProfilePostCard extends StatelessWidget {
                         onPressed: showMenu,
                         padding: EdgeInsets.all(10),
                         child: Icon(
-                          FeatherIcons.moreVertical,
+                          FeatherIcons.moreHorizontal,
                           size: 20,
                           color: CupertinoDynamicColor.resolve(
                               CupertinoColors.secondaryLabel, context),
