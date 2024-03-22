@@ -74,10 +74,7 @@ class _DonorScreenState extends State<DonorScreen> {
           await postDetailsCollection.doc(postId).get();
 
       if (postSnapshot.exists) {
-        // Extract the reserved_by user ID from the post details
-        reservedByUserId = postSnapshot['reserved_by'];
-        //pickupLocation = postSnapshot['pickup_location'];
-
+        // Extract the pickup location coordinates
         if (postSnapshot['post_location'] is GeoPoint) {
           GeoPoint geoPoint = postSnapshot['post_location'] as GeoPoint;
           setState(() {
@@ -89,6 +86,10 @@ class _DonorScreenState extends State<DonorScreen> {
             pickupLatLng = LatLng(49.8862, -119.4971);
           });
         }
+
+        // Extract the reserved_by user ID from the post details
+        reservedByUserId = postSnapshot['reserved_by'];
+        
         print(pickupLatLng);
 
         // Fetch the user document using reserved_by user ID if it exists
@@ -148,17 +149,6 @@ class _DonorScreenState extends State<DonorScreen> {
     adjustedHeadingFontSize = _defaultHeadingFontSize * _textScaleFactor;
     adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
   }
-
-  // void _onLocationSelected(LatLng location) async {
-  //   String address = await getAddressFromLatLng(location);
-  //   setState(() {
-  //     selectedLocation = location;
-  //     instructionText = address;
-  //   });
-  // }
-  // void LocationReading(LatLng location) async{
-  //   String address = await getAddressFromLatLng(location);
-  // }
 
   Future<String> getAddressFromLatLng(LatLng position) async {
     final url = Uri.parse(
@@ -464,51 +454,108 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  Widget _buildMap(BuildContext context) {
-    final LatLng? locationCoordinates = pickupLatLng;
+  // Widget _buildMap(BuildContext context) {
+  //   final LatLng? locationCoordinates = pickupLatLng;
 
-    if (locationCoordinates != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16), bottom: Radius.circular(15)),
-        child: SizedBox(
-          width: double.infinity,
-          height: 250.0,
-          child: GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: pickupLatLng,
-              zoom: 12.0,
-            ),
-            markers: Set.from([
-              Marker(
-                markerId: MarkerId('pickupLocation'),
-                position: locationCoordinates,
+  //   if (locationCoordinates != null) {
+  //     return ClipRRect(
+  //       borderRadius: BorderRadius.vertical(
+  //           top: Radius.circular(16), bottom: Radius.circular(15)),
+  //       child: SizedBox(
+  //         width: double.infinity,
+  //         height: 250.0,
+  //         child: GoogleMap(
+  //           initialCameraPosition: CameraPosition(
+  //             target: locationCoordinates,
+  //             zoom: 12.0,
+  //           ),
+  //           markers: Set.from([
+  //             Marker(
+  //               markerId: MarkerId('pickupLocation'),
+  //               position: locationCoordinates,
+  //             ),
+  //           ]),
+  //           zoomControlsEnabled: false,
+  //           scrollGesturesEnabled: true,
+  //           rotateGesturesEnabled: false,
+  //           tiltGesturesEnabled: false,
+  //           zoomGesturesEnabled: true,
+  //           myLocationEnabled: false,
+  //           mapType: MapType.normal,
+  //           myLocationButtonEnabled: false,
+  //         ),
+  //       ),
+  //     );
+  //   } else {
+  //     return Container(
+  //       width: double.infinity,
+  //       height: 250.0,
+  //       decoration: BoxDecoration(
+  //         borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+  //         color: CupertinoColors.systemGrey4,
+  //       ),
+  //       alignment: Alignment.center,
+  //       child: Text('Map Placeholder'),
+  //     );
+  //   }
+  // }
+  Widget _buildMap(BuildContext context) {
+    return FutureBuilder(
+      future: Future.delayed(Duration(milliseconds: 100)), // Add a small delay
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator(); // Show loading indicator
+        } else {
+          final LatLng? locationCoordinates = pickupLatLng;
+
+          if (locationCoordinates != null) {
+            return ClipRRect(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(16),
+                bottom: Radius.circular(15),
               ),
-            ]),
-            zoomControlsEnabled: false,
-            scrollGesturesEnabled: true,
-            rotateGesturesEnabled: false,
-            tiltGesturesEnabled: false,
-            zoomGesturesEnabled: true,
-            myLocationEnabled: false,
-            mapType: MapType.normal,
-            myLocationButtonEnabled: false,
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        width: double.infinity,
-        height: 250.0,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-          color: CupertinoColors.systemGrey4,
-        ),
-        alignment: Alignment.center,
-        child: Text('Map Placeholder'),
-      );
-    }
+              child: SizedBox(
+                width: double.infinity,
+                height: 250.0,
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: locationCoordinates, // Set initial position to marker location
+                    zoom: 12.0,
+                  ),
+                  markers: Set.from([
+                    Marker(
+                      markerId: MarkerId('pickupLocation'),
+                      position: locationCoordinates,
+                    ),
+                  ]),
+                  zoomControlsEnabled: false,
+                  scrollGesturesEnabled: true,
+                  rotateGesturesEnabled: false,
+                  tiltGesturesEnabled: false,
+                  zoomGesturesEnabled: true,
+                  myLocationEnabled: false,
+                  mapType: MapType.normal,
+                  myLocationButtonEnabled: false,
+                ),
+              ),
+            );
+          } else {
+            return Container(
+              width: double.infinity,
+              height: 250.0,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                color: CupertinoColors.systemGrey4,
+              ),
+              alignment: Alignment.center,
+              child: Text('Map Placeholder'),
+            );
+          }
+        }
+      },
+    );
   }
+
 
   Widget _buildButton() {
     if (orderState == OrderState.readyToPickUp) {

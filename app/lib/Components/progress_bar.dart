@@ -23,7 +23,7 @@ class ProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 120,
+      height: 80,
       alignment: Alignment.topCenter,
       child: Timeline.tileBuilder(
         shrinkWrap: true,
