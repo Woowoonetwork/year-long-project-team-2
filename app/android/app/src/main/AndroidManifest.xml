@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="your_package_name">
+    package="com.example.foodhood2">
 
     <!-- Add this line for permission -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
