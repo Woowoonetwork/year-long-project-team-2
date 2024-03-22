@@ -9,11 +9,13 @@ import 'package:flutter/foundation.dart';
 class GoogleMapWidget extends StatefulWidget {
   final LatLng? initialLocation;
   final Function(LatLng) onLocationSelected;
+  final bool isCurrentLocation; // New boolean parameter
 
   GoogleMapWidget({
     Key? key,
     this.initialLocation,
     required this.onLocationSelected,
+    this.isCurrentLocation = true,
   }) : super(key: key);
 
   @override
@@ -23,10 +25,10 @@ class GoogleMapWidget extends StatefulWidget {
 class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   GoogleMapController? mapController;
   String? _mapStyle;
-  LatLng _currentCenter =  LatLng(49.8875, -119.4961);
+  LatLng _currentCenter = LatLng(49.8875, -119.4961);
   Marker _centerMarker = Marker(
     markerId: MarkerId("centerMarker"),
-    position: LatLng(37.7749, -122.4194), // Default position
+    position: LatLng(49.8875, -119.4961),
     infoWindow: InfoWindow(title: "Center Location"),
   );
   bool _isLoading = true;
@@ -34,21 +36,35 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   @override
   void initState() {
     super.initState();
-    _determinePosition().then((position) {
-      LatLng initialPosition = widget.initialLocation ?? LatLng(37.7749, -122.4194);
-      if (position != null) {
-        initialPosition = LatLng(position.latitude, position.longitude);
-        _centerMarker = _centerMarker.copyWith(positionParam: initialPosition); // Update marker position
-      }
-      setState(() {
-        _currentCenter = initialPosition;
-        _isLoading = false;
+    if (widget.isCurrentLocation) {
+      _determinePosition().then((position) {
+        if (position != null) {
+          LatLng myLocation = LatLng(position.latitude, position.longitude);
+          _updatePosition(myLocation);
+        }
+      }).catchError((e) {
+        _useDefaultOrInitialLocation();
       });
-    }).catchError((e) {
-      setState(() {
-        _currentCenter = widget.initialLocation ?? LatLng(37.7749, -122.4194);
-        _isLoading = false;
-      });
+    } else {
+      _useDefaultOrInitialLocation();
+    }
+  }
+
+  void _useDefaultOrInitialLocation() {
+    setState(() {
+      _currentCenter = widget.initialLocation!;
+      _centerMarker = _centerMarker.copyWith(
+          positionParam: _currentCenter); // Update marker position
+      _isLoading = false;
+    });
+  }
+
+  void _updatePosition(LatLng newPosition) {
+    setState(() {
+      _currentCenter = newPosition;
+      _centerMarker = _centerMarker.copyWith(
+          positionParam: newPosition); // Update marker position
+      _isLoading = false;
     });
   }
 
@@ -70,15 +86,18 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
     }
 
-    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
   }
 
   void _goToMyLocation() async {
     try {
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
       LatLng myLocation = LatLng(position.latitude, position.longitude);
       mapController?.animateCamera(CameraUpdate.newLatLngZoom(myLocation, 14));
       setState(() {
@@ -125,19 +144,21 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return Center(child: CupertinoActivityIndicator());
     }
     return Stack(
       children: [
         GoogleMap(
           onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(target: _currentCenter, zoom: 12.0),
+          initialCameraPosition:
+              CameraPosition(target: _currentCenter, zoom: 12.0),
           onCameraMove: _onCameraMove,
           markers: {_centerMarker},
           myLocationEnabled: true,
           myLocationButtonEnabled: false,
           gestureRecognizers: Set()
-            ..add(Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer())),
+            ..add(Factory<OneSequenceGestureRecognizer>(
+                () => EagerGestureRecognizer())),
         ),
         Positioned(
           bottom: 10,
@@ -147,7 +168,8 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
             color: CupertinoColors.tertiarySystemBackground,
             borderRadius: BorderRadius.circular(100.0),
             padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 14.0),
-            child: Icon(CupertinoIcons.location_fill, size: 18, color: CupertinoColors.activeBlue),
+            child: Icon(CupertinoIcons.location_fill,
+                size: 18, color: CupertinoColors.activeBlue),
           ),
         ),
       ],

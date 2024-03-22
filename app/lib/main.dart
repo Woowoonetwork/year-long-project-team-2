@@ -9,7 +9,7 @@ import 'package:FoodHood/Screens/login_screen.dart';
 import 'package:FoodHood/Screens/navigation_screen.dart';
 import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
-//import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -21,13 +21,12 @@ import 'package:flutter/services.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
-
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     systemNavigationBarColor: Colors.black.withOpacity(0.002),
@@ -40,6 +39,23 @@ void main() async {
 
   await addAllergensCategoriesAndPL();
 
+  // Handling the dynamic link when the app is launched from a terminated state
+  final PendingDynamicLinkData? initialLink =
+      await FirebaseDynamicLinks.instance.getInitialLink();
+
+  // Setting up the dynamic link listener for foreground/background states
+  FirebaseDynamicLinks.instance.onLink.listen(
+    (dynamicLinkData) {
+      // Handle dynamic link within your navigation logic
+      // For example:
+      // Navigator.pushNamed(context, dynamicLinkData.link.path);
+    },
+    onError: (error) {
+      // Handle errors
+      print('Dynamic Link Failed: $error');
+    },
+  );
+
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(
@@ -49,16 +65,21 @@ void main() async {
             create: (context) => TextScaleProvider(),
           ),
         ],
-        child: FoodHoodApp(),
+        child: FoodHoodApp(initialLink: initialLink),
       ),
     );
   });
 }
 
 class FoodHoodApp extends StatelessWidget {
+  final PendingDynamicLinkData? initialLink;
+
+  FoodHoodApp({this.initialLink});
+
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
+      builder: FToastBuilder(),
       localizationsDelegates: [
         DefaultCupertinoLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,

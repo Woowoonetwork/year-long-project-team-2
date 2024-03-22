@@ -3,7 +3,7 @@
 import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../components.dart';
+import '../Components/components.dart';
 
 // TODO: Implement WelcomeScreen
 class WelcomeScreen extends StatelessWidget {

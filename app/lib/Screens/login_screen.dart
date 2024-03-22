@@ -5,7 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/reset_pwd_screen.dart';
-import '../components.dart';
+import '../Components/components.dart';
 
 class LogInScreen extends StatefulWidget {
   @override
@@ -15,7 +15,6 @@ class LogInScreen extends StatefulWidget {
 class _LogInScreenState extends State<LogInScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool _showPassword = false;
 
   String? _emailErrorText;
   String? _passwordErrorText;
@@ -48,31 +47,29 @@ class _LogInScreenState extends State<LogInScreen> {
       children: [
         buildText('Log in', 34, FontWeight.w600),
         const SizedBox(height: 50),
+
         buildCupertinoTextField(
           'Email Address',
           emailController,
-          false,
           context,
           [AutofillHints.email],
           errorText: _emailErrorText,
         ),
         const SizedBox(height: 16),
-        buildCupertinoTextField(
-          'Password',
-          passwordController,
-          !_showPassword,
-          context,
-          [AutofillHints.password],
-          errorText: _passwordErrorText,
-        ),
-        CupertinoButton(
-          onPressed: () {
-            setState(() {
-              _showPassword = !_showPassword; // Toggle the boolean variable
-            });
-          },
-          child: Text(_showPassword ? 'Hide Password' : 'Show Password'),
-        ),
+        // buildCupertinoTextField(
+        //   'Password',
+        //   passwordController,
+        //   context,
+        //   [AutofillHints.password],
+        //   errorText: _passwordErrorText,
+        // ),
+        PasswordCupertinoTextField(
+            placeholder: 'Password',
+            controller: passwordController,
+            context: context,
+            autofillHints: [AutofillHints.password],
+            errorText: _passwordErrorText),
+        // PasswordCupertinoTextField(placeholder: 'Password', controller: passwordCont
         const SizedBox(height: 16),
         GestureDetector(
           onTap: () => Navigator.of(context).push(
@@ -161,20 +158,6 @@ class _LogInScreenState extends State<LogInScreen> {
       Navigator.of(context).pushNamedAndRemoveUntil('/nav', (route) => false,
           arguments: {'selectedIndex': 0});
     } catch (e) {
-      // showCupertinoDialog(
-      //   context: context,
-      //   builder: (context) => CupertinoAlertDialog(
-      //     title: Text('Login Error'),
-      //     content: Text("Your email or password is incorrect."),
-      //     actions: <Widget>[
-      //       CupertinoDialogAction(
-      //         child: Text('OK'),
-      //         onPressed: () => Navigator.of(context).pop(),
-      //       ),
-      //     ],
-      //   ),
-      // );
-      // instead of showing a dialog, we change the error text
       Navigator.of(context).pop();
 
       setState(() {

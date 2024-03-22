@@ -3,7 +3,7 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../components.dart'; // Assuming this file contains common UI components
+import '../Components/components.dart'; // Assuming this file contains common UI components
 
 
 class SuccessScreen extends StatelessWidget {
