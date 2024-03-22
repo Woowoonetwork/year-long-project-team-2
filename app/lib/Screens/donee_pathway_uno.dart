@@ -9,7 +9,7 @@ import 'package:FoodHood/Screens/donor_rating.dart';
 import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../components.dart';
+import '../Components/components.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 

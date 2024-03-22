@@ -6,6 +6,8 @@ import 'package:FoodHood/Screens/message_screen.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
+
 import 'dart:io' show Platform;
 import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
 
@@ -31,9 +33,11 @@ class PickupInformation extends StatefulWidget {
   _PickupInformationState createState() => _PickupInformationState();
 }
 
-class _PickupInformationState extends State<PickupInformation> {
+class _PickupInformationState extends State<PickupInformation>
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   late Future<void> _delayFuture;
-
+  String? _mapStyle;
+  GoogleMapController? mapController;
   @override
   void initState() {
     super.initState();
@@ -41,7 +45,33 @@ class _PickupInformationState extends State<PickupInformation> {
   }
 
   @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+    _checkAndUpdateMapStyle();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    mapController?.dispose();
+  }
+
+  void _checkAndUpdateMapStyle() async {
+    String stylePath =
+        MediaQuery.of(context).platformBrightness == Brightness.dark
+            ? 'assets/map_style_dark.json'
+            : 'assets/map_style_light.json';
+    String style = await rootBundle.loadString(stylePath);
+    if (_mapStyle != style) {
+      setState(() => _mapStyle = style);
+      mapController?.setMapStyle(_mapStyle);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _checkAndUpdateMapStyle();
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -96,7 +126,7 @@ class _PickupInformationState extends State<PickupInformation> {
       boxShadow: [
         BoxShadow(
           color: const Color(0x19000000),
-          blurRadius: 20,
+          blurRadius: 10,
           offset: const Offset(0, 0),
         ),
       ],
@@ -126,6 +156,7 @@ class _PickupInformationState extends State<PickupInformation> {
                 width: double.infinity,
                 height: 140.0,
                 child: GoogleMap(
+                  onMapCreated: _onMapCreated,
                   initialCameraPosition: CameraPosition(
                     target: widget.viewModel.pickupLatLng,
                     zoom: 16.0,
@@ -164,6 +195,10 @@ class _PickupInformationState extends State<PickupInformation> {
     );
   }
 
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+    mapController?.setMapStyle(_mapStyle);
+  }
 
   Widget _buildDetails(BuildContext context) {
     return Column(

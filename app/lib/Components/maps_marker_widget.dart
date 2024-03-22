@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -16,7 +15,7 @@ class GoogleMapWidget extends StatefulWidget {
     Key? key,
     this.initialLocation,
     required this.onLocationSelected,
-    this.isCurrentLocation = true, 
+    this.isCurrentLocation = true,
   }) : super(key: key);
 
   @override
@@ -145,7 +144,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return Center(child: CupertinoActivityIndicator());
     }
     return Stack(
       children: [
