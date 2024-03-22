@@ -42,10 +42,9 @@ class MessageService {
         .collection("conversations")
         .doc(conversationID)
         .collection("messages")
-        .orderBy("timestamp", descending: false)
+        .orderBy("timestamp", descending: true)
         .snapshots();
   }
-
   getReceiverData(String receiverID) {
     return _firestore.collection('user').doc(receiverID).get();
   }

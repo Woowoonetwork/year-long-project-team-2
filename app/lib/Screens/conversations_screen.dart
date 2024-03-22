@@ -53,6 +53,49 @@ class ConversationsScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildMessageList(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: messageService.getUserStream(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const SliverFillRemaining(
+            child: Center(
+              child: Text('An error occurred. Please try again later.'),
+            ),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SliverFillRemaining(
+            child: Center(
+              child: CupertinoActivityIndicator(),
+            ),
+          );
+        }
+        if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+          return SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                var documentSnapshot = snapshot.data!.docs[index];
+                var userID = documentSnapshot.id;
+                var userData = documentSnapshot.data() as Map<String, dynamic>;
+                return _buildMessageCard(context, userData, userID);
+              },
+              childCount: snapshot.data!.docs.length,
+            ),
+          );
+        } else {
+          // Handle the case when there is no data
+          return SliverFillRemaining(
+            child: Center(
+              child: Text('No messages found.'),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+
   Widget _buildMessageCard(
       BuildContext context, Map<String, dynamic> userData, String userID) {
     String profileURL = userData["profileImagePath"] ?? '';
@@ -77,51 +120,6 @@ class ConversationsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageList(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: messageService.getUserStream(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const SliverFillRemaining(
-            child: Center(
-              child: Text('An error occurred. Please try again later.'),
-            ),
-          );
-        }
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SliverFillRemaining(
-            child: Center(
-              child: CupertinoActivityIndicator(),
-            ),
-          );
-        }
-        if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-          return SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                // Here we get the document snapshot
-                var documentSnapshot = snapshot.data!.docs[index];
-                // And here we get the document ID
-                var userID = documentSnapshot.id;
-                // Then we get the user data
-                var userData = documentSnapshot.data() as Map<String, dynamic>;
-
-                return _buildMessageCard(context, userData, userID);
-              },
-              childCount: snapshot.data!.docs.length,
-            ),
-          );
-        } else {
-          // Handle the case when there is no data
-          return SliverFillRemaining(
-            child: Center(
-              child: Text('No messages found.'),
-            ),
-          );
-        }
-      },
-    );
-  }
 }
 
 class CupertinoListTile extends StatelessWidget {

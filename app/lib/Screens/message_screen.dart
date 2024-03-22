@@ -51,24 +51,44 @@ class _MessageScreenState extends State<MessageScreen> {
 
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
-        Future.delayed(Duration(milliseconds: 500), () {
-          scrollDown();
-        });
+        Future.delayed(Duration(milliseconds: 500), scrollDown);
       }
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(
+        const Duration(milliseconds: 200),
+        () => scrollDown(),
+      );
+    });
 
-    Future.delayed(
-      const Duration(milliseconds: 200),
-      () => scrollDown(),
-    );
+    setupMessageListener();
+  }
+
+  void setupMessageListener() async {
+    // Fetch the user ID asynchronously
+    final userId = await authService.getUserId();
+
+    // Once you have the userId, set up the listener for new messages
+    if (userId != null) {
+      // Check if userId is not null
+      messageService
+          .getMessages(userId, widget.receiverID)
+          .listen((querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          scrollDown();
+        }
+      });
+    }
   }
 
   void scrollDown() {
-    scrollController.animateTo(
-      scrollController.position.maxScrollExtent,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.fastOutSlowIn,
-    );
+    if (scrollController.hasClients) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.fastOutSlowIn,
+      );
+    }
   }
 
   void sendMessage() async {
@@ -76,6 +96,7 @@ class _MessageScreenState extends State<MessageScreen> {
     if (message.isNotEmpty) {
       await messageService.sendMessage(widget.receiverID, message);
       messageController.clear();
+      scrollDown();
     }
   }
 
@@ -96,11 +117,19 @@ class _MessageScreenState extends State<MessageScreen> {
         child: FutureBuilder<String>(
           future: receiverName,
           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-            return Text(snapshot.data!,
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                    color: CupertinoColors.label.resolveFrom(context)));
+            if (snapshot.hasData) {
+              return Text(snapshot.data!,
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: CupertinoColors.label.resolveFrom(context)));
+            } else {
+              return Text("",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: CupertinoColors.label.resolveFrom(context)));
+            }
           },
         ),
       ),
@@ -138,8 +167,9 @@ class _MessageScreenState extends State<MessageScreen> {
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return Text("No messages found.",
                   style: TextStyle(
-                    letterSpacing: -0.4,
-                      color: CupertinoColors.secondaryLabel.resolveFrom(context)));
+                      letterSpacing: -0.4,
+                      color:
+                          CupertinoColors.secondaryLabel.resolveFrom(context)));
             }
             return ListView(
               controller: scrollController,
