@@ -1,29 +1,26 @@
-// main.dart
-// entry point of the app
-
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Models/RemoteNotification.dart';
 import 'package:FoodHood/Screens/browse_screen.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:FoodHood/Screens/login_screen.dart';
-import 'package:FoodHood/Screens/conversations_screen.dart';
 import 'package:FoodHood/Screens/navigation_screen.dart';
 import 'package:FoodHood/Screens/registration_screen.dart';
 import 'package:FoodHood/Screens/welcome_screen.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'firebase_options.dart';
-import 'package:FoodHood/auth_wrapper.dart';
-import 'Services/AuthService.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
 import 'package:FoodHood/Services/FirebaseService.dart';
+import 'package:FoodHood/auth_wrapper.dart';
 import 'package:FoodHood/text_scale_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'Services/AuthService.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +30,7 @@ void main() async {
     systemNavigationBarColor: Colors.black.withOpacity(0.002),
   ));
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env"); 
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
@@ -75,18 +73,18 @@ void main() async {
 class FoodHoodApp extends StatelessWidget {
   final PendingDynamicLinkData? initialLink;
 
-  FoodHoodApp({this.initialLink});
+  const FoodHoodApp({super.key, this.initialLink});
 
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
       builder: FToastBuilder(),
-      localizationsDelegates: [
+      localizationsDelegates: const [
         DefaultCupertinoLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-      theme: CupertinoThemeData(
+      theme: const CupertinoThemeData(
         textTheme: CupertinoTextThemeData(
           navLargeTitleTextStyle: TextStyle(
               fontSize: 34,
@@ -136,7 +134,7 @@ class FoodHoodApp extends StatelessWidget {
          
           case '/browse':
             return MaterialWithModalsPageRoute(
-                builder: (context) => BrowseScreen());
+                builder: (context) => const BrowseScreen());
           default:
             return MaterialWithModalsPageRoute(
               builder: (context) => HomeScreen(),

@@ -124,7 +124,7 @@ class _MessageInputRowState extends State<MessageInputRow> {
                         margin: const EdgeInsets.all(6),
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: CupertinoColors.activeGreen.resolveFrom(context),
+                          color: blue.resolveFrom(context),
                           borderRadius: BorderRadius.circular(100000),
                         ),
                         child: const Icon(FeatherIcons.arrowUp,

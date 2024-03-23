@@ -67,7 +67,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
                     context, _selectedImagesWithAltText.keys.toList()),
                 _buildPhotoSection(context),
                 const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-
                 buildTextField('Title'),
                 buildTextInputField(
                   context,
@@ -103,7 +102,6 @@ class _CreatePostPageState extends State<CreatePostScreen>
                 ),
                 buildTextField('Pickup Location'),
                 buildMapSection(),
-                // add an instruction to say "move the map to select a location"
                 buildInstructionText(),
                 buildDateTimeSection(
                   context: context,
@@ -156,8 +154,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
                   },
                   padding: EdgeInsets.zero,
                   child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? accentColor.resolveFrom(context).withOpacity(0.3)
@@ -228,7 +226,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
 
     return SliverToBoxAdapter(
       child: Container(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 5),
+        padding: const EdgeInsets.only(
+            left: 16.0, right: 16.0, top: 16.0, bottom: 5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -303,26 +302,17 @@ class _CreatePostPageState extends State<CreatePostScreen>
     );
   }
 
-  
-
   SliverToBoxAdapter buildInstructionText() {
-    // Assuming instructionText holds the text you want to display
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
-          decoration: BoxDecoration(
-            color: CupertinoDynamicColor.resolve(
-                CupertinoColors.tertiarySystemBackground, context),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            instructionText, // Use the variable that holds the address or default instruction
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: adjustedFontSize - 2, fontWeight: FontWeight.w500),
-          ),
+        child: Text(
+          instructionText,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: adjustedFontSize - 4, 
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -371,7 +361,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
             controller: controller,
             maxLines: height != null ? null : 1,
             textAlignVertical: height != null ? TextAlignVertical.top : null,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
             placeholder: placeholder,
             style: TextStyle(
               color:
@@ -588,24 +579,23 @@ class _CreatePostPageState extends State<CreatePostScreen>
 
   Widget _buildPhotoSection(BuildContext context) {
     return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: PullDownButton(
+        child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: PullDownButton(
         itemBuilder: (context) => [
           PullDownMenuItem(
             title: 'From Gallery',
             icon: CupertinoIcons.photo,
             onTap: () {
-               _pickImageFromGallery();
+              _pickImageFromGallery();
             },
           ),
           PullDownMenuItem(
-            title: 'From Camera',
-            icon: CupertinoIcons.camera,
-            onTap: () {
-              _pickImageFromCamera();
-            }
-          ),
+              title: 'From Camera',
+              icon: CupertinoIcons.camera,
+              onTap: () {
+                _pickImageFromCamera();
+              }),
         ],
         buttonBuilder: (context, showMenu) => CupertinoButton(
           onPressed: showMenu,
@@ -623,16 +613,16 @@ class _CreatePostPageState extends State<CreatePostScreen>
                     size: 28,
                     color: MediaQuery.of(context).platformBrightness ==
                             Brightness.light
-                        ? darken(accentColor.resolveFrom(context), 0.4)
-                        : lighten(accentColor.resolveFrom(context), 0.4)),
+                        ? darken(blue.resolveFrom(context), 0.4)
+                        : lighten(blue.resolveFrom(context), 0.4)),
                 const SizedBox(width: 10),
                 Text(
                   'Select Photos',
                   style: TextStyle(
                     color: MediaQuery.of(context).platformBrightness ==
                             Brightness.light
-                        ? darken(accentColor.resolveFrom(context), 0.4)
-                        : lighten(accentColor.resolveFrom(context), 0.4),
+                        ? darken(blue.resolveFrom(context), 0.4)
+                        : lighten(blue.resolveFrom(context), 0.4),
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
@@ -641,9 +631,8 @@ class _CreatePostPageState extends State<CreatePostScreen>
             ),
           ),
         ),
-        ),
-      )
-    );
+      ),
+    ));
   }
 
   void _onLocationSelected(LatLng location) async {
@@ -672,7 +661,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
         _selectedImagesWithAltText[image.path] = "";
       }
     });
-    }
+  }
 
   Future<void> _savePost() async {
     // Only checking if title, description, and pickup instructions are empty

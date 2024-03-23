@@ -5,7 +5,9 @@ import 'package:FoodHood/Services/MessageService.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji/flutter_emoji.dart';
 
 class ConversationsScreen extends StatelessWidget {
   final MessageService messageService = MessageService();
@@ -16,39 +18,42 @@ class ConversationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: backgroundColor,
-      child: CustomScrollView(
-        slivers: <Widget>[
-          CupertinoSliverNavigationBar(
-            transitionBetweenRoutes: true,
-            backgroundColor: backgroundColor,
-            largeTitle: Text('Messages'),
-            border: null,
-            leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Text(
-                'Back',
-                style: TextStyle(
-                  color: CupertinoColors.label.resolveFrom(context),
+      backgroundColor: groupedBackgroundColor,
+      child: SafeArea(
+        top: false,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              transitionBetweenRoutes: true,
+              backgroundColor: groupedBackgroundColor,
+              largeTitle: Text('Messages'),
+              border: null,
+              leading: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Text(
+                  'Back',
+                  style: TextStyle(
+                    color: CupertinoColors.label.resolveFrom(context),
+                  ),
                 ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Text(
-                'Compose',
-                style: TextStyle(
-                  color: CupertinoColors.label.resolveFrom(context),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Text(
+                  'Compose',
+                  style: TextStyle(
+                    color: CupertinoColors.label.resolveFrom(context),
+                  ),
                 ),
+                onPressed: () {},
               ),
-              onPressed: () {},
             ),
-          ),
-          _buildMessageList(context),
-        ],
+            _buildMessageList(context),
+          ],
+        ),
       ),
     );
   }
@@ -100,19 +105,38 @@ class ConversationsScreen extends StatelessWidget {
     String profileURL = userData["profileImagePath"] ?? '';
     String title =
         '${userData["firstName"] ?? ''} ${userData["lastName"] ?? ''}'.trim();
-    return CupertinoListTile(
-      profileURL: profileURL,
-      title: title,
-      messagePreview: "",
-      time: "",
-      onTap: () {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => MessageScreen(
-              receiverID: userID,
-            ),
-          ),
+
+    // Using StreamBuilder to listen for the latest message updates
+    return StreamBuilder<Map<String, dynamic>?>(
+      stream: messageService.getLastMessageStream(userID),
+      builder: (context, snapshot) {
+        String lastMessage = '';
+        String time = '';
+
+        // Checking if the stream has data and extracting the message details
+        if (snapshot.connectionState == ConnectionState.active &&
+            snapshot.hasData) {
+          final data = snapshot.data;
+          lastMessage = data?['message'] ?? '';
+          DateTime timestamp =
+              (data?['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
+          time = DateFormat('h:mm a').format(timestamp);
+        }
+
+        // Building the list tile with the message details
+        return CupertinoListTile(
+          profileURL: profileURL,
+          title: title,
+          messagePreview: lastMessage,
+          time: time,
+          onTap: () {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (context) => MessageScreen(receiverID: userID),
+              ),
+            );
+          },
         );
       },
     );
@@ -137,28 +161,42 @@ class CupertinoListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var parser = EmojiParser();
+    bool containsEmoji = parser.hasEmoji(messagePreview);
+    String emojiStrippedMessage =
+        containsEmoji ? parser.emojify(messagePreview) : messagePreview;
+
     return CupertinoButton(
       padding: EdgeInsets.zero,
       onPressed: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
         child: Row(
           children: [
-            if (profileURL.isNotEmpty)
-              CircleAvatar(
-                radius: 25,
-                backgroundColor:
-                    CupertinoColors.systemGrey4.resolveFrom(context),
-                backgroundImage: CachedNetworkImageProvider(profileURL),
-              )
-            else
-              CircleAvatar(
-                radius: 25,
-                backgroundColor:
-                    CupertinoColors.systemGrey4.resolveFrom(context),
-                    backgroundImage: AssetImage('assets/images/default_profile.png'),
-              ),
+            // Profile image or initial handling
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: CupertinoColors.systemGrey4.resolveFrom(context),
+              backgroundImage: profileURL.isNotEmpty
+                  ? CachedNetworkImageProvider(profileURL)
+                  : null,
+              child: profileURL.isEmpty
+                  ? Text(
+                      title.isNotEmpty ? title[0].toUpperCase() : "",
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: CupertinoColors.secondaryLabel
+                              .resolveFrom(context)),
+                    )
+                  : null,
+            ),
             SizedBox(width: 16),
+            // Message preview and time
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,12 +207,20 @@ class CupertinoListTile extends StatelessWidget {
                         color: CupertinoColors.label.resolveFrom(context),
                         fontWeight: FontWeight.w600,
                       )),
-                  Text(messagePreview,
+                  if (messagePreview.isNotEmpty) ...[
+                    Text(
+                      emojiStrippedMessage,
                       style: TextStyle(
                         fontSize: 14,
+                        fontWeight: FontWeight.w500,
                         color:
                             CupertinoColors.secondaryLabel.resolveFrom(context),
-                      )),
+                        backgroundColor: containsEmoji
+                            ? Colors.transparent
+                            : null, // Example conditional check
+                      ),
+                    ),
+                  ]
                 ],
               ),
             ),
@@ -184,6 +230,7 @@ class CupertinoListTile extends StatelessWidget {
                     color:
                         CupertinoColors.secondaryLabel.resolveFrom(context))),
             Icon(CupertinoIcons.forward,
+                size: 18,
                 color: CupertinoColors.secondaryLabel.resolveFrom(context)),
           ],
         ),

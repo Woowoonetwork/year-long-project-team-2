@@ -89,6 +89,8 @@ dependencies:
   firebase_dynamic_links: 5.4.17
   flutter_isolate: ^2.0.5-pre
   animations: ^2.0.11
+  flutter_dotenv: ^5.1.0
+  flutter_emoji: ^2.5.1
 
 dev_dependencies:
   flutter_test:

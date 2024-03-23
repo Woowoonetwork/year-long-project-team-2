@@ -10,9 +10,12 @@ class MessageService {
     return _firestore.collection('user').snapshots();
   }
 
-  Future<void> sendMessage(String receiverID, message) async {
-    final String currentUserID = _auth.currentUser!.uid;
-    final String currentUserEmail = _auth.currentUser!.email!;
+  Future<void> sendMessage(String receiverID, String message) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) throw Exception('No authenticated user found');
+
+    final String currentUserID = currentUser.uid;
+    final String currentUserEmail = currentUser.email ?? 'No-email';
     final Timestamp timestamp = Timestamp.now();
 
     Message newMessage = Message(
@@ -22,6 +25,7 @@ class MessageService {
       message: message,
       timestamp: timestamp,
     );
+
     List<String> ids = [currentUserID, receiverID];
     ids.sort();
     String conversationID = ids.join('_');
@@ -71,7 +75,6 @@ class MessageService {
       transaction.update(messageRef, {'reactions': reactions});
     });
   }
-  
 
   Stream<Map<String, dynamic>?> streamReactions(
       String conversationID, String messageID) {
@@ -96,5 +99,20 @@ class MessageService {
 
     return (messageDoc.data() as Map<String, dynamic>?)?['reactions']
         as Map<String, dynamic>?;
+  }
+
+  Stream<Map<String, dynamic>?> getLastMessageStream(String userID) {
+    final currentUserID = FirebaseAuth.instance.currentUser?.uid ?? '';
+    List<String> ids = [currentUserID, userID];
+    ids.sort(); // Ensure the ID order is consistent
+    String conversationID = ids.join('_');
+
+    return _firestore
+        .collection('conversations/$conversationID/messages')
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.isNotEmpty ? snapshot.docs.first.data() : null);
   }
 }

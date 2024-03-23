@@ -85,7 +85,6 @@ class _EditPostScreenState extends State<EditPostScreen>
                   capitalize: true,
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 10.0)),
-
                 buildDateTimeSection(
                   context: context,
                   sectionType: SectionType.date,
@@ -105,7 +104,6 @@ class _EditPostScreenState extends State<EditPostScreen>
                 ),
                 buildTextField('Pickup Location'),
                 buildMapSection(),
-                // add an instruction to say "move the map to select a location"
                 buildInstructionText(),
                 buildDateTimeSection(
                   context: context,
@@ -305,23 +303,16 @@ class _EditPostScreenState extends State<EditPostScreen>
   }
 
   SliverToBoxAdapter buildInstructionText() {
-    // Assuming instructionText holds the text you want to display
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
-          decoration: BoxDecoration(
-            color: CupertinoDynamicColor.resolve(
-                CupertinoColors.tertiarySystemBackground, context),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            instructionText, // Use the variable that holds the address or default instruction
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: adjustedFontSize - 2, fontWeight: FontWeight.w500),
-          ),
+        child: Text(
+          instructionText,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: adjustedFontSize - 4,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -658,16 +649,15 @@ class _EditPostScreenState extends State<EditPostScreen>
             title: 'From Gallery',
             icon: CupertinoIcons.photo,
             onTap: () {
-               _pickImageFromGallery();
+              _pickImageFromGallery();
             },
           ),
           PullDownMenuItem(
-            title: 'From Camera',
-            icon: CupertinoIcons.camera,
-            onTap: () {
-              _pickImageFromCamera();
-            }
-          ),
+              title: 'From Camera',
+              icon: CupertinoIcons.camera,
+              onTap: () {
+                _pickImageFromCamera();
+              }),
         ],
         buttonBuilder: (context, showMenu) => CupertinoButton(
           onPressed: showMenu,

@@ -1,5 +1,6 @@
-import 'package:FoodHood/Components/chat_bubble.dart';
-import 'package:FoodHood/Components/chat_input.dart';
+import 'package:FoodHood/Components/components.dart';
+import 'package:FoodHood/Components/message_bubble.dart';
+import 'package:FoodHood/Components/message_input_row.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:FoodHood/Services/AuthService.dart';
@@ -8,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -26,6 +28,8 @@ class _MessageScreenState extends State<MessageScreen> {
   late MessageService messageService;
   late AuthService authService;
   late Future<String> receiverName;
+  late String? senderID;
+  late Future<String> receiverImage;
 
   FocusNode focusNode = FocusNode();
 
@@ -43,38 +47,38 @@ class _MessageScreenState extends State<MessageScreen> {
     return receiverData["firstName"] + " " + receiverData["lastName"];
   }
 
+  void getSenderID() async {
+    senderID = await authService.getUserId();
+  }
+
   @override
   void initState() {
     super.initState();
     messageService = MessageService();
     authService = AuthService();
     receiverName = getReceiverName();
+    getSenderID();
 
     var keyboardVisibilityController = KeyboardVisibilityController();
     keyboardVisibilityController.onChange.listen((bool visible) {
       if (visible) {
-        Future.delayed(Duration(milliseconds: 600), scrollDown);
+        Future.delayed(Duration(milliseconds: 400), scrollDown);
       }
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.delayed(
-        const Duration(milliseconds: 600),
+        const Duration(milliseconds: 400),
         () => scrollDown(),
       );
     });
-
 
     setupMessageListener();
   }
 
   void setupMessageListener() async {
-    // Fetch the user ID asynchronously
-    final userId = await authService.getUserId();
-
-    // Once you have the userId, set up the listener for new messages
+    String? userId = await authService.getUserId();
     if (userId != null) {
-      // Check if userId is not null
       messageService
           .getMessages(userId, widget.receiverID)
           .listen((querySnapshot) {
@@ -89,7 +93,7 @@ class _MessageScreenState extends State<MessageScreen> {
     if (scrollController.hasClients) {
       scrollController.animateTo(
         scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 400),
+        duration: Duration(milliseconds: 300),
         curve: Curves.fastOutSlowIn,
       );
     }
@@ -113,11 +117,15 @@ class _MessageScreenState extends State<MessageScreen> {
           child: Icon(FeatherIcons.chevronLeft,
               size: 24, color: CupertinoColors.label.resolveFrom(context)),
           onPressed: () => Navigator.of(context).pop()),
-      backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
+      backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context)
+          .withOpacity(0.1),
       centerTitle: false,
       title: GestureDetector(
         onTap: () => Navigator.push(
-            context, CupertinoPageRoute(builder: (context) => ProfileScreen())),
+            context,
+            CupertinoPageRoute(
+                builder: (context) =>
+                    ProfileScreen(userId: widget.receiverID))),
         child: FutureBuilder<String>(
           future: receiverName,
           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
@@ -137,6 +145,14 @@ class _MessageScreenState extends State<MessageScreen> {
           },
         ),
       ),
+      actions: <Widget>[
+        CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: Icon(FeatherIcons.moreVertical,
+              size: 20, color: CupertinoColors.label.resolveFrom(context)),
+          onPressed: () {},
+        ),
+      ],
     );
   }
 
@@ -144,7 +160,7 @@ class _MessageScreenState extends State<MessageScreen> {
       DocumentSnapshot document, String senderID, BuildContext context) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
-    return ChatBubble(
+    return MessageBubble(
         message: data['message'],
         isCurrentUser: data['senderID'] == senderID,
         timestamp: data['timestamp'],
@@ -156,49 +172,60 @@ class _MessageScreenState extends State<MessageScreen> {
     return FutureBuilder<String?>(
       future: authService.getUserId(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text("Loading...");
-        }
-        final senderID = snapshot.data;
-        if (senderID == null) {
-          return const Text("User ID not found.");
-        }
-        return StreamBuilder<QuerySnapshot>(
-          stream: messageService.getMessages(senderID, widget.receiverID),
-          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return const Center(child: Text("An error occurred."));
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData) {
+          final String currentUserId = snapshot.data!;
+          return StreamBuilder<QuerySnapshot>(
+            stream:
+                messageService.getMessages(currentUserId, widget.receiverID),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasData) {
+                final docs = snapshot.data!.docs;
+                DateTime? previousDate;
+                return ListView.builder(
+                  itemCount: docs.length,
+                  controller: scrollController,
+                  itemBuilder: (context, index) {
+                    final DocumentSnapshot document = docs[index];
+                    final DateTime messageDate = document['timestamp'].toDate();
+
+                    bool isNewDay = previousDate == null ||
+                        messageDate.day != previousDate?.day;
+                    previousDate =
+                        messageDate; 
+
+                    return Column(
                       children: [
-                    Icon(FeatherIcons.messageSquare,
-                        size: 32,
-                        color: CupertinoColors.secondaryLabel
-                            .resolveFrom(context)),
-                    const SizedBox(height: 16),
-                    Text("No messages found.",
-                        style: TextStyle(
-                            letterSpacing: -0.4,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: CupertinoColors.secondaryLabel
-                                .resolveFrom(context)))
-                  ]));
-            }
-            return ListView(
-              controller: scrollController,
-              children: snapshot.data!.docs.map((DocumentSnapshot document) {
-                return _buildMessageItem(document, senderID, context);
-              }).toList(),
-            );
-          },
-        );
+                        if (isNewDay)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(determineDate(messageDate),
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  letterSpacing: -0.2,
+                                  fontWeight: FontWeight.w600,
+                                  color: CupertinoColors.secondaryLabel
+                                      .resolveFrom(context)),
+                            ),
+                          ),
+                        MessageBubble(
+                          message: document['message'],
+                          isCurrentUser: document['senderID'] == currentUserId,
+                          timestamp: document['timestamp'],
+                          conversationID: document.reference.parent.parent!.id,
+                          messageID: document.id,
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+              return const SizedBox(); // Placeholder for other states
+            },
+          );
+        } else {
+          return const CircularProgressIndicator();
+        }
       },
     );
   }

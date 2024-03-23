@@ -1,20 +1,20 @@
 import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Components/components.dart';
 import 'package:FoodHood/Services/MessageService.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
-class ChatBubble extends StatefulWidget {
+class MessageBubble extends StatefulWidget {
   final String message;
   final bool isCurrentUser;
   final Timestamp timestamp;
-  final String conversationID; // Add this
-  final String messageID; // And this
+  final String conversationID;
+  final String messageID;
 
-  const ChatBubble({
+  const MessageBubble({
     super.key,
     required this.message,
     required this.isCurrentUser,
@@ -24,30 +24,16 @@ class ChatBubble extends StatefulWidget {
   });
 
   @override
-  _ChatBubbleState createState() => _ChatBubbleState();
+  _MessageBubbleState createState() => _MessageBubbleState();
 }
 
-class _ChatBubbleState extends State<ChatBubble> {
+class _MessageBubbleState extends State<MessageBubble> {
   Widget? emojiOverlay;
-  
+
   @override
   Widget build(BuildContext context) {
-    DateTime date = widget.timestamp.toDate();
-    DateTime now = DateTime.now();
-    DateTime today = DateTime(now.year, now.month, now.day);
-    DateTime messageDate = DateTime(date.year, date.month, date.day);
-    DateTime yesterday = today.subtract(const Duration(days: 1));
     final messageService = MessageService();
 
-    String formattedDate;
-
-    if (messageDate == today) {
-      formattedDate = "Today, ${DateFormat('h:mm a').format(date)}";
-    } else if (messageDate == yesterday) {
-      formattedDate = "Yesterday, ${DateFormat('h:mm a').format(date)}";
-    } else {
-      formattedDate = DateFormat('MMM d, h:mm a').format(date);
-    }
     return Align(
       alignment:
           widget.isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -111,8 +97,10 @@ class _ChatBubbleState extends State<ChatBubble> {
                                   ? [Colors.blue.shade50, Colors.blue.shade100]
                                   : [Colors.blue.shade300, Colors.blue]
                               : [
-                                  CupertinoColors.tertiarySystemFill,
+                                  CupertinoColors.tertiarySystemFill
+                                      .resolveFrom(context),
                                   CupertinoColors.secondarySystemFill
+                                      .resolveFrom(context),
                                 ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -132,8 +120,10 @@ class _ChatBubbleState extends State<ChatBubble> {
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                           letterSpacing: -0.6,
-                          color: widget.isCurrentUser ? isOnlyEmoji(widget.message) ? CupertinoColors.black:
-                               CupertinoColors.white
+                          color: widget.isCurrentUser
+                              ? isOnlyEmoji(widget.message)
+                                  ? CupertinoColors.black
+                                  : CupertinoColors.white
                               : CupertinoColors.label.resolveFrom(context),
                         ),
                       )),
@@ -146,7 +136,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                       top: 0,
                       bottom: 4),
                   child: Text(
-                    formattedDate,
+                    determineDateTime(widget.timestamp),
                     style: TextStyle(
                         fontSize: 10,
                         letterSpacing: -0.2,
@@ -173,6 +163,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   void fetchAndSetReactions() async {
     final reactions = await MessageService()
         .getReactions(widget.conversationID, widget.messageID);
+    if (!mounted) return;
     if (reactions != null && reactions.isNotEmpty) {
       if (reactions.containsValue('❤️')) {
         setState(() {
@@ -181,10 +172,7 @@ class _ChatBubbleState extends State<ChatBubble> {
         });
       } else if (reactions.containsValue('👍')) {
         setState(() {
-          emojiOverlay = const Text(
-            '👍',
-            style: TextStyle(fontSize: 28),
-          );
+          emojiOverlay = const Text('👍', style: TextStyle(fontSize: 28));
         });
       }
     }

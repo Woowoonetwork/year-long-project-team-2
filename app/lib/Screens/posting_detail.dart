@@ -14,7 +14,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:FoodHood/Components/components.dart';
-import 'package:ionicons/ionicons.dart';
 
 class PostDetailView extends StatefulWidget {
   final String postId;
