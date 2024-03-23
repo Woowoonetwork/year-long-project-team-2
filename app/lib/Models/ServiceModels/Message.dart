@@ -6,6 +6,7 @@ class Message {
   final String receiverID;
   final String message;
   final Timestamp timestamp;
+  final Map<String, String> reactions;
 
   Message({
     required this.senderID,
@@ -13,9 +14,9 @@ class Message {
     required this.receiverID,
     required this.message,
     required this.timestamp,
+    this.reactions = const {},
   });
 
-  // convert to a map
   Map<String, dynamic> toMap() {
     return {
       'senderID': senderID,
@@ -23,6 +24,19 @@ class Message {
       'receiverID': receiverID,
       'message': message,
       'timestamp': timestamp,
+      'reactions': reactions,
     };
+  }
+
+  factory Message.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return Message(
+      senderID: data['senderID'],
+      senderEmail: data['senderEmail'],
+      receiverID: data['receiverID'],
+      message: data['message'],
+      timestamp: data['timestamp'],
+      reactions: Map<String, String>.from(data['reactions'] ?? {}),
+    );
   }
 }

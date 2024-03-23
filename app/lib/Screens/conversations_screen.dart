@@ -95,13 +95,11 @@ class ConversationsScreen extends StatelessWidget {
     );
   }
 
-
   Widget _buildMessageCard(
       BuildContext context, Map<String, dynamic> userData, String userID) {
     String profileURL = userData["profileImagePath"] ?? '';
     String title =
         '${userData["firstName"] ?? ''} ${userData["lastName"] ?? ''}'.trim();
-
     return CupertinoListTile(
       profileURL: profileURL,
       title: title,
@@ -119,7 +117,6 @@ class ConversationsScreen extends StatelessWidget {
       },
     );
   }
-
 }
 
 class CupertinoListTile extends StatelessWidget {
@@ -147,11 +144,20 @@ class CupertinoListTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 25,
-              backgroundColor: CupertinoColors.systemGrey4.resolveFrom(context),
-              backgroundImage: CachedNetworkImageProvider(profileURL),
-            ),
+            if (profileURL.isNotEmpty)
+              CircleAvatar(
+                radius: 25,
+                backgroundColor:
+                    CupertinoColors.systemGrey4.resolveFrom(context),
+                backgroundImage: CachedNetworkImageProvider(profileURL),
+              )
+            else
+              CircleAvatar(
+                radius: 25,
+                backgroundColor:
+                    CupertinoColors.systemGrey4.resolveFrom(context),
+                    backgroundImage: AssetImage('assets/images/default_profile.png'),
+              ),
             SizedBox(width: 16),
             Expanded(
               child: Column(

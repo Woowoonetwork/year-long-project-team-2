@@ -42,10 +42,59 @@ class MessageService {
         .collection("conversations")
         .doc(conversationID)
         .collection("messages")
-        .orderBy("timestamp", descending: true)
+        .orderBy("timestamp", descending: false)
         .snapshots();
   }
+
   getReceiverData(String receiverID) {
     return _firestore.collection('user').doc(receiverID).get();
+  }
+
+  Future<void> reactToMessage(
+      String conversationID, String messageID, String reaction) async {
+    final String currentUserID = _auth.currentUser!.uid;
+
+    DocumentReference messageRef = _firestore
+        .collection("conversations")
+        .doc(conversationID)
+        .collection("messages")
+        .doc(messageID);
+
+    await _firestore.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(messageRef);
+
+      Map<String, dynamic> reactions =
+          (snapshot.data() as Map<String, dynamic>).containsKey('reactions')
+              ? (snapshot.get('reactions') as Map<String, dynamic>)
+              : {};
+      reactions[currentUserID] = reaction;
+      transaction.update(messageRef, {'reactions': reactions});
+    });
+  }
+  
+
+  Stream<Map<String, dynamic>?> streamReactions(
+      String conversationID, String messageID) {
+    return _firestore
+        .collection("conversations")
+        .doc(conversationID)
+        .collection("messages")
+        .doc(messageID)
+        .snapshots()
+        .map((snapshot) =>
+            (snapshot.data()?['reactions'] as Map<String, dynamic>?));
+  }
+
+  Future<Map<String, dynamic>?> getReactions(
+      String conversationID, String messageID) async {
+    DocumentSnapshot messageDoc = await _firestore
+        .collection("conversations")
+        .doc(conversationID)
+        .collection("messages")
+        .doc(messageID)
+        .get();
+
+    return (messageDoc.data() as Map<String, dynamic>?)?['reactions']
+        as Map<String, dynamic>?;
   }
 }
