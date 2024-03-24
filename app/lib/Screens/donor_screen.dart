@@ -53,12 +53,53 @@ class _DonorScreenState extends State<DonorScreen> {
   @override
   void initState() {
     super.initState();
-    pickupLatLng = LatLng(
-        49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
-    fetchPostInformation(); // Fetch reserved by user name when the widget initializes
+    
+    // Initialize the pickup location coordinates to downtown Kelowna
+    pickupLatLng = LatLng(49.8862, -119.4971); 
+    
+    // Incorporate the font size change accessibility functionality
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
+    
+    // Set up a stream listener for changes to the 'post_status' field to sync changes in real time
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .doc(widget.postId)
+        .snapshots()
+        .listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
+      if (snapshot.exists) {
+        // Extract post_status and update orderState accordingly
+        final String post_status = snapshot.data()?['post_status'];
+        setState(() {
+          postStatus = post_status;
+          switch (postStatus) {
+            case 'not reserved':
+              orderState = OrderState.notReserved;
+              break;
+            case 'pending':
+              orderState = OrderState.reserved;
+              break;
+            case 'confirmed':
+              orderState = OrderState.confirmed;
+              break;
+            case 'delivering':
+              orderState = OrderState.delivering;
+              break;
+            case 'readyToPickUp':
+              orderState = OrderState.readyToPickUp;
+              break;
+            default:
+              orderState = OrderState.notReserved;
+          }
+        });
+      } else {
+        // Handle case where document does not exist
+      }
+    });
+
+    // Read post details
+    fetchPostInformation();
   }
 
   // Reading post information
@@ -149,12 +190,14 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
+  // Incorportate the font size change accessibility functionality
   void _updateAdjustedFontSize() {
     adjustedFontSize = _defaultFontSize * _textScaleFactor;
     adjustedHeadingFontSize = _defaultHeadingFontSize * _textScaleFactor;
     adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
   }
 
+  // Use the Google Maps Geocoding API to convert pickup coordinates to an address
   Future<String> getAddressFromLatLng(LatLng position) async {
     final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
@@ -700,6 +743,7 @@ class _DonorScreenState extends State<DonorScreen> {
   }
 }
 
+// The order info section that displays the users photo, name, and rating
 class OrderInfoSection extends StatelessWidget {
   final String? reservedByName;
   final String? reservedByLastName;
@@ -718,23 +762,14 @@ class OrderInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use a default image if avatarUrl is empty or null
-    // String effectiveAvatarUrl =
-    //     avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
-
     return Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Expanded(
-          // Wrap the Container in an Expanded widget to take up remaining space
+        // Wrap the Container in an Expanded widget to take up remaining space
+        child: Expanded(  
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // CircleAvatar(
-              //   backgroundImage: AssetImage(
-              //       effectiveAvatarUrl), // Load the image from assets
-              //   radius: 10,
-              // ),
               photo.isNotEmpty
                   ? CircleAvatar(
                       radius: 10,
