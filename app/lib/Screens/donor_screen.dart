@@ -12,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 //import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
-import 'package:timelines/timelines.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Components/progress_bar.dart';
 import 'package:http/http.dart' as http;
@@ -24,7 +23,7 @@ const double _defaultFontSize = 16.0;
 const double _defaultOrderInfoFontSize = 12.0;
 
 // Define enum to represent different states
-enum OrderState { reserved, confirmed, delivering, readyToPickUp }
+enum OrderState { notReserved, reserved, confirmed, delivering, readyToPickUp }
 
 class DonorScreen extends StatefulWidget {
   final String postId;
@@ -41,7 +40,7 @@ class _DonorScreenState extends State<DonorScreen> {
   String pickupLocation = '';
   String photo = '';
   String? reservedByUserId = '';
-  OrderState orderState = OrderState.reserved;
+  OrderState orderState = OrderState.notReserved;
   late double _textScaleFactor;
   late double adjustedFontSize;
   late double adjustedHeadingFontSize;
@@ -49,6 +48,7 @@ class _DonorScreenState extends State<DonorScreen> {
   late LatLng pickupLatLng;
   late PostDetailViewModel viewModel;
   String location = "";
+  String postStatus = 'not reserved';
 
   @override
   void initState() {
@@ -118,9 +118,14 @@ class _DonorScreenState extends State<DonorScreen> {
         }
 
         // Extract post_status and set orderState accordingly
-        final String postStatus = postSnapshot['post_status'];
+        final String post_status = postSnapshot['post_status'];
+
         setState(() {
+          postStatus = post_status;
           switch (postStatus) {
+            case 'not reserved':
+              orderState = OrderState.notReserved;
+              break;
             case 'pending':
               orderState = OrderState.reserved;
               break;
@@ -183,7 +188,9 @@ class _DonorScreenState extends State<DonorScreen> {
             color: CupertinoColors.label.resolveFrom(context),
           ),
         ),
-        trailing: reservedByName != null
+
+        // Show the "Message [donee]" button if the post has been reserved
+        trailing: orderState != OrderState.notReserved
             ? CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: Text("Message ${reservedByName ?? 'Unknown User'}",
@@ -211,10 +218,14 @@ class _DonorScreenState extends State<DonorScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
+                 
+                 // Heading Text
                   __buildHeadingTextField(text: _buildHeadingText()),
+                  
                   SizedBox(height: 16.0),
+
                   //Only show the order info section if the order has been reserved.
-                  if (reservedByName != null)
+                  if (orderState != OrderState.notReserved)
                     OrderInfoSection(
                       reservedByName: reservedByName,
                       reservedByLastName: reservedByLastName,
@@ -235,14 +246,16 @@ class _DonorScreenState extends State<DonorScreen> {
                       "Ready to Pick Up"
                     ],
                     color: accentColor,
-                    isReserved: reservedByName != null,
+                    isReserved: postStatus != 'not reserved',
                     currentState: orderState,
                   ),
 
                   // SizedBox(height: 25,),
 
+                  // Map showing the pickup location
                   _buildMap(context),
 
+                  // Text showing the written address of the pickup location
                   FutureBuilder<String>(
                     future: getAddressFromLatLng(pickupLatLng),
                     builder: (context, snapshot) {
@@ -265,128 +278,14 @@ class _DonorScreenState extends State<DonorScreen> {
                 ],
               ),
 
-              if (reservedByName != null)
-                _buildButtonAndCancelButtonRow(), // Call the new method here
+              // Show the buttons if the order has not been reserved
+              if (orderState != OrderState.notReserved)
+                _buildButtonAndCancelButtonRow(),
             ],
           ),
         ),
       ),
     );
-  }
-
-  // Reusable Widget to build the Progress Bar
-  Widget _buildProgressBar() {
-    return Container(
-      height: 120,
-      alignment: Alignment.topCenter,
-      child: Timeline.tileBuilder(
-        shrinkWrap: true,
-        padding: EdgeInsets.zero,
-        theme: TimelineThemeData(
-            direction: Axis.horizontal,
-            connectorTheme: ConnectorThemeData(space: 6.0, thickness: 3.0),
-            nodePosition: 0),
-        builder: TimelineTileBuilder.connected(
-          connectionDirection: ConnectionDirection.before,
-          itemCount: 4,
-          itemExtentBuilder: (_, __) {
-            final double padding = 16.0;
-            final double availableWidth =
-                MediaQuery.of(context).size.width - padding * 2;
-            return availableWidth / 4.0;
-          },
-          oppositeContentsBuilder: (context, index) {
-            return Container();
-          },
-          contentsBuilder: (context, index) {
-            switch (index) {
-              case 0:
-                return _buildProgressPoint("Reserved", OrderState.reserved);
-              case 1:
-                return _buildProgressPoint("Confirmed", OrderState.confirmed);
-              case 2:
-                return _buildProgressPoint("Delivering", OrderState.delivering);
-              case 3:
-                return _buildProgressPoint(
-                    "Ready to Pick Up", OrderState.readyToPickUp);
-              default:
-                return Container();
-            }
-          },
-          indicatorBuilder: (_, index) {
-            if (reservedByName == null) {
-              return OutlinedDotIndicator(
-                borderWidth: 2.0,
-                color: accentColor,
-              );
-            }
-            if (index < (_calculateProgress() * 4).toInt()) {
-              return DotIndicator(
-                color: accentColor,
-              );
-            } else {
-              return OutlinedDotIndicator(
-                borderWidth: 2.0,
-                color: accentColor,
-              );
-            }
-          },
-          connectorBuilder: (_, index, type) {
-            if (index < (_calculateProgress() * 4).toInt()) {
-              return SolidLineConnector(
-                color: accentColor,
-              );
-            } else {
-              return DashedLineConnector(
-                color: accentColor,
-              );
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  // Widget to build each progress point
-  Widget _buildProgressPoint(String text, OrderState state) {
-    final bool isReserved = reservedByName != null;
-    final bool isCurrentState = orderState == state;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: adjustedFontSize - 2.0,
-          fontWeight: FontWeight.bold,
-          color: isReserved
-              ? isCurrentState
-                  ? CupertinoDynamicColor.resolve(
-                      CupertinoColors.label, context)
-                  : CupertinoDynamicColor.resolve(
-                      CupertinoColors.secondaryLabel, context)
-              : CupertinoDynamicColor.resolve(
-                  CupertinoColors.secondaryLabel, context)
-        ),
-      ),
-    );
-  }
-
-  // Method to calculate progress based on order state
-  double _calculateProgress() {
-    switch (orderState) {
-      case OrderState.reserved:
-        return 0.25; // Progress for reserved state
-      case OrderState.confirmed:
-        return 0.5; // Progress for confirmed state
-      case OrderState.delivering:
-        return 0.75; // Progress for delivering state
-      case OrderState.readyToPickUp:
-        return 1.0; // Progress for readyToPickUp state
-      default:
-        return 0.0; // Default progress
-    }
   }
 
   // Reusable widget to build the text fields
@@ -409,13 +308,9 @@ class _DonorScreenState extends State<DonorScreen> {
 
   // Method to build heading text based on order state
   String _buildHeadingText() {
-    if (reservedByName == null) {
-      return "Your order has not been reserved yet";
-    }
-
     switch (orderState) {
-      // case OrderState.notReserved:
-      //   return "Your order has not been reserved yet";
+      case OrderState.notReserved:
+        return "Your order has not been reserved yet";
       case OrderState.reserved:
         return "Your order has been reserved by ${reservedByName ?? 'Unknown User'}";
       case OrderState.confirmed:
@@ -429,30 +324,20 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
-  Widget __buildTextField({
-    required String text,
-  }) {
-    return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Container(
-        padding: EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 0.0,
-          ),
-          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-          borderRadius: BorderRadius.circular(24.0),
-        ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: adjustedFontSize,
-          ),
-        ),
-      ),
-    );
+  // Method to calculate progress for the progress bar based on order state
+  double _calculateProgress() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return 0.25; // Progress for reserved state
+      case OrderState.confirmed:
+        return 0.5; // Progress for confirmed state
+      case OrderState.delivering:
+        return 0.75; // Progress for delivering state
+      case OrderState.readyToPickUp:
+        return 1.0; // Progress for readyToPickUp state
+      default:
+        return 0.0; // Default progress
+    }
   }
 
   Widget _buildMap(BuildContext context) {
@@ -518,6 +403,32 @@ class _DonorScreenState extends State<DonorScreen> {
           }
         }
       },
+    );
+  }
+
+  Widget __buildTextField({
+    required String text,
+  }) {
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+            width: 0.0,
+          ),
+          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+          borderRadius: BorderRadius.circular(24.0),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: adjustedFontSize,
+          ),
+        ),
+      ),
     );
   }
 
@@ -638,6 +549,9 @@ class _DonorScreenState extends State<DonorScreen> {
           newStatus = 'confirmed'; // Update post_status back to 'confirmed'
           orderState = OrderState.confirmed;
           break;
+        default:
+          newStatus = 'pending';
+          orderState = OrderState.notReserved;
       }
 
       // Update the post_status field in Firestore
@@ -657,19 +571,6 @@ class _DonorScreenState extends State<DonorScreen> {
       );
     }
   }
-
-  // OrderState _getNextOrderState() {
-  //   switch (orderState) {
-  //     case OrderState.reserved:
-  //       return OrderState.confirmed;
-  //     case OrderState.confirmed:
-  //       return OrderState.delivering;
-  //     case OrderState.delivering:
-  //       return OrderState.readyToPickUp;
-  //     case OrderState.readyToPickUp:
-  //       return OrderState.reserved;
-  //   }
-  // }
 
   Widget _buildCancelButton() {
     return Container(
