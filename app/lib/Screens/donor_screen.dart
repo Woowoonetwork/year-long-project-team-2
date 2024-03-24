@@ -434,84 +434,85 @@ class _DonorScreenState extends State<DonorScreen> {
 
   Widget _buildButton() {
     if (orderState == OrderState.readyToPickUp) {
-      return Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x19000000),
-              //spreadRadius: 1,
-              blurRadius: 20,
-              offset: Offset(0, 0),
-            ),
-          ],
-        ),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          borderRadius: BorderRadius.circular(100.0),
-          color: CupertinoColors.tertiarySystemBackground,
-          onPressed: () {
-            Navigator.of(context).push(
-              CupertinoPageRoute(
-                builder: (context) => DoneeRatingPage(
-                  postId: widget.postId,
-                ),
-              ),
-            );
-          },
-          child: Text(
-            "Leave a Review",
-            style: TextStyle(
-              fontSize: adjustedFontSize,
-              color:
-                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-            ),
-          ),
-        ),
-      );
+      return _buildLeaveReviewButton();
     } else {
-      String buttonText = _buildButtonText();
-      return Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x19000000),
-              //spreadRadius: 1,
-              blurRadius: 20,
-              offset: Offset(0, 0),
+      return _buildStatusUpdateButton();
+    }
+  }
+
+  Widget _buildLeaveReviewButton() {
+    return Container(
+      decoration: _buttonBoxDecoration(),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        borderRadius: BorderRadius.circular(100.0),
+        color: CupertinoColors.tertiarySystemBackground,
+        onPressed: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (context) => DoneeRatingPage(
+                postId: widget.postId,
+              ),
+            ),
+          );
+        },
+        child: Text(
+          "Leave a Review",
+          style: _buttonTextStyle(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusUpdateButton() {
+    String buttonText = _buildButtonText();
+    return Container(
+      decoration: _buttonBoxDecoration(),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        color: CupertinoColors.tertiarySystemBackground,
+        borderRadius: BorderRadius.circular(100.0),
+        onPressed: () {
+          setState(() {
+            _handlePostStatus();
+          });
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              FeatherIcons.check,
+              color: CupertinoColors.systemGreen,
+              size: 24,
+            ),
+            SizedBox(width: 8),
+            Text(
+              buttonText,
+              style: _buttonTextStyle(),
             ),
           ],
         ),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          color: CupertinoColors.tertiarySystemBackground,
-          borderRadius: BorderRadius.circular(100.0),
-          onPressed: () {
-            setState(() {
-              _handlePostStatus();
-            });
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                FeatherIcons.check,
-                color: CupertinoColors.systemGreen,
-                size: 24,
-              ),
-              SizedBox(width: 8),
-              Text(
-                buttonText,
-                style: TextStyle(
-                    fontSize: adjustedFontSize,
-                    color: CupertinoDynamicColor.resolve(
-                        CupertinoColors.label, context),
-                    fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
+      ),
+    );
+  }
+
+  BoxDecoration _buttonBoxDecoration() {
+    return BoxDecoration(
+      boxShadow: [
+        BoxShadow(
+          color: Color(0x19000000),
+          blurRadius: 20,
+          offset: Offset(0, 0),
         ),
-      );
-    }
+      ],
+    );
+  }
+
+  TextStyle _buttonTextStyle() {
+    return TextStyle(
+      fontSize: adjustedFontSize,
+      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+    );
   }
 
   String _buildButtonText() {
@@ -574,23 +575,12 @@ class _DonorScreenState extends State<DonorScreen> {
 
   Widget _buildCancelButton() {
     return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x19000000),
-            spreadRadius: 1,
-            blurRadius: 16,
-            offset: Offset(0, 0),
-          ),
-        ],
-      ),
+      decoration: _buttonBoxDecoration(),
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         color: CupertinoColors.tertiarySystemBackground,
         borderRadius: BorderRadius.circular(100.0),
-        onPressed: () {
-          _handleCancelOrder();
-        },
+        onPressed: _handleCancelOrder,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -601,11 +591,7 @@ class _DonorScreenState extends State<DonorScreen> {
             SizedBox(width: 8),
             Text(
               "Cancel",
-              style: TextStyle(
-                  fontSize: adjustedFontSize,
-                  color: CupertinoDynamicColor.resolve(
-                      CupertinoColors.label, context),
-                  fontWeight: FontWeight.w500),
+              style: _buttonTextStyle(),
             ),
           ],
         ),
