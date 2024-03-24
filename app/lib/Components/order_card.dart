@@ -1,31 +1,20 @@
-import 'package:FoodHood/Screens/donee_pathway_uno.dart';
-import 'package:feather_icons/feather_icons.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Components/components.dart';
+import 'package:FoodHood/Screens/donee_pathway_uno.dart';
 import 'package:FoodHood/Screens/donor_screen.dart';
 import 'package:FoodHood/Screens/posting_detail.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/text_scale_provider.dart';
-import 'package:provider/provider.dart';
-import 'dart:ui';
-import 'package:FoodHood/Components/components.dart';
-import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:feather_icons/feather_icons.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
-const double _defaultTextFontSize = 14.0;
-const double _defaultTitleFontSize = 16.0;
-const double _defaultTagFontSize = 10.0;
 const double _defaultOrderInfoFontSize = 12.0;
 const double _defaultStatusFontSize = 9.0;
-
-enum OrderState {
-  reserved,
-  confirmed,
-  delivering,
-  readyToPickUp,
-  pending,
-  notReserved
-}
+const double _defaultTagFontSize = 10.0;
+const double _defaultTextFontSize = 14.0;
+const double _defaultTitleFontSize = 16.0;
 
 class OrderCard extends StatelessWidget {
   final List<Map<String, String>> imagesWithAltText;
@@ -40,8 +29,8 @@ class OrderCard extends StatelessWidget {
   final OrderState orderState;
   final bool isDonation;
 
-  OrderCard({
-    Key? key,
+  const OrderCard({
+    super.key,
     required this.imagesWithAltText,
     required this.title,
     required this.tags,
@@ -53,18 +42,18 @@ class OrderCard extends StatelessWidget {
     this.onStatusPressed,
     required this.orderState,
     required this.isDonation,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    double _textScaleFactor =
+    double textScaleFactor =
         Provider.of<TextScaleProvider>(context).textScaleFactor;
 
-    double adjustedTitleFontSize = _defaultTitleFontSize * _textScaleFactor;
-    double adjustedTagFontSize = _defaultTagFontSize * _textScaleFactor;
+    double adjustedTitleFontSize = _defaultTitleFontSize * textScaleFactor;
+    double adjustedTagFontSize = _defaultTagFontSize * textScaleFactor;
     double adjustedOrderInfoFontSize =
-        _defaultOrderInfoFontSize * _textScaleFactor;
-    double adjustedStatusFontSize = _defaultStatusFontSize * _textScaleFactor;
+        _defaultOrderInfoFontSize * textScaleFactor;
+    double adjustedStatusFontSize = _defaultStatusFontSize * textScaleFactor;
 
     return SizedBox(
       width: MediaQuery.of(context).size.width,
@@ -88,7 +77,7 @@ class OrderCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Container(
-            padding: EdgeInsets.all(14),
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -99,7 +88,7 @@ class OrderCard extends StatelessWidget {
                   children: [
                     _buildImageSection(context, imagesWithAltText, postId),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -161,7 +150,7 @@ class OrderCard extends StatelessWidget {
             width: 88,
             height: 88,
             fit: BoxFit.cover,
-            placeholder: (context, url) => CupertinoActivityIndicator(),
+            placeholder: (context, url) => const CupertinoActivityIndicator(),
             errorWidget: (context, url, error) =>
                 buildImageFailedPlaceHolder(context, true),
           )),
@@ -174,75 +163,6 @@ class OrderCard extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  static Widget _buildTitleSection(
-      BuildContext context, String title, double adjustedTitleFontSize) {
-    return Text(
-      title,
-      style: TextStyle(
-        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-        fontSize: adjustedTitleFontSize,
-        letterSpacing: -0.8,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-
-  static Widget _buildTagSection(
-      BuildContext context, List<String> tags, double adjustedTagFontSize) {
-    const int maxDisplayTags = 2;
-    List<Widget> tagWidgets = [];
-    int displayedTagsCount =
-        tags.length > maxDisplayTags ? maxDisplayTags : tags.length;
-    int truncatedTags = tags.length - displayedTagsCount;
-
-    for (int i = 0; i < displayedTagsCount; i++) {
-      tagWidgets.add(
-        Tag(text: tags[i], color: _generateTagColor(i)),
-      );
-    }
-    if (truncatedTags > 0) {
-      tagWidgets.add(
-        Tag(
-            text: '+$truncatedTags',
-            color: _generateTagColor(displayedTagsCount)),
-      );
-    }
-    return Wrap(
-      spacing: 4,
-      runSpacing: 0,
-      children: tagWidgets,
-    );
-  }
-
-  static Color _generateTagColor(int index) {
-    List<Color> availableColors = [yellow, orange, blue, babyPink, Cyan];
-    return availableColors[index % availableColors.length];
-  }
-
-  static Widget _buildTag(String text, Color color, BuildContext context,
-      double adjustedTagFontSize) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 10, vertical: 4), // Adjusted padding
-      decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(color, context),
-          borderRadius: BorderRadius.circular(20)),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color.computeLuminance() > 0.5
-              ? CupertinoDynamicColor.resolve(CupertinoColors.black, context)
-              : CupertinoDynamicColor.resolve(CupertinoColors.white, context),
-          fontSize: adjustedTagFontSize,
-          letterSpacing: -0.40,
-          fontWeight: FontWeight.w600,
-        ),
-        overflow: TextOverflow
-            .ellipsis, // Changed to ellipsis to handle very long text
-      ),
     );
   }
 
@@ -294,7 +214,7 @@ class OrderCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         color: statusColor.withOpacity(0.2),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -327,4 +247,82 @@ class OrderCard extends StatelessWidget {
       ),
     );
   }
+
+  static Widget _buildTag(String text, Color color, BuildContext context,
+      double adjustedTagFontSize) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: 10, vertical: 4), // Adjusted padding
+      decoration: BoxDecoration(
+          color: CupertinoDynamicColor.resolve(color, context),
+          borderRadius: BorderRadius.circular(20)),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color.computeLuminance() > 0.5
+              ? CupertinoDynamicColor.resolve(CupertinoColors.black, context)
+              : CupertinoDynamicColor.resolve(CupertinoColors.white, context),
+          fontSize: adjustedTagFontSize,
+          letterSpacing: -0.40,
+          fontWeight: FontWeight.w600,
+        ),
+        overflow: TextOverflow
+            .ellipsis, // Changed to ellipsis to handle very long text
+      ),
+    );
+  }
+
+  static Widget _buildTagSection(
+      BuildContext context, List<String> tags, double adjustedTagFontSize) {
+    const int maxDisplayTags = 2;
+    List<Widget> tagWidgets = [];
+    int displayedTagsCount =
+        tags.length > maxDisplayTags ? maxDisplayTags : tags.length;
+    int truncatedTags = tags.length - displayedTagsCount;
+
+    for (int i = 0; i < displayedTagsCount; i++) {
+      tagWidgets.add(
+        Tag(text: tags[i], color: _generateTagColor(i)),
+      );
+    }
+    if (truncatedTags > 0) {
+      tagWidgets.add(
+        Tag(
+            text: '+$truncatedTags',
+            color: _generateTagColor(displayedTagsCount)),
+      );
+    }
+    return Wrap(
+      spacing: 4,
+      runSpacing: 0,
+      children: tagWidgets,
+    );
+  }
+
+  static Widget _buildTitleSection(
+      BuildContext context, String title, double adjustedTitleFontSize) {
+    return Text(
+      title,
+      style: TextStyle(
+        color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+        fontSize: adjustedTitleFontSize,
+        letterSpacing: -0.8,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  static Color _generateTagColor(int index) {
+    List<Color> availableColors = [yellow, orange, blue, babyPink, Cyan];
+    return availableColors[index % availableColors.length];
+  }
+}
+
+enum OrderState {
+  reserved,
+  confirmed,
+  delivering,
+  readyToPickUp,
+  pending,
+  notReserved
 }

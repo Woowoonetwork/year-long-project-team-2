@@ -30,7 +30,7 @@ void main() async {
     systemNavigationBarColor: Colors.black.withOpacity(0.002),
   ));
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env"); 
+  // await dotenv.load(fileName: ".env"); 
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 

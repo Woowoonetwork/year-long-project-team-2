@@ -4,6 +4,7 @@ import 'package:FoodHood/Services/AuthService.dart';
 import 'package:FoodHood/Services/MessageService.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -28,15 +29,11 @@ class ConversationsScreen extends StatelessWidget {
               backgroundColor: groupedBackgroundColor,
               largeTitle: Text('Messages'),
               border: null,
-              leading: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: Text(
-                  'Back',
-                  style: TextStyle(
-                    color: CupertinoColors.label.resolveFrom(context),
-                  ),
-                ),
-                onPressed: () {
+              leading: GestureDetector(
+                child: Icon(FeatherIcons.chevronLeft,
+                size: 24,
+                    color: CupertinoColors.label.resolveFrom(context)),
+                onTap: () {
                   Navigator.pop(context);
                 },
               ),
@@ -178,7 +175,6 @@ class CupertinoListTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
         child: Row(
           children: [
-            // Profile image or initial handling
             CircleAvatar(
               radius: 28,
               backgroundColor: CupertinoColors.systemGrey4.resolveFrom(context),
@@ -213,11 +209,10 @@ class CupertinoListTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color:
-                            CupertinoColors.secondaryLabel.resolveFrom(context),
-                        backgroundColor: containsEmoji
+                        color: containsEmoji
                             ? Colors.transparent
-                            : null, // Example conditional check
+                            : CupertinoColors.secondaryLabel
+                                .resolveFrom(context),
                       ),
                     ),
                   ]

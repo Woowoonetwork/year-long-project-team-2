@@ -2,7 +2,9 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pull_down_button/pull_down_button.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MessageInputRow extends StatefulWidget {
   final TextEditingController messageController;
@@ -91,15 +93,39 @@ class _MessageInputRowState extends State<MessageInputRow> {
               controller: widget.messageController,
               prefix: PullDownButton(
                 itemBuilder: (context) => [
+                  const PullDownMenuTitle(title: Text('Share Post from:')),
+                  PullDownMenuItem(
+                    title: 'Reserved Posts',
+                    icon: CupertinoIcons.square_stack,
+                    onTap: () {
+                      _showReservedPostsSheet(context);
+                    },
+                  ),
+                  const PullDownMenuDivider.large(),
+                  const PullDownMenuTitle(title: Text('Send Image from:')),
                   PullDownMenuItem(
                     title: 'Photos',
                     icon: CupertinoIcons.photo,
-                    onTap: () {},
+                    onTap: () async {
+                      final ImagePicker _picker = ImagePicker();
+                      final XFile? image =
+                          await _picker.pickImage(source: ImageSource.gallery);
+                      if (image != null) {
+                        print("Picked image path: ${image.path}");
+                      }
+                    },
                   ),
                   PullDownMenuItem(
                     title: 'Camera',
                     icon: CupertinoIcons.camera,
-                    onTap: () {},
+                    onTap: () async {
+                      final ImagePicker _picker = ImagePicker();
+                      final XFile? image =
+                          await _picker.pickImage(source: ImageSource.camera);
+                      if (image != null) {
+                        print("Captured image path: ${image.path}");
+                      }
+                    },
                   ),
                 ],
                 buttonBuilder: (context, showMenu) => CupertinoButton(
@@ -150,6 +176,69 @@ class _MessageInputRowState extends State<MessageInputRow> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showReservedPostsSheet(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.5, // Half the height of its parent
+            maxChildSize: 1, // Full height
+            minChildSize: 0.25, // Quarter height
+            builder: (BuildContext context, ScrollController scrollController) {
+              return Container(
+                color: Colors.white, // Background color for the bottom sheet
+                child: Column(
+                  children: [
+                    _buildDragHandle(),
+                    _buildCustomNavigationBar(context),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCustomNavigationBar(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('Reserved',
+              style: TextStyle(
+                  fontSize: 28,
+                  letterSpacing: -1.3,
+                  fontWeight: FontWeight.bold)),
+          GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Icon(FeatherIcons.x,
+                  size: 24,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDragHandle() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+      child: Center(
+        child: Container(
+          width: 40,
+          height: 5,
+          decoration: BoxDecoration(
+            color: CupertinoColors.systemGrey,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
       ),
     );
   }

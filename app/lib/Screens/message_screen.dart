@@ -1,6 +1,6 @@
 import 'package:FoodHood/Components/components.dart';
-import 'package:FoodHood/Components/message_bubble.dart';
-import 'package:FoodHood/Components/message_input_row.dart';
+import 'package:FoodHood/Components/Message/message_bubble.dart';
+import 'package:FoodHood/Components/Message/message_input_row.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:FoodHood/Services/AuthService.dart';
@@ -92,7 +92,7 @@ class _MessageScreenState extends State<MessageScreen> {
   void scrollDown() {
     if (scrollController.hasClients) {
       scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
+        scrollController.position.minScrollExtent,
         duration: Duration(milliseconds: 300),
         curve: Curves.fastOutSlowIn,
       );
@@ -183,23 +183,25 @@ class _MessageScreenState extends State<MessageScreen> {
                 final docs = snapshot.data!.docs;
                 DateTime? previousDate;
                 return ListView.builder(
+                  reverse: true,
                   itemCount: docs.length,
                   controller: scrollController,
                   itemBuilder: (context, index) {
-                    final DocumentSnapshot document = docs[index];
+                    final DocumentSnapshot document =
+                        docs[docs.length - 1 - index];
                     final DateTime messageDate = document['timestamp'].toDate();
 
                     bool isNewDay = previousDate == null ||
                         messageDate.day != previousDate?.day;
-                    previousDate =
-                        messageDate; 
+                    previousDate = messageDate;
 
                     return Column(
                       children: [
                         if (isNewDay)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(determineDate(messageDate),
+                            child: Text(
+                              determineDate(messageDate),
                               style: TextStyle(
                                   fontSize: 10,
                                   letterSpacing: -0.2,
