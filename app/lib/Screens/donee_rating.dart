@@ -17,6 +17,7 @@ class DoneeRatingPage extends StatefulWidget {
 class _DoneeRatingPageState extends State<DoneeRatingPage> {
   String? reservedByName;
   String? image;
+  String? recervedByID;
   int _rating = 0;
   TextEditingController _commentController = TextEditingController();
 
@@ -95,7 +96,7 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
           await postDetailsCollection.doc(postId).get();
 
       if (postSnapshot.exists) {
-        final String reservedByUserId = postSnapshot['reserved_by'];
+        final reservedByUserId = postSnapshot['reserved_by'];
         final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
             .collection('user')
             .doc(reservedByUserId)
@@ -148,7 +149,9 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                 ),
                 trailing: GestureDetector(
                   onTap: () {
-                    MessageScreenPage();
+                    MessageScreen(
+                      receiverID: recervedByID!,
+                    );
                   },
                   child: Text(
                     'Message ${reservedByName!}',

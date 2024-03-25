@@ -81,33 +81,39 @@ class ProfilePostCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Container(
-            padding: EdgeInsets.all(12),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    _buildImageSection(context, imagesWithAltText, postId),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildTitleSection(
-                              context, title, adjustedTitleFontSize),
-                          const SizedBox(height: 4),
-                          _buildOrderInfoSection(
-                              context, orderInfo, adjustedOrderInfoFontSize),
-                          const SizedBox(height: 4),
-                          _buildTagSection(context, tags, adjustedTagFontSize),
-                        ],
-                      ),
-                    ),
-                  ],
+                Flexible(
+                  child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildImageSection(context, imagesWithAltText, postId),
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildTitleSection(
+                                    context, title, adjustedTitleFontSize),
+                                const SizedBox(height: 4),
+                                _buildOrderInfoSection(context, orderInfo,
+                                    adjustedOrderInfoFontSize),
+                                const SizedBox(height: 4),
+                                _buildTagSection(
+                                    context, tags, adjustedTagFontSize),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ]),
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -147,7 +153,7 @@ class ProfilePostCard extends StatelessWidget {
                         onPressed: showMenu,
                         padding: EdgeInsets.all(10),
                         child: Icon(
-                          FeatherIcons.moreVertical,
+                          FeatherIcons.moreHorizontal,
                           size: 20,
                           color: CupertinoDynamicColor.resolve(
                               CupertinoColors.secondaryLabel, context),
@@ -252,6 +258,7 @@ class ProfilePostCard extends StatelessWidget {
       BuildContext context, String title, double adjustedTitleFontSize) {
     return Text(
       title,
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(
         color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
         fontSize: adjustedTitleFontSize,
