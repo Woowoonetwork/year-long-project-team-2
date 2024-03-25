@@ -34,7 +34,6 @@ class _MessageBubbleState extends State<MessageBubble> {
   static final emojiRegex = RegExp(
       r'(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])');
 
-
   @override
   Widget build(BuildContext context) {
     return FractionallySizedBox(
@@ -76,7 +75,11 @@ class _MessageBubbleState extends State<MessageBubble> {
           ],
         ],
         buttonBuilder: (context, showMenu) => GestureDetector(
-            onLongPress: showMenu, child: _bubbleBackground(context)),
+            onLongPress: () {
+              HapticFeedback.selectionClick();
+              showMenu();
+            },
+            child: _bubbleBackground(context)),
       );
 
   PullDownMenuItem _deleteMessageMenuItem() => PullDownMenuItem(
