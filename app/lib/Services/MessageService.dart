@@ -115,4 +115,13 @@ class MessageService {
         .map((snapshot) =>
             snapshot.docs.isNotEmpty ? snapshot.docs.first.data() : null);
   }
+
+  Future<void> deleteMessage(String conversationID, String messageID) async {
+    await _firestore
+        .collection("conversations")
+        .doc(conversationID)
+        .collection("messages")
+        .doc(messageID)
+        .delete();
+  }
 }

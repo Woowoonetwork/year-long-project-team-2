@@ -16,6 +16,7 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sf_symbols/sf_symbols.dart';
@@ -186,12 +187,8 @@ class _BrowseScreenState extends State<BrowseScreen>
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        SfSymbol(
-          size: 18,
-          weight: FontWeight.w400,
-          color: orange.resolveFrom(context),
-          name: 'dice.fill',
-        ),
+        Icon(Icons.casino_rounded,
+            size: 20, color: CupertinoColors.activeOrange),
       ],
     );
   }
@@ -231,58 +228,53 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   Widget _buildBottomButton() {
+    final BoxDecoration buttonDecoration = BoxDecoration(
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x19000000),
+          blurRadius: 20,
+          offset: Offset(0, 0),
+        ),
+      ],
+      borderRadius: BorderRadius.circular(100.0),
+    );
+
+    Widget buildButton({
+      required VoidCallback onPressed,
+      required Widget child,
+      EdgeInsetsGeometry padding = const EdgeInsets.all(14.0),
+      AlignmentGeometry alignment = Alignment.bottomCenter,
+      EdgeInsetsGeometry margin = EdgeInsets.zero,
+    }) {
+      return Align(
+        alignment: alignment,
+        child: Container(
+          decoration: buttonDecoration,
+          margin: margin,
+          child: CupertinoButton(
+            onPressed: onPressed,
+            color: CupertinoColors.tertiarySystemBackground,
+            borderRadius: BorderRadius.circular(100.0),
+            padding: padding,
+            child: child,
+          ),
+        ),
+      );
+    }
+
     return Stack(
       children: [
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x19000000),
-                  blurRadius: 20,
-                  offset: Offset(0, 0),
-                ),
-              ],
-              borderRadius:
-                  BorderRadius.circular(100.0), // Match button's border radius
-            ),
-            child: CupertinoButton(
-                onPressed: _currentLocation,
-                color: CupertinoColors.tertiarySystemBackground,
-                borderRadius: BorderRadius.circular(100.0),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0, vertical: 14.0),
-                child:
-                    _isZooming ? zoomButtonContent() : locationButtonContent()),
-          ),
+        buildButton(
+          onPressed: _currentLocation,
+          child: _isZooming ? zoomButtonContent() : locationButtonContent(),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
         ),
-        Positioned(
-          bottom: mapBottomPadding + 16,
-          right: 20,
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x19000000),
-                    blurRadius: 20,
-                    offset: Offset(0, 0),
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(100.0),
-              ),
-              child: CupertinoButton(
-                onPressed: () => showFeelingLuckyModal(context),
-                color: CupertinoColors.tertiarySystemBackground,
-                borderRadius: BorderRadius.circular(100.0),
-                padding: const EdgeInsets.all(14.0),
-                child: randomPostContent(),
-              ),
-            ),
+        buildButton(
+          onPressed: () => showFeelingLuckyModal(context),
+          child: randomPostContent(),
+          alignment: Alignment.bottomRight,
+          margin: const EdgeInsets.only(right: 16.0),
           ),
-        ),
       ],
     );
   }
@@ -339,12 +331,11 @@ class _BrowseScreenState extends State<BrowseScreen>
                   EdgeInsets.only(bottom: mapBottomPadding, top: mapTopPadding),
             ),
             Positioned(
-              bottom: mapBottomPadding + 24,
+              bottom: mapBottomPadding + 26,
               left: 0,
               right: 0,
               child: AnimatedSwitcher(
-                duration: const Duration(
-                    milliseconds: 300), // Adjust the duration as needed
+                duration: const Duration(milliseconds: 300),
                 child: _showPostCard ? _buildPostCard() : _buildBottomButton(),
               ),
             ),
@@ -599,15 +590,12 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   void _filterMarkersByTitle(String searchText) {
     if (searchText.isEmpty) {
-      // If the search text is empty, show all markers
       _fetchAllMarkers();
       return;
     }
     FirebaseFirestore.instance
         .collection('post_details')
-        .where('title',
-            isEqualTo:
-                searchText) // Adjust the field name as per your Firestore collection
+        .where('title', isEqualTo: searchText)
         .get()
         .then((querySnapshot) {
       Set<Marker> filteredMarkers = {};
@@ -699,9 +687,8 @@ class _BrowseScreenState extends State<BrowseScreen>
     double newZoomLevel = position.zoom;
     _lastKnownCameraPosition = position;
 
-    // Update the state with the new zoom level and adjust the search radius and circle as needed
     setState(() {
-      currentZoomLevel = newZoomLevel; // Update current zoom level
+      currentZoomLevel = newZoomLevel;
       _searchRadius = _calculateSearchRadius(newZoomLevel);
       if (newZoomLevel > zoomThreshold) {
         searchAreaCircle = null;
@@ -756,19 +743,16 @@ class _BrowseScreenState extends State<BrowseScreen>
       if (postDocument.exists && postDocument.data() != null) {
         Map<String, dynamic> postData = postDocument.data()!;
 
-        // Extract fields safely
         String title = postData['title'] ?? 'No Title';
         DateTime createdAt =
             (postData['post_timestamp'] as Timestamp?)?.toDate() ??
                 DateTime.now();
         List<String> tags = postData['categories'].split(',');
 
-        // Assign colors to tags
         List<Color> assignedColors = tags.map((tag) {
           tag = tag.trim();
           if (!tagColors.containsKey(tag)) {
-            tagColors[tag] =
-                _getRandomColor(); // Assign a new color if not already assigned
+            tagColors[tag] = _getRandomColor();
           }
           return tagColors[tag]!;
         }).toList();
@@ -920,7 +904,7 @@ class _BrowseScreenState extends State<BrowseScreen>
       }
 
       if (!selectedMarkerInsideCircle) {
-        _resetUIState(); // Reset UI state if the selected marker is outside the circle
+        _resetUIState();
       }
 
       setState(() => _markers = newMarkers);
@@ -952,7 +936,7 @@ class _BrowseScreenState extends State<BrowseScreen>
     mapController!.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
         target: postLatLng,
-        zoom: 16.0, // You can adjust this zoom level as needed
+        zoom: 16.0,
       ),
     ));
   }

@@ -17,7 +17,6 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'Services/AuthService.dart';
 import 'firebase_options.dart';
@@ -30,31 +29,15 @@ void main() async {
     systemNavigationBarColor: Colors.black.withOpacity(0.002),
   ));
   WidgetsFlutterBinding.ensureInitialized();
-  // await dotenv.load(fileName: ".env"); 
-
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   await FirebaseNotification().initNotifications();
-
   await addAllergensCategoriesAndPL();
-
-  // Handling the dynamic link when the app is launched from a terminated state
   final PendingDynamicLinkData? initialLink =
       await FirebaseDynamicLinks.instance.getInitialLink();
-
-  // Setting up the dynamic link listener for foreground/background states
   FirebaseDynamicLinks.instance.onLink.listen(
-    (dynamicLinkData) {
-      // Handle dynamic link within your navigation logic
-      // For example:
-      // Navigator.pushNamed(context, dynamicLinkData.link.path);
-    },
-    onError: (error) {
-      // Handle errors
-      print('Dynamic Link Failed: $error');
-    },
+    (dynamicLinkData) {},
+    onError: (error) => print('Dynamic Link Failed: $error'),
   );
-
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(
@@ -101,19 +84,17 @@ class FoodHoodApp extends StatelessWidget {
         barBackgroundColor: backgroundColor,
       ),
       title: 'FoodHood',
-      home: AuthWrapper(), // Use AuthWrapper as the root widget
-      debugShowCheckedModeBanner:
-          false, // Hide the debug banner in Preview mode
+      home: AuthWrapper(),
+      debugShowCheckedModeBanner: false,
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/':
             return MaterialWithModalsPageRoute(
-              builder: (context) => WelcomeScreen(), // Root route
+              builder: (context) => WelcomeScreen(),
             );
           case '/signup':
             return MaterialWithModalsPageRoute(
-              builder: (context) => RegistrationScreen(
-                  auth: AuthService()), // Signup route
+              builder: (context) => RegistrationScreen(auth: AuthService()),
             );
           case '/signin':
             return MaterialWithModalsPageRoute(
@@ -131,7 +112,7 @@ class FoodHoodApp extends StatelessWidget {
                 onItemTapped: (index) {},
               ),
             );
-         
+
           case '/browse':
             return MaterialWithModalsPageRoute(
                 builder: (context) => const BrowseScreen());

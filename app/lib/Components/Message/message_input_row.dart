@@ -2,9 +2,8 @@ import 'package:FoodHood/Components/colors.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:pull_down_button/pull_down_button.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 
 class MessageInputRow extends StatefulWidget {
   final TextEditingController messageController;
@@ -12,7 +11,7 @@ class MessageInputRow extends StatefulWidget {
   final firstName;
   final FocusNode? focusNode;
 
-  MessageInputRow({
+  const MessageInputRow({
     super.key,
     required this.firstName,
     required this.messageController,
@@ -95,7 +94,7 @@ class _MessageInputRowState extends State<MessageInputRow> {
                 itemBuilder: (context) => [
                   const PullDownMenuTitle(title: Text('Share Post from:')),
                   PullDownMenuItem(
-                    title: 'Reserved Posts',
+                    title: 'Posts',
                     icon: CupertinoIcons.square_stack,
                     onTap: () {
                       _showReservedPostsSheet(context);
@@ -107,9 +106,9 @@ class _MessageInputRowState extends State<MessageInputRow> {
                     title: 'Photos',
                     icon: CupertinoIcons.photo,
                     onTap: () async {
-                      final ImagePicker _picker = ImagePicker();
+                      final ImagePicker picker = ImagePicker();
                       final XFile? image =
-                          await _picker.pickImage(source: ImageSource.gallery);
+                          await picker.pickImage(source: ImageSource.gallery);
                       if (image != null) {
                         print("Picked image path: ${image.path}");
                       }
@@ -119,9 +118,9 @@ class _MessageInputRowState extends State<MessageInputRow> {
                     title: 'Camera',
                     icon: CupertinoIcons.camera,
                     onTap: () async {
-                      final ImagePicker _picker = ImagePicker();
+                      final ImagePicker picker = ImagePicker();
                       final XFile? image =
-                          await _picker.pickImage(source: ImageSource.camera);
+                          await picker.pickImage(source: ImageSource.camera);
                       if (image != null) {
                         print("Captured image path: ${image.path}");
                       }
@@ -150,7 +149,7 @@ class _MessageInputRowState extends State<MessageInputRow> {
                         margin: const EdgeInsets.all(6),
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: blue.resolveFrom(context),
+                          color: darken(blue, 0.1),
                           borderRadius: BorderRadius.circular(100000),
                         ),
                         child: const Icon(FeatherIcons.arrowUp,
@@ -186,12 +185,12 @@ class _MessageInputRowState extends State<MessageInputRow> {
       builder: (BuildContext context) {
         return Container(
           child: DraggableScrollableSheet(
-            initialChildSize: 0.5, // Half the height of its parent
-            maxChildSize: 1, // Full height
-            minChildSize: 0.25, // Quarter height
+            initialChildSize: 0.5, 
+            maxChildSize: 1, 
+            minChildSize: 0.25, 
             builder: (BuildContext context, ScrollController scrollController) {
               return Container(
-                color: Colors.white, // Background color for the bottom sheet
+                color: Colors.white, 
                 child: Column(
                   children: [
                     _buildDragHandle(),
@@ -208,11 +207,11 @@ class _MessageInputRowState extends State<MessageInputRow> {
 
   Widget _buildCustomNavigationBar(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('Reserved',
+          const Text('Reserved',
               style: TextStyle(
                   fontSize: 28,
                   letterSpacing: -1.3,
@@ -252,7 +251,7 @@ class _MessageInputRowState extends State<MessageInputRow> {
         scrollDirection: Axis.horizontal,
         itemCount: recommendedMessages.length,
         separatorBuilder: (context, index) => const SizedBox(
-            width: 8), // Adjusts horizontal spacing between items
+            width: 8), 
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: () =>

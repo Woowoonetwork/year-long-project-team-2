@@ -25,8 +25,9 @@ class ConversationsScreen extends StatelessWidget {
         child: CustomScrollView(
           slivers: <Widget>[
             CupertinoSliverNavigationBar(
-              transitionBetweenRoutes: true,
-              backgroundColor: groupedBackgroundColor,
+              transitionBetweenRoutes: false, 
+              backgroundColor: CupertinoDynamicColor.resolve(
+                groupedBackgroundColor, context).withOpacity(0.8),
               largeTitle: Text('Messages'),
               border: null,
               leading: GestureDetector(

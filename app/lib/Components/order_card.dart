@@ -45,84 +45,78 @@ class OrderCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    double textScaleFactor =
-        Provider.of<TextScaleProvider>(context).textScaleFactor;
+Widget build(BuildContext context) {
+  double textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
 
-    double adjustedTitleFontSize = _defaultTitleFontSize * textScaleFactor;
-    double adjustedTagFontSize = _defaultTagFontSize * textScaleFactor;
-    double adjustedOrderInfoFontSize =
-        _defaultOrderInfoFontSize * textScaleFactor;
-    double adjustedStatusFontSize = _defaultStatusFontSize * textScaleFactor;
+  double adjustedTitleFontSize = _defaultTitleFontSize * textScaleFactor;
+  double adjustedTagFontSize = _defaultTagFontSize * textScaleFactor;
+  double adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * textScaleFactor;
+  double adjustedStatusFontSize = _defaultStatusFontSize * textScaleFactor;
 
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: () {
-          HapticFeedback.selectionClick();
-          Navigator.push(
-            context,
-            CupertinoPageRoute(
-              builder: (context) => isDonation
-                  ? DonorScreen(postId: postId)
-                  : DoneePath(postId: postId),
-            ),
-          );
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            color: CupertinoDynamicColor.resolve(
-                CupertinoColors.tertiarySystemBackground, context),
-            borderRadius: BorderRadius.circular(20),
+  return SizedBox(
+    width: MediaQuery.of(context).size.width,
+    child: CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: () {
+        HapticFeedback.selectionClick();
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => isDonation ? DonorScreen(postId: postId) : DoneePath(postId: postId),
           ),
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemBackground, context),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     _buildImageSection(context, imagesWithAltText, postId),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildStatusText(
-                              context, adjustedStatusFontSize, orderState),
-                          const SizedBox(height: 4),
-                          _buildTitleSection(
-                              context, title, adjustedTitleFontSize),
-                          const SizedBox(height: 4),
-                          _buildOrderInfoSection(
-                              context, orderInfo, adjustedOrderInfoFontSize),
-                          const SizedBox(height: 4),
-                          _buildTagSection(context, tags, adjustedTagFontSize),
-                        ],
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildStatusText(context, adjustedStatusFontSize, orderState),
+                            const SizedBox(height: 4),
+                            _buildTitleSection(context, title, adjustedTitleFontSize),
+                            const SizedBox(height: 4),
+                            _buildOrderInfoSection(context, orderInfo, adjustedOrderInfoFontSize),
+                            const SizedBox(height: 4),
+                            _buildTagSection(context, tags, adjustedTagFontSize),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Icon(FeatherIcons.chevronRight,
-                        size: 24,
-                        color: CupertinoColors.systemGrey.resolveFrom(context)),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              Icon(
+                FeatherIcons.chevronRight,
+                size: 24,
+                color: CupertinoColors.systemGrey.resolveFrom(context),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _onCardTap(BuildContext context, String postId) {
     HapticFeedback.selectionClick();
@@ -217,6 +211,7 @@ class OrderCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         color: statusColor.withOpacity(0.2),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ClipOval(
@@ -303,6 +298,7 @@ class OrderCard extends StatelessWidget {
       BuildContext context, String title, double adjustedTitleFontSize) {
     return Text(
       title,
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(
         color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
         fontSize: adjustedTitleFontSize,

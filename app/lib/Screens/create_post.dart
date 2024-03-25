@@ -310,7 +310,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
           instructionText,
           textAlign: TextAlign.center,
           style: TextStyle(
-              fontSize: adjustedFontSize - 4, 
+              fontSize: adjustedFontSize - 4,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
               fontWeight: FontWeight.w500),
         ),
@@ -738,7 +738,12 @@ class _CreatePostPageState extends State<CreatePostScreen>
         showCupertinoDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: const Text("Post published"),
+            title: const Text("Post published",
+                style: TextStyle(
+                  fontSize: 18,
+                  letterSpacing: -0.2,
+                  fontWeight: FontWeight.w600,
+                )),
             content: const Text("Your post has been posted successfully."),
             actions: [
               CupertinoDialogAction(

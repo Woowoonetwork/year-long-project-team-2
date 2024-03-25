@@ -219,7 +219,7 @@ class _AccountScreenState extends State<AccountScreen> {
       largeTitle: Text('Account'),
       leading: CupertinoButton(
         padding: EdgeInsets.zero,
-        child: Text('Chats',
+        child: Text('Messages',
             style: TextStyle(color: CupertinoColors.label.resolveFrom(context))),
         onPressed: () => Navigator.of(context).push(
             CupertinoPageRoute(builder: (context) => ConversationsScreen())),

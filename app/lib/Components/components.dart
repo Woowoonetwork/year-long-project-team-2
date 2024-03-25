@@ -242,24 +242,23 @@ Widget buildSignUpText(
   );
 }
 
-String determineDate(DateTime timestamp) {
-  final now = DateTime.now();
-  DateTime date = timestamp;
-  DateTime today = DateTime(now.year, now.month, now.day);
-  DateTime messageDate = DateTime(date.year, date.month, date.day);
-  DateTime yesterday = today.subtract(const Duration(days: 1));
+String determineDate(DateTime messageDate) {
+  final today = DateTime.now();
+  final yesterday = DateTime.now().subtract(Duration(days: 1));
 
-  String formattedDate;
-
-  if (messageDate == today) {
-    formattedDate = "Today";
-  } else if (messageDate == yesterday) {
-    formattedDate = "Yesterday";
+  if (messageDate.year == today.year &&
+      messageDate.month == today.month &&
+      messageDate.day == today.day) {
+    return 'Today'.toUpperCase();
+  } else if (messageDate.year == yesterday.year &&
+             messageDate.month == yesterday.month &&
+             messageDate.day == yesterday.day) {
+    return 'Yesterday'.toUpperCase();
   } else {
-    formattedDate = DateFormat('MMM d, yyyy').format(date);
+    return DateFormat('MMMM dd, yyyy').format(messageDate).toUpperCase();
   }
-  return formattedDate.toUpperCase();
 }
+
 
 String determineDateTime(Timestamp timestamp) {
   final now = DateTime.now();

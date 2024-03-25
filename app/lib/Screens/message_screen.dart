@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 
 class MessageScreen extends StatefulWidget {
   final String receiverID;
@@ -30,6 +31,7 @@ class _MessageScreenState extends State<MessageScreen> {
   late Future<String> receiverName;
   late String? senderID;
   late Future<String> receiverImage;
+ 
 
   FocusNode focusNode = FocusNode();
 
@@ -78,6 +80,7 @@ class _MessageScreenState extends State<MessageScreen> {
 
   void setupMessageListener() async {
     String? userId = await authService.getUserId();
+    if (!mounted) return;
     if (userId != null) {
       messageService
           .getMessages(userId, widget.receiverID)
@@ -93,7 +96,7 @@ class _MessageScreenState extends State<MessageScreen> {
     if (scrollController.hasClients) {
       scrollController.animateTo(
         scrollController.position.minScrollExtent,
-        duration: Duration(milliseconds: 300),
+        duration: Duration(milliseconds: 800),
         curve: Curves.fastOutSlowIn,
       );
     }
@@ -146,11 +149,21 @@ class _MessageScreenState extends State<MessageScreen> {
         ),
       ),
       actions: <Widget>[
-        CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: Icon(FeatherIcons.moreVertical,
-              size: 20, color: CupertinoColors.label.resolveFrom(context)),
-          onPressed: () {},
+        PullDownButton(
+          itemBuilder: (context) => [
+            PullDownMenuItem(
+              title: 'Block user',
+              icon: FeatherIcons.user,
+              isDestructive: true,
+              onTap: () {},
+            ),
+          ],
+          buttonBuilder: (context, showMenu) => CupertinoButton(
+            onPressed: showMenu,
+            padding: EdgeInsets.zero,
+            child: Icon(FeatherIcons.moreVertical,
+                size: 18, color: CupertinoColors.label.resolveFrom(context)),
+          ),
         ),
       ],
     );
@@ -172,6 +185,11 @@ class _MessageScreenState extends State<MessageScreen> {
     return FutureBuilder<String?>(
       future: authService.getUserId(),
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('An error occurred. Please try again later.'),
+          );
+        } else      
         if (snapshot.connectionState == ConnectionState.done &&
             snapshot.hasData) {
           final String currentUserId = snapshot.data!;
@@ -182,47 +200,56 @@ class _MessageScreenState extends State<MessageScreen> {
               if (snapshot.hasData) {
                 final docs = snapshot.data!.docs;
                 DateTime? previousDate;
-                return ListView.builder(
-                  reverse: true,
-                  itemCount: docs.length,
-                  controller: scrollController,
-                  itemBuilder: (context, index) {
-                    final DocumentSnapshot document =
-                        docs[docs.length - 1 - index];
-                    final DateTime messageDate = document['timestamp'].toDate();
+                return ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context)
+                        .copyWith(scrollbars: false),
+                    child: ListView.builder(
+                      reverse: true,
+                      itemCount: docs.length,
+                      controller: scrollController,
+                      itemBuilder: (context, index) {
+                        final DocumentSnapshot document =
+                            docs[docs.length - 1 - index];
+                        final DateTime messageDate =
+                            document['timestamp'].toDate();
 
-                    bool isNewDay = previousDate == null ||
-                        messageDate.day != previousDate?.day;
-                    previousDate = messageDate;
+                        bool isNewDay = previousDate == null ||
+                            messageDate.day != previousDate?.day;
+                        previousDate = messageDate;
 
-                    return Column(
-                      children: [
-                        if (isNewDay)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text(
-                              determineDate(messageDate),
-                              style: TextStyle(
-                                  fontSize: 10,
-                                  letterSpacing: -0.2,
-                                  fontWeight: FontWeight.w600,
-                                  color: CupertinoColors.secondaryLabel
-                                      .resolveFrom(context)),
+                        return Column(
+                          children: [
+                            if (isNewDay)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(
+                                  determineDate(messageDate),
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      letterSpacing: -0.2,
+                                      fontWeight: FontWeight.w600,
+                                      color: CupertinoColors.secondaryLabel
+                                          .resolveFrom(context)),
+                                ),
+                              ),
+                            MessageBubble(
+                              message: document['message'],
+                              isCurrentUser:
+                                  document['senderID'] == currentUserId,
+                              timestamp: document['timestamp'],
+                              conversationID:
+                                  document.reference.parent.parent!.id,
+                              messageID: document.id,
                             ),
-                          ),
-                        MessageBubble(
-                          message: document['message'],
-                          isCurrentUser: document['senderID'] == currentUserId,
-                          timestamp: document['timestamp'],
-                          conversationID: document.reference.parent.parent!.id,
-                          messageID: document.id,
-                        ),
-                      ],
-                    );
-                  },
-                );
+                          ],
+                        );
+                      },
+                    ));
+              } else if (snapshot.hasError) {
+                return const Text("Error loading messages");
               }
-              return const SizedBox(); // Placeholder for other states
+              return const SizedBox();
             },
           );
         } else {
