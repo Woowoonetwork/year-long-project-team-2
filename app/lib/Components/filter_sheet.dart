@@ -229,18 +229,13 @@ class _FilterSheetState extends State<FilterSheet> {
                     color:
                         CupertinoColors.secondaryLabel.resolveFrom(context))),
             onPressed: () {
-              // Make sure this includes all necessary filter criteria
-              Map<String, dynamic> filterCriteria = {
-                'collectionDay': collectionDay,
-                'selectedFoodTypes':
-                    selectedFoodTypes, // Ensure these are included
-                'selectedDietPreferences': selectedDietPreferences,
-                'collectionTime': collectionTime,
-              };
-
-              widget.onApplyFilters(filterCriteria);
-
-              Navigator.of(context).pop();
+              setState(() {
+                // Reset all filters to their initial values
+                collectionDay = 'Today';
+                selectedFoodTypes = [];
+                selectedDietPreferences = [];
+                collectionTime = RangeValues(0, 24);
+              });
             },
           ),
           CupertinoButton(
@@ -251,13 +246,6 @@ class _FilterSheetState extends State<FilterSheet> {
                 style: TextStyle(
                     fontWeight: FontWeight.w600, color: CupertinoColors.white)),
             onPressed: () {
-              // Combine selected food types and diet preferences
-              List<String> selectedFilters = [
-                ...selectedFoodTypes,
-                ...selectedDietPreferences
-              ];
-
-              // Construct the filter criteria map
               Map<String, dynamic> filterCriteria = {
                 'collectionDay': collectionDay,
                 'selectedFoodTypes': selectedFoodTypes,
@@ -267,7 +255,7 @@ class _FilterSheetState extends State<FilterSheet> {
 
               widget.onApplyFilters(filterCriteria);
 
-              Navigator.of(context).pop(); // Close the FilterSheet
+              Navigator.of(context).pop();
             },
           ),
         ],
