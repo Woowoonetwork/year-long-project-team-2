@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   StreamSubscription<QuerySnapshot>? postsSubscription;
   bool isLoading = true;
   Map<String, dynamic> currentFilterCriteria = {};
+  List<String> categories = [];
 
   double _scale = 1.0; // Scale factor for the button
 
@@ -37,6 +38,12 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _initListeners();
     _loadInitialPosts();
+    fetchCategories().then((fetchedCategories) {
+      setState(() {
+        // Always include "All" and append fetched categories
+        categories = ['All', ...fetchedCategories];
+      });
+    });
   }
 
   void _initListeners() {
@@ -46,6 +53,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onFocusChange() {
     setState(() {});
+  }
+
+  Future<List<String>> fetchCategories() async {
+    // Reference to Firestore
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    try {
+      // Fetch the document that contains the categories
+      DocumentSnapshot snapshot =
+          await _firestore.collection('Data').doc('Categories').get();
+
+      if (snapshot.exists && snapshot.data() != null) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        // Use the null-aware operator to default to an empty list if null
+        final categories = List<String>.from(data['categories'] ?? []);
+        return categories; // Return the list of categories
+      } else {
+        return []; // Return an empty list if the document or field does not exist
+      }
+    } catch (e) {
+      print("Error fetching categories: $e");
+      return []; // Return an empty list in case of an error
+    }
   }
 
   void _loadInitialPosts() {
@@ -576,16 +606,28 @@ class _HomeScreenState extends State<HomeScreen> {
       scrollDirection: Axis.horizontal,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Wrap(spacing: 8.0, children: <Widget>[
-          _buildCategoryButton('All', accentColor),
-          _buildCategoryButton('Vegan', yellow),
-          _buildCategoryButton('Italian', orange),
-          _buildCategoryButton('Halal', blue),
-          _buildCategoryButton('Vegetarian', babyPink),
-          _buildCategoryButton('Indian', orange)
-        ]),
+        child: Wrap(
+          spacing: 8.0,
+          children: categories
+              .map((category) =>
+                  _buildCategoryButton(category, getColorForCategory(category)))
+              .toList(),
+        ),
       ),
     );
+  }
+
+  Color getColorForCategory(String category) {
+    // Example color assignment
+    switch (category) {
+      case 'Vegan':
+        return yellow;
+      case 'Italian':
+        return orange;
+      // Add more cases as needed
+      default:
+        return accentColor; // Default color
+    }
   }
 
   Widget _buildCategoryButton(String title, Color color) {
