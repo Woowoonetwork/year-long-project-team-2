@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, Color> tagColors = {};
   StreamSubscription<QuerySnapshot>? postsSubscription;
   bool isLoading = true;
+  Map<String, dynamic> currentFilterCriteria = {};
 
   double _scale = 1.0; // Scale factor for the button
 
@@ -537,7 +538,13 @@ class _HomeScreenState extends State<HomeScreen> {
           CupertinoDynamicColor.resolve(groupedBackgroundColor, context),
       builder: (context) => SafeArea(
         child: FilterSheet(
+          initialCriteria:
+              currentFilterCriteria, // Make sure this has the correct data structure
           onApplyFilters: (filterCriteria) {
+            setState(() {
+              // Update currentFilterCriteria with the new selections
+              currentFilterCriteria = filterCriteria;
+            });
             applyFilters(filterCriteria);
           },
         ),
