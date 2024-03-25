@@ -124,6 +124,8 @@ class ProgressBar extends StatelessWidget {
         return "Delivering";
       case dos.OrderState.readyToPickUp:
         return "Ready to Pick Up";
+      default:
+        return "Not Reserved";
     }
   }
 }

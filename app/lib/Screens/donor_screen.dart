@@ -12,11 +12,16 @@ import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 //import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
-import 'package:timelines/timelines.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Components/progress_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:uuid/uuid.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:FoodHood/Components/image_display_box.dart';
+
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -24,7 +29,7 @@ const double _defaultFontSize = 16.0;
 const double _defaultOrderInfoFontSize = 12.0;
 
 // Define enum to represent different states
-enum OrderState { reserved, confirmed, delivering, readyToPickUp }
+enum OrderState { notReserved, reserved, confirmed, delivering, readyToPickUp, completed }
 
 class DonorScreen extends StatefulWidget {
   final String postId;
@@ -41,7 +46,7 @@ class _DonorScreenState extends State<DonorScreen> {
   String pickupLocation = '';
   String photo = '';
   String? reservedByUserId = '';
-  OrderState orderState = OrderState.reserved;
+  OrderState orderState = OrderState.notReserved;
   late double _textScaleFactor;
   late double adjustedFontSize;
   late double adjustedHeadingFontSize;
@@ -49,16 +54,62 @@ class _DonorScreenState extends State<DonorScreen> {
   late LatLng pickupLatLng;
   late PostDetailViewModel viewModel;
   String location = "";
+  String postStatus = 'not reserved';
+  String? _selectedImagePath;
 
   @override
   void initState() {
     super.initState();
-    pickupLatLng = LatLng(
-        49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
-    fetchPostInformation(); // Fetch reserved by user name when the widget initializes
+    
+    // Initialize the pickup location coordinates to downtown Kelowna
+    pickupLatLng = LatLng(49.8862, -119.4971); 
+    
+    // Incorporate the font size change accessibility functionality
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
+    
+    // Set up a stream listener for changes to the 'post_status' field to sync changes in real time
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .doc(widget.postId)
+        .snapshots()
+        .listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
+      if (snapshot.exists) {
+        // Extract post_status and update orderState accordingly
+        final String post_status = snapshot.data()?['post_status'];
+        setState(() {
+          postStatus = post_status;
+          switch (postStatus) {
+            case 'not reserved':
+              orderState = OrderState.notReserved;
+              break;
+            case 'pending':
+              orderState = OrderState.reserved;
+              break;
+            case 'confirmed':
+              orderState = OrderState.confirmed;
+              break;
+            case 'delivering':
+              orderState = OrderState.delivering;
+              break;
+            case 'readyToPickUp':
+              orderState = OrderState.readyToPickUp;
+              break;
+            case 'completed':
+              orderState = OrderState.completed;
+              break;
+            default:
+              orderState = OrderState.notReserved;
+          }
+        });
+      } else {
+        // Handle case where document does not exist
+      }
+    });
+
+    // Read post details
+    fetchPostInformation();
   }
 
   // Reading post information
@@ -74,10 +125,7 @@ class _DonorScreenState extends State<DonorScreen> {
           await postDetailsCollection.doc(postId).get();
 
       if (postSnapshot.exists) {
-        // Extract the reserved_by user ID from the post details
-        reservedByUserId = postSnapshot['reserved_by'];
-        //pickupLocation = postSnapshot['pickup_location'];
-
+        // Extract the pickup location coordinates
         if (postSnapshot['post_location'] is GeoPoint) {
           GeoPoint geoPoint = postSnapshot['post_location'] as GeoPoint;
           setState(() {
@@ -89,6 +137,10 @@ class _DonorScreenState extends State<DonorScreen> {
             pickupLatLng = LatLng(49.8862, -119.4971);
           });
         }
+
+        // Extract the reserved_by user ID from the post details
+        reservedByUserId = postSnapshot['reserved_by'];
+        
         print(pickupLatLng);
 
         // Fetch the user document using reserved_by user ID if it exists
@@ -117,9 +169,14 @@ class _DonorScreenState extends State<DonorScreen> {
         }
 
         // Extract post_status and set orderState accordingly
-        final String postStatus = postSnapshot['post_status'];
+        final String post_status = postSnapshot['post_status'];
+
         setState(() {
+          postStatus = post_status;
           switch (postStatus) {
+            case 'not reserved':
+              orderState = OrderState.notReserved;
+              break;
             case 'pending':
               orderState = OrderState.reserved;
               break;
@@ -132,6 +189,9 @@ class _DonorScreenState extends State<DonorScreen> {
             case 'readyToPickUp':
               orderState = OrderState.readyToPickUp;
               break;
+            case 'completed':
+              orderState = OrderState.completed;
+              break;
           }
         });
       } else {
@@ -143,23 +203,14 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
+  // Incorportate the font size change accessibility functionality
   void _updateAdjustedFontSize() {
     adjustedFontSize = _defaultFontSize * _textScaleFactor;
     adjustedHeadingFontSize = _defaultHeadingFontSize * _textScaleFactor;
     adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
   }
 
-  // void _onLocationSelected(LatLng location) async {
-  //   String address = await getAddressFromLatLng(location);
-  //   setState(() {
-  //     selectedLocation = location;
-  //     instructionText = address;
-  //   });
-  // }
-  // void LocationReading(LatLng location) async{
-  //   String address = await getAddressFromLatLng(location);
-  // }
-
+  // Use the Google Maps Geocoding API to convert pickup coordinates to an address
   Future<String> getAddressFromLatLng(LatLng position) async {
     final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
@@ -179,6 +230,78 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
+  // Method to upload the delivery photo to Firebase storage
+  Future<String?> _uploadImageToFirebase(File imageFile) async {
+    try {
+      String fileName =
+          'post_${Uuid().v4()}.jpg'; // Unique file name for the image
+      Reference storageRef =
+          FirebaseStorage.instance.ref().child('delivered_post_images/$fileName');
+
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      await uploadTask;
+      String downloadUrl = await storageRef.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
+  }
+
+  // Method to build a cupertino action sheet for users to choose between the Camera and the Gallery
+  Future<void> _pickImageOptions() async {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        message: const Text('Choose an option to add a photo from'),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            child: const Text('Camera'),
+            onPressed: () {
+              Navigator.pop(context);
+              _pickImageFromCamera();
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: const Text('Gallery'),
+            onPressed: () {
+              Navigator.pop(context);
+              _pickImageFromGallery();
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  // Method to enable users to click an image using their camera
+  Future<void> _pickImageFromCamera() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() {
+        _selectedImagePath = image.path;
+      });
+    }
+  }
+
+  // Method to enable users to pick an image from their gallery
+  Future<void> _pickImageFromGallery() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _selectedImagePath = image.path;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -193,7 +316,9 @@ class _DonorScreenState extends State<DonorScreen> {
             color: CupertinoColors.label.resolveFrom(context),
           ),
         ),
-        trailing: reservedByName != null
+
+        // Show the "Message [donee]" button if the post has been reserved
+        trailing: orderState != OrderState.notReserved
             ? CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: Text("Message ${reservedByName ?? 'Unknown User'}",
@@ -223,10 +348,14 @@ class _DonorScreenState extends State<DonorScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
+                 
+                 // Heading Text
                   __buildHeadingTextField(text: _buildHeadingText()),
+                  
                   SizedBox(height: 16.0),
+
                   //Only show the order info section if the order has been reserved.
-                  if (reservedByName != null)
+                  if (orderState != OrderState.notReserved)
                     OrderInfoSection(
                       reservedByName: reservedByName,
                       reservedByLastName: reservedByLastName,
@@ -247,27 +376,41 @@ class _DonorScreenState extends State<DonorScreen> {
                       "Ready to Pick Up"
                     ],
                     color: accentColor,
-                    isReserved: reservedByName != null,
+                    isReserved: postStatus != 'not reserved',
                     currentState: orderState,
                   ),
 
                   // SizedBox(height: 25,),
 
-                  _buildMap(context),
-
-                  FutureBuilder<String>(
-                    future: getAddressFromLatLng(pickupLatLng),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CupertinoActivityIndicator();
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else {
-                        return __buildTextField(
-                            text: "Pickup from ${snapshot.data}");
-                      }
-                    },
+                  // Map showing the pickup location for all order states except ready to pick up
+                  Visibility(
+                    visible: (orderState != OrderState.readyToPickUp && orderState != OrderState.completed),
+                    child: _buildMap(context),
                   ),
+
+                  // Text showing the written address of the pickup location for all order states except ready to pick up
+                  if (orderState != OrderState.readyToPickUp && orderState != OrderState.completed)
+                    FutureBuilder<String>(
+                      future: getAddressFromLatLng(pickupLatLng),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return CupertinoActivityIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          return __buildTextField(
+                              text: "Pickup from ${snapshot.data}");
+                        }
+                      },
+                    ),
+
+                  // Display the option to upload pictures if the state is ready to pick up
+                  if (orderState == OrderState.readyToPickUp)
+                    buildImageSection(context, _selectedImagePath),
+
+                  // Display the delivery photo if the state is completed
+                  if (orderState == OrderState.completed)
+                   buildDeliveredImageSection(context)
 
                   // PendingConfirmationWithTimer(
                   //       durationInSeconds: 120, postId: widget.postId),
@@ -277,127 +420,14 @@ class _DonorScreenState extends State<DonorScreen> {
                 ],
               ),
 
-              if (reservedByName != null)
-                _buildButtonAndCancelButtonRow(), // Call the new method here
+              // Show the buttons if the order has been reserved
+              if (orderState != OrderState.notReserved)
+                _buildButtonAndCancelButtonRow(),
             ],
           ),
         ),
       ),
     );
-  }
-
-  // Reusable Widget to build the Progress Bar
-  Widget _buildProgressBar() {
-    return Container(
-      height: 120,
-      alignment: Alignment.topCenter,
-      child: Timeline.tileBuilder(
-        shrinkWrap: true,
-        padding: EdgeInsets.zero,
-        theme: TimelineThemeData(
-            direction: Axis.horizontal,
-            connectorTheme: ConnectorThemeData(space: 6.0, thickness: 3.0),
-            nodePosition: 0),
-        builder: TimelineTileBuilder.connected(
-          connectionDirection: ConnectionDirection.before,
-          itemCount: 4,
-          itemExtentBuilder: (_, __) {
-            final double padding = 16.0;
-            final double availableWidth =
-                MediaQuery.of(context).size.width - padding * 2;
-            return availableWidth / 4.0;
-          },
-          oppositeContentsBuilder: (context, index) {
-            return Container();
-          },
-          contentsBuilder: (context, index) {
-            switch (index) {
-              case 0:
-                return _buildProgressPoint("Reserved", OrderState.reserved);
-              case 1:
-                return _buildProgressPoint("Confirmed", OrderState.confirmed);
-              case 2:
-                return _buildProgressPoint("Delivering", OrderState.delivering);
-              case 3:
-                return _buildProgressPoint(
-                    "Ready to Pick Up", OrderState.readyToPickUp);
-              default:
-                return Container();
-            }
-          },
-          indicatorBuilder: (_, index) {
-            if (reservedByName == null) {
-              return OutlinedDotIndicator(
-                borderWidth: 2.0,
-                color: accentColor,
-              );
-            }
-            if (index < (_calculateProgress() * 4).toInt()) {
-              return DotIndicator(
-                color: accentColor,
-              );
-            } else {
-              return OutlinedDotIndicator(
-                borderWidth: 2.0,
-                color: accentColor,
-              );
-            }
-          },
-          connectorBuilder: (_, index, type) {
-            if (index < (_calculateProgress() * 4).toInt()) {
-              return SolidLineConnector(
-                color: accentColor,
-              );
-            } else {
-              return DashedLineConnector(
-                color: accentColor,
-              );
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  // Widget to build each progress point
-  Widget _buildProgressPoint(String text, OrderState state) {
-    final bool isReserved = reservedByName != null;
-    final bool isCurrentState = orderState == state;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-            fontSize: adjustedFontSize - 2.0,
-            fontWeight: FontWeight.bold,
-            color: isReserved
-                ? isCurrentState
-                    ? CupertinoDynamicColor.resolve(
-                        CupertinoColors.label, context)
-                    : CupertinoDynamicColor.resolve(
-                        CupertinoColors.secondaryLabel, context)
-                : CupertinoDynamicColor.resolve(
-                    CupertinoColors.secondaryLabel, context)),
-      ),
-    );
-  }
-
-  // Method to calculate progress based on order state
-  double _calculateProgress() {
-    switch (orderState) {
-      case OrderState.reserved:
-        return 0.25; // Progress for reserved state
-      case OrderState.confirmed:
-        return 0.5; // Progress for confirmed state
-      case OrderState.delivering:
-        return 0.75; // Progress for delivering state
-      case OrderState.readyToPickUp:
-        return 1.0; // Progress for readyToPickUp state
-      default:
-        return 0.0; // Default progress
-    }
   }
 
   // Reusable widget to build the text fields
@@ -420,13 +450,9 @@ class _DonorScreenState extends State<DonorScreen> {
 
   // Method to build heading text based on order state
   String _buildHeadingText() {
-    if (reservedByName == null) {
-      return "Your order has not been reserved yet";
-    }
-
     switch (orderState) {
-      // case OrderState.notReserved:
-      //   return "Your order has not been reserved yet";
+      case OrderState.notReserved:
+        return "Your order has not been reserved yet";
       case OrderState.reserved:
         return "Your order has been reserved by ${reservedByName ?? 'Unknown User'}";
       case OrderState.confirmed:
@@ -435,9 +461,94 @@ class _DonorScreenState extends State<DonorScreen> {
         return "Your order is out for delivery for ${reservedByName ?? 'Unknown User'}";
       case OrderState.readyToPickUp:
         return "Your order for ${reservedByName ?? 'Unknown User'} is ready to pick up";
+      case OrderState.completed:
+        return "Your order for ${reservedByName ?? 'Unknown User'} is completed";
       default:
         return "Your order has not been reserved yet";
     }
+  }
+
+  // Method to calculate progress for the progress bar based on order state
+  double _calculateProgress() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return 0.25; // Progress for reserved state
+      case OrderState.confirmed:
+        return 0.5; // Progress for confirmed state
+      case OrderState.delivering:
+        return 0.75; // Progress for delivering state
+      case OrderState.readyToPickUp:
+      case OrderState.completed:
+        return 1.0; // Progress for readyToPickUp state
+      default:
+        return 0.0; // Default progress
+    }
+  }
+
+  Widget _buildMap(BuildContext context) {
+    return FutureBuilder(
+      future: Future.delayed(Duration(milliseconds: 100)), // Add a small delay
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CupertinoActivityIndicator(); // Show loading indicator
+        } else {
+          final LatLng? locationCoordinates = pickupLatLng;
+
+          if (locationCoordinates != null) {
+            return ClipRRect(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(16),
+                bottom: Radius.circular(15),
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                height: 250.0,
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: locationCoordinates, // Set initial position to marker location
+                    zoom: 12.0,
+                  ),
+                  markers: Set.from([
+                    Marker(
+                      markerId: MarkerId('pickupLocation'),
+                      position: locationCoordinates,
+                    ),
+                  ]),
+                  onMapCreated: (GoogleMapController controller) {
+                    // Move camera to focus on marker
+                    controller.moveCamera(
+                      CameraUpdate.newLatLngZoom(
+                        locationCoordinates, 
+                        15.0, // Zoom level
+                      ),
+                    );
+                  },
+                  zoomControlsEnabled: false,
+                  scrollGesturesEnabled: false,
+                  rotateGesturesEnabled: false,
+                  tiltGesturesEnabled: false,
+                  zoomGesturesEnabled: false,
+                  myLocationEnabled: false,
+                  mapType: MapType.normal,
+                  myLocationButtonEnabled: false,
+                ),
+              ),
+            );
+          } else {
+            return Container(
+              width: double.infinity,
+              height: 250.0,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                color: CupertinoColors.systemGrey4,
+              ),
+              alignment: Alignment.center,
+              child: Text('Map Placeholder'),
+            );
+          }
+        }
+      },
+    );
   }
 
   Widget __buildTextField({
@@ -466,132 +577,291 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  Widget _buildMap(BuildContext context) {
-    final LatLng? locationCoordinates = pickupLatLng;
+  // Widget to build the delivery photo section
+  Widget buildImageSection(BuildContext context, String? imagePath) {
+    return FutureBuilder(
+      future: FirebaseFirestore.instance.collection('post_details').doc(widget.postId).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CupertinoActivityIndicator();
+        } 
+        else if (snapshot.hasData) {
+          final data = snapshot.data?.data();
+          if (data != null && data.containsKey('delivered_image')) {
+            // Delivered image URL is available, an image has already been saved
+            final deliveredImageURL = data['delivered_image'];
+            
+            // Display the image
+            return Container(
+              height: 250,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.network(
+                  deliveredImageURL,
+                  fit: BoxFit.cover,
+                  width: double.infinity
+                ),
+              ), 
+            );
+          } 
+          else {
+            // Delivered image URL not available
+            // If there isn't any delivery photo already saved, display the option to select and save one
+            return Column(
+              children: [
+                // Display the selected image 
+                ImageDisplayBox(imagePath: imagePath),
+                
+                // Display the buttons
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Expanded(
+                        child: CupertinoButton(
+                          onPressed: () {
+                            _pickImageOptions();
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 14.0),
+                            decoration: BoxDecoration(
+                              color: accentColor.resolveFrom(context).withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_photo_alternate_rounded,
+                                    size: 28,
+                                    color:
+                                        // if current mode is darkmode, use lighten, else use darken
+                                        MediaQuery.of(context).platformBrightness ==
+                                                Brightness.light
+                                            ? darken(accentColor.resolveFrom(context), 0.3)
+                                            : lighten(accentColor.resolveFrom(context), 0.3)),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Upload a delivery photo',
+                                  style: TextStyle(
+                                    color: MediaQuery.of(context).platformBrightness ==
+                                            Brightness.light
+                                        ? darken(accentColor.resolveFrom(context), 0.3)
+                                        : lighten(accentColor.resolveFrom(context), 0.3),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Show the "Save" button if an image is selected
+                      if (imagePath != null)
+                        CupertinoButton(
+                          onPressed: () async {
+                            if (_selectedImagePath != null) {
+                              // Upload the image to Firebase Storage
+                              String? imageUrl =
+                                  await _uploadImageToFirebase(File(_selectedImagePath!));
+                              if (imageUrl != null) {
+                                // Save the image URL to the firestore document
+                                await FirebaseFirestore.instance
+                                    .collection('post_details')
+                                    .doc(widget.postId)
+                                    .update({'delivered_image': imageUrl});
+                              } else {
+                                // Handle error
+                              }
+                            }
+                          },
+                          child: Text(
+                            'Save',
+                            style: TextStyle(
+                              color: accentColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
+        } 
+        else if (snapshot.hasError) {
+          // Error retrieving data
+          return Container();
+        } 
+        else {
+          // No data found
+          return Container();
+        }
+      },
+    );
+  }
 
-    if (locationCoordinates != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16), bottom: Radius.circular(15)),
-        child: SizedBox(
-          width: double.infinity,
-          height: 250.0,
-          child: GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: pickupLatLng,
-              zoom: 12.0,
-            ),
-            markers: Set.from([
-              Marker(
-                markerId: MarkerId('pickupLocation'),
-                position: locationCoordinates,
+  // Method to build the delivered image section
+  Widget buildDeliveredImageSection(BuildContext context) {
+    return FutureBuilder(
+      future: FirebaseFirestore.instance.collection('post_details').doc(widget.postId).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CupertinoActivityIndicator();
+        } else if (snapshot.hasData) {
+          final data = snapshot.data?.data();
+          if (data != null && data.containsKey('delivered_image')) {
+            // Delivered image URL is available
+            final deliveredImageURL = data['delivered_image'];
+            return Container(
+              height: 250,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.network(
+                  deliveredImageURL,
+                  fit: BoxFit.cover,
+                  width: double.infinity
+                ),
+              ), 
+            );
+            //Image.network(deliveredImageURL);
+          } else {
+            // Delivered image URL not available, display alternative UI
+            return Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x01000000),
+                    blurRadius: 20,
+                    offset: Offset(0, 0),
+                  ),
+                ],
               ),
-            ]),
-            zoomControlsEnabled: false,
-            scrollGesturesEnabled: true,
-            rotateGesturesEnabled: false,
-            tiltGesturesEnabled: false,
-            zoomGesturesEnabled: true,
-            myLocationEnabled: false,
-            mapType: MapType.normal,
-            myLocationButtonEnabled: false,
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        width: double.infinity,
-        height: 250.0,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-          color: CupertinoColors.systemGrey4,
-        ),
-        alignment: Alignment.center,
-        child: Text('Map Placeholder'),
-      );
-    }
+              margin: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 17.0),
+              height: 200,
+              foregroundDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: CupertinoColors.secondarySystemFill.resolveFrom(context),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('No delivery photo was uploaded',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context)
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        } else if (snapshot.hasError) {
+          // Error retrieving data
+          return Container(
+          );
+        } else {
+          // No data found
+          return Container(
+          );
+        }
+      },
+    );
   }
 
   Widget _buildButton() {
     if (orderState == OrderState.readyToPickUp) {
-      return Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x19000000),
-              //spreadRadius: 1,
-              blurRadius: 20,
-              offset: Offset(0, 0),
-            ),
-          ],
-        ),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          borderRadius: BorderRadius.circular(100.0),
-          color: CupertinoColors.tertiarySystemBackground,
-          onPressed: () {
-            Navigator.of(context).push(
-              CupertinoPageRoute(
-                builder: (context) => DoneeRatingPage(
-                  postId: widget.postId,
-                ),
-              ),
-            );
-          },
-          child: Text(
-            "Leave a Review",
-            style: TextStyle(
-              fontSize: adjustedFontSize,
-              color:
-                  CupertinoDynamicColor.resolve(CupertinoColors.label, context),
-            ),
-          ),
-        ),
-      );
-    } else {
-      String buttonText = _buildButtonText();
-      return Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Color(0x19000000),
-              //spreadRadius: 1,
-              blurRadius: 20,
-              offset: Offset(0, 0),
-            ),
-          ],
-        ),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          color: CupertinoColors.tertiarySystemBackground,
-          borderRadius: BorderRadius.circular(100.0),
-          onPressed: () {
-            setState(() {
-              _handlePostStatus();
-            });
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                FeatherIcons.check,
-                color: CupertinoColors.systemGreen,
-                size: 24,
-              ),
-              SizedBox(width: 8),
-              Text(
-                buttonText,
-                style: TextStyle(
-                    fontSize: adjustedFontSize,
-                    color: CupertinoDynamicColor.resolve(
-                        CupertinoColors.label, context),
-                    fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildCancelButton();
+    } 
+    else if (orderState == OrderState.completed){
+      return _buildLeaveReviewButton();
     }
+    else {
+      return _buildStatusUpdateButton();
+    }
+  }
+
+  Widget _buildLeaveReviewButton() {
+    return Container(
+      decoration: _buttonBoxDecoration(),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        borderRadius: BorderRadius.circular(100.0),
+        color: CupertinoColors.tertiarySystemBackground,
+        onPressed: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (context) => DoneeRatingPage(
+                postId: widget.postId,
+              ),
+            ),
+          );
+        },
+        child: Text(
+          "Leave a Review",
+          style: _buttonTextStyle(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusUpdateButton() {
+    String buttonText = _buildButtonText();
+    return Container(
+      decoration: _buttonBoxDecoration(),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        color: CupertinoColors.tertiarySystemBackground,
+        borderRadius: BorderRadius.circular(100.0),
+        onPressed: () {
+          setState(() {
+            _handlePostStatus();
+          });
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              FeatherIcons.check,
+              color: CupertinoColors.systemGreen,
+              size: 24,
+            ),
+            SizedBox(width: 8),
+            Text(
+              buttonText,
+              style: _buttonTextStyle(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _buttonBoxDecoration() {
+    return BoxDecoration(
+      boxShadow: [
+        BoxShadow(
+          color: Color(0x19000000),
+          blurRadius: 20,
+          offset: Offset(0, 0),
+        ),
+      ],
+    );
+  }
+
+  TextStyle _buttonTextStyle() {
+    return TextStyle(
+      fontSize: adjustedFontSize,
+      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+    );
   }
 
   String _buildButtonText() {
@@ -604,8 +874,6 @@ class _DonorScreenState extends State<DonorScreen> {
         return "Ready to Pick Up";
       default:
         return "Confirm";
-      //case OrderState.readyToPickUp:
-      //return "Confirm";
     }
   }
 
@@ -629,6 +897,9 @@ class _DonorScreenState extends State<DonorScreen> {
           newStatus = 'confirmed'; // Update post_status back to 'confirmed'
           orderState = OrderState.confirmed;
           break;
+        default:
+          newStatus = 'pending';
+          orderState = OrderState.notReserved;
       }
 
       // Update the post_status field in Firestore
@@ -649,38 +920,14 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
-  // OrderState _getNextOrderState() {
-  //   switch (orderState) {
-  //     case OrderState.reserved:
-  //       return OrderState.confirmed;
-  //     case OrderState.confirmed:
-  //       return OrderState.delivering;
-  //     case OrderState.delivering:
-  //       return OrderState.readyToPickUp;
-  //     case OrderState.readyToPickUp:
-  //       return OrderState.reserved;
-  //   }
-  // }
-
   Widget _buildCancelButton() {
     return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x19000000),
-            spreadRadius: 1,
-            blurRadius: 16,
-            offset: Offset(0, 0),
-          ),
-        ],
-      ),
+      decoration: _buttonBoxDecoration(),
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         color: CupertinoColors.tertiarySystemBackground,
         borderRadius: BorderRadius.circular(100.0),
-        onPressed: () {
-          _handleCancelOrder();
-        },
+        onPressed: _handleCancelOrder,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -691,11 +938,7 @@ class _DonorScreenState extends State<DonorScreen> {
             SizedBox(width: 8),
             Text(
               "Cancel",
-              style: TextStyle(
-                  fontSize: adjustedFontSize,
-                  color: CupertinoDynamicColor.resolve(
-                      CupertinoColors.label, context),
-                  fontWeight: FontWeight.w500),
+              style: _buttonTextStyle(),
             ),
           ],
         ),
@@ -795,7 +1038,7 @@ class _DonorScreenState extends State<DonorScreen> {
           child: _buildButton(),
         ),
         SizedBox(width: 8), // Add some space between the buttons
-        if (orderState != OrderState.readyToPickUp)
+        if (orderState != OrderState.readyToPickUp && orderState != OrderState.completed)
           Expanded(
             child: _buildCancelButton(),
           ),
@@ -804,6 +1047,7 @@ class _DonorScreenState extends State<DonorScreen> {
   }
 }
 
+// The order info section that displays the users photo, name, and rating
 class OrderInfoSection extends StatelessWidget {
   final String? reservedByName;
   final String? reservedByLastName;
@@ -822,23 +1066,14 @@ class OrderInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use a default image if avatarUrl is empty or null
-    // String effectiveAvatarUrl =
-    //     avatarUrl.isEmpty ? 'assets/images/sampleProfile.png' : avatarUrl;
-
     return Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Expanded(
-          // Wrap the Container in an Expanded widget to take up remaining space
+        // Wrap the Container in an Expanded widget to take up remaining space
+        child: Expanded(  
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // CircleAvatar(
-              //   backgroundImage: AssetImage(
-              //       effectiveAvatarUrl), // Load the image from assets
-              //   radius: 10,
-              // ),
               photo.isNotEmpty
                   ? CircleAvatar(
                       radius: 10,
