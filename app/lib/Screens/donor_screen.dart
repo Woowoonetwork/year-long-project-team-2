@@ -29,7 +29,7 @@ const double _defaultFontSize = 16.0;
 const double _defaultOrderInfoFontSize = 12.0;
 
 // Define enum to represent different states
-enum OrderState { notReserved, reserved, confirmed, delivering, readyToPickUp }
+enum OrderState { notReserved, reserved, confirmed, delivering, readyToPickUp, completed }
 
 class DonorScreen extends StatefulWidget {
   final String postId;
@@ -95,6 +95,9 @@ class _DonorScreenState extends State<DonorScreen> {
               break;
             case 'readyToPickUp':
               orderState = OrderState.readyToPickUp;
+              break;
+            case 'completed':
+              orderState = OrderState.completed;
               break;
             default:
               orderState = OrderState.notReserved;
@@ -185,6 +188,9 @@ class _DonorScreenState extends State<DonorScreen> {
               break;
             case 'readyToPickUp':
               orderState = OrderState.readyToPickUp;
+              break;
+            case 'completed':
+              orderState = OrderState.completed;
               break;
           }
         });
@@ -534,6 +540,8 @@ class _DonorScreenState extends State<DonorScreen> {
         return "Your order is out for delivery for ${reservedByName ?? 'Unknown User'}";
       case OrderState.readyToPickUp:
         return "Your order for ${reservedByName ?? 'Unknown User'} is ready to pick up";
+      case OrderState.completed:
+        return "Your order for ${reservedByName ?? 'Unknown User'} is completed";
       default:
         return "Your order has not been reserved yet";
     }
@@ -549,6 +557,7 @@ class _DonorScreenState extends State<DonorScreen> {
       case OrderState.delivering:
         return 0.75; // Progress for delivering state
       case OrderState.readyToPickUp:
+      case OrderState.completed:
         return 1.0; // Progress for readyToPickUp state
       default:
         return 0.0; // Default progress
@@ -649,8 +658,12 @@ class _DonorScreenState extends State<DonorScreen> {
 
   Widget _buildButton() {
     if (orderState == OrderState.readyToPickUp) {
+      return _buildCancelButton();
+    } 
+    else if (orderState == OrderState.completed){
       return _buildLeaveReviewButton();
-    } else {
+    }
+    else {
       return _buildStatusUpdateButton();
     }
   }
@@ -906,7 +919,7 @@ class _DonorScreenState extends State<DonorScreen> {
           child: _buildButton(),
         ),
         SizedBox(width: 8), // Add some space between the buttons
-        if (orderState != OrderState.readyToPickUp)
+        if (orderState != OrderState.readyToPickUp && orderState != OrderState.completed)
           Expanded(
             child: _buildCancelButton(),
           ),
