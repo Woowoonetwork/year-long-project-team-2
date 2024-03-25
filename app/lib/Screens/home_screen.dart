@@ -11,7 +11,6 @@ import 'package:FoodHood/Screens/create_post.dart';
 import 'package:FoodHood/firestore_service.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import '../components.dart';
 // import gesture
 import '../Components/components.dart';
 import 'package:flutter/services.dart';
