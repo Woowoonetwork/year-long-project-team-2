@@ -402,11 +402,13 @@ class _DonorScreenState extends State<DonorScreen> {
                       },
                     ),
 
+                  // Display the option to upload pictures if the state is ready to pick up
                   if (orderState == OrderState.readyToPickUp)
                     buildImageSection(context, _selectedImagePath),
 
+                  // Display the delivery photo if the state is completed
                   if (orderState == OrderState.completed)
-                  buildDeliveredImageSection(context)
+                   buildDeliveredImageSection(context)
 
                   // PendingConfirmationWithTimer(
                   //       durationInSeconds: 120, postId: widget.postId),
@@ -423,167 +425,6 @@ class _DonorScreenState extends State<DonorScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget buildImageSection(BuildContext context, String? imagePath) {
-    return Column(
-      children: [
-        // Display the image
-        ImageDisplayBox(imagePath: imagePath),
-
-        // Display the buttons
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 2.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Expanded(
-                child: CupertinoButton(
-                  onPressed: () {
-                    _pickImageOptions();
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 14.0),
-                    decoration: BoxDecoration(
-                      color: accentColor.resolveFrom(context).withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.add_photo_alternate_rounded,
-                            size: 28,
-                            color:
-                                // if current mode is darkmode, use lighten, else use darken
-                                MediaQuery.of(context).platformBrightness ==
-                                        Brightness.light
-                                    ? darken(accentColor.resolveFrom(context), 0.3)
-                                    : lighten(accentColor.resolveFrom(context), 0.3)),
-                        SizedBox(width: 10),
-                        Text(
-                          'Upload a delivery photo',
-                          style: TextStyle(
-                            color: MediaQuery.of(context).platformBrightness ==
-                                    Brightness.light
-                                ? darken(accentColor.resolveFrom(context), 0.3)
-                                : lighten(accentColor.resolveFrom(context), 0.3),
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Show the "Save" button if an image is selected
-              if (imagePath != null)
-                CupertinoButton(
-                  onPressed: () async {
-                    if (_selectedImagePath != null) {
-                      // Upload the image to Firebase Storage
-                      String? imageUrl =
-                          await _uploadImageToFirebase(File(_selectedImagePath!));
-                      if (imageUrl != null) {
-                        // Save the image URL to the firestore document
-                        await FirebaseFirestore.instance
-                            .collection('post_details')
-                            .doc(widget.postId)
-                            .update({'delivered_image': imageUrl});
-                      } else {
-                        // Handle error
-                      }
-                    }
-                  },
-                  child: Text(
-                    'Save',
-                    style: TextStyle(
-                      color: accentColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Method to build the delivered image section
-  Widget buildDeliveredImageSection(BuildContext context) {
-    return FutureBuilder(
-      future: FirebaseFirestore.instance.collection('post_details').doc(widget.postId).get(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CupertinoActivityIndicator();
-        } else if (snapshot.hasData) {
-          final data = snapshot.data?.data();
-          if (data != null && data.containsKey('delivered_image')) {
-            // Delivered image URL is available
-            final deliveredImageURL = data['delivered_image'];
-            return Container(
-              height: 250,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Image.network(
-                  deliveredImageURL,
-                  fit: BoxFit.cover,
-                  width: double.infinity
-                ),
-              ),
-              
-            );
-            //Image.network(deliveredImageURL);
-          } else {
-            // Delivered image URL not available, display alternative UI
-            return Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x01000000),
-                    blurRadius: 20,
-                    offset: Offset(0, 0),
-                  ),
-                ],
-              ),
-              margin: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 17.0),
-              height: 200,
-              foregroundDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: CupertinoColors.secondarySystemFill.resolveFrom(context),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('No delivery photo was uploaded',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: CupertinoColors.secondaryLabel.resolveFrom(context)
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-        } else if (snapshot.hasError) {
-          // Error retrieving data
-          return Container(
-          );
-        } else {
-          // No data found
-          return Container(
-          );
-        }
-      },
     );
   }
 
@@ -731,6 +572,206 @@ class _DonorScreenState extends State<DonorScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // Widget to build the delivery photo section
+  Widget buildImageSection(BuildContext context, String? imagePath) {
+    return FutureBuilder(
+      future: FirebaseFirestore.instance.collection('post_details').doc(widget.postId).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CupertinoActivityIndicator();
+        } 
+        else if (snapshot.hasData) {
+          final data = snapshot.data?.data();
+          if (data != null && data.containsKey('delivered_image')) {
+            // Delivered image URL is available, an image has already been saved
+            final deliveredImageURL = data['delivered_image'];
+            
+            // Display the image
+            return Container(
+              height: 250,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.network(
+                  deliveredImageURL,
+                  fit: BoxFit.cover,
+                  width: double.infinity
+                ),
+              ), 
+            );
+          } 
+          else {
+            // Delivered image URL not available
+            // If there isn't any delivery photo already saved, display the option to select and save one
+            return Column(
+              children: [
+                // Display the selected image 
+                ImageDisplayBox(imagePath: imagePath),
+                
+                // Display the buttons
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Expanded(
+                        child: CupertinoButton(
+                          onPressed: () {
+                            _pickImageOptions();
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 14.0),
+                            decoration: BoxDecoration(
+                              color: accentColor.resolveFrom(context).withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_photo_alternate_rounded,
+                                    size: 28,
+                                    color:
+                                        // if current mode is darkmode, use lighten, else use darken
+                                        MediaQuery.of(context).platformBrightness ==
+                                                Brightness.light
+                                            ? darken(accentColor.resolveFrom(context), 0.3)
+                                            : lighten(accentColor.resolveFrom(context), 0.3)),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Upload a delivery photo',
+                                  style: TextStyle(
+                                    color: MediaQuery.of(context).platformBrightness ==
+                                            Brightness.light
+                                        ? darken(accentColor.resolveFrom(context), 0.3)
+                                        : lighten(accentColor.resolveFrom(context), 0.3),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Show the "Save" button if an image is selected
+                      if (imagePath != null)
+                        CupertinoButton(
+                          onPressed: () async {
+                            if (_selectedImagePath != null) {
+                              // Upload the image to Firebase Storage
+                              String? imageUrl =
+                                  await _uploadImageToFirebase(File(_selectedImagePath!));
+                              if (imageUrl != null) {
+                                // Save the image URL to the firestore document
+                                await FirebaseFirestore.instance
+                                    .collection('post_details')
+                                    .doc(widget.postId)
+                                    .update({'delivered_image': imageUrl});
+                              } else {
+                                // Handle error
+                              }
+                            }
+                          },
+                          child: Text(
+                            'Save',
+                            style: TextStyle(
+                              color: accentColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
+        } 
+        else if (snapshot.hasError) {
+          // Error retrieving data
+          return Container();
+        } 
+        else {
+          // No data found
+          return Container();
+        }
+      },
+    );
+  }
+
+  // Method to build the delivered image section
+  Widget buildDeliveredImageSection(BuildContext context) {
+    return FutureBuilder(
+      future: FirebaseFirestore.instance.collection('post_details').doc(widget.postId).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CupertinoActivityIndicator();
+        } else if (snapshot.hasData) {
+          final data = snapshot.data?.data();
+          if (data != null && data.containsKey('delivered_image')) {
+            // Delivered image URL is available
+            final deliveredImageURL = data['delivered_image'];
+            return Container(
+              height: 250,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.network(
+                  deliveredImageURL,
+                  fit: BoxFit.cover,
+                  width: double.infinity
+                ),
+              ), 
+            );
+            //Image.network(deliveredImageURL);
+          } else {
+            // Delivered image URL not available, display alternative UI
+            return Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x01000000),
+                    blurRadius: 20,
+                    offset: Offset(0, 0),
+                  ),
+                ],
+              ),
+              margin: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 17.0),
+              height: 200,
+              foregroundDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: CupertinoColors.secondarySystemFill.resolveFrom(context),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('No delivery photo was uploaded',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context)
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        } else if (snapshot.hasError) {
+          // Error retrieving data
+          return Container(
+          );
+        } else {
+          // No data found
+          return Container(
+          );
+        }
+      },
     );
   }
 
