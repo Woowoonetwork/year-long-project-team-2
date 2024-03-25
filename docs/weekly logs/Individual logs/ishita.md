@@ -708,7 +708,7 @@ N/A.
     - Reorganized how donated and reserved posts are displayed and added functionality.
     - Reorganized how active and past orders are displayed and added functionality.
     - Fixed bugs on the account screen.
-    - Added location display on the donor screen using reverse geocaching.
+    - Added location display on the donor screen using reverse geocoding.
     - Added the progress bar as a component for reusability.
 
 - Complete the T2 W10 team log.
@@ -718,6 +718,49 @@ N/A.
 ### Tasks in progress (from Project Board)
 
 - No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Term 2 Week 11: Monday 18th Mar 2024 - Sunday 24th Mar 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W11.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Fixed the map initialization bug on the donor screen.
+- Added new order states - not reserved and completed and changed the logic and UI to accommodate for that.
+- Added image picking, uploading, and reading functionality for a delivery picture at the "Ready to Pick Up" state.
+- Added a stream listener to automatically update changes on the donor screen without needing to leave the screen and come back.
+- Refactored quite a bit of code and modularized it where possible.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Complete the donor screen completed state and photo picker functionality
+    - Added new order states - not reserved and completed - and changed the logic and UI to accommodate for that.
+    - Fixed the map initialization bug on the donor screen.
+    - Added image picking, uploading, and reading functionality for a delivery picture at the "Ready to Pick Up" state.
+    - Added a stream listener to automatically update changes on the donor screen without needing to leave the screen and come back.
+    - Fixed other various bugs on the donor screen and refactored the code.
+
+- Complete the T2 W11 team log.
+- Complete the T2 W11 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+
+- No tasks are currently in progress as all have been completed.
 
 ### Additional Information
 
