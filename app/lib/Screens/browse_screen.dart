@@ -1,5 +1,3 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -13,10 +11,9 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
+import 'package:FoodHood/Components/components.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/search_navigationBar.dart';
 import 'package:FoodHood/firestore_service.dart';
@@ -28,7 +25,6 @@ class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _BrowseScreenState createState() => _BrowseScreenState();
 }
 
@@ -39,7 +35,6 @@ class _BrowseScreenState extends State<BrowseScreen>
   Circle? searchAreaCircle;
   TextEditingController searchController = TextEditingController();
 
-  // Constants for map configurations
   static const double defaultZoomLevel = 14.0;
   static const LatLng fallbackLocation = LatLng(49.2827, -123.1207);
   static const double baseSearchRadius = 1000;
@@ -49,9 +44,7 @@ class _BrowseScreenState extends State<BrowseScreen>
   static const int circleStrokeWidth = 4;
   static const double zoomThreshold = 16.0;
 
-  // State variables
   double _searchRadius = baseSearchRadius;
-  // mapBottomPadding is the bottom safe area padding
   double mapBottomPadding = 0;
   double mapTopPadding = 0;
   double currentZoomLevel = defaultZoomLevel;
@@ -63,7 +56,7 @@ class _BrowseScreenState extends State<BrowseScreen>
   CameraPosition? _lastKnownCameraPosition;
   late StreamSubscription<bool> keyboardVisibilitySubscription;
   bool isKeyboardVisible = false;
-  bool _isZooming = false; // Adding the _isZooming variable here
+  bool _isZooming = false;
   Map<String, Color> tagColors = {};
   List<Map<String, dynamic>> allPosts = [];
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
@@ -104,33 +97,29 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   Future<void> createCustomMarkerIcon(
       {required Color color, bool isSelected = false}) async {
-    const double markerSize = 100.0; // Marker size including shadow and border
-    const double shadowSize = 10.0; // Shadow size
-    const double borderSize = 10.0; // White border size
-    final double circleSize =
-        markerSize - shadowSize - borderSize; // Inner circle size
+    const double markerSize = 100.0;
+    const double shadowSize = 10.0;
+    const double borderSize = 10.0;
+    const double circleSize = markerSize - shadowSize - borderSize;
 
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
 
-    // Shadow
     final Paint shadowPaint = Paint()
       ..color = Colors.black.withOpacity(0.25)
-      ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, shadowSize);
-    canvas.drawCircle(
-        Offset(markerSize / 2, markerSize / 2), circleSize / 2, shadowPaint);
+      ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, shadowSize);
+    canvas.drawCircle(const Offset(markerSize / 2, markerSize / 2),
+        circleSize / 2, shadowPaint);
 
-    // White border
     final Paint borderPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
       ..strokeWidth = borderSize;
-    canvas.drawCircle(
-        Offset(markerSize / 2, markerSize / 2), circleSize / 2, borderPaint);
+    canvas.drawCircle(const Offset(markerSize / 2, markerSize / 2),
+        circleSize / 2, borderPaint);
 
-    // Inner circle
     final Paint circlePaint = Paint()..color = color;
-    canvas.drawCircle(Offset(markerSize / 2, markerSize / 2),
+    canvas.drawCircle(const Offset(markerSize / 2, markerSize / 2),
         (circleSize - borderSize) / 2, circlePaint);
 
     final ui.Image markerAsImage = await pictureRecorder
@@ -140,7 +129,6 @@ class _BrowseScreenState extends State<BrowseScreen>
         await markerAsImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List uint8List = byteData!.buffer.asUint8List();
 
-    // Update the appropriate icon based on whether it's selected or not
     setState(() {
       if (isSelected) {
         selectedIcon = BitmapDescriptor.fromBytes(uint8List);
@@ -154,7 +142,6 @@ class _BrowseScreenState extends State<BrowseScreen>
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
       if (mounted) {
-        // Check if the widget is still mounted
         setState(() {
           if (visible) {
             mapBottomPadding = 0;
@@ -170,17 +157,15 @@ class _BrowseScreenState extends State<BrowseScreen>
 
   void _pickRandomPost() {
     if (allPosts.isEmpty) {
-      return; // Return if there are no posts
+      return;
     }
 
     var random = math.Random();
     var randomPostIndex = random.nextInt(allPosts.length);
     var randomPost = allPosts[randomPostIndex];
-
-    // Assuming 'post_location' is stored as GeoPoint in Firestore
     GeoPoint location = randomPost['post_location'];
     LatLng latLng = LatLng(location.latitude, location.longitude);
-    _zoomToPostLocation(latLng); // Navigate to the selected post's location
+    _zoomToPostLocation(latLng);
   }
 
   @override
@@ -201,7 +186,6 @@ class _BrowseScreenState extends State<BrowseScreen>
   Future<void> _requestLocationPermission() async {
     var status = await Permission.location.request();
     if (status.isGranted) {
-      // If granted, fetch the current location
       _fetchAndSetCurrentLocation();
     }
   }
@@ -273,7 +257,7 @@ class _BrowseScreenState extends State<BrowseScreen>
           _updateSearchAreaCircle(_lastKnownCameraPosition!.target);
         }
       }
-      _updateMarkersBasedOnCircle(); // Update this method call
+      _updateMarkersBasedOnCircle();
     });
   }
 
@@ -333,7 +317,6 @@ class _BrowseScreenState extends State<BrowseScreen>
     final MarkerId tappedMarkerId = MarkerId(markerId);
 
     setState(() {
-      // Toggle the selected marker state
       if (_selectedMarkerId == tappedMarkerId) {
         _selectedMarkerId = null;
       } else {
@@ -341,7 +324,6 @@ class _BrowseScreenState extends State<BrowseScreen>
       }
     });
 
-    // Now refresh the marker to update the icon
     _updateMarkerIcon(tappedMarkerId);
     FirebaseFirestore.instance
         .collection('post_details')
@@ -380,8 +362,7 @@ class _BrowseScreenState extends State<BrowseScreen>
                   postData['image_url'] ?? 'assets/images/sampleFoodPic.png',
               'title': title,
               'tags': tags,
-              'profileURL':
-                  userData?['profileImagePath'] ?? '', // Add this line
+              'profileURL': userData?['profileImagePath'] ?? '',
               'tagColors': assignedColors,
               'firstname': userData?['firstName'] ?? 'Unknown',
               'lastname': userData?['lastName'] ?? 'Unknown',
@@ -402,39 +383,18 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   void _updateMarkerIcon(MarkerId tappedMarkerId) {
-    final Marker? tappedMarker = _markers.firstWhere(
+    final Marker tappedMarker = _markers.firstWhere(
       (m) => m.markerId == tappedMarkerId,
-      orElse: () => Marker(markerId: MarkerId('default')),
+      orElse: () => const Marker(markerId: MarkerId('default')),
     );
-
-    if (tappedMarker != null) {
-      // Create a new Marker with updated icon property
-      final Marker updatedMarker = tappedMarker.copyWith(
-        iconParam:
-            (_selectedMarkerId == tappedMarkerId) ? selectedIcon : defaultIcon,
-      );
-
-      // Update the markers set with the new marker
-      setState(() {
-        _markers.removeWhere((m) => m.markerId == tappedMarkerId);
-        _markers.add(updatedMarker);
-      });
-    }
-  }
-
-  String timeAgoSinceDate(DateTime dateTime) {
-    final duration = DateTime.now().difference(dateTime);
-    if (duration.inDays > 8) {
-      return 'on ${DateFormat('MMMM dd, yyyy').format(dateTime)}';
-    } else if (duration.inDays >= 1) {
-      return '${duration.inDays} days ago';
-    } else if (duration.inHours >= 1) {
-      return '${duration.inHours} hours ago';
-    } else if (duration.inMinutes >= 1) {
-      return '${duration.inMinutes} minutes ago';
-    } else {
-      return 'Just now';
-    }
+    final Marker updatedMarker = tappedMarker.copyWith(
+      iconParam:
+          (_selectedMarkerId == tappedMarkerId) ? selectedIcon : defaultIcon,
+    );
+    setState(() {
+      _markers.removeWhere((m) => m.markerId == tappedMarkerId);
+      _markers.add(updatedMarker);
+    });
   }
 
   void _zoomToPostLocation(LatLng postLatLng) {
@@ -572,8 +532,16 @@ class _BrowseScreenState extends State<BrowseScreen>
               padding:
                   EdgeInsets.only(bottom: mapBottomPadding, top: mapTopPadding),
             ),
-            if (_showPostCard) _buildPostCard(),
-            if (!_showPostCard) _buildBottomButton(),
+            Positioned(
+              bottom: mapBottomPadding + 24,
+              left: 0,
+              right: 0,
+              child: AnimatedSwitcher(
+                duration: Duration(
+                    milliseconds: 300), // Adjust the duration as needed
+                child: _showPostCard ? _buildPostCard() : _buildBottomButton(),
+              ),
+            ),
           ],
         );
       },
@@ -634,31 +602,26 @@ class _BrowseScreenState extends State<BrowseScreen>
     String postId = _selectedPostData['postId'] ?? '0';
     String profileURL = _selectedPostData['profileURL'] ?? '';
 
-    return Positioned(
-      bottom: mapBottomPadding + 24,
-      left: 0,
-      right: 0,
-      child: GestureDetector(
-        onVerticalDragUpdate: (details) {
-          if (details.primaryDelta! > 10) {
-            _zoomOutToDefault(null);
-            _resetUIState();
-          }
-        },
-        onTap: () => _resetUIState(),
-        child: CompactPostCard(
-          imageLocation: imageLocation,
-          title: title,
-          tags: tags,
-          tagColors: _generateTagColors(tags.length),
-          firstname: firstname,
-          lastname: lastname,
-          timeAgo: timeAgo,
-          onTap: (postId) => _onMarkerTapped(postId),
-          postId: postId,
-          profileURL: profileURL,
-          showTags: false,
-        ),
+    return GestureDetector(
+      onVerticalDragUpdate: (details) {
+        if (details.primaryDelta! > 10) {
+          _zoomOutToDefault(null);
+          _resetUIState();
+        }
+      },
+      onTap: () => _resetUIState(),
+      child: CompactPostCard(
+        imageLocation: imageLocation,
+        title: title,
+        tags: tags,
+        tagColors: _generateTagColors(tags.length),
+        firstname: firstname,
+        lastname: lastname,
+        timeAgo: timeAgo,
+        onTap: (postId) => _onMarkerTapped(postId),
+        postId: postId,
+        profileURL: profileURL,
+        showTags: false,
       ),
     );
   }
@@ -680,34 +643,28 @@ class _BrowseScreenState extends State<BrowseScreen>
   Widget _buildBottomButton() {
     return Stack(
       children: [
-        Positioned(
-          bottom: mapBottomPadding + 16,
-          left: 0,
-          right: 0,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x19000000),
-                    blurRadius: 20,
-                    offset: Offset(0, 0),
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(
-                    100.0), // Match button's border radius
-              ),
-              child: CupertinoButton(
-                  onPressed: _currentLocation,
-                  color: CupertinoColors.tertiarySystemBackground,
-                  borderRadius: BorderRadius.circular(100.0),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0, vertical: 14.0),
-                  child: _isZooming
-                      ? _zoomButtonContent()
-                      : _locationButtonContent()),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x19000000),
+                  blurRadius: 20,
+                  offset: Offset(0, 0),
+                ),
+              ],
+              borderRadius:
+                  BorderRadius.circular(100.0), // Match button's border radius
             ),
+            child: CupertinoButton(
+                onPressed: _currentLocation,
+                color: CupertinoColors.tertiarySystemBackground,
+                borderRadius: BorderRadius.circular(100.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 14.0),
+                child:
+                    _isZooming ? zoomButtonContent() : locationButtonContent()),
           ),
         ),
         Positioned(
@@ -727,11 +684,11 @@ class _BrowseScreenState extends State<BrowseScreen>
                 borderRadius: BorderRadius.circular(100.0),
               ),
               child: CupertinoButton(
-                onPressed: () => _showFeelingLuckyModal(context),
+                onPressed: () => showFeelingLuckyModal(context),
                 color: CupertinoColors.tertiarySystemBackground,
                 borderRadius: BorderRadius.circular(100.0),
-                padding: EdgeInsets.all(14.0),
-                child: _RandomPostContent(),
+                padding: const EdgeInsets.all(14.0),
+                child: randomPostContent(),
               ),
             ),
           ),
@@ -740,20 +697,20 @@ class _BrowseScreenState extends State<BrowseScreen>
     );
   }
 
-  void _showFeelingLuckyModal(BuildContext context) {
+  void showFeelingLuckyModal(BuildContext context) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
         return SafeArea(
             child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
           child: _buildModalContent(context),
         ));
       },
     );
   }
 
-  Row _zoomButtonContent() {
+  Row zoomButtonContent() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -774,7 +731,7 @@ class _BrowseScreenState extends State<BrowseScreen>
     );
   }
 
-  Row _locationButtonContent() {
+  Row locationButtonContent() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -795,7 +752,7 @@ class _BrowseScreenState extends State<BrowseScreen>
     );
   }
 
-  Row _RandomPostContent() {
+  Row randomPostContent() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -933,21 +890,6 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   Widget _buildModalContent(BuildContext context) {
-    // Define commonly used text styles to avoid redundancy
-    final titleStyle = TextStyle(
-      fontWeight: FontWeight.w700,
-      fontSize: 22,
-      letterSpacing: -0.6,
-    );
-
-    final descriptionStyle = TextStyle(
-      fontSize: 16,
-      color: CupertinoColors.secondaryLabel.resolveFrom(context),
-      letterSpacing: -0.6,
-    );
-    final isDarkMode =
-        MediaQuery.of(context).platformBrightness == Brightness.dark;
-
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
@@ -958,44 +900,53 @@ class _BrowseScreenState extends State<BrowseScreen>
           borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Fit content
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14.0),
-                  child: Image.asset(
-                    isDarkMode
-                        ? 'assets/images/dice_dark.png'
-                        : 'assets/images/dice.png',
-                    fit: BoxFit.cover,
-                  )),
+                borderRadius: BorderRadius.circular(14.0),
+                child: Image.asset(
+                  MediaQuery.of(context).platformBrightness == Brightness.dark
+                      ? 'assets/images/dice_dark.png'
+                      : 'assets/images/dice.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text("Can't make up your mind?", style: titleStyle),
+              child: Text(
+                "Can't make up your mind?",
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 22,
+                  letterSpacing: -0.6,
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(bottom: 24),
               child: Text(
                 "Let us decide for you!",
                 textAlign: TextAlign.center,
-                style: descriptionStyle,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  letterSpacing: -0.6,
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 0), // Adjust the padding if needed
+              padding: const EdgeInsets.symmetric(horizontal: 0),
               child: SizedBox(
-                width: double
-                    .infinity, // Forces the button to expand to fill the width
+                width: double.infinity,
                 child: CupertinoButton(
-                  color:
-                      secondaryColor, // Ensure this variable is defined or replace it with a specific color
-                  child: Text(
-                    'Pick for me', // Changed 'Connect' to 'Pick for me' to match the context
+                  color: secondaryColor,
+                  child: const Text(
+                    'Pick for me',
                     style: TextStyle(
                       color: CupertinoColors.black,
                       fontWeight: FontWeight.w500,

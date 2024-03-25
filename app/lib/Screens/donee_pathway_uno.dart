@@ -8,12 +8,15 @@ import 'package:FoodHood/Components/progress_bar.dart';
 import 'package:FoodHood/Screens/donor_rating.dart';
 import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart';
+import 'package:timelines/timelines.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../components.dart';
+import '../Components/components.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
-
-//enum OrderState { reserved, confirmed, delivering, readyToPickUp }
+import 'package:FoodHood/Screens/donor_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class DoneePath extends StatefulWidget {
   final String postId;
@@ -26,12 +29,14 @@ class DoneePath extends StatefulWidget {
 
 class _DoneePathState extends State<DoneePath> {
   late PostDetailViewModel viewModel;
+  late LatLng pickupLatLng;
   bool isLoading = true;
-  //OrderState orderState = OrderState.reserved;
+  OrderState orderState = OrderState.reserved;
 
   @override
   void initState() {
     super.initState();
+    pickupLatLng = LatLng(49.8862, -119.4971);
     viewModel = PostDetailViewModel(widget.postId);
     viewModel.fetchData(widget.postId).then((_) {
       if (mounted) {
@@ -46,18 +51,46 @@ class _DoneePathState extends State<DoneePath> {
     return Center(child: CupertinoActivityIndicator(radius: 16));
   }
 
+  Widget _buildTextField({
+    required String text,
+  }) {
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+            width: 0.0,
+          ),
+          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+          borderRadius: BorderRadius.circular(24.0),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(),
+        ),
+      ),
+    );
+  }
+
   Widget _buildMap(LatLng position) {
-    return Container(
-      height: 200,
-      child: GoogleMap(
-        initialCameraPosition: CameraPosition(target: position, zoom: 14.4746),
-        markers: {
-          Marker(
-              markerId: MarkerId("pickupLocation"),
-              position: position,
-              infoWindow: InfoWindow(title: "Pickup Location")),
-        },
-        onMapCreated: (GoogleMapController controller) {},
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20.0), // Adjust the corner radius
+      child: Container(
+        height: 200,
+        child: GoogleMap(
+          initialCameraPosition:
+              CameraPosition(target: position, zoom: 14.4746),
+          markers: {
+            Marker(
+                markerId: MarkerId("pickupLocation"),
+                position: position,
+                infoWindow: InfoWindow(title: "Pickup Location")),
+          },
+          onMapCreated: (GoogleMapController controller) {},
+        ),
       ),
     );
   }
@@ -98,7 +131,7 @@ class _DoneePathState extends State<DoneePath> {
             color: Colors.grey.withOpacity(0.2),
             spreadRadius: 2,
             blurRadius: 5,
-            offset: Offset(0, 3),
+            offset: Offset(0, 3), // changes position of shadow
           ),
         ],
       ),
@@ -119,7 +152,7 @@ class _DoneePathState extends State<DoneePath> {
               style: TextStyle(
                 color: CupertinoColors.white,
                 fontSize: 16.0,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -158,15 +191,22 @@ class _DoneePathState extends State<DoneePath> {
     ]));
   }
 
-  // Widget _buildProgressBar(String postStatus) {
-  //   return ProgressBar(
-  //     progress: _calculateProgress(),
-  //     labels: ["Reserved", "Confirmed", "Delivering", "Ready to Pick Up"],
-  //     color: accentColor,
-  //     isReserved: postStatus == "pending",
-  //     //currentState: orderState,
-  //   );
-  // }
+  Widget _buildProgressBar(String postStatus) {
+    // Map the postStatus to OrderState for consistency
+    final OrderState state = _mapStatusToOrderState(postStatus);
+
+    // Calculate the progress based on the mapped state
+    final double progress = _calculateProgress();
+
+    return ProgressBar(
+      progress: progress,
+      labels: ["Reserved", "Confirmed", "Delivering", "Ready to Pick Up"],
+      color: accentColor,
+      // Assuming isReserved means any state other than 'not reserved'
+      isReserved: postStatus != "not reserved",
+      currentState: state,
+    );
+  }
 
   Widget _buildStatusDependentButton(String postStatus) {
     if (postStatus == "confirmed") {
@@ -177,18 +217,55 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   Widget _buildImageSection() {
-    return Container(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(32.0), // Adjust the corner radius
+      child: Container(
         height: 200,
+        width: double.infinity,
         child: Image.network(
             viewModel.imagesWithAltText.isNotEmpty
                 ? viewModel.imagesWithAltText[0]['url']!
                 : 'default_image_url',
-            fit: BoxFit.cover,
-            height: 200,
-            width: double.infinity, errorBuilder: (BuildContext context,
+            fit: BoxFit.cover, errorBuilder: (BuildContext context,
                 Object exception, StackTrace? stackTrace) {
           return const Icon(Icons.error);
-        }));
+        }),
+      ),
+    );
+  }
+
+  OrderState _mapStatusToOrderState(String postStatus) {
+    switch (postStatus) {
+      case 'pending':
+        return orderState = OrderState.reserved;
+      case 'confirmed':
+        return orderState = OrderState.confirmed;
+      case 'delivering':
+        return orderState = OrderState.delivering;
+      case 'readyToPickUp':
+        return orderState = OrderState.readyToPickUp;
+      default:
+        return orderState = OrderState.reserved;
+    }
+  }
+
+  Future<String> getAddressFromLatLng(LatLng position) async {
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      if (jsonResponse['results'] != null &&
+          jsonResponse['results'].length > 0) {
+        String address = jsonResponse['results'][0]['formatted_address'];
+        return address;
+      } else {
+        return 'Location not found';
+      }
+    } else {
+      throw Exception('Failed to fetch address');
+    }
   }
 
   @override
@@ -220,6 +297,13 @@ class _DoneePathState extends State<DoneePath> {
 
               var data = snapshot.data!.data() as Map<String, dynamic>;
               var postStatus = data['post_status'] ?? 'not reserved';
+              orderState = _mapStatusToOrderState(postStatus);
+              if (data['post_location'] is GeoPoint) {
+                GeoPoint geoPoint = data['post_location'] as GeoPoint;
+                pickupLatLng = LatLng(geoPoint.latitude, geoPoint.longitude);
+              } else {
+                pickupLatLng = LatLng(49.8862, -119.4971);
+              }
 
               return SingleChildScrollView(
                   child: Padding(
@@ -237,11 +321,8 @@ class _DoneePathState extends State<DoneePath> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    //_buildProgressBar(postStatus),
-                    SizedBox(height: 20),
-
                     Text(
-                      'Made by ${viewModel.firstName} ${viewModel.lastName} Posted ${viewModel.timeAgoSinceDate(viewModel.postTimestamp)}',
+                      'Made by ${viewModel.firstName} ${viewModel.lastName}    Posted ${viewModel.timeAgoSinceDate(viewModel.postTimestamp)}',
                       style: TextStyle(
                         color: CupertinoColors.label
                             .resolveFrom(context)
@@ -251,61 +332,95 @@ class _DoneePathState extends State<DoneePath> {
                         letterSpacing: -0.48,
                       ),
                     ),
-                    SizedBox(height: 20),
-                    if (postStatus == 'confirmed')
-                      _buildMap(LatLng(49.8862, -119.4971)),
-                    if (postStatus != 'confirmed') _buildImageSection(),
-
                     SizedBox(height: 30),
-
-                    if (postStatus == "confirmed") _buildNavigateButton(),
-                    if (postStatus == "pending" || postStatus == "not reserved")
-                      PendingConfirmationWithTimer(
-                          durationInSeconds: 500, postId: widget.postId),
-                    SizedBox(height: 15),
-                    Container(
-                      width: 350,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
+                    _buildProgressBar(postStatus),
+                    if (postStatus == 'confirmed' ||
+                        postStatus == 'delivering' ||
+                        postStatus == 'readyToPickUp')
+                      Column(
+                        children: [
+                          _buildMap(LatLng(49.8862, -119.4971)),
+                          FutureBuilder<String>(
+                            future: getAddressFromLatLng(pickupLatLng),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                return _buildTextField(
+                                    text: "Pickup from ${snapshot.data}");
+                              }
+                            },
                           ),
                         ],
                       ),
-                      child: CupertinoButton(
-                        onPressed: () {
-                          _handleCancelReservation();
-                        },
-                        color: CupertinoColors.white,
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 24.0, vertical: 8.0),
-                        borderRadius: BorderRadius.circular(30.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              CupertinoIcons.xmark,
-                              color: CupertinoColors.destructiveRed,
-                              size: 24.0,
+                    if (postStatus == 'pending') _buildImageSection(),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        if (postStatus == "confirmed" ||
+                            postStatus == "delivering" ||
+                            postStatus == "readyToPickUp")
+                          Expanded(
+                            child: _buildNavigateButton(),
+                          ),
+                        if (postStatus == "pending" ||
+                            postStatus == "not reserved")
+                          Expanded(
+                            child: PendingConfirmationWithTimer(
+                              durationInSeconds: 500,
+                              postId: widget.postId,
                             ),
-                            SizedBox(width: 8.0),
-                            Text(
-                              'Cancel Order',
-                              style: TextStyle(
-                                color: CupertinoColors.black,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: 15),
+                    if (postStatus != "readyToPickUp")
+                      Container(
+                        width: 350,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
+                        child: CupertinoButton(
+                          onPressed: () {
+                            _handleCancelReservation();
+                          },
+                          color: CupertinoColors.white,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24.0, vertical: 8.0),
+                          borderRadius: BorderRadius.circular(30.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                CupertinoIcons.xmark,
+                                color: CupertinoColors.destructiveRed,
+                                size: 24.0,
+                              ),
+                              SizedBox(width: 8.0),
+                              Text(
+                                'Cancel Order',
+                                style: TextStyle(
+                                  color: CupertinoColors.black,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 20.0),
+                    SizedBox(height: 0.0),
                     if (postStatus == "readyToPickUp")
                       Container(
                         width: 350,
@@ -397,17 +512,18 @@ class _DoneePathState extends State<DoneePath> {
     );
   }
 
-  // double _calculateProgress() {
-  //   switch (orderState) {
-  //     case OrderState.reserved:
-  //       return 0.25; // Progress for reserved state
-  //     case OrderState.confirmed:
-  //       return 0.5; // Progress for confirmed state
-  //     case OrderState.delivering:
-  //       return 0.75; // Progress for delivering state
-  //     case OrderState.readyToPickUp:
-  //       return 1.0; // Progress for readyToPickUp state
-  //     default:
-  //       return 0.0; // Default progress
-  //   }
+  double _calculateProgress() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return 0.25; // Progress for reserved state
+      case OrderState.confirmed:
+        return 0.5; // Progress for confirmed state
+      case OrderState.delivering:
+        return 0.75; // Progress for delivering state
+      case OrderState.readyToPickUp:
+        return 1.0; // Progress for readyToPickUp state
+      default:
+        return 0.0; // Default progress
+    }
+  }
 }

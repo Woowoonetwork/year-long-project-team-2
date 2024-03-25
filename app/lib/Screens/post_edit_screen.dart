@@ -866,7 +866,7 @@ class _EditPostScreenState extends State<EditPostScreen>
               height: 250.0,
               margin: EdgeInsets.all(16.0),
               alignment: Alignment.center,
-              child: CircularProgressIndicator(),
+              child: CupertinoActivityIndicator(),
             ),
           );
         } else {
@@ -884,7 +884,7 @@ class _EditPostScreenState extends State<EditPostScreen>
               ),
             ),
           );
-        } 
+        }
       },
     );
   }

@@ -47,7 +47,6 @@ class _CupertinoSearchNavigationBarState
       });
       widget.onSearchBarTapped();
     } else {
-      
       _updateCancelButtonVisibility();
     }
   }
@@ -149,7 +148,6 @@ class _CupertinoSearchNavigationBarState
               fontWeight: FontWeight.w400,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             style: TextStyle(
               fontSize: 18,
               color: CupertinoColors.label.resolveFrom(context),

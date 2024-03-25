@@ -53,7 +53,8 @@ class _DonorScreenState extends State<DonorScreen> {
   @override
   void initState() {
     super.initState();
-    pickupLatLng = LatLng(49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
+    pickupLatLng = LatLng(
+        49.8862, -119.4971); // Initialize the coordinates to downtown Kelowna
     fetchPostInformation(); // Fetch reserved by user name when the widget initializes
     _textScaleFactor =
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
@@ -104,7 +105,7 @@ class _DonorScreenState extends State<DonorScreen> {
             final userRating = userSnapshot['avgRating'];
 
             setState(() {
-              reservedByName = userName; 
+              reservedByName = userName;
               reservedByLastName = userLastName;
               rating = userRating;
               photo = userSnapshot['profileImagePath'] as String? ?? '';
@@ -147,7 +148,7 @@ class _DonorScreenState extends State<DonorScreen> {
     adjustedHeadingFontSize = _defaultHeadingFontSize * _textScaleFactor;
     adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
   }
-  
+
   // void _onLocationSelected(LatLng location) async {
   //   String address = await getAddressFromLatLng(location);
   //   setState(() {
@@ -231,41 +232,46 @@ class _DonorScreenState extends State<DonorScreen> {
                       rating: rating,
                       photo: photo,
                     ),
-                    
+
                   SizedBox(height: 10.0),
 
-                  // Progress Bar 
+                  // Progress Bar
                   ProgressBar(
-                    progress: _calculateProgress(), 
-                    labels: ["Reserved", "Confirmed", "Delivering", "Ready to Pick Up"], 
+                    progress: _calculateProgress(),
+                    labels: [
+                      "Reserved",
+                      "Confirmed",
+                      "Delivering",
+                      "Ready to Pick Up"
+                    ],
                     color: accentColor,
                     isReserved: reservedByName != null,
                     currentState: orderState,
                   ),
 
                   // SizedBox(height: 25,),
-                  
+
                   _buildMap(context),
 
                   FutureBuilder<String>(
                     future: getAddressFromLatLng(pickupLatLng),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
+                        return CupertinoActivityIndicator();
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else {
-                        return __buildTextField( text: "Pickup from ${snapshot.data}");
+                        return __buildTextField(
+                            text: "Pickup from ${snapshot.data}");
                       }
                     },
                   ),
-                  
+
                   // PendingConfirmationWithTimer(
                   //       durationInSeconds: 120, postId: widget.postId),
-                
+
                   // Replace the placeholder with the chat bubble in the future
                   //SizedBox(height: 200.0),
-
                 ],
               ),
 
@@ -279,34 +285,29 @@ class _DonorScreenState extends State<DonorScreen> {
   }
 
   // Reusable Widget to build the Progress Bar
-  Widget _buildProgressBar(){
+  Widget _buildProgressBar() {
     return Container(
       height: 120,
-      alignment: Alignment.topCenter, 
+      alignment: Alignment.topCenter,
       child: Timeline.tileBuilder(
         shrinkWrap: true,
         padding: EdgeInsets.zero,
-        
         theme: TimelineThemeData(
-          direction: Axis.horizontal,
-          connectorTheme: ConnectorThemeData(space: 6.0, thickness: 3.0),
-          nodePosition: 0
-        ),
-
+            direction: Axis.horizontal,
+            connectorTheme: ConnectorThemeData(space: 6.0, thickness: 3.0),
+            nodePosition: 0),
         builder: TimelineTileBuilder.connected(
           connectionDirection: ConnectionDirection.before,
           itemCount: 4,
-
           itemExtentBuilder: (_, __) {
             final double padding = 16.0;
-            final double availableWidth = MediaQuery.of(context).size.width - padding * 2;
-            return availableWidth / 4.0; 
+            final double availableWidth =
+                MediaQuery.of(context).size.width - padding * 2;
+            return availableWidth / 4.0;
           },
-
           oppositeContentsBuilder: (context, index) {
             return Container();
           },
-          
           contentsBuilder: (context, index) {
             switch (index) {
               case 0:
@@ -316,14 +317,14 @@ class _DonorScreenState extends State<DonorScreen> {
               case 2:
                 return _buildProgressPoint("Delivering", OrderState.delivering);
               case 3:
-                return _buildProgressPoint("Ready to Pick Up", OrderState.readyToPickUp);
+                return _buildProgressPoint(
+                    "Ready to Pick Up", OrderState.readyToPickUp);
               default:
                 return Container();
             }
           },
-
           indicatorBuilder: (_, index) {
-            if (reservedByName == null){
+            if (reservedByName == null) {
               return OutlinedDotIndicator(
                 borderWidth: 2.0,
                 color: accentColor,
@@ -336,11 +337,10 @@ class _DonorScreenState extends State<DonorScreen> {
             } else {
               return OutlinedDotIndicator(
                 borderWidth: 2.0,
-                color:  accentColor,
+                color: accentColor,
               );
             }
           },
-
           connectorBuilder: (_, index, type) {
             if (index < (_calculateProgress() * 4).toInt()) {
               return SolidLineConnector(
@@ -348,7 +348,7 @@ class _DonorScreenState extends State<DonorScreen> {
               );
             } else {
               return DashedLineConnector(
-                color:  accentColor,
+                color: accentColor,
               );
             }
           },
@@ -368,22 +368,19 @@ class _DonorScreenState extends State<DonorScreen> {
         text,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: adjustedFontSize - 2.0,
-          fontWeight: FontWeight.bold,
-          color: isReserved
-              ? isCurrentState
-                  ? CupertinoDynamicColor.resolve(
-                      CupertinoColors.label, context)
-                  : CupertinoDynamicColor.resolve(
-                      CupertinoColors.secondaryLabel, context)
-              :
-                  CupertinoDynamicColor.resolve(
-                      CupertinoColors.secondaryLabel, context)
-        ),
+            fontSize: adjustedFontSize - 2.0,
+            fontWeight: FontWeight.bold,
+            color: isReserved
+                ? isCurrentState
+                    ? CupertinoDynamicColor.resolve(
+                        CupertinoColors.label, context)
+                    : CupertinoDynamicColor.resolve(
+                        CupertinoColors.secondaryLabel, context)
+                : CupertinoDynamicColor.resolve(
+                    CupertinoColors.secondaryLabel, context)),
       ),
     );
   }
-
 
   // Method to calculate progress based on order state
   double _calculateProgress() {
@@ -471,34 +468,34 @@ class _DonorScreenState extends State<DonorScreen> {
     final LatLng? locationCoordinates = pickupLatLng;
 
     if (locationCoordinates != null) {
-      return  ClipRRect(
-          borderRadius: BorderRadius.vertical(
-              top: Radius.circular(16), bottom: Radius.circular(15)),
-          child: SizedBox(
-            width: double.infinity,
-            height: 250.0,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: pickupLatLng,
-                zoom: 12.0,
-              ),
-              markers: Set.from([
-                Marker(
-                  markerId: MarkerId('pickupLocation'),
-                  position: locationCoordinates,
-                ),
-              ]),
-              zoomControlsEnabled: false,
-              scrollGesturesEnabled: true,
-              rotateGesturesEnabled: false,
-              tiltGesturesEnabled: false,
-              zoomGesturesEnabled: true,
-              myLocationEnabled: false,
-              mapType: MapType.normal,
-              myLocationButtonEnabled: false,
+      return ClipRRect(
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(16), bottom: Radius.circular(15)),
+        child: SizedBox(
+          width: double.infinity,
+          height: 250.0,
+          child: GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: pickupLatLng,
+              zoom: 12.0,
             ),
+            markers: Set.from([
+              Marker(
+                markerId: MarkerId('pickupLocation'),
+                position: locationCoordinates,
+              ),
+            ]),
+            zoomControlsEnabled: false,
+            scrollGesturesEnabled: true,
+            rotateGesturesEnabled: false,
+            tiltGesturesEnabled: false,
+            zoomGesturesEnabled: true,
+            myLocationEnabled: false,
+            mapType: MapType.normal,
+            myLocationButtonEnabled: false,
           ),
-        );
+        ),
+      );
     } else {
       return Container(
         width: double.infinity,
@@ -716,7 +713,8 @@ class _DonorScreenState extends State<DonorScreen> {
             CupertinoDialogAction(
               child: Text("Cancel"),
               onPressed: () {
-                Navigator.pop(context, false); // Return false to indicate cancel
+                Navigator.pop(
+                    context, false); // Return false to indicate cancel
               },
             ),
             CupertinoDialogAction(
@@ -735,10 +733,11 @@ class _DonorScreenState extends State<DonorScreen> {
     if (confirmCancel == true) {
       try {
         // Get the user document
-        DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore.instance
-            .collection('user')
-            .doc(reservedByUserId)
-            .get();
+        DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+            await FirebaseFirestore.instance
+                .collection('user')
+                .doc(reservedByUserId)
+                .get();
 
         // Check if data exists
         if (userSnapshot.exists) {
@@ -756,7 +755,7 @@ class _DonorScreenState extends State<DonorScreen> {
               .update({'reserved_posts': reservedPosts});
         }
 
-        // Update the reserved_by and post_status fields in the post_details document 
+        // Update the reserved_by and post_status fields in the post_details document
         await FirebaseFirestore.instance
             .collection('post_details')
             .doc(widget.postId)
@@ -839,19 +838,19 @@ class OrderInfoSection extends StatelessWidget {
               //   radius: 10,
               // ),
               photo.isNotEmpty
-                ? CircleAvatar(
-                    radius: 10,
-                    backgroundImage: CachedNetworkImageProvider(photo),
-                    onBackgroundImageError: (_, __) {
-                      // Handle image load error
-                    },
-                    backgroundColor: Colors.transparent,
-                  )
-                : CircleAvatar(
-                    radius: 10,
-                    backgroundImage:
-                        AssetImage('assets/images/sampleProfile.png'),
-                  ),
+                  ? CircleAvatar(
+                      radius: 10,
+                      backgroundImage: CachedNetworkImageProvider(photo),
+                      onBackgroundImageError: (_, __) {
+                        // Handle image load error
+                      },
+                      backgroundColor: Colors.transparent,
+                    )
+                  : CircleAvatar(
+                      radius: 10,
+                      backgroundImage:
+                          AssetImage('assets/images/sampleProfile.png'),
+                    ),
               SizedBox(width: 8),
               Text(
                 'Reserved by $reservedByName $reservedByLastName',

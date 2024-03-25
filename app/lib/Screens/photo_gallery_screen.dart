@@ -142,7 +142,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
           padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
-              color: _showAltText ? blue : CupertinoColors.darkBackgroundGray),
+              color: _showAltText ? blue : CupertinoColors.darkBackgroundGray.withOpacity(0.7)),
           child: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () {
