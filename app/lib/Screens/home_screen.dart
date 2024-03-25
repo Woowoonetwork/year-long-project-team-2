@@ -488,15 +488,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void applyFilters(Map<String, dynamic> filterCriteria) async {
-    // Extract filter criteria
     String collectionDay = filterCriteria['collectionDay'] ?? 'Today';
     List<String> selectedFilters =
         List<String>.from(filterCriteria['selectedFilters'] ?? []);
     RangeValues selectedTimeRange =
         filterCriteria['collectionTime'] as RangeValues;
 
-    // Prepare for date filtering if specific day is selected
-    bool isAllSelected = collectionDay == 'All';
     DateTime now = DateTime.now();
     DateTime targetDate = collectionDay == "Today"
         ? DateTime(now.year, now.month, now.day)
@@ -514,28 +511,39 @@ class _HomeScreenState extends State<HomeScreen> {
       Timestamp? pickupTimestamp = data['pickup_time'] as Timestamp?;
       DateTime? pickupDateTime = pickupTimestamp?.toDate();
 
-      bool isWithinTimeRange = true;
-      bool matchesDayFilter = true;
+      bool isDayMatch = collectionDay == "All" ||
+          (pickupDateTime != null &&
+              pickupDateTime.year == targetDate.year &&
+              pickupDateTime.month == targetDate.month &&
+              pickupDateTime.day == targetDate.day);
 
-      // If "All" is not selected, check if the post matches the selected day and time range
-      if (!isAllSelected && pickupDateTime != null) {
-        matchesDayFilter = pickupDateTime.year == targetDate.year &&
-            pickupDateTime.month == targetDate.month &&
-            pickupDateTime.day == targetDate.day;
+      bool isTimeMatch = collectionDay == "All" ||
+          (pickupDateTime != null &&
+              pickupDateTime.hour + pickupDateTime.minute / 60.0 >=
+                  selectedTimeRange.start &&
+              pickupDateTime.hour + pickupDateTime.minute / 60.0 <=
+                  selectedTimeRange.end);
 
-        double pickupHour = pickupDateTime.hour + pickupDateTime.minute / 60.0;
-        isWithinTimeRange = pickupHour >= selectedTimeRange.start &&
-            pickupHour <= selectedTimeRange.end;
+      List<String> combinedTags = [];
+      if (data['categories'] != null) {
+        combinedTags.addAll(List<String>.from(
+            data['categories'].split(',').map((s) => s.trim())));
+      }
+      if (data['allergens'] != null) {
+        combinedTags.addAll(List<String>.from(
+            data['allergens'].split(',').map((s) => s.trim())));
       }
 
-      // Apply category and other filters
-      bool hasMatchingFilters = selectedFilters.isEmpty ||
-          selectedFilters.contains(data[
-              'category']); // Example for category filter, adjust as needed
+      // Debugging output
+      print("Selected Filters: $selectedFilters");
+      print("Combined Tags: $combinedTags");
 
-      if (matchesDayFilter &&
-          isWithinTimeRange &&
-          hasMatchingFilters &&
+      bool hasMatchingTags = selectedFilters.isEmpty ||
+          selectedFilters.every((filter) => combinedTags.contains(filter));
+
+      if (isDayMatch &&
+          isTimeMatch &&
+          hasMatchingTags &&
           !data.containsKey('reserved_by')) {
         var postWidget = await _buildPostCard(doc);
         filteredPosts.add(postWidget);
