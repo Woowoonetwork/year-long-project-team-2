@@ -31,7 +31,6 @@ class _MessageScreenState extends State<MessageScreen> {
   late Future<String> receiverName;
   late String? senderID;
   late Future<String> receiverImage;
- 
 
   FocusNode focusNode = FocusNode();
 
@@ -189,8 +188,7 @@ class _MessageScreenState extends State<MessageScreen> {
           return Center(
             child: Text('An error occurred. Please try again later.'),
           );
-        } else      
-        if (snapshot.connectionState == ConnectionState.done &&
+        } else if (snapshot.connectionState == ConnectionState.done &&
             snapshot.hasData) {
           final String currentUserId = snapshot.data!;
           return StreamBuilder<QuerySnapshot>(
@@ -199,6 +197,29 @@ class _MessageScreenState extends State<MessageScreen> {
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasData) {
                 final docs = snapshot.data!.docs;
+                if (docs.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(FeatherIcons.messageSquare,
+                            size: 38,
+                            color: CupertinoColors.secondaryLabel
+                                .resolveFrom(context)),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No messages found.",
+                          style: TextStyle(
+                              fontSize: 16,
+                              letterSpacing: -0.4,
+                              fontWeight: FontWeight.w500,
+                              color: CupertinoColors.secondaryLabel
+                                  .resolveFrom(context)),
+                        ),
+                      ],
+                    ),
+                  );
+                }
                 DateTime? previousDate;
                 return ScrollConfiguration(
                     behavior: ScrollConfiguration.of(context)
