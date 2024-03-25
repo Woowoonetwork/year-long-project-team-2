@@ -14,6 +14,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 // import gesture
 import '../Components/components.dart';
 import 'package:flutter/services.dart';
+import 'dart:math' as math;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -618,16 +619,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Color getColorForCategory(String category) {
-    // Example color assignment
-    switch (category) {
-      case 'Vegan':
-        return yellow;
-      case 'Italian':
-        return orange;
-      // Add more cases as needed
-      default:
-        return accentColor; // Default color
-    }
+    // Generate a random color
+    math.Random random = math.Random();
+    return Color.fromRGBO(
+      random.nextInt(255), // Red
+      random.nextInt(255), // Green
+      random.nextInt(255), // Blue
+      1, // Opacity
+    );
   }
 
   Widget _buildCategoryButton(String title, Color color) {
