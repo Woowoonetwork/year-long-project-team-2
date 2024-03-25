@@ -20,6 +20,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:FoodHood/Components/image_display_box.dart';
 
 
 const double _iconSize = 22.0;
@@ -416,220 +417,91 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  // Widget buildImageSection(BuildContext context, String? imagePath) {
-  //   return Column(
-  //     children: [
-  //       Container(
-  //         decoration: BoxDecoration(
-  //           boxShadow: [
-  //             BoxShadow(
-  //               color: Color(0x01000000),
-  //               blurRadius: 20,
-  //               offset: Offset(0, 0),
-  //             ),
-  //           ],
-  //         ),
-  //         margin:
-  //             const EdgeInsets.symmetric(vertical: 18.0, horizontal: 17.0),
-  //         height: 200,
-  //         foregroundDecoration: BoxDecoration(
-  //           borderRadius: BorderRadius.circular(20),
-  //           image: imagePath != null
-  //               ? DecorationImage(
-  //                   image: FileImage(File(imagePath)), fit: BoxFit.cover)
-  //               : null, // You can put a placeholder image here if you want
-  //         ),
-  //         // If imagePath is null, you might want to show a placeholder or keep it empty
-  //         child: imagePath == null
-  //             ? // fill the container with a color if no image is selected
-  //             Container(
-  //                 decoration: BoxDecoration(
-  //                   color: CupertinoColors.secondarySystemFill
-  //                       .resolveFrom(context),
-  //                   borderRadius: BorderRadius.circular(20),
-  //                 ),
-  //                 child: // an icon with text
-  //                     Row(
-  //                   mainAxisAlignment: MainAxisAlignment.center,
-  //                   children: [
-  //                     Text('Click "+" to add photo',
-  //                         style: TextStyle(
-  //                             fontSize: 18,
-  //                             fontWeight: FontWeight.w500,
-  //                             color: CupertinoColors.secondaryLabel
-  //                                 .resolveFrom(context))),
-  //                   ],
-  //                 ),
-  //               )
-  //             : null, // No child needed if the image is displayed
-  //       ),
-  //       Padding(
-  //         padding: const EdgeInsets.symmetric(horizontal: 17.0),
-  //         child: Row(
-  //           crossAxisAlignment: CrossAxisAlignment.end,
-  //           children: <Widget>[
-  //             Column(
-  //               mainAxisSize: MainAxisSize.min,
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Text('Photo',
-  //                     style: TextStyle(
-  //                       fontSize: 16,
-  //                       letterSpacing: -0.5,
-  //                       fontWeight: FontWeight.w500,
-  //                     )),
-  //                 const SizedBox(height: 5),
-  //                 CupertinoButton(
-  //                   padding: EdgeInsets.zero,
-  //                   onPressed: () {
-  //                     //pickImage(context);
-  //                     //ImageHelper.showImagePickerOptions(context);
-  //                     _pickImageOptions();
-  //                   },
-  //                   child: Container(
-  //                     width: 76,
-  //                     height: 74,
-  //                     decoration: BoxDecoration(
-  //                         color: accentColor.resolveFrom(context),
-  //                         borderRadius: BorderRadius.circular(16)),
-  //                     child: Icon(FeatherIcons.plus,
-  //                         size: 37, color: CupertinoColors.white),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-
-  //             // Show the "Save" button if an image is selected
-  //             if (_isImageSelected) 
-  //               CupertinoButton(
-  //                 onPressed: () async {
-  //                   if (_selectedImagePath != null) {
-  //                     // Upload the image to Firebase Storage
-  //                     String? imageUrl = await _uploadImageToFirebase(File(_selectedImagePath!));
-  //                     if (imageUrl != null) {
-  //                       // Save the image URL to the firestore document
-  //                       await FirebaseFirestore.instance
-  //                         .collection('post_details')
-  //                         .doc(widget.postId)
-  //                         .update({'delivered_image': imageUrl});
-  //                     } else {
-  //                       // Handle error
-  //                     }
-  //                   }
-  //                 },
-  //                 child: Text('Save', style: TextStyle(color: CupertinoColors.activeBlue)),
-  //               ),        
-  //           ],
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
   Widget buildImageSection(BuildContext context, String? imagePath) {
-    return Column(
-      children: [
-        if (imagePath != null) // Conditionally render the container only if imagePath is not null
-          Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x01000000),
-                  blurRadius: 20,
-                  offset: Offset(0, 0),
-                ),
-              ],
-            ),
-            margin: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 17.0),
-            height: 200,
-            foregroundDecoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              image: DecorationImage(
-                image: FileImage(File(imagePath)),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 2.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Expanded(
-                child: 
-                  CupertinoButton(
-                    onPressed: () {
-                      _pickImageOptions();
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 14.0),
-                      decoration: BoxDecoration(
-                        color: accentColor.resolveFrom(context).withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add_photo_alternate_rounded,
-                              size: 28,
-                              color:
-                                  // if current mode is darkmode, use lighten, else use darken
-                                  MediaQuery.of(context).platformBrightness ==
-                                          Brightness.light
-                                      ? darken(accentColor.resolveFrom(context), 0.3)
-                                      : lighten(accentColor.resolveFrom(context), 0.3)),
-                          SizedBox(width: 10),
-                          Text(
-                            'Upload a delivery photo',
-                            style: TextStyle(
-                              color: MediaQuery.of(context).platformBrightness ==
+  return Column(
+    children: [
+      // Display the image
+      ImageDisplayBox(imagePath: imagePath),
+
+      // Display the buttons
+      Padding(
+        padding: EdgeInsets.symmetric(horizontal: 2.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Expanded(
+              child: CupertinoButton(
+                onPressed: () {
+                  _pickImageOptions();
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 14.0),
+                  decoration: BoxDecoration(
+                    color: accentColor.resolveFrom(context).withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_photo_alternate_rounded,
+                          size: 28,
+                          color:
+                              // if current mode is darkmode, use lighten, else use darken
+                              MediaQuery.of(context).platformBrightness ==
                                       Brightness.light
                                   ? darken(accentColor.resolveFrom(context), 0.3)
-                                  : lighten(accentColor.resolveFrom(context), 0.3),
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                                  : lighten(accentColor.resolveFrom(context), 0.3)),
+                      SizedBox(width: 10),
+                      Text(
+                        'Upload a delivery photo',
+                        style: TextStyle(
+                          color: MediaQuery.of(context).platformBrightness ==
+                                  Brightness.light
+                              ? darken(accentColor.resolveFrom(context), 0.3)
+                              : lighten(accentColor.resolveFrom(context), 0.3),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ),
-
-              ),
-
-              // Show the "Save" button if an image is selected
-              if (imagePath != null)
-                CupertinoButton(
-                  onPressed: () async {
-                    if (_selectedImagePath != null) {
-                      // Upload the image to Firebase Storage
-                      String? imageUrl =
-                          await _uploadImageToFirebase(File(_selectedImagePath!));
-                      if (imageUrl != null) {
-                        // Save the image URL to the firestore document
-                        await FirebaseFirestore.instance
-                            .collection('post_details')
-                            .doc(widget.postId)
-                            .update({'delivered_image': imageUrl});
-                      } else {
-                        // Handle error
-                      }
-                    }
-                  },
-                  child: Text(
-                    'Save',
-                    style: TextStyle(
-                      color: accentColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    ],
                   ),
                 ),
-            ],
-          ),
+              ),
+            ),
+
+            // Show the "Save" button if an image is selected
+            if (imagePath != null)
+              CupertinoButton(
+                onPressed: () async {
+                  if (_selectedImagePath != null) {
+                    // Upload the image to Firebase Storage
+                    String? imageUrl =
+                        await _uploadImageToFirebase(File(_selectedImagePath!));
+                    if (imageUrl != null) {
+                      // Save the image URL to the firestore document
+                      await FirebaseFirestore.instance
+                          .collection('post_details')
+                          .doc(widget.postId)
+                          .update({'delivered_image': imageUrl});
+                    } else {
+                      // Handle error
+                    }
+                  }
+                },
+                child: Text(
+                  'Save',
+                  style: TextStyle(
+                    color: accentColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 
   // Reusable widget to build the text fields
   Widget __buildHeadingTextField({
