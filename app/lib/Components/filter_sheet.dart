@@ -127,6 +127,7 @@ class _FilterSheetState extends State<FilterSheet> {
           const EdgeInsets.symmetric(horizontal: 16.0), // Ensure full width
       child: CupertinoSlidingSegmentedControl<String>(
         children: {
+          'All': Text('All'),
           'Today': Text('Today'),
           'Tomorrow': Text('Tomorrow'),
         },
