@@ -189,7 +189,8 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
   }
 
   Widget _buildGradientBackground() {
-    final backgroundColor = _backgroundColor ?? CupertinoColors.systemBackground;
+    final backgroundColor =
+        _backgroundColor ?? CupertinoColors.systemBackground;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -243,7 +244,7 @@ class _ProfileAppBarState extends State<ProfileAppBar> {
 
     String ratingText = _rating != null
         ? '  ${_rating!.toStringAsFixed(1)} Ratings, '
-        : '  No rating available, ';
+        : '  No rating, ';
     String postsSoldText = '$_postsSold items sold';
 
     return Column(
