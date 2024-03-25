@@ -4,6 +4,7 @@ import 'package:FoodHood/Screens/bookmark_screen.dart';
 import 'package:FoodHood/Screens/browse_screen.dart';
 import 'package:FoodHood/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 class NavigationScreen extends StatelessWidget {
   static final List<Widget> _screens = [
@@ -42,9 +43,11 @@ class NavigationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
-        
         currentIndex: selectedIndex,
-        onTap: onItemTapped,
+        onTap: (index) {
+          HapticFeedback.lightImpact(); // Add haptic feedback here
+          onItemTapped(index);
+        },
         iconSize: 24,
         backgroundColor:
             CupertinoDynamicColor.resolve(groupedBackgroundColor, context)

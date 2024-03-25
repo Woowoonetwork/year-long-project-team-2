@@ -76,7 +76,7 @@ class _MessageBubbleState extends State<MessageBubble> {
         ],
         buttonBuilder: (context, showMenu) => GestureDetector(
             onLongPress: () {
-              HapticFeedback.selectionClick();
+              HapticFeedback.heavyImpact();
               showMenu();
             },
             child: _bubbleBackground(context)),
