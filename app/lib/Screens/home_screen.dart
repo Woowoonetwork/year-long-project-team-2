@@ -488,20 +488,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void applyFilters(Map<String, dynamic> filterCriteria) async {
-    // Extracting filter criteria
+    // Extract filter criteria
     String collectionDay = filterCriteria['collectionDay'] ?? 'Today';
     List<String> selectedFilters =
         List<String>.from(filterCriteria['selectedFilters'] ?? []);
     RangeValues selectedTimeRange =
         filterCriteria['collectionTime'] as RangeValues;
 
-    // Prepare for date filtering
+    // Prepare for date filtering if specific day is selected
+    bool isAllSelected = collectionDay == 'All';
     DateTime now = DateTime.now();
     DateTime targetDate = collectionDay == "Today"
         ? DateTime(now.year, now.month, now.day)
         : DateTime(now.year, now.month, now.day).add(Duration(days: 1));
 
-    // Fetch all documents
     var snapshot = await FirebaseFirestore.instance
         .collection('post_details')
         .orderBy('post_timestamp', descending: true)
@@ -514,39 +514,29 @@ class _HomeScreenState extends State<HomeScreen> {
       Timestamp? pickupTimestamp = data['pickup_time'] as Timestamp?;
       DateTime? pickupDateTime = pickupTimestamp?.toDate();
 
-      bool isSameDay = pickupDateTime != null &&
-          pickupDateTime.year == targetDate.year &&
-          pickupDateTime.month == targetDate.month &&
-          pickupDateTime.day == targetDate.day;
+      bool isWithinTimeRange = true;
+      bool matchesDayFilter = true;
 
-      // Calculate the pickup hour for comparison
-      bool isWithinTimeRange = false;
-      if (pickupDateTime != null) {
+      // If "All" is not selected, check if the post matches the selected day and time range
+      if (!isAllSelected && pickupDateTime != null) {
+        matchesDayFilter = pickupDateTime.year == targetDate.year &&
+            pickupDateTime.month == targetDate.month &&
+            pickupDateTime.day == targetDate.day;
+
         double pickupHour = pickupDateTime.hour + pickupDateTime.minute / 60.0;
         isWithinTimeRange = pickupHour >= selectedTimeRange.start &&
             pickupHour <= selectedTimeRange.end;
       }
 
-      // Additional checks for categories and allergens
-      var categories = (data['categories'] as String)
-          .split(',')
-          .map((c) => c.trim())
-          .toList();
-      var allergens = (data['allergens'] as String?)
-              ?.split(',')
-              .map((a) => a.trim())
-              .toList() ??
-          [];
+      // Apply category and other filters
+      bool hasMatchingFilters = selectedFilters.isEmpty ||
+          selectedFilters.contains(data[
+              'category']); // Example for category filter, adjust as needed
 
-      // Check for category or allergen match
-      bool hasMatchingCategoryOrAllergen = selectedFilters.isEmpty ||
-          selectedFilters.any((filter) =>
-              categories.contains(filter) || allergens.contains(filter));
-
-      if (!data.containsKey('reserved_by') &&
-          isSameDay &&
+      if (matchesDayFilter &&
           isWithinTimeRange &&
-          hasMatchingCategoryOrAllergen) {
+          hasMatchingFilters &&
+          !data.containsKey('reserved_by')) {
         var postWidget = await _buildPostCard(doc);
         filteredPosts.add(postWidget);
       }
