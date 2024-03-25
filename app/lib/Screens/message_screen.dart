@@ -1,347 +1,306 @@
-import 'package:feather_icons/feather_icons.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:FoodHood/Components/components.dart';
+import 'package:FoodHood/Components/Message/message_bubble.dart';
+import 'package:FoodHood/Components/Message/message_input_row.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Screens/profile_screen.dart';
+import 'package:FoodHood/Services/AuthService.dart';
+import 'package:FoodHood/Services/MessageService.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:feather_icons/feather_icons.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 
-class MessageScreenPage extends StatefulWidget {
+class MessageScreen extends StatefulWidget {
+  final String receiverID;
+
+  const MessageScreen({super.key, required this.receiverID});
+
   @override
-  _MessageScreenPageState createState() => _MessageScreenPageState();
+  _MessageScreenState createState() => _MessageScreenState();
 }
 
-class _MessageScreenPageState extends State<MessageScreenPage> {
-  final TextEditingController _messageController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final List<String> recommendedMessages = [
-    "Sure, see you then!",
-    "On my way.",
-    "Can we reschedule?",
-    "Let me check my calendar.",
-    "Running late, sorry!",
-  ];
+class _MessageScreenState extends State<MessageScreen> {
+  final ScrollController scrollController = ScrollController();
+  final TextEditingController messageController = TextEditingController();
 
-  List<Map<String, dynamic>> messages = [
-    {
-      "text": "I will be back home in a few minutes",
-      "received": true,
-      "read": true
-    },
-    {"text": "Is 8:45 okay for you ?", "received": true, "read": true},
-    {"text": "Blah Blah Blah Blah", "received": false, "read": false},
-    {
-      "text": "Are you at the place right now?",
-      "received": false,
-      "read": false
-    },
-  ];
+  late MessageService messageService;
+  late AuthService authService;
+  late Future<String> receiverName;
+  late String? senderID;
+  late Future<String> receiverImage;
+
+  FocusNode focusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
-      backgroundColor: CupertinoDynamicColor.resolve(
-        backgroundColor,
-        context,
-      ),
-      body: SafeArea(
-        child: _buildPageContent(),
-      ),
+      appBar: _buildAppBar(context),
+      backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
+      body: SafeArea(child: _buildPageContent(context)),
     );
   }
 
-  Widget _buildPageContent() {
-    return Column(
-      children: <Widget>[
-        Expanded(
-          child: _buildMessagesList(),
-        ),
-        _buildMessageInput(),
-      ],
-    );
+  Future<String> getReceiverName() async {
+    var receiverData = await messageService.getReceiverData(widget.receiverID);
+    return receiverData["firstName"] + " " + receiverData["lastName"];
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      titleSpacing: 0,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      leading: _buildLeading(context),
-      backgroundColor: CupertinoDynamicColor.resolve(
-        backgroundColor,
-        context,
-      ),
-      centerTitle: false,
-      title: _buildContactName(),
-      actions: [_buildTrailingItems()],
-    );
+  void getSenderID() async {
+    senderID = await authService.getUserId();
   }
 
-  Widget _buildTrailingItems() {
-    return Row(
-      children: [
-        _buildOnlineIndicator(),
-      ],
-    );
+  @override
+  void initState() {
+    super.initState();
+    messageService = MessageService();
+    authService = AuthService();
+    receiverName = getReceiverName();
+    getSenderID();
+
+    var keyboardVisibilityController = KeyboardVisibilityController();
+    keyboardVisibilityController.onChange.listen((bool visible) {
+      if (visible) {
+        Future.delayed(Duration(milliseconds: 400), scrollDown);
+      }
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(
+        const Duration(milliseconds: 400),
+        () => scrollDown(),
+      );
+    });
+
+    setupMessageListener();
   }
 
-   Widget _buildLeading(BuildContext context) {
-    return CupertinoButton(
-      child: Icon(FeatherIcons.chevronLeft,
-          size: 24, color: CupertinoColors.label.resolveFrom(context)),
-      onPressed: () => Navigator.of(context).pop(),
-    );
-  }
-  Widget _buildContactName() {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(builder: (context) => ProfileScreen()),
-        );
-      },
-      child: Text(
-        'Harry Styles',
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: CupertinoColors.label.resolveFrom(context),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOnlineIndicator() {
-    return Container(
-      width: 10,
-      height: 10,
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: CupertinoColors.activeGreen,
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  Widget _buildMessagesList() {
-    int lastReadMessageIndex = messages
-        .lastIndexWhere((message) => !message["received"] && message["read"]);
-
-    return Expanded(
-      child: ListView.builder(
-        controller: _scrollController, // Use the controller here
-
-        itemCount: messages.length,
-        itemBuilder: (context, index) {
-          final message = messages[index];
-          bool shouldShowReadReceipt = index == lastReadMessageIndex;
-
-          return Column(
-            crossAxisAlignment: message["received"]
-                ? CrossAxisAlignment.start
-                : CrossAxisAlignment.end,
-            children: [
-              _buildMessage(
-                message["text"],
-                received: message["received"],
-              ),
-              // Show read receipt only for the last read message sent by the user
-              if (shouldShowReadReceipt)
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: 4,
-                    right: !message["received"] ? 16 : 0,
-                    left: message["received"] ? 16 : 0,
-                  ),
-                  child: Text(
-                    "Read",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildMessage(String message, {bool received = true}) {
-    return Container(
-      margin: EdgeInsets.only(
-        top: 8,
-        left: received ? 16 : 0,
-        right: received ? 0 : 16,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: received
-            ? CupertinoColors.tertiarySystemFill.resolveFrom(context)
-            : accentColor,
-        borderRadius: BorderRadius.circular(18.0),
-      ),
-      child: Text(
-        message,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          letterSpacing: -0.6,
-          color: received
-              ? CupertinoColors.label.resolveFrom(context)
-              : CupertinoColors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickMessageSuggestions() {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      height: 40, // Adjust the height as necessary
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: recommendedMessages.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () => _quickMessageTap(recommendedMessages[index]),
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 8),
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: CupertinoColors.tertiarySystemFill.resolveFrom(context),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Center(
-                child: Text(
-                  recommendedMessages[index],
-                  style: TextStyle(
-                      fontSize: 14,
-                      letterSpacing: -0.6,
-                      fontWeight: FontWeight.w500,
-                      color: CupertinoColors.label.resolveFrom(context)),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _quickMessageTap(String message) {
-    _messageController.text = message;
-  }
-
-  Widget _buildMessageInput() {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildQuickMessageSuggestions(), // Quick message suggestions row
-          Container(
-            margin: EdgeInsets.only(bottom: 16, left: 16, right: 16),
-            decoration: BoxDecoration(
-              color: CupertinoColors.tertiarySystemFill.resolveFrom(context),
-              borderRadius: BorderRadius.circular(18.0),
-            ),
-            child: TextField(
-              controller: _messageController,
-              style: TextStyle(
-                fontSize: 16.0, // Custom font size
-                color: CupertinoColors.label.resolveFrom(context),
-                letterSpacing: -0.6, // Custom letter spacing
-                fontWeight: FontWeight.w400, // Custom font weight
-                // Add any other TextStyle properties you need
-              ),
-              decoration: InputDecoration(
-                hintText: "Message Harry",
-                hintStyle: TextStyle(
-                  letterSpacing: -0.6,
-                  fontWeight: FontWeight.w500,
-                  color: CupertinoColors.placeholderText.resolveFrom(context),
-                ),
-                border: InputBorder.none,
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-                suffixIcon: GestureDetector(
-                  onTap: _sendMessage,
-                  child: Container(
-                    padding: EdgeInsets.all(8),
-                    margin:
-                        EdgeInsets.all(12), // Symmetric padding for the icon
-                    decoration: BoxDecoration(
-                      color: accentColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      FeatherIcons.arrowUp,
-                      size: 24,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _sendMessage() {
-    final String messageText = _messageController.text.trim();
-    if (messageText.isNotEmpty) {
-      setState(() {
-        messages.add({
-          "text": messageText,
-          "received": false, // Assuming the user is sending the message
-          "read": false, // New messages start as unread
-        });
-      });
-      _messageController.clear();
-
-      // Automatically scroll to the latest message
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
-      });
-
-      // Simulate receiving a reply after a delay
-      Future.delayed(Duration(seconds: 2), () {
-        setState(() {
-          messages.add({
-            "text": "Auto-reply to: $messageText",
-            "received": true,
-            "read": true,
-          });
-
-          // Mark the user's last message as read
-          if (messages.isNotEmpty) {
-            messages[messages.length - 2]["read"] = true;
-          }
-        });
-
-        // Scroll to the bottom to show the auto-reply
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
+  void setupMessageListener() async {
+    String? userId = await authService.getUserId();
+    if (!mounted) return;
+    if (userId != null) {
+      messageService
+          .getMessages(userId, widget.receiverID)
+          .listen((querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          scrollDown();
         }
       });
     }
   }
 
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
+  void scrollDown() {
+    if (scrollController.hasClients) {
+      scrollController.animateTo(
+        scrollController.position.minScrollExtent,
+        duration: Duration(milliseconds: 800),
+        curve: Curves.fastOutSlowIn,
+      );
+    }
+  }
+
+  void sendMessage() async {
+    final message = messageController.text;
+    if (message.isNotEmpty) {
+      await messageService.sendMessage(widget.receiverID, message);
+      messageController.clear();
+      scrollDown();
+    }
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      titleSpacing: 0,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      leading: CupertinoButton(
+          child: Icon(FeatherIcons.chevronLeft,
+              size: 24, color: CupertinoColors.label.resolveFrom(context)),
+          onPressed: () => Navigator.of(context).pop()),
+      backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context)
+          .withOpacity(0.1),
+      centerTitle: false,
+      title: GestureDetector(
+        onTap: () => Navigator.push(
+            context,
+            CupertinoPageRoute(
+                builder: (context) =>
+                    ProfileScreen(userId: widget.receiverID))),
+        child: FutureBuilder<String>(
+          future: receiverName,
+          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+            if (snapshot.hasData) {
+              return Text(snapshot.data!,
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: CupertinoColors.label.resolveFrom(context)));
+            } else {
+              return Text("",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: CupertinoColors.label.resolveFrom(context)));
+            }
+          },
+        ),
+      ),
+      actions: <Widget>[
+        PullDownButton(
+          itemBuilder: (context) => [
+            PullDownMenuItem(
+              title: 'Block user',
+              icon: FeatherIcons.user,
+              isDestructive: true,
+              onTap: () {},
+            ),
+          ],
+          buttonBuilder: (context, showMenu) => CupertinoButton(
+            onPressed: showMenu,
+            padding: EdgeInsets.zero,
+            child: Icon(FeatherIcons.moreVertical,
+                size: 18, color: CupertinoColors.label.resolveFrom(context)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMessageItem(
+      DocumentSnapshot document, String senderID, BuildContext context) {
+    Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+
+    return MessageBubble(
+        message: data['message'],
+        isCurrentUser: data['senderID'] == senderID,
+        timestamp: data['timestamp'],
+        messageID: document.id,
+        conversationID: document.reference.parent.parent!.id);
+  }
+
+  Widget _buildMessageList(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: authService.getUserId(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('An error occurred. Please try again later.'),
+          );
+        } else if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData) {
+          final String currentUserId = snapshot.data!;
+          return StreamBuilder<QuerySnapshot>(
+            stream:
+                messageService.getMessages(currentUserId, widget.receiverID),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasData) {
+                final docs = snapshot.data!.docs;
+                if (docs.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(FeatherIcons.messageSquare,
+                            size: 38,
+                            color: CupertinoColors.secondaryLabel
+                                .resolveFrom(context)),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No messages found.",
+                          style: TextStyle(
+                              fontSize: 16,
+                              letterSpacing: -0.4,
+                              fontWeight: FontWeight.w500,
+                              color: CupertinoColors.secondaryLabel
+                                  .resolveFrom(context)),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                DateTime? previousDate;
+                return ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context)
+                        .copyWith(scrollbars: false),
+                    child: ListView.builder(
+                      reverse: true,
+                      itemCount: docs.length,
+                      controller: scrollController,
+                      itemBuilder: (context, index) {
+                        final DocumentSnapshot document =
+                            docs[docs.length - 1 - index];
+                        final DateTime messageDate =
+                            document['timestamp'].toDate();
+
+                        bool isNewDay = previousDate == null ||
+                            messageDate.day != previousDate?.day;
+                        previousDate = messageDate;
+
+                        return Column(
+                          children: [
+                            if (isNewDay)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text(
+                                  determineDate(messageDate),
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      letterSpacing: -0.2,
+                                      fontWeight: FontWeight.w600,
+                                      color: CupertinoColors.secondaryLabel
+                                          .resolveFrom(context)),
+                                ),
+                              ),
+                            MessageBubble(
+                              message: document['message'],
+                              isCurrentUser:
+                                  document['senderID'] == currentUserId,
+                              timestamp: document['timestamp'],
+                              conversationID:
+                                  document.reference.parent.parent!.id,
+                              messageID: document.id,
+                            ),
+                          ],
+                        );
+                      },
+                    ));
+              } else if (snapshot.hasError) {
+                return const Text("Error loading messages");
+              }
+              return const SizedBox();
+            },
+          );
+        } else {
+          return const CircularProgressIndicator();
+        }
+      },
+    );
+  }
+
+  Widget _buildPageContent(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Expanded(child: _buildMessageList(context)),
+        FutureBuilder<String>(
+          future: receiverName,
+          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return const Text("Error loading name");
+            } else {
+              return MessageInputRow(
+                  firstName: snapshot.data?.split(' ').first ?? '',
+                  messageController: messageController,
+                  sendMessage: sendMessage,
+                  focusNode: focusNode);
+            }
+          },
+        ),
+      ],
+    );
   }
 }

@@ -8,7 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:path/path.dart';
-import 'package:FoodHood/firestore_service.dart';
+import 'package:FoodHood/Services/FirebaseService.dart';
 
 class CreatePostViewModel {
   final titleController = TextEditingController();

@@ -6,7 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
-import 'package:FoodHood/components.dart';
+import 'package:FoodHood/Components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pull_down_button/pull_down_button.dart';
@@ -69,7 +69,7 @@ class ProfilePostCard extends StatelessWidget {
           );
         },
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 16),
+          margin: EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
             color: CupertinoDynamicColor.resolve(
                 CupertinoColors.tertiarySystemBackground, context),
@@ -78,37 +78,42 @@ class ProfilePostCard extends StatelessWidget {
               BoxShadow(
                 color: Color(0x19000000),
                 blurRadius: 10,
-                offset: Offset(0, 0),
-              )
+              ),
             ],
           ),
-          child: Container(
-            padding: EdgeInsets.all(14),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    _buildImageSection(context, imagesWithAltText, postId),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildTitleSection(
-                              context, title, adjustedTitleFontSize),
-                          const SizedBox(height: 4),
-                          _buildOrderInfoSection(
-                              context, orderInfo, adjustedOrderInfoFontSize),
-                          const SizedBox(height: 4),
-                          _buildTagSection(context, tags, adjustedTagFontSize),
-                        ],
-                      ),
-                    ),
-                  ],
+                Flexible(
+                  child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildImageSection(context, imagesWithAltText, postId),
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildTitleSection(
+                                    context, title, adjustedTitleFontSize),
+                                const SizedBox(height: 4),
+                                _buildOrderInfoSection(context, orderInfo,
+                                    adjustedOrderInfoFontSize),
+                                const SizedBox(height: 4),
+                                _buildTagSection(
+                                    context, tags, adjustedTagFontSize),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ]),
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -117,13 +122,13 @@ class ProfilePostCard extends StatelessWidget {
                     PullDownButton(
                       itemBuilder: (context) => [
                         if (isCurrentUser) ...[
-                        PullDownMenuItem(
-                          title: 'Edit',
-                          onTap: () {
-                            onEdit?.call();
-                          },
-                          icon: CupertinoIcons.pencil,
-                        ),
+                          PullDownMenuItem(
+                            title: 'Edit',
+                            onTap: () {
+                              onEdit?.call();
+                            },
+                            icon: CupertinoIcons.pencil,
+                          ),
                         ],
                         PullDownMenuItem(
                           title: 'Share',
@@ -134,21 +139,21 @@ class ProfilePostCard extends StatelessWidget {
                           icon: CupertinoIcons.share,
                         ),
                         if (isCurrentUser) ...[
-                        PullDownMenuItem(
-                          onTap: () {
-                            _showDeletePostConfirmation(context);
-                          },
-                          title: 'Remove Post',
-                          isDestructive: true,
-                          icon: CupertinoIcons.delete,
-                        ),
+                          PullDownMenuItem(
+                            onTap: () {
+                              _showDeletePostConfirmation(context);
+                            },
+                            title: 'Remove Post',
+                            isDestructive: true,
+                            icon: CupertinoIcons.delete,
+                          ),
                         ],
                       ],
                       buttonBuilder: (context, showMenu) => CupertinoButton(
                         onPressed: showMenu,
                         padding: EdgeInsets.all(10),
                         child: Icon(
-                          FeatherIcons.moreVertical,
+                          FeatherIcons.moreHorizontal,
                           size: 20,
                           color: CupertinoDynamicColor.resolve(
                               CupertinoColors.secondaryLabel, context),
@@ -164,7 +169,6 @@ class ProfilePostCard extends StatelessWidget {
       ),
     );
   }
-
 
   Future<void> shareDynamicLink() async {
     final Uri dynamicLink = await createDynamicLink(postId);
@@ -240,10 +244,8 @@ class ProfilePostCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       child: CachedNetworkImage(
         imageUrl: imageToShow,
-        width: 90,
-        height: 90,
-        maxHeightDiskCache: 200, // Set maximum height for disk caching
-        maxWidthDiskCache: 200, // Set maximum width for disk caching
+        width: 80,
+        height: 80,
         fit: BoxFit.cover,
         placeholder: (context, url) => CupertinoActivityIndicator(),
         errorWidget: (context, url, error) =>
@@ -256,6 +258,7 @@ class ProfilePostCard extends StatelessWidget {
       BuildContext context, String title, double adjustedTitleFontSize) {
     return Text(
       title,
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(
         color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
         fontSize: adjustedTitleFontSize,
@@ -275,13 +278,15 @@ class ProfilePostCard extends StatelessWidget {
 
     for (int i = 0; i < displayedTagsCount; i++) {
       tagWidgets.add(
-        _buildTag(tags[i], _generateTagColor(i), context, adjustedTagFontSize),
+        Tag(text: tags[i], color: _generateTagColor(i)),
       );
     }
     if (truncatedTags > 0) {
       tagWidgets.add(
-        _buildTag('+$truncatedTags', _generateTagColor(displayedTagsCount),
-            context, adjustedTagFontSize),
+        Tag(
+          text: '+$truncatedTags',
+          color: CupertinoDynamicColor.resolve(blue, context),
+        ),
       );
     }
     return Wrap(

@@ -165,8 +165,7 @@ class _DetailAppBarState extends State<DetailAppBar> {
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         var begin = 0.0;
         var end = 1.0;
-        var curve = Curves.ease;
-
+        var curve = Curves.fastOutSlowIn;
         var tween =
             Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
         var opacityAnimation = animation.drive(tween);
@@ -194,7 +193,7 @@ class _DetailAppBarState extends State<DetailAppBar> {
     return blurEffect(
       Icon(
         widget.isFavorite ? Icons.bookmark : Icons.bookmark_outline_outlined,
-        size: 18,
+        size: 20,
         color: widget.isFavorite
             ? CupertinoColors.systemOrange
             : CupertinoColors.label.resolveFrom(context),

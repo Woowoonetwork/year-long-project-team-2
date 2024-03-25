@@ -47,14 +47,14 @@ class _ToasterOverlayState extends State<_ToasterOverlay>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0.0, -1.0),
       end: const Offset(0.0, 0.0),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn));
 
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(
         parent: _controller,
-        curve: Curves.easeInOutCubic)); // Initialize fade animation
+        curve: Curves.fastOutSlowIn)); // Initialize fade animation
 
     _controller.forward().then((_) {
       Future.delayed(const Duration(seconds: 2)).then((_) {
