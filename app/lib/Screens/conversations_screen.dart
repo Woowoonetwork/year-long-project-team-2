@@ -19,7 +19,7 @@ class ConversationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: groupedBackgroundColor,
+      backgroundColor: backgroundColor,
       child: SafeArea(
         top: false,
         child: CustomScrollView(
@@ -27,9 +27,8 @@ class ConversationsScreen extends StatelessWidget {
             CupertinoSliverNavigationBar(
               transitionBetweenRoutes: false, 
               backgroundColor: CupertinoDynamicColor.resolve(
-                groupedBackgroundColor, context).withOpacity(0.8),
+                backgroundColor, context).withOpacity(0.8),
               largeTitle: Text('Messages'),
-              border: null,
               leading: GestureDetector(
                 child: Icon(FeatherIcons.chevronLeft,
                 size: 24,
@@ -180,16 +179,20 @@ class CupertinoListTile extends StatelessWidget {
       padding: EdgeInsets.zero,
       onPressed: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
-          color: CupertinoColors.tertiarySystemBackground.resolveFrom(context),
-          borderRadius: BorderRadius.circular(18),
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          border: Border(
+            bottom: BorderSide(
+              color: CupertinoColors.separator.resolveFrom(context),
+              width: 0.5,
+            ),
+          ),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Row(
           children: [
             CircleAvatar(
-              radius: 28,
+              radius: 26,
               backgroundColor: CupertinoColors.systemGrey4.resolveFrom(context),
               backgroundImage: profileURL.isNotEmpty
                   ? CachedNetworkImageProvider(profileURL)
