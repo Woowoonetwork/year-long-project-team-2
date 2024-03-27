@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/donee_pathway_uno.dart';
+import 'package:FoodHood/Screens/donee_screen.dart';
 
 class ReserveButton extends StatefulWidget {
   final bool isReserved;

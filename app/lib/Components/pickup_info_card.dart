@@ -3,7 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Screens/message_screen.dart';
-import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
+import 'package:FoodHood/Screens/detail_screen.dart'; // Update this import
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';

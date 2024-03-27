@@ -1,7 +1,7 @@
 import 'package:FoodHood/Components/components.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:FoodHood/Screens/posting_detail.dart';
+import 'package:FoodHood/Screens/detail_screen.dart';
 import 'package:FoodHood/Components/colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
