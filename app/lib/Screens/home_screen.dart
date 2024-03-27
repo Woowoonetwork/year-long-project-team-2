@@ -494,6 +494,12 @@ class _HomeScreenState extends State<HomeScreen> {
     RangeValues selectedTimeRange =
         filterCriteria['collectionTime'] as RangeValues;
 
+    // Extract the food types and diet preferences from the filter criteria
+    List<String> selectedFoodTypes =
+        List<String>.from(filterCriteria['selectedFoodTypes'] ?? []);
+    List<String> selectedDietPreferences =
+        List<String>.from(filterCriteria['selectedDietPreferences'] ?? []);
+
     DateTime now = DateTime.now();
     DateTime targetDate = collectionDay == "Today"
         ? DateTime(now.year, now.month, now.day)
@@ -524,22 +530,19 @@ class _HomeScreenState extends State<HomeScreen> {
               pickupDateTime.hour + pickupDateTime.minute / 60.0 <=
                   selectedTimeRange.end);
 
-      List<String> combinedTags = [];
-      if (data['categories'] != null) {
-        combinedTags.addAll(List<String>.from(
-            data['categories'].split(',').map((s) => s.trim())));
-      }
-      if (data['allergens'] != null) {
-        combinedTags.addAll(List<String>.from(
-            data['allergens'].split(',').map((s) => s.trim())));
-      }
+      List<String> categories = List<String>.from(
+          (data['categories'] ?? '').split(',').map((s) => s.trim()));
+      List<String> allergens = List<String>.from(
+          (data['allergens'] ?? '').split(',').map((s) => s.trim()));
 
-      // Debugging output
-      print("Selected Filters: $selectedFilters");
-      print("Combined Tags: $combinedTags");
+      // Combine categories and allergens for comparison with selected filters
+      List<String> combinedTags = [...categories, ...allergens];
 
-      bool hasMatchingTags = selectedFilters.isEmpty ||
-          selectedFilters.every((filter) => combinedTags.contains(filter));
+      bool hasMatchingTags =
+          (selectedFoodTypes.isEmpty && selectedDietPreferences.isEmpty) ||
+              combinedTags.any((tag) =>
+                  selectedFoodTypes.contains(tag) ||
+                  selectedDietPreferences.contains(tag));
 
       if (isDayMatch &&
           isTimeMatch &&
