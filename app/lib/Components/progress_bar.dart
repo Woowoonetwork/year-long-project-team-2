@@ -96,7 +96,7 @@ class ProgressBar extends StatelessWidget {
       case dos.OrderState.delivering:
         return "Delivering";
       case dos.OrderState.readyToPickUp:
-        return "Ready to Pick Up";
+        return "Dropped Off";
       default:
         return "Not Reserved";
     }

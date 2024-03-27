@@ -33,6 +33,7 @@ void main() {
       await tester.pumpWidget(CupertinoApp(
           home: DonorRatingPage(
         postId: '0423e12c-792f-4986-a723-c701f3cf5332',
+        receiverID: 'mockReceiverID',
       )));
 
       expect(find.byType(CupertinoTextField), findsOneWidget);

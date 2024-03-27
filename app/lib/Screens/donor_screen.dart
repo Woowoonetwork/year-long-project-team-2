@@ -206,12 +206,7 @@ class _DonorScreenState extends State<DonorScreen> {
                   // Progress Bar
                   ProgressBar(
                     progress: _calculateProgress(),
-                    labels: [
-                      "Reserved",
-                      "Confirmed",
-                      "Delivering",
-                      "Ready to Pick Up"
-                    ],
+                    labels: ["Reserved", "Confirmed", "Delivering", "Dropped Off"],
                     color: accentColor,
                     isReserved: postStatus != 'not reserved',
                     currentState: orderState,
@@ -223,7 +218,7 @@ class _DonorScreenState extends State<DonorScreen> {
                     child: _buildMap(context),
                   ),
 
-                  // Text showing the written address of the pickup location for all order states except Ready to Pick Up
+                  // Text showing the written address of the pickup location for all order states except Ready
                   if (orderState != OrderState.readyToPickUp &&
                       orderState != OrderState.completed)
                     FutureBuilder<String>(
@@ -715,7 +710,7 @@ class _DonorScreenState extends State<DonorScreen> {
       case OrderState.confirmed:
         return "Delivering";
       case OrderState.delivering:
-        return "Ready to Pick Up";
+        return "Dropped Off";
       default:
         return "Confirm";
     }
@@ -779,6 +774,7 @@ class _DonorScreenState extends State<DonorScreen> {
             CupertinoPageRoute(
               builder: (context) => DoneeRatingPage(
                 postId: widget.postId,
+                receiverID: reservedByUserId!,
               ),
             ),
           );

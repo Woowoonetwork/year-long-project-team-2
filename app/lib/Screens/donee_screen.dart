@@ -31,6 +31,7 @@ class _DoneePathState extends State<DoneePath> {
   late LatLng pickupLatLng = const LatLng(49.8862, -119.4971);
   bool isLoading = true;
   OrderState orderState = OrderState.reserved;
+  final Map<LatLng, String> _addressCache = {};
 
   @override
   Widget build(BuildContext context) {
@@ -41,17 +42,23 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   Future<String> getAddressFromLatLng(LatLng position) async {
-        String googleAPIKey = 'AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A';
+    if (_addressCache.containsKey(position)) {
+      return _addressCache[position]!;
+    }
 
+    String googleAPIKey = 'AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A';
     final url = Uri.parse(
         'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$googleAPIKey');
+
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       if (jsonResponse['results'] != null &&
           jsonResponse['results'].length > 0) {
-        return jsonResponse['results'][0]['formatted_address'];
+        _addressCache[position] =
+            jsonResponse['results'][0]['formatted_address'];
+        return _addressCache[position]!;
       } else {
         return 'Address not found';
       }
@@ -59,6 +66,18 @@ class _DoneePathState extends State<DoneePath> {
       throw Exception('Failed to fetch address');
     }
   }
+
+  BoxDecoration getShadowDecoration() => BoxDecoration(
+        borderRadius: BorderRadius.circular(100.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromARGB(16, 0, 0, 0),
+            blurRadius: 10,
+            offset: Offset(0, 0),
+            spreadRadius: 2,
+          )
+        ],
+      );
 
   @override
   void initState() {
@@ -71,22 +90,11 @@ class _DoneePathState extends State<DoneePath> {
     });
   }
 
-  
   Widget _buildCancelButton() {
     return Container(
       width: double.infinity,
       height: 60.0,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(100.0),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromARGB(16, 0, 0, 0),
-            blurRadius: 10,
-            offset: Offset(0, 0),
-            spreadRadius: 2,
-          )
-        ],
-      ),
+      decoration: getShadowDecoration(),
       child: CupertinoButton(
         onPressed: _handleCancelReservation,
         color: CupertinoColors.tertiarySystemBackground,
@@ -212,14 +220,14 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   Widget _buildLoadingScreen() {
-    return const Center(child: CupertinoActivityIndicator(radius: 16));
+    return const Center(child: CupertinoActivityIndicator());
   }
 
   Widget _buildMap(LatLng position) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.0),
       child: SizedBox(
-        height: 220,
+        height: 240,
         child: GoogleMap(
           initialCameraPosition:
               CameraPosition(target: position, zoom: 14.4746),
@@ -271,17 +279,7 @@ class _DoneePathState extends State<DoneePath> {
   Widget _buildNavigateButton() {
     return Container(
         height: 60.0,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromARGB(16, 0, 0, 0),
-              blurRadius: 10,
-              offset: Offset(0, 0),
-              spreadRadius: 2,
-            )
-          ],
-        ),
+        decoration: getShadowDecoration(),
         child: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => _launchMapUrl(pickupLatLng),
@@ -315,16 +313,15 @@ class _DoneePathState extends State<DoneePath> {
             size: 24, color: CupertinoColors.label.resolveFrom(context)),
       ),
       trailing: isLoading
-          ? const CupertinoActivityIndicator(radius: 14)
+          ? const CupertinoActivityIndicator()
           : CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: () {
                 Navigator.push(
                     context,
                     CupertinoPageRoute(
-                        builder: (context) => 
-                MessageScreen(receiverID: viewModel.userid)
-                ));
+                        builder: (context) =>
+                            MessageScreen(receiverID: viewModel.userid)));
               },
               child: Text('Message ${viewModel.firstName}',
                   style: TextStyle(
@@ -410,12 +407,7 @@ class _DoneePathState extends State<DoneePath> {
         const SizedBox(height: 24),
         ProgressBar(
             progress: _calculateProgress(),
-            labels: const [
-              "Reserved",
-              "Confirmed",
-              "Delivering",
-              "Ready to Pick Up"
-            ],
+            labels: const ["Reserved", "Confirmed", "Delivering", "Dropped Off"],
             color: accentColor,
             isReserved: true,
             currentState: orderState),
@@ -426,16 +418,7 @@ class _DoneePathState extends State<DoneePath> {
   Widget _buildReviewButton() {
     return Container(
       height: 60.0,
-      decoration: const BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Color.fromARGB(16, 0, 0, 0),
-            blurRadius: 10,
-            offset: Offset(0, 0),
-            spreadRadius: 2,
-          )
-        ],
-      ),
+      decoration: getShadowDecoration(),
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: _navigateToRatingPage,
@@ -530,23 +513,16 @@ class _DoneePathState extends State<DoneePath> {
   }
 
   Future<void> _launchMapUrl(LatLng locationCoordinates) async {
-    final Uri googleMapsUri = Uri.parse(
-        'https://www.google.com/maps/search/?api=1&query=${locationCoordinates.latitude},${locationCoordinates.longitude}');
-    final Uri appleMapsUri = Uri.parse(
-        'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}');
+    final Uri uri = Platform.isIOS
+        ? Uri.parse(
+            'http://maps.apple.com/?q=${locationCoordinates.latitude},${locationCoordinates.longitude}')
+        : Uri.parse(
+            'https://www.google.com/maps/search/?api=1&query=${locationCoordinates.latitude},${locationCoordinates.longitude}');
 
-    if (Platform.isIOS) {
-      if (await canLaunchUrl(appleMapsUri)) {
-        await launchUrl(appleMapsUri);
-      } else {
-        throw 'Could not launch $appleMapsUri';
-      }
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     } else {
-      if (await canLaunchUrl(googleMapsUri)) {
-        await launchUrl(googleMapsUri);
-      } else {
-        throw 'Could not launch $googleMapsUri';
-      }
+      throw 'Could not launch $uri';
     }
   }
 
@@ -569,6 +545,8 @@ class _DoneePathState extends State<DoneePath> {
     Navigator.push(
         context,
         CupertinoPageRoute(
-            builder: (context) => DonorRatingPage(postId: widget.postId)));
+            builder: (context) => DonorRatingPage(
+                postId: widget.postId, receiverID: 
+                viewModel.userid)));
   }
 }

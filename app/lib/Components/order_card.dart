@@ -201,7 +201,7 @@ class OrderCard extends StatelessWidget {
         statusColor = CupertinoColors.systemBlue;
         break;
       case OrderState.readyToPickUp:
-        statusText = 'Ready to Pick Up';
+        statusText = 'Dropped Off';
         statusColor = CupertinoColors.systemGreen;
         break;
       case OrderState.pending:
