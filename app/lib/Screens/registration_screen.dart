@@ -4,8 +4,8 @@
 import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
 import '../Components/components.dart';
-import '../auth_service.dart';
-import '../firestore_service.dart';
+import '../Services/AuthService.dart';
+import '../Services/FirebaseService.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

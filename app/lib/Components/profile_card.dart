@@ -71,7 +71,7 @@ class _ProfileCardState extends State<ProfileCard> {
             context, CupertinoPageRoute(builder: (context) => ProfileScreen()));
       },
       child: Container(
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(

@@ -1,5 +1,5 @@
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/auth_service.dart';
+import 'package:FoodHood/Services/AuthService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +63,7 @@ class ForgotPasswordScreen extends StatelessWidget {
   // Continue button
   Widget buildContinueButton(BuildContext context, String text,
       Color backgroundColor, Color textColor) {
-    final AuthService authService = AuthService(FirebaseAuth.instance);
+    final AuthService authService = AuthService();
 
     return CupertinoButton(
       onPressed: () async {

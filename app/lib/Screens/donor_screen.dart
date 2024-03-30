@@ -329,7 +329,9 @@ class _DonorScreenState extends State<DonorScreen> {
                   Navigator.push(
                     context,
                     CupertinoPageRoute(
-                        builder: (context) => MessageScreenPage()),
+                        builder: (context) => MessageScreen(
+                            receiverID: reservedByUserId!
+                            )),
                   );
                 },
               )

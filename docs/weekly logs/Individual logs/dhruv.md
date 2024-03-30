@@ -500,3 +500,31 @@ N/A.
 ### Tasks in progress (from Project Board)
 - Add filtering to the home page
   - Filter post based on time 
+
+  ## Term 2 Week 11: Monday 25th Mar 2024 - Sunday 31th Mar 2024
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/dhruv_term2_week11.png)
+
+### Recap of personal goals
+- Helped in planning out the features for the upcoming milestone 
+- Helped assign and prioritize tasks to be completed.
+- Added an All tab to the filter menu
+- Worked on All tab functionality 
+- Fetched categories from firebase
+- Worked on improving filter
+- Completed the weekly logs.
+
+
+### Tasks completed (from Project Board)
+- Complete the filtering bug fixes
+  - Added the All for filtering  
+  - Cupertino buttons gets from firebase 
+  - Added functionality for them 
+- Complete the T2 W10 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+- Add filtering to the home page
+  - categories are not working 
+- Blocking is not working

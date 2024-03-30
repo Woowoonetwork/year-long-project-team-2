@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Styles {
   static TextStyle titleStyle = TextStyle(
@@ -63,6 +64,7 @@ CupertinoNavigationBar buildNavigationBar(BuildContext context) {
 CupertinoSliverNavigationBar buildMainNavigationBar(
     BuildContext context, String title) {
   return CupertinoSliverNavigationBar(
+    transitionBetweenRoutes: false,
     backgroundColor:
         CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
             .withOpacity(0.8),
@@ -238,6 +240,43 @@ Widget buildSignUpText(
       ),
     ),
   );
+}
+
+String determineDate(DateTime messageDate) {
+  final today = DateTime.now();
+  final yesterday = DateTime.now().subtract(Duration(days: 1));
+
+  if (messageDate.year == today.year &&
+      messageDate.month == today.month &&
+      messageDate.day == today.day) {
+    return 'Today'.toUpperCase();
+  } else if (messageDate.year == yesterday.year &&
+             messageDate.month == yesterday.month &&
+             messageDate.day == yesterday.day) {
+    return 'Yesterday'.toUpperCase();
+  } else {
+    return DateFormat('MMMM dd, yyyy').format(messageDate).toUpperCase();
+  }
+}
+
+
+String determineDateTime(Timestamp timestamp) {
+  final now = DateTime.now();
+  DateTime date = timestamp.toDate();
+  DateTime today = DateTime(now.year, now.month, now.day);
+  DateTime messageDate = DateTime(date.year, date.month, date.day);
+  DateTime yesterday = today.subtract(const Duration(days: 1));
+
+  String formattedDate;
+
+  if (messageDate == today) {
+    formattedDate = "Today, ${DateFormat('h:mm a').format(date)}";
+  } else if (messageDate == yesterday) {
+    formattedDate = "Yesterday, ${DateFormat('h:mm a').format(date)}";
+  } else {
+    formattedDate = DateFormat('MMM d, h:mm a').format(date);
+  }
+  return formattedDate;
 }
 
 Widget buildCenteredText(String text, double fontSize, FontWeight fontWeight) {
@@ -557,7 +596,6 @@ String timeAgoSinceDate(DateTime dateTime) {
     return 'Just now';
   }
 }
-
 
 class Tag extends StatelessWidget {
   final String text;

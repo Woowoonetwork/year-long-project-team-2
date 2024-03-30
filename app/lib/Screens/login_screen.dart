@@ -47,7 +47,6 @@ class _LogInScreenState extends State<LogInScreen> {
       children: [
         buildText('Log in', 34, FontWeight.w600),
         const SizedBox(height: 50),
-
         buildCupertinoTextField(
           'Email Address',
           emailController,
@@ -56,20 +55,12 @@ class _LogInScreenState extends State<LogInScreen> {
           errorText: _emailErrorText,
         ),
         const SizedBox(height: 16),
-        // buildCupertinoTextField(
-        //   'Password',
-        //   passwordController,
-        //   context,
-        //   [AutofillHints.password],
-        //   errorText: _passwordErrorText,
-        // ),
         PasswordCupertinoTextField(
             placeholder: 'Password',
             controller: passwordController,
             context: context,
             autofillHints: [AutofillHints.password],
             errorText: _passwordErrorText),
-        // PasswordCupertinoTextField(placeholder: 'Password', controller: passwordCont
         const SizedBox(height: 16),
         GestureDetector(
           onTap: () => Navigator.of(context).push(
