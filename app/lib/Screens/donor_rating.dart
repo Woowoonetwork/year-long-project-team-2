@@ -19,7 +19,7 @@ class DonorRatingPage extends StatefulWidget {
 class _DonorRatingPageState extends State<DonorRatingPage> {
   String? createdByName;
   String? image;
-  String recervedByID = '';
+  String reservedByID = '';
   int _rating = 0;
   bool _isLoading = true;
 
@@ -49,7 +49,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
               Navigator.of(context).push(
                 CupertinoPageRoute(
                   builder: (context) => MessageScreen(
-                    receiverID: recervedByID,
+                    receiverID: reservedByID,
                   ),
                 ),
               );
@@ -205,7 +205,7 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
   @override
   void initState() {
     super.initState();
-    recervedByID = widget.receiverID;
+    reservedByID = widget.receiverID;
     fetchCreatedByName();
   }
 

@@ -19,8 +19,10 @@ class DoneeRatingPage extends StatefulWidget {
 class _DoneeRatingPageState extends State<DoneeRatingPage> {
   String? reservedByName;
   String? image;
-  String? recervedByID;
+  String? reservedByID;
   int _rating = 0;
+  bool _isLoading = true;
+
   final TextEditingController _commentController = TextEditingController();
 
   bool get _isPublishButtonEnabled {
@@ -29,6 +31,9 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return _buildLoadingScreen();
+    }
     return CupertinoPageScaffold(
         backgroundColor: backgroundColor,
         navigationBar: CupertinoNavigationBar(
@@ -41,25 +46,28 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
           ),
           trailing: GestureDetector(
             onTap: () {
-              MessageScreen(
-                receiverID: recervedByID!,
+              Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (context) =>
+                      MessageScreen(receiverID: reservedByID!),
+                ),
               );
             },
-            child: Text(
-              'Message ${reservedByName!}',
-              style: TextStyle(color: accentColor.resolveFrom(context)),
-            ),
+            child: Text('Message ${reservedByName!}',
+                style: TextStyle(
+                    color: CupertinoColors.label.resolveFrom(context))),
           ),
         ),
         child: SafeArea(
           child: CustomScrollView(
             slivers: <Widget>[
-              SliverToBoxAdapter(
+              SliverFillRemaining(
+                hasScrollBody: false,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 30, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
                         "How was your experience with ${reservedByName!}?",
                         textAlign: TextAlign.center,
@@ -71,21 +79,23 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 32),
                     CircleAvatar(
                         radius: 50,
                         backgroundImage: CachedNetworkImageProvider(image!)),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 32),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: List.generate(5, (index) {
                         return IconButton(
                           icon: Icon(
-                            _rating > index
-                                ? Ionicons.star
-                                : Ionicons.star_outline,
-                            color: accentColor.resolveFrom(context),
-                          ),
-                          iconSize: 40,
+                              index >= _rating
+                                  ? CupertinoIcons.star
+                                  : CupertinoIcons.star_fill,
+                              color: index >= _rating
+                                  ? tertiaryColor.resolveFrom(context)
+                                  : accentColor.resolveFrom(context)),
+                          iconSize: 36,
                           onPressed: () {
                             setState(() {
                               _rating = index + 1;
@@ -97,19 +107,26 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                     const SizedBox(height: 20),
                     SizedBox(
                       height: 100.0,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: CupertinoTextField(
                           controller: _commentController,
                           onChanged: (_) => setState(() {}),
                           textAlign: TextAlign.start,
                           textAlignVertical: TextAlignVertical.top,
                           textCapitalization: TextCapitalization.sentences,
+                          style: TextStyle(
+                            color: CupertinoColors.label.resolveFrom(context),
+                            fontSize: 16,
+                            letterSpacing: -0.5,
+                            fontWeight: FontWeight.w500,
+                          ),
                           placeholder:
-                              'Write a review for ${reservedByName!}',
+                              'Write a review for ${reservedByName!}...',
                           decoration: BoxDecoration(
-                            color: groupedBackgroundColor,
-                            borderRadius: BorderRadius.circular(8.0),
+                            color: CupertinoColors.tertiarySystemFill
+                                .resolveFrom(context),
+                            borderRadius: BorderRadius.circular(20.0),
                           ),
                           placeholderStyle: TextStyle(
                             fontWeight: FontWeight.w500,
@@ -117,7 +134,7 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
                             color: CupertinoColors.placeholderText
                                 .resolveFrom(context),
                           ),
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(20),
                         ),
                       ),
                     ),
@@ -130,6 +147,15 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
             ],
           ),
         ));
+  }
+
+  Widget _buildLoadingScreen() {
+    return CupertinoPageScaffold(
+      backgroundColor: backgroundColor,
+      child: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
   }
 
   @override
@@ -159,6 +185,8 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
           setState(() {
             reservedByName = userName;
             image = userSnapshot['profileImagePath'] as String? ?? '';
+            reservedByID =
+                reservedByUserId; 
           });
         } else {
           print(
@@ -167,7 +195,13 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
       } else {
         print('Post details document does not exist for ID: $postId');
       }
+      setState(() {
+        _isLoading = false;
+      });
     } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
       print('Error fetching reserved by user name: $error');
     }
   }
@@ -180,52 +214,42 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
 
   Widget _buildButton(BuildContext context, String text, IconData icon) {
     return Container(
-      decoration: const BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x19000000),
-            blurRadius: 10,
-            offset: Offset(0, 0),
-          ),
-        ],
-      ),
+      height: 60.0,
       child: CupertinoButton(
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.symmetric(horizontal: 32.0),
           borderRadius: BorderRadius.circular(100.0),
           color: _isPublishButtonEnabled
-              ? CupertinoColors.systemBackground.resolveFrom(context)
-              : CupertinoColors.systemGrey4.resolveFrom(context),
+              ? yellow.resolveFrom(context).withOpacity(0.2)
+              : CupertinoColors.tertiarySystemFill.resolveFrom(context),
           onPressed: _isPublishButtonEnabled
               ? () async {
                   await _storeCommentInDatabase();
                 }
               : null,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  text,
-                  style: TextStyle(
-                    color: _isPublishButtonEnabled
-                        ? CupertinoColors.label.resolveFrom(context)
-                        : CupertinoColors.inactiveGray,
-                    fontSize: 18,
-                    letterSpacing: -0.8,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Icon(
-                  icon,
-                  size: 20,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: _isPublishButtonEnabled
+                    ? yellow.resolveFrom(context)
+                    : CupertinoColors.inactiveGray,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: TextStyle(
                   color: _isPublishButtonEnabled
                       ? CupertinoColors.label.resolveFrom(context)
                       : CupertinoColors.inactiveGray,
+                  fontSize: 18,
+                  letterSpacing: -0.8,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
-            ),
+              ),
+            ],
           )),
     );
   }
