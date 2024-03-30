@@ -69,9 +69,6 @@ class _DonorScreenState extends State<DonorScreen> {
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
     
-    // Read post details
-    fetchPostInformation();
-    
     // Set up a stream listener for changes to the 'post_status' field to sync changes in real time
     FirebaseFirestore.instance
         .collection('post_details')
@@ -81,8 +78,21 @@ class _DonorScreenState extends State<DonorScreen> {
       if (snapshot.exists) {
         // Extract post_status and update orderState accordingly
         final String post_status = snapshot.data()?['post_status'];
+        final String? reserved_by = snapshot.data()?['reserved_by'];
+
         setState(() {
           postStatus = post_status;
+          
+          if (reserved_by != null) {
+            // Read post details
+            fetchPostInformation();
+          } else {
+            reservedByName = null; // Reset the reservedByName if reserved_by is null
+            reservedByLastName = null;
+            rating = 0.0;
+            photo = '';
+          }
+
           switch (postStatus) {
             case 'not reserved':
               orderState = OrderState.notReserved;
@@ -352,6 +362,7 @@ class _DonorScreenState extends State<DonorScreen> {
                  
                  // Heading Text
                   __buildHeadingTextField(text: _buildHeadingText()),
+                  //_buildHeadingTextField(),
                   
                   SizedBox(height: 16.0),
 
