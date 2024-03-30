@@ -27,7 +27,7 @@ class _ProfileCardState extends State<ProfileCard> {
   void _initializeUserProfile() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
       return;
     }
 
@@ -40,7 +40,7 @@ class _ProfileCardState extends State<ProfileCard> {
         if (snapshot.exists) {
           _updateProfileData(snapshot.data()!);
         } else {
-          setState(() => isLoading = false);
+          if (mounted) setState(() => isLoading = false);
         }
       },
       onError: (e) {
@@ -53,11 +53,13 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   void _updateProfileData(Map<String, dynamic> data) {
-    setState(() {
-      profileData = data;
-      photo = data['profileImagePath'] as String? ?? '';
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        profileData = data;
+        photo = data['profileImagePath'] as String? ?? '';
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -69,7 +71,7 @@ class _ProfileCardState extends State<ProfileCard> {
             context, CupertinoPageRoute(builder: (context) => ProfileScreen()));
       },
       child: Container(
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: CupertinoDynamicColor.resolve(
@@ -104,7 +106,7 @@ class _ProfileCardState extends State<ProfileCard> {
                   FontWeight.w600),
               const SizedBox(height: 4),
               _buildDescriptiveText(
-                  "Edit Account & Profile", 12, FontWeight.w500),
+                  "Edit Account & Posts", 12, FontWeight.w500),
             ],
           ),
         ),
@@ -116,9 +118,11 @@ class _ProfileCardState extends State<ProfileCard> {
   Widget _profileImage() {
     return CachedNetworkImage(
       imageUrl: photo,
-      fit: BoxFit.fill,
+      fit: BoxFit.cover,
       width: 64,
       height: 64,
+      maxHeightDiskCache: 200, // Set maximum height for disk caching
+      maxWidthDiskCache: 200, // Set maximum width for disk caching
       placeholder: (context, url) => const CupertinoActivityIndicator(),
       errorWidget: (context, url, error) => Image.asset(
         'assets/images/sampleProfile.png',

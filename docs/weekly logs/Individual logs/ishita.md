@@ -85,13 +85,12 @@ N/A.
 
 ### Tasks completed (from Project Board)
 
-- Design the "add post" page on Figma	
-- Design the settings page on Figma and create detailed flows	
-- Design the chat page on Figma	
-- Design the public profile page on Figma	
+- Design the "add post" page on Figma
+- Design the settings page on Figma and create detailed flows
+- Design the chat page on Figma
+- Design the public profile page on Figma
 - Complete team log for Weeks 6 and 7
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -132,7 +131,6 @@ N/A.
 - Complete team log for Week 8.
 - Reviewed other team members' PRs and assigned team members to PRs.
 
-
 ### Tasks in progress (from Project Board)
 
 No task currently in progress as all have been completed.
@@ -165,7 +163,6 @@ N/A.
 - Complete team log for Week 9.
 - Reviewed other team members' PRs and assigned team members to PRs.
 
-
 ### Tasks in progress (from Project Board)
 
 No task currently in progress as all have been completed.
@@ -173,7 +170,6 @@ No task currently in progress as all have been completed.
 ### Additional Information
 
 N/A.
-
 
 ---
 ---
@@ -194,20 +190,18 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Create a post UI and widget test.
-    - Completed a widget test for the UI of the screen.
-    - Design code of the "create post screen"
-        - Added various input text fields for various details about the food.
-        - Added "save" and "close" buttons.
-        - Manually tested the code and fixed bugs.
+  - Completed a widget test for the UI of the screen.
+  - Design code of the "create post screen"
+    - Added various input text fields for various details about the food.
+    - Added "save" and "close" buttons.
+    - Manually tested the code and fixed bugs.
 - Complete Week 10 team log
 - Complete Week 10 individual log
 - Assisted in planning out the features left for the milestone and the tasks associated with them.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -235,24 +229,22 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Create a post feature.
-    - Modified the widget test for the UI of the screen.
-    - Design code of the "create post screen"
-        - Modified the design to look similar to Figma.
-        - Manually tested the code and fixed bugs.
-    - Functionality
-        - Added functionality to the create post by enabling it to write to firestore.
+  - Modified the widget test for the UI of the screen.
+  - Design code of the "create post screen"
+    - Modified the design to look similar to Figma.
+    - Manually tested the code and fixed bugs.
+  - Functionality
+    - Added functionality to the create post by enabling it to write to firestore.
 - Settings page
-    - Created a widget test for the settings page UI.
-    - Completed the design code for the settings page.
-    - Added functionality to it.
+  - Created a widget test for the settings page UI.
+  - Completed the design code for the settings page.
+  - Added functionality to it.
 - Complete Weeks 11 and 12 team log
 - Complete Week 12 individual log
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -285,16 +277,15 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Fix bugs in settings page
 - Fix the UI widget test of settings
 - Create a post backend feature.
-    - Modified the widget test for the UI of the screen to add more test cases.
-    - Added data to firestore using a function created by a team member.
+  - Modified the widget test for the UI of the screen to add more test cases.
+  - Added data to firestore using a function created by a team member.
 - Create a custom search bar which includes backend implementation for the pre-defined lists of allergens, categories, and pickup locations.
-    - Created a custom cupertino chip widget to display the selected items from the search bar
+  - Created a custom cupertino chip widget to display the selected items from the search bar
 - Create a mock firestore service for testing document reading and writing.
 - Create a mock test for verifying successful document addition.
 - Recap of features of design doc.
@@ -302,7 +293,6 @@ N/A.
 - Complete Week 13 team log.
 - Complete Week 13 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -331,7 +321,6 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Front-end of forgot password page.
@@ -340,7 +329,6 @@ N/A.
 - Complete Week 13 team log.
 - Complete Week 13 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -373,23 +361,21 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Update the settings page to add account settings + test
-    - Added new buttons for account settings to the settings screen.
-    - Added delete account functionality.
-    - Fixed bug with navigation issues on clicking the "reset password" button.
-    - Added link to the accessibility settings screen on this page.
-    - Completely changed the previous widget test for this new settings page.
+  - Added new buttons for account settings to the settings screen.
+  - Added delete account functionality.
+  - Fixed bug with navigation issues on clicking the "reset password" button.
+  - Added link to the accessibility settings screen on this page.
+  - Completely changed the previous widget test for this new settings page.
 - Add the accessibility screen to allow users to control font size + test
-    - Added a slider to allow users to set their preferred font size.
-    - Implemented a TextScaleProvider class that listens to the change in font size (as set by the user) and notifies other screens of the changes in real time via main.dart.
-    - Developed a widget test for the accessibility screen.
+  - Added a slider to allow users to set their preferred font size.
+  - Implemented a TextScaleProvider class that listens to the change in font size (as set by the user) and notifies other screens of the changes in real time via main.dart.
+  - Developed a widget test for the accessibility screen.
 - Complete the T2 W2 team log.
 - Complete the T2 W2 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -420,21 +406,19 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Update the order card with the new status button for donors + backend
-    - Ensured that the status button on the order card is for donors only.
-    - Added a new and updated reserve button class in posting_details.dart to save the donee id.
-    - Fixed many bugs related to the reserve button working as intended from the donor's point of view.
+  - Ensured that the status button on the order card is for donors only.
+  - Added a new and updated reserve button class in posting_details.dart to save the donee id.
+  - Fixed many bugs related to the reserve button working as intended from the donor's point of view.
 - Complete all the screens/updates of the donor pathway
-    - Added the front-end of the first donor status screen.
-    - Implemented functionality to update the state of the donor screen everytime there is an update on the order.
-    - Developed a widget test for the donor state screen.
+  - Added the front-end of the first donor status screen.
+  - Implemented functionality to update the state of the donor screen everytime there is an update on the order.
+  - Developed a widget test for the donor state screen.
 - Complete the T2 W3 team log.
 - Complete the T2 W3 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -472,27 +456,25 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Complete accessibility screen bug fixes
-    - Fixed the overflow bug in settings when users increase the font size.
-    - Added font size increase functionality to accounts screen and order card (as specified through users in accessibility screen)
+  - Fixed the overflow bug in settings when users increase the font size.
+  - Added font size increase functionality to accounts screen and order card (as specified through users in accessibility screen)
 - Complete various small bug fixes elsewhere throughout the app
-    - Fixed a minor bug related to input validation in create post screen.
-    - Changed minor texts for UI purposes.
-    - Updated the pre-defined lists for allergens and categories.
+  - Fixed a minor bug related to input validation in create post screen.
+  - Changed minor texts for UI purposes.
+  - Updated the pre-defined lists for allergens and categories.
 - Fix the navigation bug from the rating page
 - Complete the list of tasks for the peer testing.
 - Complete the questionnaire for the peer testing.
 - Order status should not show up if the order has not been reserved
-    - It will not show buttons to message anyone or confirm the order if it hasn't been reserved.
-    - It's heading is updated to show the order hasn't been reserved yet to correctly inform the user on the order status.
+  - It will not show buttons to message anyone or confirm the order if it hasn't been reserved.
+  - It's heading is updated to show the order hasn't been reserved yet to correctly inform the user on the order status.
 - Fix bug that requires the bio to save any other change on the edit profile screen
 - Complete the T2 W4 team log.
 - Complete the T2 W4 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -521,26 +503,24 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Add the font size change functionality to other screens
-    - Added it to the new order card and fixed bugs related to overflow when font size is increased.
-    - Added it to the donor screen.
-    - Added it to the edit profile screen.
-    - Added it to the create post screen.
-    - Added it to the saved posts/ bookmarks screen.
+  - Added it to the new order card and fixed bugs related to overflow when font size is increased.
+  - Added it to the donor screen.
+  - Added it to the edit profile screen.
+  - Added it to the create post screen.
+  - Added it to the saved posts/ bookmarks screen.
 - Modify the tests of various files to ensure they pass.
-    - Modified the tests of the accounts and settings screen because the "Edit profile" button was moved.
-    - Modified the test of the create post screen.
-    - Modified the test of the saved post screen.
-    - Modified the test of the edit profile screen.
-    - Modified the test of the donor screen.
-    - Modified the mock firestore service.
+  - Modified the tests of the accounts and settings screen because the "Edit profile" button was moved.
+  - Modified the test of the create post screen.
+  - Modified the test of the saved post screen.
+  - Modified the test of the edit profile screen.
+  - Modified the test of the donor screen.
+  - Modified the mock firestore service.
 - Complete the T2 W5 team log.
 - Complete the T2 W5 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -570,18 +550,16 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Complete the donor screen backend by saving the status of the orders.
-    - Added the map to display the pin location of the post on the donor screen.
-    - Added the cancel reservation button and logic.
-    - Added backend - saving post status and updating the state on the page.
-    - Updated the UI of some components to make it more similar to the Figma design.
+  - Added the map to display the pin location of the post on the donor screen.
+  - Added the cancel reservation button and logic.
+  - Added backend - saving post status and updating the state on the page.
+  - Updated the UI of some components to make it more similar to the Figma design.
 - Complete the T2 W6 team log.
 - Complete the T2 W6 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -612,20 +590,18 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Display the reserved posts
 - Modify the donor screen frontend + backend.
-    - Added the progress bar to display the post status on the donor screen.
-    - Modified the data storage for post reservation.
-    - Modifed the cancel button logic.
-    - Added to the category list
+  - Added the progress bar to display the post status on the donor screen.
+  - Modified the data storage for post reservation.
+  - Modifed the cancel button logic.
+  - Added to the category list
 
 - Complete the T2 W8 team log.
 - Complete the T2 W8 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
@@ -657,24 +633,106 @@ N/A.
 - Completed the weekly logs.
 - Updated and managed the Project Board.
 
-
 ### Tasks completed (from Project Board)
 
 - Work on the post status functionality from donor's POV with Jayati and fix donor screen bugs
-    - Modified the progress bar to display the post status on the donor screen.
-    - Modified the data storage for post reservation.
-    - Modified the storage of information in the documents of the user collection to fix the order status bug.
-    - Made a minor change to the category list.
-    - Fixed the data reading on the donor screen to fix the order status bug.
+  - Modified the progress bar to display the post status on the donor screen.
+  - Modified the data storage for post reservation.
+  - Modified the storage of information in the documents of the user collection to fix the order status bug.
+  - Made a minor change to the category list.
+  - Fixed the data reading on the donor screen to fix the order status bug.
 
 - Complete the T2 W9 team log.
-- Complete the T2 W8=9 individual log.
+- Complete the T2 W9 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
-
 
 ### Tasks in progress (from Project Board)
 
 - No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Term 2 Week 10: Monday 11th Mar 2024 - Sunday 17th Mar 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W10.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Added functionality for active and past/completed orders.
+- Reorganized how donated and reserved posts are displayed and added functionality.
+- Fixed major bugs on the account screen.
+- Added the progress bar as a component for reusability.
+- Added location display on the donor screen using reverse geocaching.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+### Tasks completed (from Project Board)
+
+- Display the reserved posts
+  - Reorganized how donated and reserved posts are displayed and added functionality.
+  - Reorganized how active and past orders are displayed and added functionality.
+  - Fixed bugs on the account screen.
+  - Added location display on the donor screen using reverse geocoding.
+  - Added the progress bar as a component for reusability.
+
+- Complete the T2 W10 team log.
+- Complete the T2 W10 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+
+- No tasks currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Term 2 Week 11: Monday 18th Mar 2024 - Sunday 24th Mar 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W11.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Fixed the map initialization bug on the donor screen.
+- Added new order states - not reserved and completed and changed the logic and UI to accommodate for that.
+- Added image picking, uploading, and reading functionality for a delivery picture at the "Ready to Pick Up" state.
+- Added a stream listener to automatically update changes on the donor screen without needing to leave the screen and come back.
+- Refactored quite a bit of code and modularized it where possible.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+### Tasks completed (from Project Board)
+
+- Complete the donor screen completed state and photo picker functionality
+  - Added new order states - not reserved and completed - and changed the logic and UI to accommodate for that.
+  - Fixed the map initialization bug on the donor screen.
+  - Added image picking, uploading, and reading functionality for a delivery picture at the "Ready to Pick Up" state.
+  - Added a stream listener to automatically update changes on the donor screen without needing to leave the screen and come back.
+  - Fixed other various bugs on the donor screen and refactored the code.
+
+- Complete the T2 W11 team log.
+- Complete the T2 W11 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+
+- No tasks are currently in progress as all have been completed.
 
 ### Additional Information
 

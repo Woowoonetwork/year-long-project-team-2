@@ -3,9 +3,9 @@
 
 import 'package:FoodHood/Components/colors.dart';
 import 'package:flutter/cupertino.dart';
-import '../components.dart';
-import '../auth_service.dart';
-import '../firestore_service.dart';
+import '../Components/components.dart';
+import '../Services/AuthService.dart';
+import '../Services/FirebaseService.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +30,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _confPasswordController = TextEditingController();
   final _provinceController = TextEditingController();
   final _cityController = TextEditingController();
-  bool _showPassword = false;
 
   String _selectedProvince = '';
   String _selectedCity = '';
@@ -106,39 +105,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           _lastNameController,
         ),
         const SizedBox(height: 16),
-        buildCupertinoTextField('Email Address', _emailController, false,
-            context, [AutofillHints.email],
+        buildCupertinoTextField(
+            'Email Address', _emailController, context, [AutofillHints.email],
             errorText: _emailErrorText),
         const SizedBox(height: 16),
-        buildCupertinoTextField('Password', _passwordController, !_showPassword, context,
-            [AutofillHints.password],
+        PasswordCupertinoTextField(
+            placeholder: 'Password',
+            controller: _passwordController,
+            context: context,
+            showHint: true,
+            autofillHints: [AutofillHints.password],
             errorText: _passwordErrorText),
         const SizedBox(height: 16),
-
-        buildCupertinoTextField('Confirm Password', _confPasswordController,
-            !_showPassword, context, [AutofillHints.password],
-            errorText: _confPasswordErrorText), // Confirm password text field
-
-        const SizedBox(height: 16),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-              'Password must be at least 8 letters long, with one upper case letter, one lower case letter, and one number.',
-              style: TextStyle(
-                color: CupertinoColors.systemGrey,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              )),
-        ),
-        // Show/Hide Password button
-        CupertinoButton(
-          onPressed: () {
-            setState(() {
-              _showPassword = !_showPassword; // Toggle the boolean variable
-            });
-          },
-          child: Text(_showPassword ? 'Hide Password' : 'Show Password'),
-        ),
+        PasswordCupertinoTextField(
+            placeholder: 'Confirm Password',
+            controller: _confPasswordController,
+            context: context,
+            showHint: true,
+            autofillHints: [AutofillHints.password],
+            errorText: _confPasswordErrorText),
         const SizedBox(height: 16),
         buildTwoPickerFieldsRow(
           'Province',
@@ -187,7 +172,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           child: Padding(
             padding: const EdgeInsets.only(right: 10.0),
             child: buildCupertinoTextField(
-                placeholder1, controller1, false, context, [],
+                placeholder1, controller1, context, [],
                 errorText: _firstNameErrorText),
           ),
         ),
@@ -195,7 +180,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           child: Padding(
             padding: const EdgeInsets.only(left: 10.0),
             child: buildCupertinoTextField(
-                placeholder2, controller2, false, context, [],
+                placeholder2, controller2, context, [],
                 errorText: _lastNameErrorText),
           ),
         ),
@@ -298,8 +283,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         !_passwordController.text.contains(RegExp(r'[a-z]')) ||
         !_passwordController.text.contains(RegExp(r'[A-Z]')) ||
         !_passwordController.text.contains(RegExp(r'[0-9]'))) {
-      _passwordErrorText =
-          "Password is weak.";
+      _passwordErrorText = "Password is weak.";
       isFormValid = false;
     }
 
@@ -499,7 +483,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               Icon(FeatherIcons.chevronDown,
                   size: 18,
                   color: CupertinoDynamicColor.resolve(
-                      CupertinoColors.label, context)),
+                      CupertinoColors.secondaryLabel, context)),
             ],
           ),
         ),

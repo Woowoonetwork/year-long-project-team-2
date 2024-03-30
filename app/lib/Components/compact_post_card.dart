@@ -1,8 +1,6 @@
-import 'package:FoodHood/Screens/profile_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
-import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Screens/detail_screen.dart'; // Update this import
 import 'package:cached_network_image/cached_network_image.dart'; // Add this import
 
 class CompactPostCard extends StatelessWidget {
@@ -16,15 +14,8 @@ class CompactPostCard extends StatelessWidget {
   final Function(String) onTap; // New callback parameter
   final String postId;
   final profileURL; // New parameter to store the profile image URL
-  final bool showTags; // New parameter to indicate whether to show tags or not
-
-  // Define your colors here
-  final List<Color> colors = [
-    Colors.lightGreenAccent, // Light Green
-    Colors.lightBlueAccent, // Light Blue
-    Colors.pinkAccent[100]!, // Light Pink
-    Colors.yellowAccent[100]! // Light Yellow
-  ];
+  final bool
+      showTags; // New parameter to indicate whether to show tags or notxx
 
   CompactPostCard({
     Key? key,
@@ -62,11 +53,7 @@ class CompactPostCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTitleSection(context),
-              if (showTags) ...[
-                _buildTagSection(context),
-              ] else ...[
-                SizedBox(height: 10),
-              ],
+              SizedBox(height: 10),
               _buildOrderInfoSection(context, profileURL),
             ],
           ),
@@ -83,7 +70,7 @@ class CompactPostCard extends StatelessWidget {
       boxShadow: [
         BoxShadow(
           color: Color(0x19000000),
-          blurRadius: 20,
+          blurRadius: 10,
           offset: Offset(0, 0),
         ),
       ],
@@ -106,47 +93,6 @@ class CompactPostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTagSection(BuildContext context) {
-    const double horizontalSpacing = 7.0;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      child: Row(
-        children: List.generate(tags.length, (index) {
-          return Row(
-            children: [
-              _buildTag(tags[index], _generateTagColor(index), context),
-              SizedBox(width: horizontalSpacing),
-            ],
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildTag(String text, Color color, BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.black, context),
-          fontSize: 10,
-          letterSpacing: -0.40,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Color _generateTagColor(int index) {
-    List<Color> availableColors = [yellow, orange, blue, babyPink, Cyan];
-    return availableColors[index % availableColors.length];
-  }
-
   Widget _buildOrderInfoSection(BuildContext context, String avatarUrl) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -158,7 +104,7 @@ class CompactPostCard extends StatelessWidget {
             width: 20,
             height: 20,
             fit: BoxFit.cover,
-            placeholder: (context, url) => CircularProgressIndicator(),
+            placeholder: (context, url) => CupertinoActivityIndicator(),
             errorWidget: (context, url, error) => Image.asset(
                 'assets/images/sampleProfile.png',
                 width: 20,

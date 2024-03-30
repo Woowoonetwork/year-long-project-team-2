@@ -510,3 +510,65 @@ Additional Information
 Additional Information 
 
 
+# Individual Log: Monday 11th Mar 2024 - Sunday 17th Mar 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati17.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed
+* Started the switch to Ishita's progress bar
+* Fixed the crashing from reserved page
+* Fixed UI buttons flying to top
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+
+* Started the switch to Ishita's progress bar
+* Fixed the crashing from reserved page
+* Fixed UI buttons flying to top
+* Completed the weekly individual log
+* Created team log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+
+
+Additional Information 
+
+# Individual Log: Monday 18th Mar 2024 - Sunday 24th Mar 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati18.png)
+
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed
+* Fixed all the states of reservation page
+* Fixed google sign in for both Android and iOS
+* Started working on pulling in names for Apple signin
+* Completed the weekly individual log
+* Created team log
+
+# Tasks completed (from Project Board)
+
+* Fixed all the states of reservation page
+* Fixed google sign in for both Android and iOS
+* Started working on pulling in names for Apple signin
+* Completed the weekly individual log
+* Created team log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+
+
+Additional Information 
+
+
+
