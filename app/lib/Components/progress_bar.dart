@@ -75,7 +75,7 @@ class ProgressBar extends StatelessWidget {
     return index < progressIndex
         ? DotIndicator(color: accentColor.resolveFrom(context))
         : OutlinedDotIndicator(
-            borderWidth: 2.0, color: secondaryColor.resolveFrom(context));
+            borderWidth: 2.0, color: accentColor.resolveFrom(context));
   }
 
   Widget _buildConnector(int index, {required BuildContext context}) {
@@ -83,8 +83,8 @@ class ProgressBar extends StatelessWidget {
     return index < progressIndex
         ? SolidLineConnector(
             color: tertiaryColor.resolveFrom(context), thickness: 4.0)
-        : SolidLineConnector(
-            color: tertiaryColor.resolveFrom(context), thickness: 4.0);
+        : DashedLineConnector(
+            color: tertiaryColor.resolveFrom(context), thickness: 3.0, dash: 3.0);
   }
 
   String _getStateText(dos.OrderState state) {
