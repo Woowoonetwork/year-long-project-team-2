@@ -69,6 +69,9 @@ class _DonorScreenState extends State<DonorScreen> {
         Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
     _updateAdjustedFontSize();
     
+    // Read post details
+    fetchPostInformation();
+    
     // Set up a stream listener for changes to the 'post_status' field to sync changes in real time
     FirebaseFirestore.instance
         .collection('post_details')
@@ -107,9 +110,7 @@ class _DonorScreenState extends State<DonorScreen> {
         // Handle case where document does not exist
       }
     });
-
-    // Read post details
-    fetchPostInformation();
+    
   }
 
   // Reading post information
