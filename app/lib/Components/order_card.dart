@@ -1,8 +1,8 @@
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/components.dart';
-import 'package:FoodHood/Screens/donee_pathway_uno.dart';
+import 'package:FoodHood/Screens/donee_screen.dart';
 import 'package:FoodHood/Screens/donor_screen.dart';
-import 'package:FoodHood/Screens/posting_detail.dart';
+import 'package:FoodHood/Screens/detail_screen.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:feather_icons/feather_icons.dart';
@@ -45,78 +45,87 @@ class OrderCard extends StatelessWidget {
   });
 
   @override
-Widget build(BuildContext context) {
-  double textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
+  Widget build(BuildContext context) {
+    double textScaleFactor =
+        Provider.of<TextScaleProvider>(context).textScaleFactor;
 
-  double adjustedTitleFontSize = _defaultTitleFontSize * textScaleFactor;
-  double adjustedTagFontSize = _defaultTagFontSize * textScaleFactor;
-  double adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * textScaleFactor;
-  double adjustedStatusFontSize = _defaultStatusFontSize * textScaleFactor;
+    double adjustedTitleFontSize = _defaultTitleFontSize * textScaleFactor;
+    double adjustedTagFontSize = _defaultTagFontSize * textScaleFactor;
+    double adjustedOrderInfoFontSize =
+        _defaultOrderInfoFontSize * textScaleFactor;
+    double adjustedStatusFontSize = _defaultStatusFontSize * textScaleFactor;
 
-  return SizedBox(
-    width: MediaQuery.of(context).size.width,
-    child: CupertinoButton(
-      padding: EdgeInsets.zero,
-      onPressed: () {
-        HapticFeedback.selectionClick();
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => isDonation ? DonorScreen(postId: postId) : DoneePath(postId: postId),
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          HapticFeedback.selectionClick();
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+              builder: (context) => isDonation
+                  ? DonorScreen(postId: postId)
+                  : DoneePath(postId: postId),
+            ),
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: CupertinoDynamicColor.resolve(
+                CupertinoColors.tertiarySystemBackground, context),
+            borderRadius: BorderRadius.circular(20),
           ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(CupertinoColors.tertiarySystemBackground, context),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildImageSection(context, imagesWithAltText, postId),
-                    Flexible(
-                      fit: FlexFit.loose,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildStatusText(context, adjustedStatusFontSize, orderState),
-                            const SizedBox(height: 4),
-                            _buildTitleSection(context, title, adjustedTitleFontSize),
-                            const SizedBox(height: 4),
-                            _buildOrderInfoSection(context, orderInfo, adjustedOrderInfoFontSize),
-                            const SizedBox(height: 4),
-                            _buildTagSection(context, tags, adjustedTagFontSize),
-                          ],
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildImageSection(context, imagesWithAltText, postId),
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildStatusText(
+                                  context, adjustedStatusFontSize, orderState),
+                              const SizedBox(height: 4),
+                              _buildTitleSection(
+                                  context, title, adjustedTitleFontSize),
+                              const SizedBox(height: 4),
+                              _buildOrderInfoSection(context, orderInfo,
+                                  adjustedOrderInfoFontSize),
+                              const SizedBox(height: 4),
+                              _buildTagSection(
+                                  context, tags, adjustedTagFontSize),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                FeatherIcons.chevronRight,
-                size: 24,
-                color: CupertinoColors.systemGrey.resolveFrom(context),
-              ),
-            ],
+                Icon(
+                  FeatherIcons.chevronRight,
+                  size: 24,
+                  color: CupertinoColors.systemGrey.resolveFrom(context),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _onCardTap(BuildContext context, String postId) {
     HapticFeedback.selectionClick();
@@ -192,7 +201,7 @@ Widget build(BuildContext context) {
         statusColor = CupertinoColors.systemBlue;
         break;
       case OrderState.readyToPickUp:
-        statusText = 'Ready to Pick Up';
+        statusText = 'Dropped Off';
         statusColor = CupertinoColors.systemGreen;
         break;
       case OrderState.pending:

@@ -1,38 +1,264 @@
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Screens/message_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:FoodHood/Components/colors.dart';
-import 'package:feather_icons/feather_icons.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DonorRatingPage extends StatefulWidget {
   final String postId;
-  const DonorRatingPage({Key? key, required this.postId}) : super(key: key);
+  final String receiverID;
+  const DonorRatingPage(
+      {Key? key, required this.postId, required this.receiverID})
+      : super(key: key);
   @override
   _DonorRatingPageState createState() => _DonorRatingPageState();
 }
 
 class _DonorRatingPageState extends State<DonorRatingPage> {
-  String? CreatedByName;
-  int _rating = 0; // State variable to keep track of the rating
-  TextEditingController _commentController =
-      TextEditingController(); // Initialize the text controller
+  String? createdByName;
+  String? image;
+  String reservedByID = '';
+  int _rating = 0;
+  bool _isLoading = true;
+
+  TextEditingController _commentController = TextEditingController();
+
+  bool get _isPublishButtonEnabled {
+    return _rating > 0 && _commentController.text.isNotEmpty;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return _buildLoadingScreen();
+    }
+    return CupertinoPageScaffold(
+        backgroundColor: backgroundColor,
+        navigationBar: CupertinoNavigationBar(
+          border: null,
+          backgroundColor: backgroundColor,
+          leading: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Icon(FeatherIcons.x,
+                size: 22, color: CupertinoColors.label.resolveFrom(context)),
+          ),
+          trailing: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (context) => MessageScreen(
+                    receiverID: reservedByID,
+                  ),
+                ),
+              );
+            },
+            child: Text('Message ${createdByName ?? ""}',
+                style: TextStyle(
+                    color: accentColor.resolveFrom(context),
+                    fontWeight: FontWeight.w500,
+                )
+            ),
+          ),
+        ),
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        "How was your experience with ${createdByName ?? ""}?",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: CupertinoColors.label.resolveFrom(context),
+                          fontSize: 32,
+                          letterSpacing: -1.3,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    CircleAvatar(
+                        radius: 50,
+                        backgroundImage: CachedNetworkImageProvider(image!)),
+                    const SizedBox(height: 32),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(5, (index) {
+                        return IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                              index >= _rating
+                                  ? CupertinoIcons.star
+                                  : CupertinoIcons.star_fill,
+                              color: index >= _rating
+                                  ? tertiaryColor.resolveFrom(context)
+                                  : accentColor.resolveFrom(context)),
+                          iconSize: 36,
+                          onPressed: () {
+                            setState(() {
+                              _rating = index + 1;
+                            });
+                          },
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: 100.0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: CupertinoTextField(
+                          controller: _commentController,
+                          onChanged: (_) => setState(() {}),
+                          textAlign: TextAlign.start,
+                          textAlignVertical: TextAlignVertical.top,
+                          textCapitalization: TextCapitalization.sentences,
+                          style: TextStyle(
+                            color: CupertinoColors.label.resolveFrom(context),
+                            fontSize: 16,
+                            letterSpacing: -0.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          placeholder:
+                              'Write a review for ${createdByName ?? ""}',
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.tertiarySystemFill
+                                .resolveFrom(context),
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          placeholderStyle: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: -0.8,
+                            color: CupertinoColors.placeholderText
+                                .resolveFrom(context),
+                          ),
+                          padding: const EdgeInsets.all(20),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    _buildButton(context, "Publish", FeatherIcons.edit),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ));
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> fetchCreatedByName() async {
+    try {
+      final DocumentSnapshot postSnapshot = await FirebaseFirestore.instance
+          .collection('post_details')
+          .doc(widget.postId)
+          .get();
+      if (postSnapshot.exists) {
+        final String createdByUserId = postSnapshot['user_id'];
+        final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('user')
+            .doc(createdByUserId)
+            .get();
+
+        if (userSnapshot.exists) {
+          final userName = userSnapshot['firstName'];
+          setState(() {
+            createdByName = userName;
+            image = userSnapshot['profileImagePath'] as String? ?? '';
+          });
+        } else {
+          print(
+              'User document does not exist for reserved by user ID: $createdByUserId');
+        }
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching creator name: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Widget _buildLoadingScreen() {
+    return CupertinoPageScaffold(
+      backgroundColor: backgroundColor,
+      child: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
 
   @override
   void initState() {
     super.initState();
+    reservedByID = widget.receiverID;
     fetchCreatedByName();
-    // Fetch reserved by user name when the widget initializes
+  }
+
+  Widget _buildButton(BuildContext context, String text, IconData icon) {
+    return Container(
+      height: 60.0,
+      child: CupertinoButton(
+          padding: EdgeInsets.symmetric(horizontal: 32.0),
+          borderRadius: BorderRadius.circular(100.0),
+          color: _isPublishButtonEnabled
+              ? yellow.resolveFrom(context).withOpacity(0.2)
+              : CupertinoColors.tertiarySystemFill.resolveFrom(context),
+          onPressed: _isPublishButtonEnabled
+              ? () async {
+                  await _storeCommentInDatabase();
+                }
+              : null,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: _isPublishButtonEnabled
+                    ? yellow.resolveFrom(context)
+                    : CupertinoColors.inactiveGray,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: TextStyle(
+                  color: _isPublishButtonEnabled
+                      ? CupertinoColors.label.resolveFrom(context)
+                      : CupertinoColors.inactiveGray,
+                  fontSize: 18,
+                  letterSpacing: -0.8,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          )),
+    );
   }
 
   Future<void> _storeCommentInDatabase() async {
-    String comment = _commentController.text;
-    int starRating = _rating; // Number of stars clicked
-
-    DocumentReference postDocRef = FirebaseFirestore.instance
-        .collection('post_details')
-        .doc(widget.postId);
-
     try {
+      DocumentReference postDocRef = FirebaseFirestore.instance
+          .collection('post_details')
+          .doc(widget.postId);
       DocumentSnapshot postDoc = await postDocRef.get();
 
       if (postDoc.exists && postDoc.data() is Map<String, dynamic>) {
@@ -41,7 +267,6 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
 
         DocumentReference userDocRef =
             FirebaseFirestore.instance.collection('user').doc(userId);
-
         DocumentSnapshot userDoc = await userDocRef.get();
 
         if (userDoc.exists && userDoc.data() is Map<String, dynamic>) {
@@ -50,195 +275,27 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
           List<dynamic> comments = List.from(userData['comments'] ?? []);
           List<dynamic> ratings = List.from(userData['ratings'] ?? []);
 
-          comments.add(comment);
-          ratings.add(starRating);
+          comments.add(_commentController.text);
+          ratings.add(_rating);
 
-          // Calculate the average rating
-          double avgRating = 0;
-          if (ratings.isNotEmpty) {
-            avgRating = ratings.reduce((a, b) => a + b) / ratings.length;
-            // Format the average to two decimal places
-            avgRating = double.parse(avgRating.toStringAsFixed(2));
-          }
+          double avgRating = ratings.isNotEmpty
+              ? ratings.reduce((a, b) => a + b) / ratings.length
+              : 0.0;
+          avgRating = double.parse(avgRating.toStringAsFixed(2));
 
           await userDocRef.update({
             'comments': comments,
             'ratings': ratings,
             'avgRating': avgRating
           });
-          print("Rating stored in database");
+
           Navigator.of(context).pushNamedAndRemoveUntil(
-            '/nav',
-            (route) => false,
-            arguments: {'selectedIndex': 0},
-          );
-        } else {
-          print("User document not found for ID: $userId");
+              '/nav', (route) => false,
+              arguments: {'selectedIndex': 0});
         }
-      } else {
-        print("Post details document not found for ID: ${widget.postId}");
       }
     } catch (e) {
       print("Error updating document: $e");
     }
-  }
-
-  Future<void> fetchCreatedByName() async {
-    final CollectionReference postDetailsCollection =
-        FirebaseFirestore.instance.collection('post_details');
-
-    // Retrieve the created_by user ID from your current data
-    final String postId = widget.postId;
-    try {
-      // Fetch the post details document
-      final DocumentSnapshot postSnapshot =
-          await postDetailsCollection.doc(postId).get();
-
-      if (postSnapshot.exists) {
-        // Extract the created_by user ID from the post details
-        final String CreatedByUserId = postSnapshot['user_id'];
-
-        // Fetch the user document using user_id user ID
-        final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-            .collection('user')
-            .doc(CreatedByUserId)
-            .get();
-
-        if (userSnapshot.exists) {
-          // Extract the user name from the user document
-          final userName = userSnapshot['firstName'];
-          setState(() {
-            CreatedByName = userName;
-          });
-        } else {
-          print(
-              'User document does not exist for reserved by user ID: $CreatedByUserId');
-        }
-      } else {
-        print('Post details document does not exist for ID: $postId');
-      }
-    } catch (error) {
-      print('Error fetching reserved by user name: $error');
-    }
-  }
-
-  void dispose() {
-    _commentController
-        .dispose(); // Dispose the controller when the widget is disposed
-    super.dispose();
-  }
-
-  bool get _isPublishButtonEnabled {
-    return _rating > 0 && _commentController.text.isNotEmpty;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: groupedBackgroundColor,
-      child: CustomScrollView(
-        slivers: <Widget>[
-          CupertinoSliverNavigationBar(
-            largeTitle: Text('', style: TextStyle(letterSpacing: -1.34)),
-            border: Border(bottom: BorderSide.none),
-            backgroundColor: groupedBackgroundColor,
-            leading: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Icon(FeatherIcons.chevronLeft,
-                  size: 22, color: CupertinoColors.label.resolveFrom(context)),
-            ),
-            trailing: GestureDetector(
-              onTap: () {
-                print("Message Harry Tapped");
-              },
-              child: Text(
-                'Message ${CreatedByName ?? 'Unknown User'}',
-                style:
-                    TextStyle(color: CupertinoColors.activeBlue, fontSize: 17),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 30, horizontal: 16),
-                  child: Text(
-                    "How was your experience with ${CreatedByName ?? 'Unknown User'}?",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: CupertinoColors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                ClipOval(),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(5, (index) {
-                    return IconButton(
-                      icon: Icon(
-                        _rating > index ? Icons.star : Icons.star_border,
-                        color: Colors.amber,
-                      ),
-                      iconSize: 40,
-                      onPressed: () {
-                        setState(() {
-                          _rating = index + 1;
-                        });
-                      },
-                    );
-                  }),
-                ),
-                SizedBox(height: 20),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 16), // Padding for the text field
-                  child: CupertinoTextField(
-                    controller: _commentController,
-                    onChanged: (_) => setState(() {}),
-                    maxLines:
-                        3, // Increased maxLines to make the text field taller
-                    placeholder: 'Write your comments here',
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.white,
-                      border: Border.all(
-                        color: CupertinoColors.systemGrey3,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    padding:
-                        EdgeInsets.all(12), // Internal padding for text content
-                  ),
-                ),
-                SizedBox(height: 40),
-                CupertinoButton(
-                  onPressed: _isPublishButtonEnabled
-                      ? () async {
-                          await _storeCommentInDatabase();
-                        }
-                      : null,
-                  color: _isPublishButtonEnabled
-                      ? CupertinoColors.activeBlue
-                      : CupertinoColors.quaternarySystemFill,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.publish, size: 20),
-                      SizedBox(width: 4),
-                      Text("Publish"),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

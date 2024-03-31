@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:FoodHood/Screens/posting_detail.dart';
+import 'package:FoodHood/Screens/detail_screen.dart';
 import 'mock.dart';
 import 'package:firebase_core/firebase_core.dart';
 

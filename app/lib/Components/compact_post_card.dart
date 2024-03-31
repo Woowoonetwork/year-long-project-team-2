@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:FoodHood/Screens/posting_detail.dart'; // Update this import
+import 'package:FoodHood/Screens/detail_screen.dart'; // Update this import
 import 'package:cached_network_image/cached_network_image.dart'; // Add this import
 
 class CompactPostCard extends StatelessWidget {

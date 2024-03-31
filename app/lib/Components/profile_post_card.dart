@@ -1,7 +1,7 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Screens/posting_detail.dart';
+import 'package:FoodHood/Screens/detail_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
