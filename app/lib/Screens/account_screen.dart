@@ -235,21 +235,27 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
+  // Widget to build the donations and reservations tab content
   Widget _buildOrdersContent(int segmentedValue) {
-    List<dynamic> orders =
+    List<dynamic> activeOrders =
         segmentedValue == 1 ? activeReservedOrders : activeDonatedOrders;
     List<dynamic> pastOrders =
         segmentedValue == 1 ? pastReservedOrders : pastDonatedOrders;
     String activeTitle = "In Progress";
     String completedTitle = "Completed";
 
+    // Calculate totalWidgets including placeholder text
     int totalWidgets = 0;
-    if (orders.isNotEmpty) {
-      totalWidgets +=
-          1 + (2 * orders.length); // For title and each order with a SizedBox
+    if (activeOrders.isNotEmpty) {
+      totalWidgets += 1 + (2 * activeOrders.length); // For title and each order with a SizedBox
     }
     if (pastOrders.isNotEmpty) {
       totalWidgets += 1 + (2 * pastOrders.length); // Same as above
+    }
+    
+    // Add 1 for placeholder text when there are no orders
+    if (totalWidgets == 0) {
+      totalWidgets += 1;
     }
 
     return SliverPadding(
@@ -257,55 +263,65 @@ class _AccountScreenState extends State<AccountScreen> {
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
+            // Display placeholder text if there are no orders
+            if (activeOrders.isEmpty && pastOrders.isEmpty) {
+              return _buildSectionPlaceholderText(
+                segmentedValue == 1
+                      ? "No Reserved Orders"
+                      : "No Donated Orders"
+              );
+            }
+
             List<Widget> combinedList = [];
-            if (orders.isNotEmpty) {
+            if (activeOrders.isNotEmpty) {
               combinedList.add(buildTitleSection(context, activeTitle));
               combinedList.addAll(
-                  orders.expand((order) => [order, SizedBox(height: 16.0)]));
+                  activeOrders.expand((order) => [order, SizedBox(height: 16.0)]));
             }
             if (pastOrders.isNotEmpty) {
               combinedList.add(buildTitleSection(context, completedTitle));
               combinedList.addAll(pastOrders
                   .expand((order) => [order, SizedBox(height: 16.0)]));
             }
-            if (combinedList.isEmpty) {
-              combinedList.add(_buildSectionPlaceholderText(segmentedValue == 1
-                  ? "No Reserved Orders"
-                  : "No Donated Orders"));
-            }
             return combinedList[index];
           },
-          childCount:
-              totalWidgets, // Updated to use the calculated totalWidgets
+          childCount: totalWidgets,
         ),
       ),
     );
   }
 
+  // Widget to build placeholder text if no orders are available
   Widget _buildSectionPlaceholderText(String message) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              FeatherIcons.shoppingBag,
-              size: 22,
-              color: CupertinoColors.systemGrey,
-            ),
-            SizedBox(
-              width: 8.0,
-            ),
-            Text(
-              message,
-              style: TextStyle(
-                fontSize: adjustedTextFontSize,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+      child: Column(
+        children: [
+          SizedBox(height: 190),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                FeatherIcons.shoppingBag,
+                size: 22,
+                color: CupertinoColors.systemGrey,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ));
+              SizedBox(
+                width: 8.0,
+              ),
+              Text(
+                message,
+                style: TextStyle(
+                  fontSize: adjustedTextFontSize,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ], 
+      ),
+    );
   }
 
   SliverToBoxAdapter _buildSegmentControl(Map<int, Widget> myTabs) {
