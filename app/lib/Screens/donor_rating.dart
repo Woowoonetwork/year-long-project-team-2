@@ -56,7 +56,10 @@ class _DonorRatingPageState extends State<DonorRatingPage> {
             },
             child: Text('Message ${createdByName ?? ""}',
                 style: TextStyle(
-                    color: CupertinoColors.label.resolveFrom(context))),
+                    color: accentColor.resolveFrom(context),
+                    fontWeight: FontWeight.w500,
+                )
+            ),
           ),
         ),
         child: SafeArea(

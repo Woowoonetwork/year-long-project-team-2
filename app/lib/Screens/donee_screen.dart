@@ -3,7 +3,6 @@ import 'dart:io' show Platform;
 
 import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/progress_bar.dart';
-import 'package:FoodHood/Components/timer_button.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Screens/detail_screen.dart';
 import 'package:FoodHood/Screens/donor_rating.dart';
@@ -325,7 +324,8 @@ class _DoneePathState extends State<DoneePath> {
               },
               child: Text('Message ${viewModel.firstName}',
                   style: TextStyle(
-                      color: CupertinoColors.label.resolveFrom(context))),
+                      color: accentColor,
+                      fontWeight: FontWeight.w500)),
             ),
       border: null,
     );

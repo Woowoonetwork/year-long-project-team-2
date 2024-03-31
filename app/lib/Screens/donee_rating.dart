@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 
 class DoneeRatingPage extends StatefulWidget {
   final String postId;
@@ -55,7 +54,10 @@ class _DoneeRatingPageState extends State<DoneeRatingPage> {
             },
             child: Text('Message ${reservedByName!}',
                 style: TextStyle(
-                    color: CupertinoColors.label.resolveFrom(context))),
+                    color: accentColor.resolveFrom(context),
+                    fontWeight: FontWeight.w500,
+                ),
+            ),
           ),
         ),
         child: SafeArea(
