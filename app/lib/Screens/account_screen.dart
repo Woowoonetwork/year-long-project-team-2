@@ -220,14 +220,22 @@ class _AccountScreenState extends State<AccountScreen> {
       leading: CupertinoButton(
         padding: EdgeInsets.zero,
         child: Text('Messages',
-            style: TextStyle(color: CupertinoColors.label.resolveFrom(context))),
+            style: TextStyle(
+              color: accentColor.resolveFrom(context),
+              fontWeight: FontWeight.w500,
+            )
+        ),
         onPressed: () => Navigator.of(context).push(
             CupertinoPageRoute(builder: (context) => ConversationsScreen())),
       ),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
         child: Text('Settings',
-            style: TextStyle(color: CupertinoColors.label.resolveFrom(context))),
+            style: TextStyle(
+              color: accentColor.resolveFrom(context),
+              fontWeight: FontWeight.w500,
+            )
+        ),
         onPressed: () => _navigateToSettings(context),
       ),
       border: Border(bottom: BorderSide.none),

@@ -869,6 +869,7 @@ class _DonorScreenState extends State<DonorScreen> {
         CupertinoPageRoute(
           builder: (context) => DoneeRatingPage(
             postId: widget.postId,
+            receiverID: reservedByUserId!,
           ),
         ),
       );
