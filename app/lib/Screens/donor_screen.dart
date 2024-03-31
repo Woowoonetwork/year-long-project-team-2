@@ -1,31 +1,35 @@
 //donor_screen.dart
 
+import 'package:FoodHood/Screens/message_screen.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:feather_icons/feather_icons.dart';
+import 'package:FoodHood/Components/colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:FoodHood/Screens/donee_rating.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+//import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
+import 'package:FoodHood/Models/PostDetailViewModel.dart';
+import 'package:FoodHood/Components/progress_bar.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:FoodHood/Components/colors.dart';
-import 'package:FoodHood/Components/image_display_box.dart';
-import 'package:FoodHood/Components/progress_bar.dart';
-import 'package:FoodHood/Models/PostDetailViewModel.dart';
-import 'package:FoodHood/Screens/donee_rating.dart';
-import 'package:FoodHood/Screens/message_screen.dart';
-import 'package:FoodHood/text_scale_provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:feather_icons/feather_icons.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:FoodHood/Components/image_display_box.dart';
 
-const double _defaultFontSize = 16.0;
-const double _defaultHeadingFontSize = 32.0;
-const double _defaultOrderInfoFontSize = 12.0;
+
 const double _iconSize = 22.0;
+const double _defaultHeadingFontSize = 32.0;
+const double _defaultFontSize = 16.0;
+const double _defaultOrderInfoFontSize = 12.0;
+
+// Define enum to represent different states
+enum OrderState { notReserved, reserved, confirmed, delivering, readyToPickUp, completed }
 
 class DonorScreen extends StatefulWidget {
   final String postId;
@@ -33,95 +37,6 @@ class DonorScreen extends StatefulWidget {
 
   @override
   _DonorScreenState createState() => _DonorScreenState();
-}
-
-// The order info section that displays the users photo, name, and rating
-class OrderInfoSection extends StatelessWidget {
-  final String? reservedByName;
-  final String? reservedByLastName;
-  final double adjustedOrderInfoFontSize;
-  final double rating;
-  final String photo;
-
-  const OrderInfoSection({
-    Key? key,
-    required this.reservedByName,
-    required this.reservedByLastName,
-    required this.adjustedOrderInfoFontSize,
-    required this.rating,
-    required this.photo,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        // Wrap the Container in an Expanded widget to take up remaining space
-        child: Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              photo.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 10,
-                      backgroundImage: CachedNetworkImageProvider(photo),
-                      onBackgroundImageError: (_, __) {
-                        // Handle image load error
-                      },
-                      backgroundColor: Colors.transparent,
-                    )
-                  : CircleAvatar(
-                      radius: 10,
-                      backgroundImage:
-                          AssetImage('assets/images/sampleProfile.png'),
-                    ),
-              SizedBox(width: 8),
-              Text(
-                'Reserved by $reservedByName $reservedByLastName',
-                style: TextStyle(
-                  color: CupertinoColors.label
-                      .resolveFrom(context)
-                      .withOpacity(0.8),
-                  fontSize: adjustedOrderInfoFontSize,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(
-                width: 12,
-              ),
-              Icon(
-                Icons.star,
-                color: secondaryColor,
-                size: 14,
-              ),
-              const SizedBox(width: 3),
-              Text(
-                '${rating} Rating',
-                style: TextStyle(
-                  overflow: TextOverflow.fade,
-                  color: CupertinoColors.label
-                      .resolveFrom(context)
-                      .withOpacity(0.8),
-                  fontSize: adjustedOrderInfoFontSize,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.48,
-                ),
-              ),
-            ],
-          ),
-        ));
-  }
-}
-
-// Define enum to represent different states
-enum OrderState {
-  notReserved,
-  reserved,
-  confirmed,
-  delivering,
-  readyToPickUp,
-  completed
 }
 
 class _DonorScreenState extends State<DonorScreen> {
@@ -143,326 +58,69 @@ class _DonorScreenState extends State<DonorScreen> {
   String? _selectedImagePath;
 
   @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: detailsBackgroundColor,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: detailsBackgroundColor,
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Icon(
-            FeatherIcons.x,
-            size: _iconSize,
-            color: CupertinoColors.label.resolveFrom(context),
-          ),
-        ),
+  void initState() {
+    super.initState();
+    
+    // Initialize the pickup location coordinates to downtown Kelowna
+    pickupLatLng = LatLng(49.8862, -119.4971); 
+    
+    // Incorporate the font size change accessibility functionality
+    _textScaleFactor =
+        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
+    _updateAdjustedFontSize();
+    
+    // Set up a stream listener for changes to the 'post_status' field to sync changes in real time
+    FirebaseFirestore.instance
+        .collection('post_details')
+        .doc(widget.postId)
+        .snapshots()
+        .listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
+      if (snapshot.exists) {
+        // Extract post_status and update orderState accordingly
+        final String post_status = snapshot.data()?['post_status'];
+        final String? reserved_by = snapshot.data()?['reserved_by'];
 
-        // Show the "Message [donee]" button if the post has been reserved
-        trailing: orderState != OrderState.notReserved
-            ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: Text("Message ${reservedByName ?? 'Unknown User'}",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w500, color: accentColor)),
-                onPressed: () {
-                  // Close the current screen
-                  Navigator.push(
-                    context,
-                    CupertinoPageRoute(
-                        builder: (context) =>
-                            MessageScreen(receiverID: reservedByUserId!)),
-                  );
-                },
-              )
-            : null,
-        border: null,
-      ),
-      child: SafeArea(
-        child: Container(
-          margin: EdgeInsets.all(16.0),
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: <Widget>[
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  // Heading Text
-                  __buildHeadingTextField(text: _buildHeadingText()),
-
-                  SizedBox(height: 16.0),
-
-                  if (orderState != OrderState.notReserved)
-                    OrderInfoSection(
-                      reservedByName: reservedByName,
-                      reservedByLastName: reservedByLastName,
-                      adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
-                      rating: rating,
-                      photo: photo,
-                    ),
-
-                  SizedBox(height: 10.0),
-
-                  // Progress Bar
-                  ProgressBar(
-                    progress: _calculateProgress(),
-                    labels: ["Reserved", "Confirmed", "Delivering", "Dropped Off"],
-                    color: accentColor,
-                    isReserved: postStatus != 'not reserved',
-                    currentState: orderState,
-                  ),
-
-                  Visibility(
-                    visible: (orderState != OrderState.readyToPickUp &&
-                        orderState != OrderState.completed),
-                    child: _buildMap(context),
-                  ),
-
-                  // Text showing the written address of the pickup location for all order states except Ready
-                  if (orderState != OrderState.readyToPickUp &&
-                      orderState != OrderState.completed)
-                    FutureBuilder<String>(
-                      future: getAddressFromLatLng(pickupLatLng),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return CupertinoActivityIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          return __buildTextField(
-                              text: "Pickup from ${snapshot.data}");
-                        }
-                      },
-                    ),
-
-                  if (orderState == OrderState.readyToPickUp)
-                    buildImageSection(context, _selectedImagePath),
-
-                  if (orderState == OrderState.completed)
-                    buildDeliveredImageSection(context)
-                ],
-              ),
-
-              // Show the buttons if the order has been reserved
-              if (orderState != OrderState.notReserved)
-                _buildButtonAndCancelButtonRow(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Method to build the delivered image section
-  Widget buildDeliveredImageSection(BuildContext context) {
-    return FutureBuilder(
-      future: FirebaseFirestore.instance
-          .collection('post_details')
-          .doc(widget.postId)
-          .get(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CupertinoActivityIndicator();
-        } else if (snapshot.hasData) {
-          final data = snapshot.data?.data();
-          if (data != null && data.containsKey('delivered_image')) {
-            // Delivered image URL is available
-            final deliveredImageURL = data['delivered_image'];
-            return Container(
-              height: 250,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Image.network(deliveredImageURL,
-                    fit: BoxFit.cover, width: double.infinity),
-              ),
-            );
-            //Image.network(deliveredImageURL);
+        setState(() {
+          postStatus = post_status;
+          
+          if (reserved_by != null) {
+            // Read post details
+            fetchPostInformation();
           } else {
-            // Delivered image URL not available, display alternative UI
-            return Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x01000000),
-                    blurRadius: 20,
-                    offset: Offset(0, 0),
-                  ),
-                ],
-              ),
-              margin:
-                  const EdgeInsets.symmetric(vertical: 18.0, horizontal: 17.0),
-              height: 200,
-              foregroundDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color:
-                      CupertinoColors.secondarySystemFill.resolveFrom(context),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'No delivery photo was uploaded',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: CupertinoColors.secondaryLabel
-                              .resolveFrom(context)),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            reservedByName = null; // Reset the reservedByName if reserved_by is null
+            reservedByLastName = null;
+            rating = 0.0;
+            photo = '';
           }
-        } else if (snapshot.hasError) {
-          // Error retrieving data
-          return Container();
-        } else {
-          // No data found
-          return Container();
-        }
-      },
-    );
-  }
 
-  // Widget to build the delivery photo section
-  Widget buildImageSection(BuildContext context, String? imagePath) {
-    return FutureBuilder(
-      future: FirebaseFirestore.instance
-          .collection('post_details')
-          .doc(widget.postId)
-          .get(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return CupertinoActivityIndicator();
-        } else if (snapshot.hasData) {
-          final data = snapshot.data?.data();
-          if (data != null && data.containsKey('delivered_image')) {
-            // Delivered image URL is available, an image has already been saved
-            final deliveredImageURL = data['delivered_image'];
-
-            // Display the image
-            return Container(
-              height: 250,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Image.network(deliveredImageURL,
-                    fit: BoxFit.cover, width: double.infinity),
-              ),
-            );
-          } else {
-            // Delivered image URL not available
-            // If there isn't any delivery photo already saved, display the option to select and save one
-            return Column(
-              children: [
-                // Display the selected image
-                ImageDisplayBox(imagePath: imagePath),
-
-                // Display the buttons
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 2.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Expanded(
-                        child: CupertinoButton(
-                          onPressed: () {
-                            _pickImageOptions();
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 14.0),
-                            decoration: BoxDecoration(
-                              color: accentColor
-                                  .resolveFrom(context)
-                                  .withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add_photo_alternate_rounded,
-                                    size: 28,
-                                    color:
-                                        // if current mode is darkmode, use lighten, else use darken
-                                        MediaQuery.of(context)
-                                                    .platformBrightness ==
-                                                Brightness.light
-                                            ? darken(
-                                                accentColor
-                                                    .resolveFrom(context),
-                                                0.3)
-                                            : lighten(
-                                                accentColor
-                                                    .resolveFrom(context),
-                                                0.3)),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Upload a delivery photo',
-                                  style: TextStyle(
-                                    color: MediaQuery.of(context)
-                                                .platformBrightness ==
-                                            Brightness.light
-                                        ? darken(
-                                            accentColor.resolveFrom(context),
-                                            0.3)
-                                        : lighten(
-                                            accentColor.resolveFrom(context),
-                                            0.3),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Show the "Save" button if an image is selected
-                      if (imagePath != null)
-                        CupertinoButton(
-                          onPressed: () async {
-                            if (_selectedImagePath != null) {
-                              // Upload the image to Firebase Storage
-                              String? imageUrl = await _uploadImageToFirebase(
-                                  File(_selectedImagePath!));
-                              if (imageUrl != null) {
-                                // Save the image URL to the firestore document
-                                await FirebaseFirestore.instance
-                                    .collection('post_details')
-                                    .doc(widget.postId)
-                                    .update({'delivered_image': imageUrl});
-                              } else {
-                                // Handle error
-                              }
-                            }
-                          },
-                          child: Text(
-                            'Save',
-                            style: TextStyle(
-                              color: accentColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            );
+          switch (postStatus) {
+            case 'not reserved':
+              orderState = OrderState.notReserved;
+              break;
+            case 'pending':
+              orderState = OrderState.reserved;
+              break;
+            case 'confirmed':
+              orderState = OrderState.confirmed;
+              break;
+            case 'delivering':
+              orderState = OrderState.delivering;
+              break;
+            case 'readyToPickUp':
+              orderState = OrderState.readyToPickUp;
+              break;
+            case 'completed':
+              orderState = OrderState.completed;
+              break;
+            default:
+              orderState = OrderState.notReserved;
           }
-        } else if (snapshot.hasError) {
-          // Error retrieving data
-          return Container();
-        } else {
-          // No data found
-          return Container();
-        }
-      },
-    );
+        });
+      } else {
+        // Handle case where document does not exist
+      }
+    });
+    
   }
 
   // Reading post information
@@ -493,7 +151,7 @@ class _DonorScreenState extends State<DonorScreen> {
 
         // Extract the reserved_by user ID from the post details
         reservedByUserId = postSnapshot['reserved_by'];
-
+        
         print(pickupLatLng);
 
         // Fetch the user document using reserved_by user ID if it exists
@@ -556,6 +214,13 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
+  // Incorportate the font size change accessibility functionality
+  void _updateAdjustedFontSize() {
+    adjustedFontSize = _defaultFontSize * _textScaleFactor;
+    adjustedHeadingFontSize = _defaultHeadingFontSize * _textScaleFactor;
+    adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
+  }
+
   // Use the Google Maps Geocoding API to convert pickup coordinates to an address
   Future<String> getAddressFromLatLng(LatLng position) async {
     final url = Uri.parse(
@@ -576,59 +241,205 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
+  // Method to upload the delivery photo to Firebase storage
+  Future<String?> _uploadImageToFirebase(File imageFile) async {
+    try {
+      String fileName =
+          'post_${Uuid().v4()}.jpg'; // Unique file name for the image
+      Reference storageRef =
+          FirebaseStorage.instance.ref().child('delivered_post_images/$fileName');
+
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      await uploadTask;
+      String downloadUrl = await storageRef.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading image: $e");
+      return null;
+    }
+  }
+
+  // Method to build a cupertino action sheet for users to choose between the Camera and the Gallery
+  Future<void> _pickImageOptions() async {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        message: const Text('Choose an option to add a photo from'),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            child: const Text('Camera'),
+            onPressed: () {
+              Navigator.pop(context);
+              _pickImageFromCamera();
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: const Text('Gallery'),
+            onPressed: () {
+              Navigator.pop(context);
+              _pickImageFromGallery();
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  // Method to enable users to click an image using their camera
+  Future<void> _pickImageFromCamera() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      setState(() {
+        _selectedImagePath = image.path;
+      });
+    }
+  }
+
+  // Method to enable users to pick an image from their gallery
+  Future<void> _pickImageFromGallery() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _selectedImagePath = image.path;
+      });
+    }
+  }
+
   @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: detailsBackgroundColor,
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: detailsBackgroundColor,
+        leading: GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Icon(
+            FeatherIcons.x,
+            size: _iconSize,
+            color: CupertinoColors.label.resolveFrom(context),
+          ),
+        ),
 
-    // Initialize the pickup location coordinates to downtown Kelowna
-    pickupLatLng = LatLng(49.8862, -119.4971);
+        // Show the "Message [donee]" button if the post has been reserved
+        trailing: orderState != OrderState.notReserved
+            ? CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Text("Message ${reservedByName ?? 'Unknown User'}",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w500, color: accentColor)),
+                onPressed: () {
+                  // Close the current screen
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                        builder: (context) => MessageScreen(
+                            receiverID: reservedByUserId!
+                            )),
+                  );
+                },
+              )
+            : null,
+        border: null,
+      ),
+      child: SafeArea(
+        child: Container(
+          margin: EdgeInsets.all(16.0),
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: <Widget>[
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                 
+                 // Heading Text
+                  __buildHeadingTextField(text: _buildHeadingText()),
+                  //_buildHeadingTextField(),
+                  
+                  SizedBox(height: 16.0),
 
-    // Incorporate the font size change accessibility functionality
-    _textScaleFactor =
-        Provider.of<TextScaleProvider>(context, listen: false).textScaleFactor;
-    _updateAdjustedFontSize();
+                  //Only show the order info section if the order has been reserved.
+                  if (orderState != OrderState.notReserved)
+                    OrderInfoSection(
+                      reservedByName: reservedByName,
+                      reservedByLastName: reservedByLastName,
+                      adjustedOrderInfoFontSize: adjustedOrderInfoFontSize,
+                      rating: rating,
+                      photo: photo,
+                    ),
 
-    // Set up a stream listener for changes to the 'post_status' field to sync changes in real time
-    FirebaseFirestore.instance
-        .collection('post_details')
-        .doc(widget.postId)
-        .snapshots()
-        .listen((DocumentSnapshot<Map<String, dynamic>> snapshot) {
-      if (snapshot.exists) {
-        // Extract post_status and update orderState accordingly
-        final String post_status = snapshot.data()?['post_status'];
-        setState(() {
-          postStatus = post_status;
-          switch (postStatus) {
-            case 'not reserved':
-              orderState = OrderState.notReserved;
-              break;
-            case 'pending':
-              orderState = OrderState.reserved;
-              break;
-            case 'confirmed':
-              orderState = OrderState.confirmed;
-              break;
-            case 'delivering':
-              orderState = OrderState.delivering;
-              break;
-            case 'readyToPickUp':
-              orderState = OrderState.readyToPickUp;
-              break;
-            case 'completed':
-              orderState = OrderState.completed;
-              break;
-            default:
-              orderState = OrderState.notReserved;
-          }
-        });
-      } else {
-        // Handle case where document does not exist
-      }
-    });
+                  SizedBox(height: 10.0),
 
-    // Read post details
-    fetchPostInformation();
+                  // Progress Bar
+                  ProgressBar(
+                    progress: _calculateProgress(),
+                    labels: [
+                      "Reserved",
+                      "Confirmed",
+                      "Delivering",
+                      "Ready to Pick Up"
+                    ],
+                    color: accentColor,
+                    isReserved: postStatus != 'not reserved',
+                    currentState: orderState,
+                  ),
+
+                  // SizedBox(height: 25,),
+
+                  // Map showing the pickup location for all order states except ready to pick up
+                  Visibility(
+                    visible: (orderState != OrderState.readyToPickUp && orderState != OrderState.completed),
+                    child: _buildMap(context),
+                  ),
+
+                  // Text showing the written address of the pickup location for all order states except ready to pick up
+                  if (orderState != OrderState.readyToPickUp && orderState != OrderState.completed)
+                    FutureBuilder<String>(
+                      future: getAddressFromLatLng(pickupLatLng),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return CupertinoActivityIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          return __buildTextField(
+                              text: "Pickup from ${snapshot.data}");
+                        }
+                      },
+                    ),
+
+                  // Display the option to upload pictures if the state is ready to pick up
+                  if (orderState == OrderState.readyToPickUp)
+                    buildImageSection(context, _selectedImagePath),
+
+                  // Display the delivery photo if the state is completed
+                  if (orderState == OrderState.completed)
+                   buildDeliveredImageSection(context)
+
+                  // PendingConfirmationWithTimer(
+                  //       durationInSeconds: 120, postId: widget.postId),
+
+                  // Replace the placeholder with the chat bubble in the future
+                  //SizedBox(height: 200.0),
+                ],
+              ),
+
+              // Show the buttons if the order has been reserved
+              if (orderState != OrderState.notReserved)
+                _buildButtonAndCancelButtonRow(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // Reusable widget to build the text fields
@@ -649,104 +460,11 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  Widget __buildTextField({
-    required String text,
-  }) {
-    return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Container(
-        padding: EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 0.0,
-          ),
-          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-          borderRadius: BorderRadius.circular(24.0),
-        ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: adjustedFontSize,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButton() {
-    if (orderState == OrderState.readyToPickUp) {
-      return _buildCancelButton();
-    } else if (orderState == OrderState.completed) {
-      return _buildLeaveReviewButton();
-    } else {
-      return _buildStatusUpdateButton();
-    }
-  }
-
-  Widget _buildButtonAndCancelButtonRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: _buildButton(),
-        ),
-        SizedBox(width: 8), // Add some space between the buttons
-        if (orderState != OrderState.readyToPickUp &&
-            orderState != OrderState.completed)
-          Expanded(
-            child: _buildCancelButton(),
-          ),
-      ],
-    );
-  }
-
-  String _buildButtonText() {
-    switch (orderState) {
-      case OrderState.reserved:
-        return "Confirm";
-      case OrderState.confirmed:
-        return "Delivering";
-      case OrderState.delivering:
-        return "Dropped Off";
-      default:
-        return "Confirm";
-    }
-  }
-
-  Widget _buildCancelButton() {
-    return Container(
-      decoration: _buttonBoxDecoration(),
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        color: CupertinoColors.tertiarySystemBackground,
-        borderRadius: BorderRadius.circular(100.0),
-        onPressed: _handleCancelOrder,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              FeatherIcons.x,
-              color: CupertinoColors.systemRed,
-            ),
-            SizedBox(width: 8),
-            Text(
-              "Cancel",
-              style: _buttonTextStyle(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // Method to build heading text based on order state
   String _buildHeadingText() {
     switch (orderState) {
       case OrderState.notReserved:
-        return "Your order has not been reserved";
+        return "Your order has not been reserved yet";
       case OrderState.reserved:
         return "Your order has been reserved by ${reservedByName ?? 'Unknown User'}";
       case OrderState.confirmed:
@@ -754,37 +472,29 @@ class _DonorScreenState extends State<DonorScreen> {
       case OrderState.delivering:
         return "Your order is out for delivery for ${reservedByName ?? 'Unknown User'}";
       case OrderState.readyToPickUp:
-        return "Your order for ${reservedByName ?? 'Unknown User'} is Ready to Pick Up";
+        return "Your order for ${reservedByName ?? 'Unknown User'} is ready to pick up";
       case OrderState.completed:
         return "Your order for ${reservedByName ?? 'Unknown User'} is completed";
       default:
-        return "Your order has not been reserved";
+        return "Your order has not been reserved yet";
     }
   }
 
-  Widget _buildLeaveReviewButton() {
-    return Container(
-      decoration: _buttonBoxDecoration(),
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        borderRadius: BorderRadius.circular(100.0),
-        color: CupertinoColors.tertiarySystemBackground,
-        onPressed: () {
-          Navigator.of(context).push(
-            CupertinoPageRoute(
-              builder: (context) => DoneeRatingPage(
-                postId: widget.postId,
-                receiverID: reservedByUserId!,
-              ),
-            ),
-          );
-        },
-        child: Text(
-          "Leave a Review",
-          style: _buttonTextStyle(),
-        ),
-      ),
-    );
+  // Method to calculate progress for the progress bar based on order state
+  double _calculateProgress() {
+    switch (orderState) {
+      case OrderState.reserved:
+        return 0.25; // Progress for reserved state
+      case OrderState.confirmed:
+        return 0.5; // Progress for confirmed state
+      case OrderState.delivering:
+        return 0.75; // Progress for delivering state
+      case OrderState.readyToPickUp:
+      case OrderState.completed:
+        return 1.0; // Progress for readyToPickUp state
+      default:
+        return 0.0; // Default progress
+    }
   }
 
   Widget _buildMap(BuildContext context) {
@@ -807,8 +517,7 @@ class _DonorScreenState extends State<DonorScreen> {
                 height: 250.0,
                 child: GoogleMap(
                   initialCameraPosition: CameraPosition(
-                    target:
-                        locationCoordinates, // Set initial position to marker location
+                    target: locationCoordinates, // Set initial position to marker location
                     zoom: 12.0,
                   ),
                   markers: Set.from([
@@ -821,7 +530,7 @@ class _DonorScreenState extends State<DonorScreen> {
                     // Move camera to focus on marker
                     controller.moveCamera(
                       CameraUpdate.newLatLngZoom(
-                        locationCoordinates,
+                        locationCoordinates, 
                         15.0, // Zoom level
                       ),
                     );
@@ -851,6 +560,269 @@ class _DonorScreenState extends State<DonorScreen> {
           }
         }
       },
+    );
+  }
+
+  Widget __buildTextField({
+    required String text,
+  }) {
+    return Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Container(
+        padding: EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+            width: 0.0,
+          ),
+          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
+          borderRadius: BorderRadius.circular(24.0),
+        ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: adjustedFontSize,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Widget to build the delivery photo section
+  Widget buildImageSection(BuildContext context, String? imagePath) {
+    return FutureBuilder(
+      future: FirebaseFirestore.instance.collection('post_details').doc(widget.postId).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CupertinoActivityIndicator();
+        } 
+        else if (snapshot.hasData) {
+          final data = snapshot.data?.data();
+          if (data != null && data.containsKey('delivered_image')) {
+            // Delivered image URL is available, an image has already been saved
+            final deliveredImageURL = data['delivered_image'];
+            
+            // Display the image
+            return Container(
+              height: 250,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.network(
+                  deliveredImageURL,
+                  fit: BoxFit.cover,
+                  width: double.infinity
+                ),
+              ), 
+            );
+          } 
+          else {
+            // Delivered image URL not available
+            // If there isn't any delivery photo already saved, display the option to select and save one
+            return Column(
+              children: [
+                // Display the selected image 
+                ImageDisplayBox(imagePath: imagePath),
+                
+                // Display the buttons
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Expanded(
+                        child: CupertinoButton(
+                          onPressed: () {
+                            _pickImageOptions();
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 14.0),
+                            decoration: BoxDecoration(
+                              color: accentColor.resolveFrom(context).withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_photo_alternate_rounded,
+                                    size: 28,
+                                    color:
+                                        // if current mode is darkmode, use lighten, else use darken
+                                        MediaQuery.of(context).platformBrightness ==
+                                                Brightness.light
+                                            ? darken(accentColor.resolveFrom(context), 0.3)
+                                            : lighten(accentColor.resolveFrom(context), 0.3)),
+                                SizedBox(width: 10),
+                                Text(
+                                  'Upload a delivery photo',
+                                  style: TextStyle(
+                                    color: MediaQuery.of(context).platformBrightness ==
+                                            Brightness.light
+                                        ? darken(accentColor.resolveFrom(context), 0.3)
+                                        : lighten(accentColor.resolveFrom(context), 0.3),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Show the "Save" button if an image is selected
+                      if (imagePath != null)
+                        CupertinoButton(
+                          onPressed: () async {
+                            if (_selectedImagePath != null) {
+                              // Upload the image to Firebase Storage
+                              String? imageUrl =
+                                  await _uploadImageToFirebase(File(_selectedImagePath!));
+                              if (imageUrl != null) {
+                                // Save the image URL to the firestore document
+                                await FirebaseFirestore.instance
+                                    .collection('post_details')
+                                    .doc(widget.postId)
+                                    .update({'delivered_image': imageUrl});
+                              } else {
+                                // Handle error
+                              }
+                            }
+                          },
+                          child: Text(
+                            'Save',
+                            style: TextStyle(
+                              color: accentColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          }
+        } 
+        else if (snapshot.hasError) {
+          // Error retrieving data
+          return Container();
+        } 
+        else {
+          // No data found
+          return Container();
+        }
+      },
+    );
+  }
+
+  // Method to build the delivered image section
+  Widget buildDeliveredImageSection(BuildContext context) {
+    return FutureBuilder(
+      future: FirebaseFirestore.instance.collection('post_details').doc(widget.postId).get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CupertinoActivityIndicator();
+        } else if (snapshot.hasData) {
+          final data = snapshot.data?.data();
+          if (data != null && data.containsKey('delivered_image')) {
+            // Delivered image URL is available
+            final deliveredImageURL = data['delivered_image'];
+            return Container(
+              height: 250,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Image.network(
+                  deliveredImageURL,
+                  fit: BoxFit.cover,
+                  width: double.infinity
+                ),
+              ), 
+            );
+            //Image.network(deliveredImageURL);
+          } else {
+            // Delivered image URL not available, display alternative UI
+            return Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x01000000),
+                    blurRadius: 20,
+                    offset: Offset(0, 0),
+                  ),
+                ],
+              ),
+              margin: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 17.0),
+              height: 200,
+              foregroundDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: CupertinoColors.secondarySystemFill.resolveFrom(context),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('No delivery photo was uploaded',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context)
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        } else if (snapshot.hasError) {
+          // Error retrieving data
+          return Container(
+          );
+        } else {
+          // No data found
+          return Container(
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildButton() {
+    if (orderState == OrderState.readyToPickUp) {
+      return _buildCancelButton();
+    } 
+    else if (orderState == OrderState.completed){
+      return _buildLeaveReviewButton();
+    }
+    else {
+      return _buildStatusUpdateButton();
+    }
+  }
+
+  Widget _buildLeaveReviewButton() {
+    return Container(
+      decoration: _buttonBoxDecoration(),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        borderRadius: BorderRadius.circular(100.0),
+        color: CupertinoColors.tertiarySystemBackground,
+        onPressed: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (context) => DoneeRatingPage(
+                postId: widget.postId,
+                receiverID: reservedByUserId!,
+              ),
+            ),
+          );
+        },
+        child: Text(
+          "Leave a Review",
+          style: _buttonTextStyle(),
+        ),
+      ),
     );
   }
 
@@ -905,21 +877,86 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  // Method to calculate progress for the progress bar based on order state
-  double _calculateProgress() {
+  String _buildButtonText() {
     switch (orderState) {
       case OrderState.reserved:
-        return 0.25; // Progress for reserved state
+        return "Confirm";
       case OrderState.confirmed:
-        return 0.5; // Progress for confirmed state
+        return "Delivering";
       case OrderState.delivering:
-        return 0.75; // Progress for delivering state
-      case OrderState.readyToPickUp:
-      case OrderState.completed:
-        return 1.0; // Progress for readyToPickUp state
+        return "Ready to Pick Up";
       default:
-        return 0.0; // Default progress
+        return "Confirm";
     }
+  }
+
+  void _handlePostStatus() async {
+    try {
+      String newStatus;
+      switch (orderState) {
+        case OrderState.reserved:
+          newStatus = 'confirmed'; // Update post_status to 'confirmed'
+          orderState = OrderState.confirmed;
+          break;
+        case OrderState.confirmed:
+          newStatus = 'delivering'; // Update post_status to 'delivering'
+          orderState = OrderState.delivering;
+          break;
+        case OrderState.delivering:
+          newStatus = 'readyToPickUp'; // Update post_status to 'readyToPickUp'
+          orderState = OrderState.readyToPickUp;
+          break;
+        case OrderState.readyToPickUp:
+          newStatus = 'confirmed'; // Update post_status back to 'confirmed'
+          orderState = OrderState.confirmed;
+          break;
+        default:
+          newStatus = 'pending';
+          orderState = OrderState.notReserved;
+      }
+
+      // Update the post_status field in Firestore
+      await FirebaseFirestore.instance
+          .collection('post_details')
+          .doc(widget.postId)
+          .update({'post_status': newStatus});
+
+      setState(() {});
+    } catch (error) {
+      print('Error updating post status: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update post status. Please try again.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Widget _buildCancelButton() {
+    return Container(
+      decoration: _buttonBoxDecoration(),
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        color: CupertinoColors.tertiarySystemBackground,
+        borderRadius: BorderRadius.circular(100.0),
+        onPressed: _handleCancelOrder,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              FeatherIcons.x,
+              color: CupertinoColors.systemRed,
+            ),
+            SizedBox(width: 8),
+            Text(
+              "Cancel",
+              style: _buttonTextStyle(),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _handleCancelOrder() async {
@@ -1005,126 +1042,99 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
-  void _handlePostStatus() async {
-    try {
-      String newStatus;
-      switch (orderState) {
-        case OrderState.reserved:
-          newStatus = 'confirmed'; // Update post_status to 'confirmed'
-          orderState = OrderState.confirmed;
-          break;
-        case OrderState.confirmed:
-          newStatus = 'delivering'; // Update post_status to 'delivering'
-          orderState = OrderState.delivering;
-          break;
-        case OrderState.delivering:
-          newStatus = 'readyToPickUp'; // Update post_status to 'readyToPickUp'
-          orderState = OrderState.readyToPickUp;
-          break;
-        case OrderState.readyToPickUp:
-          newStatus = 'confirmed'; // Update post_status back to 'confirmed'
-          orderState = OrderState.confirmed;
-          break;
-        default:
-          newStatus = 'pending';
-          orderState = OrderState.notReserved;
-      }
-
-      // Update the post_status field in Firestore
-      await FirebaseFirestore.instance
-          .collection('post_details')
-          .doc(widget.postId)
-          .update({'post_status': newStatus});
-
-      setState(() {});
-    } catch (error) {
-      print('Error updating post status: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update post status. Please try again.'),
-          duration: Duration(seconds: 2),
+  Widget _buildButtonAndCancelButtonRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: _buildButton(),
         ),
-      );
-    }
-  }
-
-  // Method to enable users to click an image using their camera
-  Future<void> _pickImageFromCamera() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.camera);
-    if (image != null) {
-      setState(() {
-        _selectedImagePath = image.path;
-      });
-    }
-  }
-
-  // Method to enable users to pick an image from their gallery
-  Future<void> _pickImageFromGallery() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _selectedImagePath = image.path;
-      });
-    }
-  }
-
-  // Method to build a cupertino action sheet for users to choose between the Camera and the Gallery
-  Future<void> _pickImageOptions() async {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        message: const Text('Choose an option to add a photo from'),
-        actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: const Text('Camera'),
-            onPressed: () {
-              Navigator.pop(context);
-              _pickImageFromCamera();
-            },
+        SizedBox(width: 8), // Add some space between the buttons
+        if (orderState != OrderState.readyToPickUp && orderState != OrderState.completed)
+          Expanded(
+            child: _buildCancelButton(),
           ),
-          CupertinoActionSheetAction(
-            child: const Text('Gallery'),
-            onPressed: () {
-              Navigator.pop(context);
-              _pickImageFromGallery();
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancel'),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      ],
     );
   }
+}
 
-  // Incorportate the font size change accessibility functionality
-  void _updateAdjustedFontSize() {
-    adjustedFontSize = _defaultFontSize * _textScaleFactor;
-    adjustedHeadingFontSize = _defaultHeadingFontSize * _textScaleFactor;
-    adjustedOrderInfoFontSize = _defaultOrderInfoFontSize * _textScaleFactor;
-  }
+// The order info section that displays the users photo, name, and rating
+class OrderInfoSection extends StatelessWidget {
+  final String? reservedByName;
+  final String? reservedByLastName;
+  final double adjustedOrderInfoFontSize;
+  final double rating;
+  final String photo;
 
-  // Method to upload the delivery photo to Firebase storage
-  Future<String?> _uploadImageToFirebase(File imageFile) async {
-    try {
-      String fileName =
-          'post_${Uuid().v4()}.jpg'; // Unique file name for the image
-      Reference storageRef = FirebaseStorage.instance
-          .ref()
-          .child('delivered_post_images/$fileName');
+  const OrderInfoSection({
+    Key? key,
+    required this.reservedByName,
+    required this.reservedByLastName,
+    required this.adjustedOrderInfoFontSize,
+    required this.rating,
+    required this.photo,
+  }) : super(key: key);
 
-      UploadTask uploadTask = storageRef.putFile(imageFile);
-      await uploadTask;
-      String downloadUrl = await storageRef.getDownloadURL();
-      return downloadUrl;
-    } catch (e) {
-      print("Error uploading image: $e");
-      return null;
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        // Wrap the Container in an Expanded widget to take up remaining space
+        child: Expanded(  
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              photo.isNotEmpty
+                  ? CircleAvatar(
+                      radius: 10,
+                      backgroundImage: CachedNetworkImageProvider(photo),
+                      onBackgroundImageError: (_, __) {
+                        // Handle image load error
+                      },
+                      backgroundColor: Colors.transparent,
+                    )
+                  : CircleAvatar(
+                      radius: 10,
+                      backgroundImage:
+                          AssetImage('assets/images/sampleProfile.png'),
+                    ),
+              SizedBox(width: 8),
+              Text(
+                'Reserved by $reservedByName $reservedByLastName',
+                style: TextStyle(
+                  color: CupertinoColors.label
+                      .resolveFrom(context)
+                      .withOpacity(0.8),
+                  fontSize: adjustedOrderInfoFontSize,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(
+                width: 12,
+              ),
+              Icon(
+                Icons.star,
+                color: secondaryColor,
+                size: 14,
+              ),
+              const SizedBox(width: 3),
+              Text(
+                '${rating} Rating',
+                style: TextStyle(
+                  overflow: TextOverflow.fade,
+                  color: CupertinoColors.label
+                      .resolveFrom(context)
+                      .withOpacity(0.8),
+                  fontSize: adjustedOrderInfoFontSize,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.48,
+                ),
+              ),
+            ],
+          ),
+        ));
   }
 }
