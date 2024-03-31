@@ -10,7 +10,7 @@ import 'package:FoodHood/Screens/donee_rating.dart';
 import 'package:FoodHood/text_scale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+//import 'package:cached_network_image/cached_network_image.dart';
 //import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
 import 'package:FoodHood/Models/PostDetailViewModel.dart';
 import 'package:FoodHood/Components/progress_bar.dart';
@@ -21,7 +21,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:FoodHood/Components/image_display_box.dart';
-
+import 'package:FoodHood/Components/donor_order_info.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -789,42 +789,91 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  Widget _buildButton() {
+  BoxDecoration _buttonBoxDecoration() {
+    return BoxDecoration(
+      boxShadow: [
+        BoxShadow(
+          color: Color(0x19000000),
+          blurRadius: 20,
+          offset: Offset(0, 0),
+        ),
+      ],
+    );
+  }
+
+  TextStyle _buttonTextStyle() {
+    return TextStyle(
+      fontSize: adjustedFontSize,
+      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+    );
+  }
+
+  Widget _buildButton() {   
     if (orderState == OrderState.readyToPickUp) {
       return _buildCancelButton();
     } 
+
     else if (orderState == OrderState.completed){
-      return _buildLeaveReviewButton();
+      // Display the leave a review button
+      return _buildCustomButton(
+        onPressed: () {
+          _navigateToRatingScreen(context);
+        }, 
+        icon: FeatherIcons.edit, 
+        buttonText: "Leave a review", 
+        iconSize: 21
+      );
     }
+
     else {
       return _buildStatusUpdateButton();
     }
   }
 
-  Widget _buildLeaveReviewButton() {
+  Widget _buildCustomButton({
+    required VoidCallback onPressed,
+    required IconData icon,
+    required String buttonText,
+    required double iconSize,
+  }) {
     return Container(
       decoration: _buttonBoxDecoration(),
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         borderRadius: BorderRadius.circular(100.0),
         color: CupertinoColors.tertiarySystemBackground,
-        onPressed: () {
-          Navigator.of(context).push(
-            CupertinoPageRoute(
-              builder: (context) => DoneeRatingPage(
-                postId: widget.postId,
-              ),
+        onPressed: onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: icon == FeatherIcons.x 
+                ? CupertinoColors.systemRed 
+                : CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+              size: iconSize,
             ),
-          );
-        },
-        child: Text(
-          "Leave a Review",
-          style: _buttonTextStyle(),
+            SizedBox(width: 8),
+            Text(
+              buttonText,
+              style: _buttonTextStyle(),
+            ),
+          ],
         ),
       ),
     );
   }
 
+  void _navigateToRatingScreen(BuildContext context) {
+    Navigator.of(context).push(
+        CupertinoPageRoute(
+          builder: (context) => DoneeRatingPage(
+            postId: widget.postId,
+          ),
+        ),
+      );
+  }
+  
   Widget _buildStatusUpdateButton() {
     String buttonText = _buildButtonText();
     return Container(
@@ -854,25 +903,6 @@ class _DonorScreenState extends State<DonorScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  BoxDecoration _buttonBoxDecoration() {
-    return BoxDecoration(
-      boxShadow: [
-        BoxShadow(
-          color: Color(0x19000000),
-          blurRadius: 20,
-          offset: Offset(0, 0),
-        ),
-      ],
-    );
-  }
-
-  TextStyle _buttonTextStyle() {
-    return TextStyle(
-      fontSize: adjustedFontSize,
-      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
     );
   }
 
@@ -932,29 +962,12 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
-  Widget _buildCancelButton() {
-    return Container(
-      decoration: _buttonBoxDecoration(),
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        color: CupertinoColors.tertiarySystemBackground,
-        borderRadius: BorderRadius.circular(100.0),
-        onPressed: _handleCancelOrder,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              FeatherIcons.x,
-              color: CupertinoColors.systemRed,
-            ),
-            SizedBox(width: 8),
-            Text(
-              "Cancel",
-              style: _buttonTextStyle(),
-            ),
-          ],
-        ),
-      ),
+  Widget _buildCancelButton(){
+    return _buildCustomButton(
+      onPressed: _handleCancelOrder,
+      icon: FeatherIcons.x,
+      buttonText: "Cancel",
+      iconSize: 23
     );
   }
 
@@ -1056,84 +1069,5 @@ class _DonorScreenState extends State<DonorScreen> {
           ),
       ],
     );
-  }
-}
-
-// The order info section that displays the users photo, name, and rating
-class OrderInfoSection extends StatelessWidget {
-  final String? reservedByName;
-  final String? reservedByLastName;
-  final double adjustedOrderInfoFontSize;
-  final double rating;
-  final String photo;
-
-  const OrderInfoSection({
-    Key? key,
-    required this.reservedByName,
-    required this.reservedByLastName,
-    required this.adjustedOrderInfoFontSize,
-    required this.rating,
-    required this.photo,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        // Wrap the Container in an Expanded widget to take up remaining space
-        child: Expanded(  
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              photo.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 10,
-                      backgroundImage: CachedNetworkImageProvider(photo),
-                      onBackgroundImageError: (_, __) {
-                        // Handle image load error
-                      },
-                      backgroundColor: Colors.transparent,
-                    )
-                  : CircleAvatar(
-                      radius: 10,
-                      backgroundImage:
-                          AssetImage('assets/images/sampleProfile.png'),
-                    ),
-              SizedBox(width: 8),
-              Text(
-                'Reserved by $reservedByName $reservedByLastName',
-                style: TextStyle(
-                  color: CupertinoColors.label
-                      .resolveFrom(context)
-                      .withOpacity(0.8),
-                  fontSize: adjustedOrderInfoFontSize,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(
-                width: 12,
-              ),
-              Icon(
-                Icons.star,
-                color: secondaryColor,
-                size: 14,
-              ),
-              const SizedBox(width: 3),
-              Text(
-                '${rating} Rating',
-                style: TextStyle(
-                  overflow: TextOverflow.fade,
-                  color: CupertinoColors.label
-                      .resolveFrom(context)
-                      .withOpacity(0.8),
-                  fontSize: adjustedOrderInfoFontSize,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.48,
-                ),
-              ),
-            ],
-          ),
-        ));
   }
 }
