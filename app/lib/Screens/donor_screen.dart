@@ -1,27 +1,28 @@
 //donor_screen.dart
 
-import 'package:FoodHood/Screens/message_screen.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:feather_icons/feather_icons.dart';
-import 'package:FoodHood/Components/colors.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:FoodHood/Screens/donee_rating.dart';
-import 'package:FoodHood/text_scale_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-//import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
-import 'package:FoodHood/Models/PostDetailViewModel.dart';
-import 'package:FoodHood/Components/progress_bar.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:uuid/uuid.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:FoodHood/Components/image_display_box.dart';
 
+import 'package:FoodHood/Components/colors.dart';
+import 'package:FoodHood/Components/donor_order_info.dart';
+import 'package:FoodHood/Components/image_display_box.dart';
+import 'package:FoodHood/Components/progress_bar.dart';
+import 'package:FoodHood/Models/PostDetailViewModel.dart';
+import 'package:FoodHood/Screens/donee_rating.dart';
+import 'package:FoodHood/Screens/message_screen.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:feather_icons/feather_icons.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -56,6 +57,7 @@ class _DonorScreenState extends State<DonorScreen> {
   String location = "";
   String postStatus = 'not reserved';
   String? _selectedImagePath;
+  String apiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
 
   @override
   void initState() {
@@ -78,8 +80,21 @@ class _DonorScreenState extends State<DonorScreen> {
       if (snapshot.exists) {
         // Extract post_status and update orderState accordingly
         final String post_status = snapshot.data()?['post_status'];
+        final String? reserved_by = snapshot.data()?['reserved_by'];
+
         setState(() {
           postStatus = post_status;
+          
+          if (reserved_by != null) {
+            // Read post details
+            fetchPostInformation();
+          } else {
+            reservedByName = null; // Reset the reservedByName if reserved_by is null
+            reservedByLastName = null;
+            rating = 0.0;
+            photo = '';
+          }
+
           switch (postStatus) {
             case 'not reserved':
               orderState = OrderState.notReserved;
@@ -107,9 +122,7 @@ class _DonorScreenState extends State<DonorScreen> {
         // Handle case where document does not exist
       }
     });
-
-    // Read post details
-    fetchPostInformation();
+    
   }
 
   // Reading post information
@@ -213,7 +226,7 @@ class _DonorScreenState extends State<DonorScreen> {
   // Use the Google Maps Geocoding API to convert pickup coordinates to an address
   Future<String> getAddressFromLatLng(LatLng position) async {
     final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$apiKey');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -246,38 +259,6 @@ class _DonorScreenState extends State<DonorScreen> {
       print("Error uploading image: $e");
       return null;
     }
-  }
-
-  // Method to build a cupertino action sheet for users to choose between the Camera and the Gallery
-  Future<void> _pickImageOptions() async {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        message: const Text('Choose an option to add a photo from'),
-        actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: const Text('Camera'),
-            onPressed: () {
-              Navigator.pop(context);
-              _pickImageFromCamera();
-            },
-          ),
-          CupertinoActionSheetAction(
-            child: const Text('Gallery'),
-            onPressed: () {
-              Navigator.pop(context);
-              _pickImageFromGallery();
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancel'),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-    );
   }
 
   // Method to enable users to click an image using their camera
@@ -351,6 +332,7 @@ class _DonorScreenState extends State<DonorScreen> {
                  
                  // Heading Text
                   __buildHeadingTextField(text: _buildHeadingText()),
+                  //_buildHeadingTextField(),
                   
                   SizedBox(height: 16.0),
 
@@ -412,11 +394,6 @@ class _DonorScreenState extends State<DonorScreen> {
                   if (orderState == OrderState.completed)
                    buildDeliveredImageSection(context)
 
-                  // PendingConfirmationWithTimer(
-                  //       durationInSeconds: 120, postId: widget.postId),
-
-                  // Replace the placeholder with the chat bubble in the future
-                  //SizedBox(height: 200.0),
                 ],
               ),
 
@@ -555,26 +532,16 @@ class _DonorScreenState extends State<DonorScreen> {
     required String text,
   }) {
     return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Container(
-        padding: EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 0.0,
-          ),
-          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-          borderRadius: BorderRadius.circular(24.0),
-        ),
+        padding: const EdgeInsets.all(16.0),
         child: Text(
           text,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: adjustedFontSize,
-          ),
+              fontSize: adjustedFontSize - 2.0,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              fontWeight: FontWeight.w500),
         ),
-      ),
-    );
+      );
   }
 
   // Widget to build the delivery photo section
@@ -619,44 +586,9 @@ class _DonorScreenState extends State<DonorScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Expanded(
-                        child: CupertinoButton(
-                          onPressed: () {
-                            _pickImageOptions();
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 14.0),
-                            decoration: BoxDecoration(
-                              color: accentColor.resolveFrom(context).withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add_photo_alternate_rounded,
-                                    size: 28,
-                                    color:
-                                        // if current mode is darkmode, use lighten, else use darken
-                                        MediaQuery.of(context).platformBrightness ==
-                                                Brightness.light
-                                            ? darken(accentColor.resolveFrom(context), 0.3)
-                                            : lighten(accentColor.resolveFrom(context), 0.3)),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Upload a delivery photo',
-                                  style: TextStyle(
-                                    color: MediaQuery.of(context).platformBrightness ==
-                                            Brightness.light
-                                        ? darken(accentColor.resolveFrom(context), 0.3)
-                                        : lighten(accentColor.resolveFrom(context), 0.3),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        child: _buildUploadPhotoSection(context)
                       ),
+ 
                       // Show the "Save" button if an image is selected
                       if (imagePath != null)
                         CupertinoButton(
@@ -703,7 +635,70 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  // Method to build the delivered image section
+  // Widget to build the upload photo button
+  Widget _buildUploadPhotoSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: PullDownButton(
+        itemBuilder: (context) => [
+          PullDownMenuItem(
+            title: 'From Gallery',
+            icon: CupertinoIcons.photo,
+            onTap: () {
+              _pickImageFromGallery();
+            },
+          ),
+          PullDownMenuItem(
+              title: 'From Camera',
+              icon: CupertinoIcons.camera,
+              onTap: () {
+                _pickImageFromCamera();
+              }),
+        ],
+        buttonBuilder: (context, showMenu) => Expanded(
+          child: CupertinoButton(
+            onPressed: showMenu,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 14.0),
+              decoration: BoxDecoration(
+                color: accentColor.resolveFrom(context).withOpacity(0.3),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_photo_alternate_rounded,
+                    size: 28,
+                    color:
+                      // if current mode is darkmode, use lighten, else use darken
+                      MediaQuery.of(context).platformBrightness ==
+                              Brightness.light
+                          ? darken(accentColor.resolveFrom(context), 0.3)
+                          : lighten(accentColor.resolveFrom(context), 0.3)
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'Upload a delivery photo',
+                    style: TextStyle(
+                      color: MediaQuery.of(context).platformBrightness ==
+                              Brightness.light
+                          ? darken(accentColor.resolveFrom(context), 0.3)
+                          : lighten(accentColor.resolveFrom(context), 0.3),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
+  // Method to build the delivered image section for the completed order state
   Widget buildDeliveredImageSection(BuildContext context) {
     return FutureBuilder(
       future: FirebaseFirestore.instance.collection('post_details').doc(widget.postId).get(),
@@ -726,7 +721,7 @@ class _DonorScreenState extends State<DonorScreen> {
                 ),
               ), 
             );
-            //Image.network(deliveredImageURL);
+
           } else {
             // Delivered image URL not available, display alternative UI
             return Container(
@@ -777,43 +772,92 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  Widget _buildButton() {
+  BoxDecoration _buttonBoxDecoration() {
+    return BoxDecoration(
+      boxShadow: [
+        BoxShadow(
+          color: Color(0x19000000),
+          blurRadius: 20,
+          offset: Offset(0, 0),
+        ),
+      ],
+    );
+  }
+
+  TextStyle _buttonTextStyle() {
+    return TextStyle(
+      fontSize: adjustedFontSize,
+      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+    );
+  }
+
+  Widget _buildButton() {   
     if (orderState == OrderState.readyToPickUp) {
       return _buildCancelButton();
     } 
+
     else if (orderState == OrderState.completed){
-      return _buildLeaveReviewButton();
+      // Display the leave a review button
+      return _buildCustomButton(
+        onPressed: () {
+          _navigateToRatingScreen(context);
+        }, 
+        icon: FeatherIcons.edit, 
+        buttonText: "Leave a review", 
+        iconSize: 21
+      );
     }
+
     else {
       return _buildStatusUpdateButton();
     }
   }
 
-  Widget _buildLeaveReviewButton() {
+  Widget _buildCustomButton({
+    required VoidCallback onPressed,
+    required IconData icon,
+    required String buttonText,
+    required double iconSize,
+  }) {
     return Container(
       decoration: _buttonBoxDecoration(),
       child: CupertinoButton(
         padding: EdgeInsets.zero,
         borderRadius: BorderRadius.circular(100.0),
         color: CupertinoColors.tertiarySystemBackground,
-        onPressed: () {
-          Navigator.of(context).push(
-            CupertinoPageRoute(
-              builder: (context) => DoneeRatingPage(
-                postId: widget.postId,
-                receiverID: reservedByUserId!,
-              ),
+        onPressed: onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: icon == FeatherIcons.x 
+                ? CupertinoColors.systemRed 
+                : CupertinoDynamicColor.resolve(CupertinoColors.label, context),
+              size: iconSize,
             ),
-          );
-        },
-        child: Text(
-          "Leave a Review",
-          style: _buttonTextStyle(),
+            SizedBox(width: 8),
+            Text(
+              buttonText,
+              style: _buttonTextStyle(),
+            ),
+          ],
         ),
       ),
     );
   }
 
+  void _navigateToRatingScreen(BuildContext context) {
+    Navigator.of(context).push(
+        CupertinoPageRoute(
+          builder: (context) => DoneeRatingPage(
+            postId: widget.postId,
+            receiverID: reservedByUserId!,
+          ),
+        ),
+      );
+  }
+  
   Widget _buildStatusUpdateButton() {
     String buttonText = _buildButtonText();
     return Container(
@@ -843,25 +887,6 @@ class _DonorScreenState extends State<DonorScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  BoxDecoration _buttonBoxDecoration() {
-    return BoxDecoration(
-      boxShadow: [
-        BoxShadow(
-          color: Color(0x19000000),
-          blurRadius: 20,
-          offset: Offset(0, 0),
-        ),
-      ],
-    );
-  }
-
-  TextStyle _buttonTextStyle() {
-    return TextStyle(
-      fontSize: adjustedFontSize,
-      color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
     );
   }
 
@@ -921,29 +946,12 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
-  Widget _buildCancelButton() {
-    return Container(
-      decoration: _buttonBoxDecoration(),
-      child: CupertinoButton(
-        padding: EdgeInsets.zero,
-        color: CupertinoColors.tertiarySystemBackground,
-        borderRadius: BorderRadius.circular(100.0),
-        onPressed: _handleCancelOrder,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              FeatherIcons.x,
-              color: CupertinoColors.systemRed,
-            ),
-            SizedBox(width: 8),
-            Text(
-              "Cancel",
-              style: _buttonTextStyle(),
-            ),
-          ],
-        ),
-      ),
+  Widget _buildCancelButton(){
+    return _buildCustomButton(
+      onPressed: _handleCancelOrder,
+      icon: FeatherIcons.x,
+      buttonText: "Cancel",
+      iconSize: 23
     );
   }
 
@@ -1045,84 +1053,5 @@ class _DonorScreenState extends State<DonorScreen> {
           ),
       ],
     );
-  }
-}
-
-// The order info section that displays the users photo, name, and rating
-class OrderInfoSection extends StatelessWidget {
-  final String? reservedByName;
-  final String? reservedByLastName;
-  final double adjustedOrderInfoFontSize;
-  final double rating;
-  final String photo;
-
-  const OrderInfoSection({
-    Key? key,
-    required this.reservedByName,
-    required this.reservedByLastName,
-    required this.adjustedOrderInfoFontSize,
-    required this.rating,
-    required this.photo,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        // Wrap the Container in an Expanded widget to take up remaining space
-        child: Expanded(  
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              photo.isNotEmpty
-                  ? CircleAvatar(
-                      radius: 10,
-                      backgroundImage: CachedNetworkImageProvider(photo),
-                      onBackgroundImageError: (_, __) {
-                        // Handle image load error
-                      },
-                      backgroundColor: Colors.transparent,
-                    )
-                  : CircleAvatar(
-                      radius: 10,
-                      backgroundImage:
-                          AssetImage('assets/images/sampleProfile.png'),
-                    ),
-              SizedBox(width: 8),
-              Text(
-                'Reserved by $reservedByName $reservedByLastName',
-                style: TextStyle(
-                  color: CupertinoColors.label
-                      .resolveFrom(context)
-                      .withOpacity(0.8),
-                  fontSize: adjustedOrderInfoFontSize,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(
-                width: 12,
-              ),
-              Icon(
-                Icons.star,
-                color: secondaryColor,
-                size: 14,
-              ),
-              const SizedBox(width: 3),
-              Text(
-                '${rating} Rating',
-                style: TextStyle(
-                  overflow: TextOverflow.fade,
-                  color: CupertinoColors.label
-                      .resolveFrom(context)
-                      .withOpacity(0.8),
-                  fontSize: adjustedOrderInfoFontSize,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.48,
-                ),
-              ),
-            ],
-          ),
-        ));
   }
 }

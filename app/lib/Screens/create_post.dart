@@ -9,6 +9,7 @@ import 'package:FoodHood/text_scale_provider.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -45,6 +46,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
   LatLng? initialLocation;
   GoogleMapController? mapController;
   String instructionText = 'Move the map to select a location';
+  String apiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
 
   @override
   Widget build(BuildContext context) {
@@ -404,7 +406,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
 
   Future<String> getAddressFromLatLng(LatLng position) async {
     final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$apiKey');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {

@@ -10,6 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -46,6 +47,7 @@ class _EditPostScreenState extends State<EditPostScreen>
   GoogleMapController? mapController;
   String instructionText = 'Move the map to select a location';
   late Future<void> _delayFuture;
+  String apiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
 
   @override
   Widget build(BuildContext context) {
@@ -421,7 +423,7 @@ class _EditPostScreenState extends State<EditPostScreen>
 
   Future<String> getAddressFromLatLng(LatLng position) async {
     final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$apiKey');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {

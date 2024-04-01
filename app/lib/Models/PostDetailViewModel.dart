@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert'; // For JSON decoding
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class PostDetailViewModel extends ChangeNotifier {
   late String firstName;
@@ -144,8 +146,8 @@ class PostDetailViewModel extends ChangeNotifier {
       return;
     }
 
-    String googleAPIKey = 'AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A';
-    String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.latitude},${coordinates.longitude}&key=$googleAPIKey';
+    String apiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
+    String url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinates.latitude},${coordinates.longitude}&key=$apiKey';
 
     try {
       final response = await http.get(Uri.parse(url));

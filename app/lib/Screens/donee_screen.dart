@@ -14,6 +14,7 @@ import 'package:feather_icons/feather_icons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -45,9 +46,9 @@ class _DoneePathState extends State<DoneePath> {
       return _addressCache[position]!;
     }
 
-    String googleAPIKey = 'AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A';
+    String apiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
     final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$googleAPIKey');
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$apiKey');
 
     final response = await http.get(url);
 

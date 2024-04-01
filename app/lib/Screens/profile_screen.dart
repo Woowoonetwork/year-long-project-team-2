@@ -267,9 +267,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     Widget contentWidget;
+
+    // Method to handle post deletion
     void removePost(String postId) async {
       try {
+        // Delete the post document from the post_details collection
         await firestore.collection('post_details').doc(postId).delete();
+        
+        // Get the user document
+        DocumentSnapshot<Map<String, dynamic>> userSnapshot =
+            await FirebaseFirestore.instance
+                .collection('user')
+                .doc(FirebaseAuth.instance.currentUser?.uid)
+                .get();
+
+        // Check if data exists
+        if (userSnapshot.exists) {
+          // Get the current posts of the user
+          List<String> posts = List<String>.from(userSnapshot.data()?['posts'] ?? []);
+
+          // Remove the postId of the deleted order
+          posts.remove(postId);
+
+          // Update the user document with the updated posts list
+          await FirebaseFirestore.instance
+              .collection('user')
+              .doc(FirebaseAuth.instance.currentUser?.uid)
+              .update({'posts': posts});
+        }
         setState(() {
           recentPosts.removeWhere((post) => post['postId'] == postId);
         });
@@ -284,7 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         contentWidget = RecentPostsTab(
           recentPosts: recentPosts,
           userId: userId,
-          onRemove: removePost, // Add this line
+          onRemove: removePost, 
           onEdit: (postId) {
             Navigator.push(
               context,

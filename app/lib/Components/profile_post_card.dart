@@ -143,7 +143,7 @@ class ProfilePostCard extends StatelessWidget {
                             onTap: () {
                               _showDeletePostConfirmation(context);
                             },
-                            title: 'Remove Post',
+                            title: 'Delete Post',
                             isDestructive: true,
                             icon: CupertinoIcons.delete,
                           ),
@@ -199,7 +199,7 @@ class ProfilePostCard extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
-          title: Text('Remove Post'),
+          title: Text('Delete Post'),
           content: Text(
               'Are you sure you want to delete this post? This action cannot be undone.'),
           actions: <Widget>[
@@ -211,7 +211,7 @@ class ProfilePostCard extends StatelessWidget {
             ),
             CupertinoDialogAction(
               isDestructiveAction: true,
-              child: Text('Remove'),
+              child: Text('Delete'),
               onPressed: () {
                 Navigator.of(context).pop();
                 onRemove?.call();
