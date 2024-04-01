@@ -22,6 +22,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -260,38 +261,6 @@ class _DonorScreenState extends State<DonorScreen> {
     }
   }
 
-  // Method to build a cupertino action sheet for users to choose between the Camera and the Gallery
-  Future<void> _pickImageOptions() async {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        message: const Text('Choose an option to add a photo from'),
-        actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: const Text('Camera'),
-            onPressed: () {
-              Navigator.pop(context);
-              _pickImageFromCamera();
-            },
-          ),
-          CupertinoActionSheetAction(
-            child: const Text('Gallery'),
-            onPressed: () {
-              Navigator.pop(context);
-              _pickImageFromGallery();
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancel'),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-    );
-  }
-
   // Method to enable users to click an image using their camera
   Future<void> _pickImageFromCamera() async {
     final ImagePicker picker = ImagePicker();
@@ -425,11 +394,6 @@ class _DonorScreenState extends State<DonorScreen> {
                   if (orderState == OrderState.completed)
                    buildDeliveredImageSection(context)
 
-                  // PendingConfirmationWithTimer(
-                  //       durationInSeconds: 120, postId: widget.postId),
-
-                  // Replace the placeholder with the chat bubble in the future
-                  //SizedBox(height: 200.0),
                 ],
               ),
 
@@ -632,44 +596,9 @@ class _DonorScreenState extends State<DonorScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Expanded(
-                        child: CupertinoButton(
-                          onPressed: () {
-                            _pickImageOptions();
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 14.0),
-                            decoration: BoxDecoration(
-                              color: accentColor.resolveFrom(context).withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add_photo_alternate_rounded,
-                                    size: 28,
-                                    color:
-                                        // if current mode is darkmode, use lighten, else use darken
-                                        MediaQuery.of(context).platformBrightness ==
-                                                Brightness.light
-                                            ? darken(accentColor.resolveFrom(context), 0.3)
-                                            : lighten(accentColor.resolveFrom(context), 0.3)),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Upload a delivery photo',
-                                  style: TextStyle(
-                                    color: MediaQuery.of(context).platformBrightness ==
-                                            Brightness.light
-                                        ? darken(accentColor.resolveFrom(context), 0.3)
-                                        : lighten(accentColor.resolveFrom(context), 0.3),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        child: _buildUploadPhotoSection(context)
                       ),
+ 
                       // Show the "Save" button if an image is selected
                       if (imagePath != null)
                         CupertinoButton(
@@ -716,7 +645,70 @@ class _DonorScreenState extends State<DonorScreen> {
     );
   }
 
-  // Method to build the delivered image section
+  // Widget to build the upload photo button
+  Widget _buildUploadPhotoSection(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: PullDownButton(
+        itemBuilder: (context) => [
+          PullDownMenuItem(
+            title: 'From Gallery',
+            icon: CupertinoIcons.photo,
+            onTap: () {
+              _pickImageFromGallery();
+            },
+          ),
+          PullDownMenuItem(
+              title: 'From Camera',
+              icon: CupertinoIcons.camera,
+              onTap: () {
+                _pickImageFromCamera();
+              }),
+        ],
+        buttonBuilder: (context, showMenu) => Expanded(
+          child: CupertinoButton(
+            onPressed: showMenu,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 14.0),
+              decoration: BoxDecoration(
+                color: accentColor.resolveFrom(context).withOpacity(0.3),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_photo_alternate_rounded,
+                    size: 28,
+                    color:
+                      // if current mode is darkmode, use lighten, else use darken
+                      MediaQuery.of(context).platformBrightness ==
+                              Brightness.light
+                          ? darken(accentColor.resolveFrom(context), 0.3)
+                          : lighten(accentColor.resolveFrom(context), 0.3)
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'Upload a delivery photo',
+                    style: TextStyle(
+                      color: MediaQuery.of(context).platformBrightness ==
+                              Brightness.light
+                          ? darken(accentColor.resolveFrom(context), 0.3)
+                          : lighten(accentColor.resolveFrom(context), 0.3),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
+  // Method to build the delivered image section for the completed order state
   Widget buildDeliveredImageSection(BuildContext context) {
     return FutureBuilder(
       future: FirebaseFirestore.instance.collection('post_details').doc(widget.postId).get(),
@@ -739,7 +731,7 @@ class _DonorScreenState extends State<DonorScreen> {
                 ),
               ), 
             );
-            //Image.network(deliveredImageURL);
+
           } else {
             // Delivered image URL not available, display alternative UI
             return Container(
