@@ -16,10 +16,8 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sf_symbols/sf_symbols.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -43,8 +41,10 @@ class _BrowseScreenState extends State<BrowseScreen>
   Future<LatLng?>? currentLocationFuture;
   Circle? searchAreaCircle;
   TextEditingController searchController = TextEditingController();
+  FocusNode _searchFocusNode = FocusNode();
 
   double _searchRadius = baseSearchRadius;
+  Key _mapKey = UniqueKey();
   double mapBottomPadding = 0;
   double mapTopPadding = 0;
   double currentZoomLevel = defaultZoomLevel;
@@ -62,6 +62,7 @@ class _BrowseScreenState extends State<BrowseScreen>
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
   Timer? _debounce;
   List<Map<String, dynamic>> postsInCircle = [];
+  Map<String, String> _markerData = {};
 
   BitmapDescriptor defaultIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor selectedIcon = BitmapDescriptor.defaultMarker;
@@ -146,6 +147,7 @@ class _BrowseScreenState extends State<BrowseScreen>
     keyboardVisibilitySubscription.cancel();
     searchController.dispose();
     mapController?.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -159,6 +161,15 @@ class _BrowseScreenState extends State<BrowseScreen>
     createCustomMarkerIcon(color: Colors.orange, isSelected: true);
     _fetchAllMarkers();
     _requestLocationPermission();
+    _searchFocusNode.addListener(() {
+      if (_searchFocusNode.hasFocus) {
+        // Show labels
+        _updateMarkers(showLabels: true);
+      } else {
+        // Hide labels
+        _updateMarkers(showLabels: false);
+      }
+    });
   }
 
   Row locationButtonContent() {
@@ -183,7 +194,7 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   Row randomPostContent() {
-    return Row(
+    return const Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -274,7 +285,7 @@ class _BrowseScreenState extends State<BrowseScreen>
           child: randomPostContent(),
           alignment: Alignment.bottomRight,
           margin: const EdgeInsets.only(right: 16.0),
-          ),
+        ),
       ],
     );
   }
@@ -318,6 +329,7 @@ class _BrowseScreenState extends State<BrowseScreen>
               onCameraMove: _onCameraMove,
               onCameraIdle: _onCameraIdle,
               markers: _markers,
+              key: _mapKey,
               initialCameraPosition: CameraPosition(
                 target: snapshot.data!,
                 zoom: currentZoomLevel,
@@ -428,6 +440,7 @@ class _BrowseScreenState extends State<BrowseScreen>
         CupertinoSearchNavigationBar(
           title: "Browse",
           textController: searchController,
+          focusNode: _searchFocusNode,
           onSearchTextChanged: (text) {
             if (text.isEmpty) {
               _fetchAllMarkers();
@@ -435,6 +448,7 @@ class _BrowseScreenState extends State<BrowseScreen>
               _filterMarkersByTitle(text);
             }
           },
+          onClearSearch: _handleSearchClear,
           buildFilterButton: () => _buildFilterButton(),
           onSearchBarTapped: _handleSearchBarTapped,
         ),
@@ -545,8 +559,11 @@ class _BrowseScreenState extends State<BrowseScreen>
         .get()
         .then((querySnapshot) {
       Set<Marker> allMarkers = {};
+      _markerData.clear(); // Assume _markerData is declared at the class level
+
       for (var doc in querySnapshot.docs) {
-        final data = doc.data();
+        final data = doc.data() as Map<String, dynamic>; // Ensure correct type
+        String title = data['title'] ?? 'No Title';
         double? latitude = double.tryParse(data['latitude']?.toString() ?? '');
         double? longitude =
             double.tryParse(data['longitude']?.toString() ?? '');
@@ -560,13 +577,20 @@ class _BrowseScreenState extends State<BrowseScreen>
             position: postLatLng,
             onTap: () => _onMarkerTapped(doc.id),
             icon: _selectedMarkerId == markerId ? selectedIcon : defaultIcon,
+            // Initially, do not set infoWindow or set it with a title based on your initial UI requirements
           );
           allMarkers.add(marker);
+          _markerData[markerId.value] = title; // Store the title for later use
         }
-        allPosts.add(data);
+        allPosts.add(data); // Assuming you're using this elsewhere
       }
-      setState(() => _markers = allMarkers);
-    }).catchError((error) {});
+
+      setState(() {
+        _markers = allMarkers;
+      });
+    }).catchError((error) {
+      // Handle the error
+    });
   }
 
   Future<void> _fetchAndSetCurrentLocation() async {
@@ -589,13 +613,10 @@ class _BrowseScreenState extends State<BrowseScreen>
   }
 
   void _filterMarkersByTitle(String searchText) {
-    if (searchText.isEmpty) {
-      _fetchAllMarkers();
-      return;
-    }
     FirebaseFirestore.instance
         .collection('post_details')
-        .where('title', isEqualTo: searchText)
+        .where('title', isGreaterThanOrEqualTo: searchText)
+        .where('title', isLessThanOrEqualTo: searchText + '\uf8ff')
         .get()
         .then((querySnapshot) {
       Set<Marker> filteredMarkers = {};
@@ -616,7 +637,16 @@ class _BrowseScreenState extends State<BrowseScreen>
         filteredMarkers.add(marker);
       }
       setState(() => _markers = filteredMarkers);
-    }).catchError((error) {});
+    }).catchError((error) {
+      // Handle any errors here
+    });
+  }
+
+  void _handleSearchClear() {
+    _fetchAllMarkers();
+    setState(() {
+      _mapKey = UniqueKey();
+    });
   }
 
   String _formatSearchRadius(double radius) {
@@ -858,6 +888,26 @@ class _BrowseScreenState extends State<BrowseScreen>
     setState(() {
       _markers.removeWhere((m) => m.markerId == tappedMarkerId);
       _markers.add(updatedMarker);
+    });
+  }
+
+  void _updateMarkers({required bool showLabels}) {
+    Set<Marker> updatedMarkers = {};
+
+    _markers.forEach((marker) {
+      String markerIdVal = marker.markerId.value;
+      // Retrieve the title from _markerData or use a placeholder if not found
+      String? title = showLabels ? _markerData[markerIdVal] : null;
+
+      Marker updatedMarker = marker.copyWith(
+        infoWindowParam: InfoWindow(title: title),
+      );
+
+      updatedMarkers.add(updatedMarker);
+    });
+
+    setState(() {
+      _markers = updatedMarkers;
     });
   }
 
