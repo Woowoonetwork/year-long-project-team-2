@@ -1,27 +1,27 @@
 //donor_screen.dart
 
-import 'package:FoodHood/Screens/message_screen.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:feather_icons/feather_icons.dart';
-import 'package:FoodHood/Components/colors.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:FoodHood/Screens/donee_rating.dart';
-import 'package:FoodHood/text_scale_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-//import 'package:cached_network_image/cached_network_image.dart';
-//import 'package:FoodHood/Components/PendingConfirmationWithTimer.dart';
-import 'package:FoodHood/Models/PostDetailViewModel.dart';
-import 'package:FoodHood/Components/progress_bar.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:uuid/uuid.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:FoodHood/Components/image_display_box.dart';
+
+import 'package:FoodHood/Components/colors.dart';
 import 'package:FoodHood/Components/donor_order_info.dart';
+import 'package:FoodHood/Components/image_display_box.dart';
+import 'package:FoodHood/Components/progress_bar.dart';
+import 'package:FoodHood/Models/PostDetailViewModel.dart';
+import 'package:FoodHood/Screens/donee_rating.dart';
+import 'package:FoodHood/Screens/message_screen.dart';
+import 'package:FoodHood/text_scale_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:feather_icons/feather_icons.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 const double _iconSize = 22.0;
 const double _defaultHeadingFontSize = 32.0;
@@ -56,6 +56,7 @@ class _DonorScreenState extends State<DonorScreen> {
   String location = "";
   String postStatus = 'not reserved';
   String? _selectedImagePath;
+  String apiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
 
   @override
   void initState() {
@@ -224,7 +225,7 @@ class _DonorScreenState extends State<DonorScreen> {
   // Use the Google Maps Geocoding API to convert pickup coordinates to an address
   Future<String> getAddressFromLatLng(LatLng position) async {
     final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$apiKey');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {

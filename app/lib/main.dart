@@ -20,6 +20,7 @@ import 'package:provider/provider.dart';
 
 import 'Services/AuthService.dart';
 import 'firebase_options.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,10 @@ void main() async {
     (dynamicLinkData) {},
     onError: (error) => print('Dynamic Link Failed: $error'),
   );
+
+  // Load the environment variables
+  await dotenv.load(fileName: '.env');
+  
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then((_) {
     runApp(

@@ -16,6 +16,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_down_button/pull_down_button.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -45,6 +46,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
   LatLng? initialLocation;
   GoogleMapController? mapController;
   String instructionText = 'Move the map to select a location';
+  String apiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
 
   @override
   Widget build(BuildContext context) {
@@ -404,7 +406,7 @@ class _CreatePostPageState extends State<CreatePostScreen>
 
   Future<String> getAddressFromLatLng(LatLng position) async {
     final url = Uri.parse(
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyC9ZK3lbbGSIpFOI_dl-JON4zrBKjMlw2A');
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$apiKey');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
