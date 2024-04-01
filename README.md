@@ -8,7 +8,7 @@ FoodHood is a mobile application that allows users to share leftover food with p
 It lets you to create food posts, view nearby food listings available to you, order food, and arrange for pickup at a designated meetup point after placing your order.
 
 > [!WARNING]
-> Project is currently under development, see the list of featured completed in the design document.
+> Project is currently under development, see the list of features completed in the design document.
 
 ## Local development
 
