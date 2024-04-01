@@ -737,3 +737,48 @@ N/A.
 ### Additional Information
 
 N/A.
+
+---
+---
+
+## Term 2 Week 11: Monday 25th Mar 2024 - Sunday 31st Mar 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W12.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Fixed the "unknown user" bug on donor screen.
+- Added placeholder text on the account screen.
+- Added the environment variable to store the API key and removed the hardcoding of the key on various screens.
+- Modified the backend of the delete post functionality so it accurately updates Firestore accordingly.
+- Modularized the button code more for maintainability.
+- Modified the photo picker options to be consistent with the create post screen.
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Complete donor screen and other miscellaneous bug fixes
+    - Fixed the "unknown user" bug on donor screen.
+    - Added placeholder text on the account screen.
+    - Added the environment variable to store the API key and removed the hardcoding of the key on various screens.
+    - Modified the backend of the delete post functionality so it accurately updates Firestore accordingly.
+    - Modularized the button code more for maintainability.
+    - Modified the photo picker options to be consistent with the create post screen.
+
+- Complete the T2 W12 team log.
+- Complete the T2 W12 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+
+- No tasks are currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
