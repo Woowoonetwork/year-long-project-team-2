@@ -117,6 +117,7 @@ flutter:
     - assets/map_style_dark.json
     - assets/map_style_light.json
     - assets/images/
+    - .env
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
