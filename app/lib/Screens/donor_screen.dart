@@ -532,26 +532,16 @@ class _DonorScreenState extends State<DonorScreen> {
     required String text,
   }) {
     return Padding(
-      padding: EdgeInsets.all(16.0),
-      child: Container(
-        padding: EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-            width: 0.0,
-          ),
-          color: CupertinoColors.quaternarySystemFill.resolveFrom(context),
-          borderRadius: BorderRadius.circular(24.0),
-        ),
+        padding: const EdgeInsets.all(16.0),
         child: Text(
           text,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: adjustedFontSize,
-          ),
+              fontSize: adjustedFontSize - 2.0,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              fontWeight: FontWeight.w500),
         ),
-      ),
-    );
+      );
   }
 
   // Widget to build the delivery photo section
