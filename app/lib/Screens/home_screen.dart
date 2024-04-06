@@ -488,78 +488,65 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void applyFilters(Map<String, dynamic> filterCriteria) async {
-    String collectionDay = filterCriteria['collectionDay'] ?? 'Today';
-    List<String> selectedFilters =
-        List<String>.from(filterCriteria['selectedFilters'] ?? []);
-    RangeValues selectedTimeRange =
-        filterCriteria['collectionTime'] as RangeValues;
+  String collectionDay = filterCriteria['collectionDay'] ?? 'All';
+  List<String> selectedFoodTypes = List<String>.from(filterCriteria['selectedFoodTypes'] ?? []);
+  List<String> selectedDietPreferences = List<String>.from(filterCriteria['selectedDietPreferences'] ?? []);
+  RangeValues selectedTimeRange = filterCriteria['collectionTime'] as RangeValues;
 
-    // Extract the food types and diet preferences from the filter criteria
-    List<String> selectedFoodTypes =
-        List<String>.from(filterCriteria['selectedFoodTypes'] ?? []);
-    List<String> selectedDietPreferences =
-        List<String>.from(filterCriteria['selectedDietPreferences'] ?? []);
+  DateTime now = DateTime.now();
+  DateTime targetDate;
+  if (collectionDay == "Today") {
+    targetDate = DateTime(now.year, now.month, now.day);
+  } else if (collectionDay == "Tomorrow") {
+    DateTime tomorrow = now.add(Duration(days: 1));
+    targetDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+  } else {
+    targetDate = now; // Default to now, "All" doesn't rely on targetDate
+  }
 
-    DateTime now = DateTime.now();
-    DateTime targetDate = collectionDay == "Today"
-        ? DateTime(now.year, now.month, now.day)
-        : DateTime(now.year, now.month, now.day).add(Duration(days: 1));
+  var snapshot = await FirebaseFirestore.instance
+      .collection('post_details')
+      .orderBy('post_timestamp', descending: true)
+      .get();
 
-    var snapshot = await FirebaseFirestore.instance
-        .collection('post_details')
-        .orderBy('post_timestamp', descending: true)
-        .get();
+  List<Widget> filteredPosts = [];
 
-    List<Widget> filteredPosts = [];
+  for (var doc in snapshot.docs) {
+    var data = doc.data() as Map<String, dynamic>;
+    Timestamp? pickupTimestamp = data['pickup_time'] as Timestamp?;
+    DateTime? pickupDateTime = pickupTimestamp?.toDate();
 
-    for (var doc in snapshot.docs) {
-      var data = doc.data() as Map<String, dynamic>;
-      Timestamp? pickupTimestamp = data['pickup_time'] as Timestamp?;
-      DateTime? pickupDateTime = pickupTimestamp?.toDate();
+    bool isDayMatch = collectionDay == "All" ||
+        (pickupDateTime != null &&
+            pickupDateTime.year == targetDate.year &&
+            pickupDateTime.month == targetDate.month &&
+            pickupDateTime.day == targetDate.day);
 
-      bool isDayMatch = collectionDay == "All" ||
-          (pickupDateTime != null &&
-              pickupDateTime.year == targetDate.year &&
-              pickupDateTime.month == targetDate.month &&
-              pickupDateTime.day == targetDate.day);
+    bool isTimeMatch = collectionDay == "All" ||
+        (pickupDateTime != null &&
+            pickupDateTime.hour + pickupDateTime.minute / 60.0 >= selectedTimeRange.start &&
+            pickupDateTime.hour + pickupDateTime.minute / 60.0 <= selectedTimeRange.end);
 
-      bool isTimeMatch = collectionDay == "All" ||
-          (pickupDateTime != null &&
-              pickupDateTime.hour + pickupDateTime.minute / 60.0 >=
-                  selectedTimeRange.start &&
-              pickupDateTime.hour + pickupDateTime.minute / 60.0 <=
-                  selectedTimeRange.end);
+    List<String> categories = List<String>.from((data['categories'] ?? '').split(',').map((s) => s.trim()));
+    List<String> allergens = List<String>.from((data['allergens'] ?? '').split(',').map((s) => s.trim()));
+    List<String> combinedTags = [...categories, ...allergens];
 
-      List<String> categories = List<String>.from(
-          (data['categories'] ?? '').split(',').map((s) => s.trim()));
-      List<String> allergens = List<String>.from(
-          (data['allergens'] ?? '').split(',').map((s) => s.trim()));
+    bool hasMatchingTags = selectedFoodTypes.every((tag) => combinedTags.contains(tag)) && selectedDietPreferences.every((tag) => combinedTags.contains(tag));
 
-      // Combine categories and allergens for comparison with selected filters
-      List<String> combinedTags = [...categories, ...allergens];
-
-      bool hasMatchingTags =
-          (selectedFoodTypes.isEmpty && selectedDietPreferences.isEmpty) ||
-              combinedTags.any((tag) =>
-                  selectedFoodTypes.contains(tag) ||
-                  selectedDietPreferences.contains(tag));
-
-      if (isDayMatch &&
-          isTimeMatch &&
-          hasMatchingTags &&
-          !data.containsKey('reserved_by')) {
-        var postWidget = await _buildPostCard(doc);
-        filteredPosts.add(postWidget);
-      }
-    }
-
-    if (mounted) {
-      setState(() {
-        postCards = filteredPosts;
-        isLoading = false;
-      });
+    if (isDayMatch && isTimeMatch && hasMatchingTags && !data.containsKey('reserved_by')) {
+      var postWidget = await _buildPostCard(doc);
+      filteredPosts.add(postWidget);
     }
   }
+
+  if (mounted) {
+    setState(() {
+      postCards = filteredPosts;
+      isLoading = false;
+    });
+  }
+}
+
 
   // In HomeScreen.dart
 // In HomeScreen, where you show the FilterSheet
