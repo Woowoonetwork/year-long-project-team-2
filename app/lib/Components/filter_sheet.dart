@@ -26,7 +26,7 @@ class _FilterSheetState extends State<FilterSheet> {
   @override
   void initState() {
     super.initState();
-    collectionDay = widget.initialCriteria['collectionDay'] ?? 'Today';
+    collectionDay = widget.initialCriteria['collectionDay'] ?? 'All';
     selectedFoodTypes =
         List<String>.from(widget.initialCriteria['selectedFoodTypes'] ?? []);
     selectedDietPreferences = List<String>.from(
@@ -232,7 +232,7 @@ class _FilterSheetState extends State<FilterSheet> {
             onPressed: () {
               setState(() {
                 // Reset all filters to their initial values
-                collectionDay = 'Today';
+                collectionDay = 'All';
                 selectedFoodTypes = [];
                 selectedDietPreferences = [];
                 collectionTime = RangeValues(0, 24);
