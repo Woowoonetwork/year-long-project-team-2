@@ -31,18 +31,31 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   Map<String, dynamic> currentFilterCriteria = {};
   List<String> categories = [];
+   Map<String, Color> categoryColors = {};
 
   double _scale = 1.0; // Scale factor for the button
 
-  @override
+   @override
   void initState() {
     super.initState();
     _initListeners();
     _loadInitialPosts();
     fetchCategories().then((fetchedCategories) {
+      final math.Random random = math.Random();
+      Map<String, Color> initialColors = {
+        'All': accentColor,
+        'Vegan': Colors.yellow,
+        'Vegetarian': Colors.orange,
+        'Halal': Colors.blue,
+        // Add other specific categories and their colors here
+      };
+
       setState(() {
-        // Always include "All" and append fetched categories
         categories = ['All', ...fetchedCategories];
+        categories.forEach((category) {
+          categoryColors[category] = initialColors[category] ??
+              Color.fromRGBO(random.nextInt(255), random.nextInt(255), random.nextInt(255), 1);
+        });
       });
     });
   }
@@ -599,7 +612,7 @@ class _HomeScreenState extends State<HomeScreen> {
           spacing: 8.0,
           children: categories
               .map((category) =>
-                  _buildCategoryButton(category, getColorForCategory(category)))
+                  _buildCategoryButton(category))
               .toList(),
         ),
       ),
@@ -617,15 +630,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoryButton(String title, Color color) {
+ Widget _buildCategoryButton(String title) {
+    Color color = categoryColors[title] ?? Colors.grey; // Default color
     return ConstrainedBox(
       constraints: BoxConstraints(minWidth: 60, maxHeight: 40),
       child: CupertinoButton(
         child: Text(title,
             style: TextStyle(
-                color: color.computeLuminance() > 0.5
-                    ? CupertinoColors.black
-                    : CupertinoColors.white,
+                color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
                 fontSize: 16,
                 letterSpacing: -0.6,
                 fontWeight: FontWeight.w600)),
@@ -636,7 +648,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
   void _filterPostsByCategory(String categoryName) async {
     setState(() => isLoading = true);
 
