@@ -527,7 +527,6 @@ N/A.
 
 N/A.
 
-
 ## Term 2 Week 9: Monday 4th Mar 2024 - Sunday 10th Mar 2024
 
 ![Peer Evaluation](./images/nickT2W9.png)
@@ -559,7 +558,6 @@ N/A.
 
 N/A.
 
-
 ## Term 2 Week 10: Monday 11th Mar 2024 - Sunday 17th Mar 2024
 
 ![Peer Evaluation](./images/nickT2W10.png)
@@ -581,11 +579,72 @@ N/A.
 - Enhanced the image selection process by allowing users to choose their camera source.
 - Modified the logic for the tapping area on the order card.
 
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
+### Additional Information
+
+N/A.
+
+## Term 2 Week 10: Monday 18th Mar 2024 - Sunday 17th Mar 2024
+
+![Peer Evaluation](./images/nickT2W11.png)
+
+### Tasks completed (from Project Board)
+
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+- Review Code from last week and resolve some minor ui bugs
+- Implemented messaging feature app wise and configured the front end and back end logic
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+
+### Recap of personal goals
+
+- Implemented the Conversation Screen, Message Page, and backend logic on Firebase.
+- Added the ability to react to a message with ❤️ and 👍. Although it's still buggy I will attempt to address them next week.
+- Added UI behaviours to the message page such as when a new message arrives
+- Added an option to remove a message If sent accidentally.
+- Revamped Donor Review Page.
+- Fixed the title overflow on the order card and profile post card
 
 ### Tasks in progress (from Project Board)
 
 - No other tasks currently in progress.
-  
+
+### Additional Information
+
+N/A.
+
+
+## Term 2 Week 10: Monday 24th Mar 2024 - Sunday 31th Mar 2024
+
+![Peer Evaluation](./images/nickT2W12.png)
+
+### Tasks completed (from Project Board)
+
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+- Review Code from last week and resolve some minor ui bugs
+- Fixed the bugs in the app and resolved the issues from testing.
+- Assisted in assigning and prioritizing the tasks for the upcoming milestone.
+- Assisted in preparing for the final presentation and demo.
+- Assisted in preparing for the final documentation.
+
+### Recap of personal goals
+
+- Fixed the bugs in the app and resolved the issues from testing.
+- Make changes to the donee pathway and match the design and ui with the donor pathway.
+- Resolve the bugs with the review page and ensure the pages are reachable to the message screen.
+- Assisted in preparing for the final presentation and demo.
+- Assisted in preparing for the final documentation.
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+
 ### Additional Information
 
 N/A.

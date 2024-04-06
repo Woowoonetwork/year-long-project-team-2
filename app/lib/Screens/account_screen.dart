@@ -1,18 +1,18 @@
-import 'package:FoodHood/Screens/settings_screen.dart';
-import 'package:feather_icons/feather_icons.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:FoodHood/Components/profile_card.dart';
-import 'package:FoodHood/Components/order_card.dart';
 import 'package:FoodHood/Components/colors.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:FoodHood/Components/order_card.dart';
+import 'package:FoodHood/Components/profile_card.dart';
+import 'package:FoodHood/Screens/conversations_screen.dart';
+import 'package:FoodHood/Screens/settings_screen.dart';
 import 'package:FoodHood/text_scale_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:feather_icons/feather_icons.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-
-const double _defaultTextFontSize = 16.0;
 const double _defaultTabTextFontSize = 14.0;
+const double _defaultTextFontSize = 16.0;
 
 class AccountScreen extends StatefulWidget {
   @override
@@ -28,6 +28,98 @@ class _AccountScreenState extends State<AccountScreen> {
   late double _textScaleFactor;
   late double adjustedTextFontSize;
   late double adjustedTabTextFontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
+    _updateAdjustedFontSize();
+
+    final Map<int, Widget> tabs = <int, Widget>{
+      0: Text(
+        'Donations',
+        style: TextStyle(
+          fontSize: adjustedTabTextFontSize,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      1: Text(
+        'Reservations',
+        style: TextStyle(
+            fontSize: adjustedTabTextFontSize, fontWeight: FontWeight.w500),
+      ),
+    };
+
+    return CupertinoPageScaffold(
+      backgroundColor: groupedBackgroundColor,
+      child: SafeArea(
+        top: false,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            _buildNavigationBar(context),
+            SliverToBoxAdapter(child: ProfileCard()),
+            _buildSegmentControl(tabs),
+            _buildOrdersContent(segmentedControlGroupValue),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildTitleSection(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0, left: 10.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          overflow: TextOverflow.ellipsis,
+          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)
+              .withOpacity(0.8),
+          fontSize: 18,
+          letterSpacing: -0.8,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  OrderCard createOrderCard(
+      Map<String, dynamic> documentData, String postId, bool isDonation) {
+    String title = documentData['title'] ?? 'No Title';
+    List<String> tags = documentData['categories'].split(',');
+    DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
+
+    List<Map<String, String>> imagesWithAltText = [];
+    if (documentData.containsKey('images') && documentData['images'] is List) {
+      imagesWithAltText = List<Map<String, String>>.from(
+        (documentData['images'] as List).map((image) {
+          return {
+            'url': image['url'] as String? ?? '',
+            'alt_text': image['alt_text'] as String? ?? '',
+          };
+        }),
+      );
+    }
+
+    return OrderCard(
+      title: title,
+      tags: tags,
+      orderInfo: 'Posted on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
+      postId: postId,
+      onTap: _onOrderCardTap,
+      imagesWithAltText: imagesWithAltText,
+      orderState: OrderState.confirmed,
+      isDonation: isDonation,
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  String getCurrentUserUID() {
+    return FirebaseAuth.instance.currentUser?.uid ?? '';
+  }
 
   @override
   void initState() {
@@ -118,88 +210,6 @@ class _AccountScreenState extends State<AccountScreen> {
     });
   }
 
-  void _updateAdjustedFontSize() {
-    adjustedTextFontSize = _defaultTextFontSize * _textScaleFactor;
-    adjustedTabTextFontSize = _defaultTabTextFontSize * _textScaleFactor;
-  }
-
-  void _onOrderCardTap(String postId) {
-    setState(() {
-      postId = postId;
-    });
-    print(postId + 'accountscreen');
-  }
-
-  OrderCard createOrderCard(
-      Map<String, dynamic> documentData, String postId, bool isDonation) {
-    String title = documentData['title'] ?? 'No Title';
-    List<String> tags = documentData['categories'].split(',');
-    DateTime createdAt = (documentData['post_timestamp'] as Timestamp).toDate();
-
-    List<Map<String, String>> imagesWithAltText = [];
-    if (documentData.containsKey('images') && documentData['images'] is List) {
-      imagesWithAltText = List<Map<String, String>>.from(
-        (documentData['images'] as List).map((image) {
-          return {
-            'url': image['url'] as String? ?? '',
-            'alt_text': image['alt_text'] as String? ?? '',
-          };
-        }),
-      );
-    }
-
-    return OrderCard(
-      title: title,
-      tags: tags,
-      orderInfo: 'Posted on ${DateFormat('MMMM dd, yyyy').format(createdAt)}',
-      postId: postId,
-      onTap: _onOrderCardTap,
-      imagesWithAltText: imagesWithAltText,
-      orderState: OrderState.confirmed,
-      isDonation: isDonation,
-    );
-  }
-
-  String getCurrentUserUID() {
-    return FirebaseAuth.instance.currentUser?.uid ?? '';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _textScaleFactor = Provider.of<TextScaleProvider>(context).textScaleFactor;
-    _updateAdjustedFontSize();
-
-    final Map<int, Widget> tabs = <int, Widget>{
-      0: Text(
-        'Donations',
-        style: TextStyle(
-          fontSize: adjustedTabTextFontSize,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      1: Text(
-        'Reservations',
-        style: TextStyle(
-            fontSize: adjustedTabTextFontSize, fontWeight: FontWeight.w500),
-      ),
-    };
-
-    return CupertinoPageScaffold(
-      backgroundColor: groupedBackgroundColor,
-      child: SafeArea(
-        top: false,
-        child: CustomScrollView(
-          slivers: <Widget>[
-            _buildNavigationBar(context),
-            SliverToBoxAdapter(child: ProfileCard()),
-            _buildSegmentControl(tabs),
-            _buildOrdersContent(segmentedControlGroupValue),
-          ],
-        ),
-      ),
-    );
-  }
-
   CupertinoSliverNavigationBar _buildNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
       transitionBetweenRoutes: false,
@@ -207,10 +217,25 @@ class _AccountScreenState extends State<AccountScreen> {
           CupertinoDynamicColor.resolve(groupedBackgroundColor, context)
               .withOpacity(0.8),
       largeTitle: Text('Account'),
+      leading: CupertinoButton(
+        padding: EdgeInsets.zero,
+        child: Text('Messages',
+            style: TextStyle(
+              color: accentColor.resolveFrom(context),
+              fontWeight: FontWeight.w500,
+            )
+        ),
+        onPressed: () => Navigator.of(context).push(
+            CupertinoPageRoute(builder: (context) => ConversationsScreen())),
+      ),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
         child: Text('Settings',
-            style: TextStyle(fontWeight: FontWeight.w500, color: accentColor)),
+            style: TextStyle(
+              color: accentColor.resolveFrom(context),
+              fontWeight: FontWeight.w500,
+            )
+        ),
         onPressed: () => _navigateToSettings(context),
       ),
       border: Border(bottom: BorderSide.none),
@@ -218,9 +243,93 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void _navigateToSettings(BuildContext context) {
-    Navigator.of(context)
-        .push(CupertinoPageRoute(builder: (context) => SettingsScreen()));
+  // Widget to build the donations and reservations tab content
+  Widget _buildOrdersContent(int segmentedValue) {
+    List<dynamic> activeOrders =
+        segmentedValue == 1 ? activeReservedOrders : activeDonatedOrders;
+    List<dynamic> pastOrders =
+        segmentedValue == 1 ? pastReservedOrders : pastDonatedOrders;
+    String activeTitle = "In Progress";
+    String completedTitle = "Completed";
+
+    // Calculate totalWidgets including placeholder text
+    int totalWidgets = 0;
+    if (activeOrders.isNotEmpty) {
+      totalWidgets += 1 + (2 * activeOrders.length); // For title and each order with a SizedBox
+    }
+    if (pastOrders.isNotEmpty) {
+      totalWidgets += 1 + (2 * pastOrders.length); // Same as above
+    }
+    
+    // Add 1 for placeholder text when there are no orders
+    if (totalWidgets == 0) {
+      totalWidgets += 1;
+    }
+
+    return SliverPadding(
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            // Display placeholder text if there are no orders
+            if (activeOrders.isEmpty && pastOrders.isEmpty) {
+              return _buildSectionPlaceholderText(
+                segmentedValue == 1
+                      ? "No Reserved Orders"
+                      : "No Donated Orders"
+              );
+            }
+
+            List<Widget> combinedList = [];
+            if (activeOrders.isNotEmpty) {
+              combinedList.add(buildTitleSection(context, activeTitle));
+              combinedList.addAll(
+                  activeOrders.expand((order) => [order, SizedBox(height: 16.0)]));
+            }
+            if (pastOrders.isNotEmpty) {
+              combinedList.add(buildTitleSection(context, completedTitle));
+              combinedList.addAll(pastOrders
+                  .expand((order) => [order, SizedBox(height: 16.0)]));
+            }
+            return combinedList[index];
+          },
+          childCount: totalWidgets,
+        ),
+      ),
+    );
+  }
+
+  // Widget to build placeholder text if no orders are available
+  Widget _buildSectionPlaceholderText(String message) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+      child: Column(
+        children: [
+          SizedBox(height: 190),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                FeatherIcons.shoppingBag,
+                size: 22,
+                color: CupertinoColors.systemGrey,
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              Text(
+                message,
+                style: TextStyle(
+                  fontSize: adjustedTextFontSize,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ], 
+      ),
+    );
   }
 
   SliverToBoxAdapter _buildSegmentControl(Map<int, Widget> myTabs) {
@@ -240,98 +349,20 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  Widget _buildOrdersContent(int segmentedValue) {
-    List<dynamic> orders =
-        segmentedValue == 1 ? activeReservedOrders : activeDonatedOrders;
-    List<dynamic> pastOrders =
-        segmentedValue == 1 ? pastReservedOrders : pastDonatedOrders;
-    String activeTitle = "In Progress";
-    String completedTitle = "Completed";
-
-    int totalWidgets = 0;
-    if (orders.isNotEmpty) {
-      totalWidgets +=
-          1 + (2 * orders.length); // For title and each order with a SizedBox
-    }
-    if (pastOrders.isNotEmpty) {
-      totalWidgets += 1 + (2 * pastOrders.length); // Same as above
-    }
-
-    return SliverPadding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            List<Widget> combinedList = [];
-            if (orders.isNotEmpty) {
-              combinedList.add(buildTitleSection(context, activeTitle));
-              combinedList.addAll(
-                  orders.expand((order) => [order, SizedBox(height: 16.0)]));
-            }
-            if (pastOrders.isNotEmpty) {
-              combinedList.add(buildTitleSection(context, completedTitle));
-              combinedList.addAll(pastOrders
-                  .expand((order) => [order, SizedBox(height: 16.0)]));
-            }
-            if (combinedList.isEmpty) {
-              combinedList.add(_buildSectionPlaceholderText(
-                  segmentedValue == 1
-                      ? "No Reserved Orders"
-                      : "No Donated Orders"));
-            }
-            return combinedList[index];
-          },
-          childCount:
-              totalWidgets, // Updated to use the calculated totalWidgets
-        ),
-      ),
-    );
+  void _navigateToSettings(BuildContext context) {
+    Navigator.of(context)
+        .push(CupertinoPageRoute(builder: (context) => SettingsScreen()));
   }
 
-  Widget buildTitleSection(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0, left: 10.0),
-      child: Text(
-        title,
-        style: TextStyle(
-          overflow: TextOverflow.ellipsis,
-          color: CupertinoDynamicColor.resolve(CupertinoColors.label, context)
-              .withOpacity(0.8),
-          fontSize: 18,
-          letterSpacing: -0.8,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
+  void _onOrderCardTap(String postId) {
+    setState(() {
+      postId = postId;
+    });
+    print(postId + 'accountscreen');
   }
 
-  Widget _buildSectionPlaceholderText(String message) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(
-            FeatherIcons.shoppingBag,
-            size: 22,
-            color: CupertinoColors.systemGrey,
-          ),
-          SizedBox(width: 8.0,),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: adjustedTextFontSize,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      )
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+  void _updateAdjustedFontSize() {
+    adjustedTextFontSize = _defaultTextFontSize * _textScaleFactor;
+    adjustedTabTextFontSize = _defaultTabTextFontSize * _textScaleFactor;
   }
 }

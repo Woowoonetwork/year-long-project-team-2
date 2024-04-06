@@ -432,3 +432,27 @@ N/A.
 ### Additional Information
 
 N/A.
+
+## Term 2 Week 12
+
+### Tasks Worked On During the Week
+![Peer Evaluation](./images/t2w12manjot.jpg)
+### Recap of personal goals
+- Helped prioritise the task
+- modified code in settings_screen and implemented delete account feature
+- updated libraries and sdks
+- updated back end connectivity to update documents to reflect when an account has been deleted
+- Completed logs for the week
+
+### Tasks completed (from Project Board)
+- added delete account functionality
+- increased functionality for back end updates
+- Completed Week 24 individual log.
+
+### Tasks in progress (from Project Board)
+
+- none
+
+### Additional Information
+
+N/A.
