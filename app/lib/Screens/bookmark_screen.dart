@@ -63,18 +63,40 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
   }
 
   Future<void> _fetchSavedPosts() async {
-    if (mounted) {
-      setState(() => isLoading = true);
+  if (mounted) {
+    setState(() => isLoading = true);
+  }
+  
+  var userDoc = await FirebaseFirestore.instance.collection('user').doc(userId).get();
+  if (userDoc.exists && userDoc.data()!.containsKey('saved_posts')) {
+    List<String> currentSavedPostIds = List<String>.from(userDoc.data()!['saved_posts']);
+    List<String> postIdsToRemove = [];
+
+    for (String postId in currentSavedPostIds) {
+      var postDoc = await FirebaseFirestore.instance.collection('post_details').doc(postId).get();
+      if (postDoc.exists && postDoc.data()!.containsKey('reserved_by')) {
+        // If post is reserved, mark it for removal
+        postIdsToRemove.add(postId);
+      }
     }
-    var document =
-        await FirebaseFirestore.instance.collection('user').doc(userId).get();
-    if (document.exists && document.data()!.containsKey('saved_posts')) {
-      savedPostIds = List<String>.from(document.data()!['saved_posts']);
-    }
-    if (mounted) {
-      setState(() => isLoading = false);
+
+    // Remove reserved post IDs from the saved posts list
+    if (postIdsToRemove.isNotEmpty) {
+      List<String> updatedSavedPostIds = currentSavedPostIds.where((id) => !postIdsToRemove.contains(id)).toList();
+      await _updateSavedPostsForUser(updatedSavedPostIds);
     }
   }
+
+  if (mounted) {
+    setState(() => isLoading = false);
+  }
+}
+Future<void> _updateSavedPostsForUser(List<String> updatedSavedPostIds) async {
+  await FirebaseFirestore.instance.collection('user').doc(userId).update({
+    'saved_posts': updatedSavedPostIds
+  });
+}
+
 
   void _listenForSavedPosts() {
     _savedPostsSubscription = FirebaseFirestore.instance
