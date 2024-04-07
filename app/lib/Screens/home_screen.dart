@@ -11,7 +11,7 @@ import 'package:FoodHood/Screens/create_post.dart';
 import 'package:FoodHood/Services/FirebaseService.dart';
 import 'package:feather_icons/feather_icons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-// import gesture
+
 import '../Components/components.dart';
 import 'package:flutter/services.dart';
 import 'dart:math' as math;
@@ -31,30 +31,31 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   Map<String, dynamic> currentFilterCriteria = {};
   List<String> categories = [];
-   Map<String, Color> categoryColors = {};
+  Map<String, Color> categoryColors = {};
 
-  double _scale = 1.0; // Scale factor for the button
+  double _scale = 1.0;
 
-   @override
+  @override
   void initState() {
     super.initState();
     _initListeners();
     _loadInitialPosts();
     fetchCategories().then((fetchedCategories) {
-      final math.Random random = math.Random();
-      Map<String, Color> initialColors = {
-        'All': accentColor,
-        'Vegan': Colors.yellow,
-        'Vegetarian': Colors.orange,
-        'Halal': Colors.blue,
-        // Add other specific categories and their colors here
-      };
+      final Color allCategoryColor = accentColor;
+      List<Color> cycleColors = [yellow, orange, blue, babyPink, Cyan];
 
       setState(() {
         categories = ['All', ...fetchedCategories];
+        int cycleIndex = 0;
+
         categories.forEach((category) {
-          categoryColors[category] = initialColors[category] ??
-              Color.fromRGBO(random.nextInt(255), random.nextInt(255), random.nextInt(255), 1);
+          if (category == 'All') {
+            categoryColors[category] = allCategoryColor;
+          } else {
+            categoryColors[category] =
+                cycleColors[cycleIndex % cycleColors.length];
+            cycleIndex++;
+          }
         });
       });
     });
@@ -70,25 +71,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<List<String>> fetchCategories() async {
-    // Reference to Firestore
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
     try {
-      // Fetch the document that contains the categories
       DocumentSnapshot snapshot =
           await _firestore.collection('Data').doc('Categories').get();
 
       if (snapshot.exists && snapshot.data() != null) {
         final data = snapshot.data() as Map<String, dynamic>;
-        // Use the null-aware operator to default to an empty list if null
+
         final categories = List<String>.from(data['categories'] ?? []);
-        return categories; // Return the list of categories
+        return categories;
       } else {
-        return []; // Return an empty list if the document or field does not exist
+        return [];
       }
     } catch (e) {
       print("Error fetching categories: $e");
-      return []; // Return an empty list in case of an error
+      return [];
     }
   }
 
@@ -115,7 +114,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
     if (cards.isEmpty) {
-      // If after filtering, no cards are left, display text
       cards.add(_buildNoPostsWidget());
     } else {
       cards.add(SizedBox(height: 100));
@@ -149,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<Widget> _buildPostCard(QueryDocumentSnapshot document) async {
     var data = document.data() as Map<String, dynamic>?;
     if (data == null) {
-      return SizedBox.shrink(); // Return an empty widget if data is null
+      return SizedBox.shrink();
     }
 
     List<String> tags = (data['categories'] as String?)
@@ -166,7 +164,6 @@ class _HomeScreenState extends State<HomeScreen> {
     var createdAt =
         (data['post_timestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
 
-    // Extract images with alt text
     List<Map<String, String>> imagesWithAltText = [];
     if (data.containsKey('images') && data['images'] is List) {
       imagesWithAltText = List<Map<String, String>>.from(
@@ -182,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 16),
       child: PostCard(
-        imagesWithAltText: imagesWithAltText, // Pass the images with alt text
+        imagesWithAltText: imagesWithAltText,
         title: data['title'] ?? 'No Title',
         tags: tags,
         tagColors: assignedColors(),
@@ -221,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       setState(() {
         isSearching = false;
-        _loadInitialPosts(); // Reload initial posts if search text is cleared
+        _loadInitialPosts();
       });
     }
   }
@@ -232,12 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
         .orderBy('post_timestamp', descending: true)
         .get();
 
-    // Correcting the return type by using Future.wait
     var futures = querySnapshot.docs
         .where((doc) => _matchesSearchString(doc, searchString))
         .where((doc) {
           var data = doc.data() as Map<String, dynamic>;
-          // Exclude documents with reserved_by field
+
           return !data.containsKey('reserved_by');
         })
         .map((doc) => _buildPostCard(doc))
@@ -296,12 +292,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPostListSliver() {
     if (postCards.isEmpty && !isSearching) {
-      // show message when there are no posts in the initial load
       return SliverFillRemaining(
         child: Center(child: _buildNoPostsWidget()),
       );
     } else if (postCards.isEmpty && isSearching) {
-      // show message when search returns no results
       return SliverFillRemaining(
         child: Column(
           children: [
@@ -325,7 +319,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     } else {
-      // Display the list of post cards or search results
       return SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) => postCards[index],
@@ -338,17 +331,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSearchBar(BuildContext context) {
     bool isFocused = _focusNode.hasFocus;
 
-    // Clearing text and keyboard pop down
     void _clearSearch() {
-      // Clear the search text field
       textController.clear();
 
-      // Dismiss the keyboard by removing focus from the search text field
       if (_focusNode.hasFocus) {
         _focusNode.unfocus();
       }
 
-      // Reset the search state and reload initial posts
       setState(() {
         isSearching = false;
         _loadInitialPosts();
@@ -375,7 +364,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     backgroundColor: CupertinoColors.tertiarySystemBackground,
-
                     placeholderStyle: TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.w400,
@@ -392,13 +380,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           CupertinoColors.secondaryLabel.resolveFrom(context),
                       size: 20,
                     ),
-                    onSuffixTap:
-                        _clearSearch, // Clear text when the suffix (x) icon is tapped
+                    onSuffixTap: _clearSearch,
                   ),
                 ),
-                SizedBox(
-                    width: 8), // spacing between search bar and cancel button
-                // Only show the Cancel button if the search bar is focused
+                SizedBox(width: 8),
                 if (isFocused)
                   GestureDetector(
                     onTap: _clearSearch,
@@ -413,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          if (!isFocused) // Only show the filter button if the search bar is not focused
+          if (!isFocused)
             Padding(
               padding: EdgeInsets.only(left: 8),
               child: _buildFilterButton(),
@@ -463,7 +448,6 @@ class _HomeScreenState extends State<HomeScreen> {
   List<QueryDocumentSnapshot> filterDocuments(
       List<QueryDocumentSnapshot> docs, List<String> selectedFilters) {
     return docs.where((doc) {
-      // Combine categories and allergens from the document into one list
       var docCategoriesAndAllergens =
           ((doc.data() as Map<String, dynamic>)['categories'] as String)
               .split(',')
@@ -478,7 +462,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 .map((s) => s.trim()));
       }
 
-      // Check if the document contains all selected filters in the combined categories and allergens list
       return selectedFilters
           .every((filter) => docCategoriesAndAllergens.contains(filter));
     }).toList();
@@ -488,81 +471,87 @@ class _HomeScreenState extends State<HomeScreen> {
       List<String> selectedCategories) async {
     Query query = FirebaseFirestore.instance.collection('post_details');
 
-    // Ensure the categories list is not empty before using 'whereIn'
-
     if (selectedCategories.isNotEmpty) {
       query = query.where('categories', whereIn: selectedCategories);
     }
 
-    // Continue with your query as before
     var querySnapshot = await query.get();
     var futures = querySnapshot.docs.map((doc) => _buildPostCard(doc)).toList();
     return await Future.wait(futures);
   }
 
   void applyFilters(Map<String, dynamic> filterCriteria) async {
-  String collectionDay = filterCriteria['collectionDay'] ?? 'All';
-  List<String> selectedFoodTypes = List<String>.from(filterCriteria['selectedFoodTypes'] ?? []);
-  List<String> selectedDietPreferences = List<String>.from(filterCriteria['selectedDietPreferences'] ?? []);
-  RangeValues selectedTimeRange = filterCriteria['collectionTime'] as RangeValues;
+    String collectionDay = filterCriteria['collectionDay'] ?? 'All';
+    List<String> selectedFoodTypes =
+        List<String>.from(filterCriteria['selectedFoodTypes'] ?? []);
+    List<String> selectedDietPreferences =
+        List<String>.from(filterCriteria['selectedDietPreferences'] ?? []);
+    RangeValues selectedTimeRange =
+        filterCriteria['collectionTime'] as RangeValues;
 
-  DateTime now = DateTime.now();
-  DateTime targetDate;
-  if (collectionDay == "Today") {
-    targetDate = DateTime(now.year, now.month, now.day);
-  } else if (collectionDay == "Tomorrow") {
-    DateTime tomorrow = now.add(Duration(days: 1));
-    targetDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
-  } else {
-    targetDate = now; // Default to now, "All" doesn't rely on targetDate
-  }
+    DateTime now = DateTime.now();
+    DateTime targetDate;
+    if (collectionDay == "Today") {
+      targetDate = DateTime(now.year, now.month, now.day);
+    } else if (collectionDay == "Tomorrow") {
+      DateTime tomorrow = now.add(Duration(days: 1));
+      targetDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+    } else {
+      targetDate = now;
+    }
 
-  var snapshot = await FirebaseFirestore.instance
-      .collection('post_details')
-      .orderBy('post_timestamp', descending: true)
-      .get();
+    var snapshot = await FirebaseFirestore.instance
+        .collection('post_details')
+        .orderBy('post_timestamp', descending: true)
+        .get();
 
-  List<Widget> filteredPosts = [];
+    List<Widget> filteredPosts = [];
 
-  for (var doc in snapshot.docs) {
-    var data = doc.data() as Map<String, dynamic>;
-    Timestamp? pickupTimestamp = data['pickup_time'] as Timestamp?;
-    DateTime? pickupDateTime = pickupTimestamp?.toDate();
+    for (var doc in snapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+      Timestamp? pickupTimestamp = data['pickup_time'] as Timestamp?;
+      DateTime? pickupDateTime = pickupTimestamp?.toDate();
 
-    bool isDayMatch = collectionDay == "All" ||
-        (pickupDateTime != null &&
-            pickupDateTime.year == targetDate.year &&
-            pickupDateTime.month == targetDate.month &&
-            pickupDateTime.day == targetDate.day);
+      bool isDayMatch = collectionDay == "All" ||
+          (pickupDateTime != null &&
+              pickupDateTime.year == targetDate.year &&
+              pickupDateTime.month == targetDate.month &&
+              pickupDateTime.day == targetDate.day);
 
-    bool isTimeMatch = collectionDay == "All" ||
-        (pickupDateTime != null &&
-            pickupDateTime.hour + pickupDateTime.minute / 60.0 >= selectedTimeRange.start &&
-            pickupDateTime.hour + pickupDateTime.minute / 60.0 <= selectedTimeRange.end);
+      bool isTimeMatch = collectionDay == "All" ||
+          (pickupDateTime != null &&
+              pickupDateTime.hour + pickupDateTime.minute / 60.0 >=
+                  selectedTimeRange.start &&
+              pickupDateTime.hour + pickupDateTime.minute / 60.0 <=
+                  selectedTimeRange.end);
 
-    List<String> categories = List<String>.from((data['categories'] ?? '').split(',').map((s) => s.trim()));
-    List<String> allergens = List<String>.from((data['allergens'] ?? '').split(',').map((s) => s.trim()));
-    List<String> combinedTags = [...categories, ...allergens];
+      List<String> categories = List<String>.from(
+          (data['categories'] ?? '').split(',').map((s) => s.trim()));
+      List<String> allergens = List<String>.from(
+          (data['allergens'] ?? '').split(',').map((s) => s.trim()));
+      List<String> combinedTags = [...categories, ...allergens];
 
-    bool hasMatchingTags = selectedFoodTypes.every((tag) => combinedTags.contains(tag)) && selectedDietPreferences.every((tag) => combinedTags.contains(tag));
+      bool hasMatchingTags = selectedFoodTypes
+              .every((tag) => combinedTags.contains(tag)) &&
+          selectedDietPreferences.every((tag) => combinedTags.contains(tag));
 
-    if (isDayMatch && isTimeMatch && hasMatchingTags && !data.containsKey('reserved_by')) {
-      var postWidget = await _buildPostCard(doc);
-      filteredPosts.add(postWidget);
+      if (isDayMatch &&
+          isTimeMatch &&
+          hasMatchingTags &&
+          !data.containsKey('reserved_by')) {
+        var postWidget = await _buildPostCard(doc);
+        filteredPosts.add(postWidget);
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        postCards = filteredPosts;
+        isLoading = false;
+      });
     }
   }
 
-  if (mounted) {
-    setState(() {
-      postCards = filteredPosts;
-      isLoading = false;
-    });
-  }
-}
-
-
-  // In HomeScreen.dart
-// In HomeScreen, where you show the FilterSheet
   void _showFilterSheet() {
     showCupertinoModalBottomSheet(
       context: context,
@@ -570,11 +559,9 @@ class _HomeScreenState extends State<HomeScreen> {
           CupertinoDynamicColor.resolve(groupedBackgroundColor, context),
       builder: (context) => SafeArea(
         child: FilterSheet(
-          initialCriteria:
-              currentFilterCriteria, // Make sure this has the correct data structure
+          initialCriteria: currentFilterCriteria,
           onApplyFilters: (filterCriteria) {
             setState(() {
-              // Update currentFilterCriteria with the new selections
               currentFilterCriteria = filterCriteria;
             });
             applyFilters(filterCriteria);
@@ -597,8 +584,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Icon(FeatherIcons.filter,
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
             size: 20),
-        onPressed:
-            _showFilterSheet, // Updated to call the filter sheet display method
+        onPressed: _showFilterSheet,
       ),
     );
   }
@@ -611,33 +597,23 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Wrap(
           spacing: 8.0,
           children: categories
-              .map((category) =>
-                  _buildCategoryButton(category))
+              .map((category) => _buildCategoryButton(category))
               .toList(),
         ),
       ),
     );
   }
 
-  Color getColorForCategory(String category) {
-    // Generate a random color
-    math.Random random = math.Random();
-    return Color.fromRGBO(
-      random.nextInt(255), // Red
-      random.nextInt(255), // Green
-      random.nextInt(255), // Blue
-      1, // Opacity
-    );
-  }
-
- Widget _buildCategoryButton(String title) {
-    Color color = categoryColors[title] ?? Colors.grey; // Default color
+  Widget _buildCategoryButton(String title) {
+    Color color = categoryColors[title] ?? Colors.grey;
     return ConstrainedBox(
       constraints: BoxConstraints(minWidth: 60, maxHeight: 40),
       child: CupertinoButton(
         child: Text(title,
             style: TextStyle(
-                color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                color: color.computeLuminance() > 0.5
+                    ? Colors.black
+                    : Colors.white,
                 fontSize: 16,
                 letterSpacing: -0.6,
                 fontWeight: FontWeight.w600)),
@@ -648,10 +624,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
   void _filterPostsByCategory(String categoryName) async {
     setState(() => isLoading = true);
 
-    // Fetch all posts excluding those with 'reserved_by'.
     var snapshot = await FirebaseFirestore.instance
         .collection('post_details')
         .orderBy('post_timestamp', descending: true)
@@ -659,7 +635,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     List<Widget> filteredPosts = [];
 
-    // Iterate through each document.
     for (var doc in snapshot.docs) {
       var data = doc.data() as Map<String, dynamic>;
       var categories =
@@ -668,7 +643,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ? List.from(data['allergens'].split(',').map((a) => a.trim()))
           : [];
 
-      // Check if 'All' is selected or if the category matches 'categories' or 'allergens'.
       if (categoryName == 'All' ||
           categories.contains(categoryName) ||
           allergens.contains(categoryName)) {
@@ -704,9 +678,8 @@ class _HomeScreenState extends State<HomeScreen> {
           _openCreatePostScreen(context);
         },
         onTapCancel: () {
-          setState(() =>
-              _scale = 1.0); // Ensure button size reverts if tap is canceled
-          HapticFeedback.selectionClick(); // Add haptic feedback here
+          setState(() => _scale = 1.0);
+          HapticFeedback.selectionClick();
         },
         child: Transform.scale(
           scale: _scale,
