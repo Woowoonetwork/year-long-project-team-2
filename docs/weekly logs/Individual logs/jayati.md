@@ -597,5 +597,35 @@ Additional Information
 
 Additional Information 
 
+# Individual Log: Monday 1st April 2024 - Sunday 7th April 2024
+
+## Tasks Worked On During the week
+![Peer Evaluation](images/jayati20.png)
+
+
+# Recap of goals
+
+* Helped assign and prioritize tasks to be completed
+* Worked on capstone individual report
+* Worked on capstone individual video
+* Worked on fixing up apple and google sign in bugs
+* Worked on donee pathway readytopickup screen
+* Created team log
+
+# Tasks completed (from Project Board)
+
+* Worked on capstone individual report
+* Worked on capstone individual video
+* Worked on fixing up apple and google sign in bugs
+* Worked on donee pathway readytopickup screen
+* Completed the weekly individual log
+* Created team log
+* Reviewed other team members' PRs and assigned team members to PRs.
+
+# Tasks in progress (from Project Board)
+
+
+Additional Information 
+
 
 
