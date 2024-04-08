@@ -648,3 +648,29 @@ N/A.
 ### Additional Information
 
 N/A.
+
+## Term 2 Week 10: Monday 1st Apr 2024 - Sunday 7th Apr 2024
+
+![Peer Evaluation](./images/nickT2W13.png)
+
+### Tasks completed (from Project Board)
+
+- Completed the weekly log.
+- Assisted in reviewing and merging PRs from team members.
+- Review Code from last week and resolve some minor ui bugs
+- Fixed the bugs in the app and resolved the issues from testing.
+- Assisted in assigning and prioritizing the tasks for the final milestore
+
+### Recap of personal goals
+- Fixed the bugs in the app and resolved the issues from testing.
+- Make changes to the color of the homescreen tags and match the design and ui with the donor pathway.
+- Assisted in preparing for the final presentation and demo.
+- Assisted in preparing for the final documentation.
+- Completed the weekly log.
+
+### Tasks in progress (from Project Board)
+
+- No other tasks currently in progress.
+  
+### Additional Information
+- N/A.
