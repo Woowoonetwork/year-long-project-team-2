@@ -324,6 +324,14 @@ class _LogInScreenState extends State<LogInScreen> {
       ],
     );
 
+    //  if (appleIdCredential.fullName != null) {
+    // final userFullName =
+    // '${appleIdCredential.fullName.givenName} ${appleIdCredential.fullName.familyName}';
+    // return userFullName;
+    //  } else {
+    // If the user did not provide a full name, return an empty string or handle it accordingly
+    //  }
+
     final oauthCredential = OAuthProvider("apple.com").credential(
       idToken: appleIdCredential.identityToken,
       accessToken: appleIdCredential.authorizationCode,
