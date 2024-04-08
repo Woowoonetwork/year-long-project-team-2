@@ -769,7 +769,7 @@ N/A.
 ---
 ---
 
-## Term 2 Week 11: Monday 25th Mar 2024 - Sunday 31st Mar 2024
+## Term 2 Week 12: Monday 25th Mar 2024 - Sunday 31st Mar 2024
 
 ### Tasks Worked On During the Week
 
@@ -801,6 +801,46 @@ N/A.
 
 - Complete the T2 W12 team log.
 - Complete the T2 W12 individual log.
+- Reviewed other team members' PRs and assigned team members to PRs.
+
+### Tasks in progress (from Project Board)
+
+- No tasks are currently in progress as all have been completed.
+
+### Additional Information
+
+N/A.
+
+---
+---
+
+## Term 2 Week 13: Monday 1st Apr 2024 - Sunday 8th Apr 2024
+
+### Tasks Worked On During the Week
+
+![Peer Evaluation](./images/ishitaT2W13.png)
+
+### Recap of personal goals
+
+- Assisted in planning out our features for the upcoming milestone.
+- Helped assign and prioritize tasks to be completed.
+- Completed the individual report
+- Completed the video demo 
+- Completed the weekly logs.
+- Updated and managed the Project Board.
+
+
+### Tasks completed (from Project Board)
+
+- Complete the individual report
+    - Completed the system overview.
+    - Completed the system architecture.
+    - Completed the system features.
+    - Completed the installation/set up instructions.
+    - Completed the video demo.
+
+- Complete the T2 W13 team log.
+- Complete the T2 W13 individual log.
 - Reviewed other team members' PRs and assigned team members to PRs.
 
 ### Tasks in progress (from Project Board)
